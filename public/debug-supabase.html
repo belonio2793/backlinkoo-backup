@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Supabase Debug Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .success { color: green; }
+        .error { color: red; }
+        .warning { color: orange; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Supabase Connection Debug</h1>
+    <div id="results"></div>
+    
+    <script type="module">
+        const results = document.getElementById('results');
+        
+        function log(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = type;
+            div.innerHTML = message;
+            results.appendChild(div);
+            console.log(message);
+        }
+        
+        log('<h2>🔧 Step 1: Testing Direct Supabase Connection</h2>');
+        
+        // Test with hardcoded credentials (same as fallback)
+        const SUPABASE_URL = 'https://dfhanacsmsvvkpunurnp.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRmaGFuYWNzbXN2dmtwdW51cm5wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI5NTY2NDcsImV4cCI6MjA2ODUzMjY0N30.MZcB4P_TAOOTktXSG7bNK5BsIMAf1bKXVgT87Zqa5RY';
+        
+        log(`<p>🌐 URL: ${SUPABASE_URL}</p>`);
+        log(`<p>🔑 Key: ${SUPABASE_ANON_KEY.substring(0, 20)}...</p>`);
+        
+        // Import Supabase from CDN
+        import('https://cdn.skypack.dev/@supabase/supabase-js').then(async ({ createClient }) => {
+            log('<h2>📦 Step 2: Creating Supabase Client</h2>');
+            
+            try {
+                const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+                    auth: {
+                        storage: localStorage,
+                        persistSession: false
+                    }
+                });
+                
+                log('<p class="success">✅ Client created successfully</p>');
+                
+                log('<h2>🧪 Step 3: Testing Database Access</h2>');
+                
+                // Test 1: profiles table
+                log('<p>Testing profiles table...</p>');
+                const { data: profilesData, error: profilesError } = await supabase
+                    .from('profiles')
+                    .select('id')
+                    .limit(1);
+                    
+                if (profilesError) {
+                    log(`<p class="error">❌ Profiles test failed: ${profilesError.message}</p>`);
+                    log(`<pre>${JSON.stringify(profilesError, null, 2)}</pre>`);
+                } else {
+                    log('<p class="success">✅ Profiles test successful</p>');
+                }
+                
+                // Test 2: blog_posts table
+                log('<p>Testing blog_posts table...</p>');
+                const { data: postsData, error: postsError } = await supabase
+                    .from('blog_posts')
+                    .select('id')
+                    .limit(1);
+                    
+                if (postsError) {
+                    log(`<p class="error">❌ Blog posts test failed: ${postsError.message}</p>`);
+                    log(`<pre>${JSON.stringify(postsError, null, 2)}</pre>`);
+                } else {
+                    log('<p class="success">✅ Blog posts test successful</p>');
+                }
+                
+                // Test 3: published_blog_posts table
+                log('<p>Testing published_blog_posts table...</p>');
+                const { data: publishedData, error: publishedError } = await supabase
+                    .from('published_blog_posts')
+                    .select('id')
+                    .limit(1);
+                    
+                if (publishedError) {
+                    log(`<p class="error">❌ Published blog posts test failed: ${publishedError.message}</p>`);
+                    log(`<pre>${JSON.stringify(publishedError, null, 2)}</pre>`);
+                } else {
+                    log('<p class="success">✅ Published blog posts test successful</p>');
+                }
+                
+                // Test 4: domains table
+                log('<p>Testing domains table...</p>');
+                const { data: domainsData, error: domainsError } = await supabase
+                    .from('domains')
+                    .select('id')
+                    .limit(1);
+                    
+                if (domainsError) {
+                    log(`<p class="error">❌ Domains test failed: ${domainsError.message}</p>`);
+                    log(`<pre>${JSON.stringify(domainsError, null, 2)}</pre>`);
+                } else {
+                    log('<p class="success">✅ Domains test successful</p>');
+                }
+                
+                log('<h2>🔍 Step 4: Raw Fetch Test</h2>');
+                
+                // Test raw fetch to Supabase REST API
+                const rawUrl = `${SUPABASE_URL}/rest/v1/profiles?select=id&limit=1`;
+                log(`<p>Testing raw fetch to: ${rawUrl}</p>`);
+                
+                try {
+                    const response = await fetch(rawUrl, {
+                        headers: {
+                            'apikey': SUPABASE_ANON_KEY,
+                            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        log('<p class="success">✅ Raw fetch test successful</p>');
+                        log(`<pre>${JSON.stringify(data, null, 2)}</pre>`);
+                    } else {
+                        log(`<p class="error">❌ Raw fetch failed: ${response.status} ${response.statusText}</p>`);
+                        const errorText = await response.text();
+                        log(`<pre>${errorText}</pre>`);
+                    }
+                } catch (fetchError) {
+                    log(`<p class="error">❌ Raw fetch error: ${fetchError.message}</p>`);
+                }
+                
+            } catch (clientError) {
+                log(`<p class="error">❌ Failed to create client: ${clientError.message}</p>`);
+            }
+            
+        }).catch(importError => {
+            log(`<p class="error">❌ Failed to import Supabase: ${importError.message}</p>`);
+        });
+    </script>
+</body>
+</html>
