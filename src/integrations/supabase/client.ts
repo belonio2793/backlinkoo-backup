@@ -51,7 +51,7 @@ if (!finalKey.startsWith('eyJ') || finalKey.length < 100) {
 }
 
 // Enhanced Supabase client with error resilience
-export const supabase = createClient<Database>(finalUrl, finalKey, {
+const enhancedSupabase = createClient<Database>(finalUrl, finalKey, {
   auth: {
     storage: localStorage,
     persistSession: true,
