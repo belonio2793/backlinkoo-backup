@@ -383,6 +383,57 @@ export class SupabaseConnectionFixer {
   }
 
   /**
+   * Test connection and return simplified result
+   */
+  static async testConnection(): Promise<{
+    success: boolean;
+    message: string;
+    actions: string[];
+  }> {
+    try {
+      const connectivity = await this.testConnectivity();
+      const config = this.checkConfiguration();
+
+      if (!config.isValid) {
+        return {
+          success: false,
+          message: 'Configuration issues detected',
+          actions: config.issues
+        };
+      }
+
+      if (!connectivity.internet) {
+        return {
+          success: false,
+          message: 'No internet connection detected',
+          actions: ['Check your network connection', 'Try again in a moment']
+        };
+      }
+
+      if (!connectivity.supabase) {
+        return {
+          success: false,
+          message: 'Cannot reach Supabase servers',
+          actions: ['Check firewall settings', 'Try emergency fix']
+        };
+      }
+
+      return {
+        success: true,
+        message: 'All connections working properly',
+        actions: ['Connection is healthy']
+      };
+
+    } catch (error: any) {
+      return {
+        success: false,
+        message: `Connection test failed: ${error.message}`,
+        actions: ['Try emergency fix', 'Check configuration']
+      };
+    }
+  }
+
+  /**
    * Initialize connection monitoring and auto-recovery
    */
   static initializeMonitoring() {
