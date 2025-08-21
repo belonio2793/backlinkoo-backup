@@ -30,27 +30,26 @@ export async function checkSupabasePermissions() {
       };
       
       if (error) {
-        console.error(`❌ ${table} access failed:`, {
-          message: error.message,
-          code: error.code,
-          details: error.details,
-          hint: error.hint
-        });
-        
+        // Import and use error extractor
+        const { logSupabaseError, extractErrorMessage } = await import('@/utils/errorExtractor');
+        logSupabaseError(`${table} access failed`, error);
+
+        const errorMessage = extractErrorMessage(error);
+
         // Check for common RLS or permission issues
-        if (error.message?.includes('permission denied') || 
-            error.message?.includes('RLS') ||
+        if (errorMessage.includes('permission denied') ||
+            errorMessage.includes('RLS') ||
             error.code === '42501') {
           console.error(`🔒 ${table} appears to have RLS policy issues`);
         }
-        
-        if (error.message?.includes('No API key') || 
-            error.code === '401' || 
+
+        if (errorMessage.includes('No API key') ||
+            error.code === '401' ||
             error.code === 'PGRST000') {
           console.error(`🔑 ${table} access blocked by authentication issue`);
         }
-        
-        if (error.message?.includes('relation') && error.message?.includes('does not exist')) {
+
+        if (errorMessage.includes('relation') && errorMessage.includes('does not exist')) {
           console.error(`📋 ${table} table does not exist in database`);
         }
       } else {
