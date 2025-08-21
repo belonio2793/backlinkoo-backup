@@ -21,11 +21,15 @@ interface MinimalDomainsTableProps {
   onValidate: (domainId: string) => void;
 }
 
-export default function MinimalDomainsTable({ 
-  domains, 
-  validatingDomains, 
-  onValidate 
+export default function MinimalDomainsTable({
+  domains,
+  validatingDomains,
+  onValidate
 }: MinimalDomainsTableProps) {
+  const [showDNSInstructions, setShowDNSInstructions] = useState<{
+    domain: string;
+    records: any[];
+  } | null>(null);
   const getStatusBadge = (domain: Domain) => {
     const statusConfig = {
       pending: { variant: 'secondary' as const, label: 'Pending' },
