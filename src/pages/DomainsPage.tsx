@@ -295,7 +295,8 @@ const DomainsPage = () => {
       await supabase
         .from('domains')
         .update(updateData)
-        .eq('id', domainId);
+        .eq('id', domainId)
+        .eq('user_id', user?.id);
 
       setDomains(prev => prev.map(d => 
         d.id === domainId ? { ...d, ...updateData } : d
