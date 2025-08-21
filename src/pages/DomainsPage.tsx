@@ -140,8 +140,6 @@ const DomainsPage = () => {
   const [enhancedNetlifyService, setEnhancedNetlifyService] = useState<EnhancedNetlifyDomainService | null>(null); // Enhanced Netlify service with DNS
   const [showDNSInstructions, setShowDNSInstructions] = useState<{domain: string, scenario: 'registrar' | 'domains-page' | 'subdomain'} | null>(null);
   const [selectedDomainForControl, setSelectedDomainForControl] = useState<Domain | null>(null);
-  const [showEnvironmentManager, setShowEnvironmentManager] = useState(false);
-  const [environmentConfig, setEnvironmentConfig] = useState<{ [key: string]: string }>({});
   const [supabaseConnected, setSupabaseConnected] = useState<boolean | null>(null); // null = unknown, true = connected, false = disconnected
 
   // Calculate blog-enabled domains for UI messaging
@@ -309,7 +307,7 @@ const DomainsPage = () => {
   // Test Supabase connection
   const testSupabaseConnection = async (throwOnError: boolean = true) => {
     try {
-      console.log('�� Testing Supabase connection...');
+      console.log('🔍 Testing Supabase connection...');
 
       // Check if environment variables are available
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
