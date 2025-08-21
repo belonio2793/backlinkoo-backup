@@ -481,6 +481,8 @@ if (import.meta.env.DEV) {
   console.log('  - debugSupabaseConfig() - Check Supabase environment variables');
   console.log('  - checkSupabasePermissions() - Test table access and RLS policies');
   console.log('  - createSampleBlogPosts() - Create sample blog posts for testing display');
+  console.log('  - fixSupabaseAuth() - Diagnose and fix Supabase authentication issues');
+  console.log('  - emergencySupabaseReset() - Emergency reset for connection issues');
 }
 
 // Priority: Get React app rendering ASAP
