@@ -478,6 +478,7 @@ if (import.meta.env.DEV) {
   console.log('  - fixBlogConfiguration() - Auto-fix common blog configuration problems');
   console.log('  - debugSupabaseConfig() - Check Supabase environment variables');
   console.log('  - checkSupabasePermissions() - Test table access and RLS policies');
+  console.log('  - createSampleBlogPosts() - Create sample blog posts for testing display');
 }
 
 // Priority: Get React app rendering ASAP
