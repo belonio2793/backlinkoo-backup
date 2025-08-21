@@ -13,6 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 import type { BlogPost } from '@/types/blogTypes';
 import { Footer } from '@/components/Footer';
 import { FetchErrorBoundary } from '@/components/FetchErrorHandler';
+import { DatabaseTest } from '@/components/DatabaseTest';
 
 import { EnhancedUnifiedPaymentModal } from '@/components/EnhancedUnifiedPaymentModal';
 import { ClaimStatusIndicator } from '@/components/ClaimStatusIndicator';
