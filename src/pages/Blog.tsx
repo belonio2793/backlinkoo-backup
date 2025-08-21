@@ -4,13 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { ClaimableBlogService } from '@/services/claimableBlogService';
+import { blogService, type BlogPost } from '@/services/blogService';
 import { UnifiedClaimService } from '@/services/unifiedClaimService';
 import { useAuth } from '@/hooks/useAuth';
 import { usePremiumSEOScore } from '@/hooks/usePremiumSEOScore';
-import { BlogClaimService } from '@/services/blogClaimService';
 import { supabase } from '@/integrations/supabase/client';
-import type { BlogPost } from '@/types/blogTypes';
 import { Footer } from '@/components/Footer';
 import { FetchErrorBoundary } from '@/components/FetchErrorHandler';
 
