@@ -849,6 +849,38 @@ const DomainsPage = () => {
     }
   };
 
+  // Background API monitoring - runs silently to maintain connection
+  const startBackgroundApiMonitoring = () => {
+    console.log('🔧 Starting background API monitoring...');
+
+    // Monitor API health every 5 minutes
+    const apiHealthCheck = async () => {
+      try {
+        const isConnected = await testSupabaseConnection(false);
+
+        if (isConnected !== apiConnectionEstablished) {
+          setApiConnectionEstablished(isConnected);
+
+          if (isConnected) {
+            console.log('✅ API connection restored in background');
+            // Silently reload domains when connection is restored
+            await loadDomains(false);
+          } else {
+            console.warn('⚠️ API connection lost, will retry automatically');
+          }
+        }
+      } catch (error) {
+        console.error('Background API health check failed:', error);
+      }
+    };
+
+    // Initial check after 30 seconds
+    setTimeout(apiHealthCheck, 30000);
+
+    // Then check every 5 minutes
+    setInterval(apiHealthCheck, 300000);
+  };
+
   // Fix domains missing verification tokens
   useEffect(() => {
     const fixMissingTokens = async () => {
@@ -1649,7 +1681,7 @@ const DomainsPage = () => {
                 size="sm"
                 onClick={() => {
                   loadDomains().then(() => {
-                    toast.success('✅ Domains refreshed!');
+                    toast.success('��� Domains refreshed!');
                   }).catch((error) => {
                     toast.error(`❌ Failed to refresh: ${error.message}`);
                   });
