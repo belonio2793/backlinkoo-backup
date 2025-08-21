@@ -55,8 +55,10 @@ const DomainsPage = () => {
   ];
 
   useEffect(() => {
-    loadDomains();
-  }, []);
+    if (user) {
+      loadDomains();
+    }
+  }, [user]);
 
   // Store intended route for unauthenticated users
   useEffect(() => {
