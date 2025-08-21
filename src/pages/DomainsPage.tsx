@@ -302,6 +302,9 @@ const DomainsPage = () => {
         // Check DNS service status
         await checkDNSServiceHealth();
 
+        // Start background API health monitoring
+        startBackgroundApiMonitoring();
+
         console.log('✅ Domains initialization complete');
 
       } catch (error: any) {
