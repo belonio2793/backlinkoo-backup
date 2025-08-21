@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Functionality Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; color: #155724; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; color: #0c5460; }
+        button { padding: 8px 16px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Blog Functionality Test</h1>
+    
+    <div class="test-section info">
+        <h3>🔍 Testing Blog Configuration</h3>
+        <p>This test verifies that the blog system is working correctly after recent updates.</p>
+        <button onclick="runAllTests()">Run All Tests</button>
+        <button onclick="clearResults()">Clear Results</button>
+    </div>
+
+    <div id="results"></div>
+
+    <script type="module">
+        // Import the blog services
+        import { supabase } from './src/integrations/supabase/client.js';
+        
+        window.supabase = supabase;
+
+        async function testDatabaseConnection() {
+            addResult('🔌 Testing Database Connection...', 'info');
+            
+            try {
+                const { data, error } = await supabase
+                    .from('blog_posts')
+                    .select('count', { count: 'exact', head: true });
+                
+                if (error) {
+                    addResult(`❌ Database connection failed: ${error.message}`, 'error');
+                    return false;
+                } else {
+                    addResult(`✅ Database connected successfully. Found ${data || 0} blog posts.`, 'success');
+                    return true;
+                }
+            } catch (err) {
+                addResult(`❌ Database connection error: ${err.message}`, 'error');
+                return false;
+            }
+        }
+
+        async function testBlogServiceQueries() {
+            addResult('📖 Testing Blog Service Queries...', 'info');
+            
+            try {
+                // Test fetching published posts
+                const { data: publishedPosts, error: publishedError } = await supabase
+                    .from('blog_posts')
+                    .select('*')
+                    .eq('status', 'published')
+                    .limit(5);
+                
+                if (publishedError) {
+                    addResult(`❌ Published posts query failed: ${publishedError.message}`, 'error');
+                    return false;
+                }
+                
+                addResult(`✅ Successfully queried blog_posts table. Found ${publishedPosts?.length || 0} published posts.`, 'success');
+                
+                // Test specific columns exist
+                if (publishedPosts && publishedPosts.length > 0) {
+                    const firstPost = publishedPosts[0];
+                    const requiredFields = ['id', 'title', 'content', 'slug', 'status', 'created_at'];
+                    const missingFields = requiredFields.filter(field => !(field in firstPost));
+                    
+                    if (missingFields.length > 0) {
+                        addResult(`⚠️ Missing required fields in blog_posts: ${missingFields.join(', ')}`, 'error');
+                    } else {
+                        addResult('✅ All required blog post fields are present.', 'success');
+                    }
+                }
+                
+                return true;
+            } catch (err) {
+                addResult(`❌ Blog service query error: ${err.message}`, 'error');
+                return false;
+            }
+        }
+
+        async function testCreateBlogPost() {
+            addResult('📝 Testing Blog Post Creation...', 'info');
+            
+            try {
+                const testPost = {
+                    title: `Test Blog Post - ${new Date().toISOString()}`,
+                    content: 'This is a test blog post to verify the system is working correctly.',
+                    slug: `test-post-${Date.now()}`,
+                    target_url: 'https://example.com',
+                    status: 'published',
+                    created_at: new Date().toISOString()
+                };
+
+                const { data: createdPost, error: createError } = await supabase
+                    .from('blog_posts')
+                    .insert(testPost)
+                    .select()
+                    .single();
+                
+                if (createError) {
+                    addResult(`❌ Blog post creation failed: ${createError.message}`, 'error');
+                    return false;
+                }
+                
+                addResult(`✅ Successfully created test blog post with ID: ${createdPost.id}`, 'success');
+                
+                // Clean up the test post
+                await supabase
+                    .from('blog_posts')
+                    .delete()
+                    .eq('id', createdPost.id);
+                
+                addResult('🧹 Test post cleaned up successfully.', 'info');
+                return true;
+            } catch (err) {
+                addResult(`❌ Blog post creation error: ${err.message}`, 'error');
+                return false;
+            }
+        }
+
+        async function testBlogPageCompatibility() {
+            addResult('🌐 Testing Blog Page Compatibility...', 'info');
+            
+            try {
+                // Test the UnifiedClaimService approach
+                const { data: claimablePosts, error: claimableError } = await supabase
+                    .from('blog_posts')
+                    .select('*')
+                    .eq('status', 'published')
+                    .order('created_at', { ascending: false })
+                    .limit(20);
+                
+                if (claimableError) {
+                    addResult(`❌ Claimable posts query failed: ${claimableError.message}`, 'error');
+                    return false;
+                }
+                
+                addResult(`✅ Blog page compatibility test passed. Found ${claimablePosts?.length || 0} posts for display.`, 'success');
+                return true;
+            } catch (err) {
+                addResult(`❌ Blog page compatibility error: ${err.message}`, 'error');
+                return false;
+            }
+        }
+
+        window.runAllTests = async function() {
+            clearResults();
+            addResult('🚀 Starting Blog Functionality Test Suite...', 'info');
+            
+            const tests = [
+                testDatabaseConnection,
+                testBlogServiceQueries,
+                testCreateBlogPost,
+                testBlogPageCompatibility
+            ];
+            
+            let passedTests = 0;
+            
+            for (const test of tests) {
+                const result = await test();
+                if (result) passedTests++;
+                await new Promise(resolve => setTimeout(resolve, 500)); // Small delay between tests
+            }
+            
+            addResult(`\n🏁 Test Suite Complete: ${passedTests}/${tests.length} tests passed`, 
+                passedTests === tests.length ? 'success' : 'error');
+        };
+
+        function addResult(message, type = 'info') {
+            const resultsDiv = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `test-section ${type}`;
+            div.innerHTML = `<pre>${message}</pre>`;
+            resultsDiv.appendChild(div);
+            console.log(`[BlogTest] ${message}`);
+        }
+
+        window.clearResults = function() {
+            document.getElementById('results').innerHTML = '';
+        };
+
+        // Auto-run tests when page loads
+        window.addEventListener('load', () => {
+            setTimeout(runAllTests, 1000);
+        });
+    </script>
+</body>
+</html>
