@@ -303,6 +303,50 @@ if (import.meta.env.DEV) {
     }
   };
 
+  // Add API key diagnostics and fix helper
+  (window as any).fixAPIKeyIssue = async () => {
+    console.log('🔑 Diagnosing and fixing API key issues...');
+
+    // Check environment variables
+    const hasUrl = !!import.meta.env.VITE_SUPABASE_URL;
+    const hasKey = !!import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+    console.log('Environment check:', { hasUrl, hasKey });
+
+    if (!hasUrl || !hasKey) {
+      console.error('❌ Missing environment variables!');
+      console.log('💡 Fix: Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in environment');
+      console.log('💡 Try: Restart dev server after setting environment variables');
+      return { success: false, issue: 'missing_env_vars' };
+    }
+
+    // Test connection
+    try {
+      const { supabase } = await import('@/integrations/supabase/client');
+      const { data, error } = await supabase.from('profiles').select('id').limit(1);
+
+      if (error) {
+        console.error('❌ Connection test failed:', error);
+
+        if (error.message?.includes('No API key') || error.code === 'PGRST000') {
+          console.log('🔧 Attempting to reload Supabase client...');
+          // Force a page reload to reinitialize
+          setTimeout(() => window.location.reload(), 1000);
+          return { success: false, issue: 'api_key_not_loaded', action: 'reloading' };
+        }
+
+        return { success: false, issue: 'connection_failed', error };
+      }
+
+      console.log('✅ API key and connection working correctly');
+      return { success: true };
+
+    } catch (error) {
+      console.error('❌ API key test failed:', error);
+      return { success: false, issue: 'test_failed', error };
+    }
+  };
+
   // Add client content generator test
   (window as any).testClientContent = async () => {
     try {
