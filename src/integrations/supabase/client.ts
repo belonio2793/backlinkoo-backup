@@ -2,6 +2,7 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 import { SupabaseConnectionFixer } from '@/utils/supabaseConnectionFixer';
+import { supabaseDirect } from './client-direct';
 
 // Get Supabase configuration
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
