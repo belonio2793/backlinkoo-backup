@@ -252,6 +252,117 @@ const DomainsPage = () => {
     }
   };
 
+  // Add domain to Netlify and fetch DNS records
+  const addDomainToNetlify = async (domain: Domain) => {
+    try {
+      toast.info(`Adding ${domain.domain} to Netlify...`);
+
+      // Update status to show we're processing
+      await supabase
+        .from('domains')
+        .update({ status: 'validating' })
+        .eq('id', domain.id);
+
+      setDomains(prev => prev.map(d =>
+        d.id === domain.id ? { ...d, status: 'validating' } : d
+      ));
+
+      // Step 1: Add domain to Netlify (this happens in the validate function)
+      // Step 2: Fetch DNS records that need to be configured
+      const dnsResponse = await fetch('/.netlify/functions/get-dns-records', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ domain: domain.domain })
+      });
+
+      if (dnsResponse.ok) {
+        const dnsData = await dnsResponse.json();
+
+        if (dnsData.success) {
+          // Update domain with DNS records
+          const updateData = {
+            status: 'dns_ready' as const,
+            dns_records: dnsData.records
+          };
+
+          await supabase
+            .from('domains')
+            .update(updateData)
+            .eq('id', domain.id);
+
+          setDomains(prev => prev.map(d =>
+            d.id === domain.id ? { ...d, ...updateData } : d
+          ));
+
+          toast.success(`${domain.domain} added to Netlify! DNS records are ready for configuration.`);
+
+          // Auto-validate after a short delay
+          setTimeout(() => {
+            validateDomain(domain.id);
+          }, 2000);
+        }
+      }
+    } catch (error: any) {
+      console.error('Error adding domain to Netlify:', error);
+      toast.error(`Failed to add ${domain.domain} to Netlify: ${error.message}`);
+    }
+  };
+
+  // Set theme for domain after validation
+  const setDomainTheme = async (domainId: string, themeId: string) => {
+    const domain = domains.find(d => d.id === domainId);
+    if (!domain) return;
+
+    try {
+      const theme = BLOG_THEMES.find(t => t.id === themeId);
+      if (!theme) return;
+
+      toast.info(`Setting ${theme.name} theme for ${domain.domain}...`);
+
+      const response = await fetch('/.netlify/functions/set-domain-theme', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          domainId: domain.id,
+          domain: domain.domain,
+          themeId: themeId
+        })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+
+        if (result.success) {
+          // Update domain status to active
+          const updateData = {
+            status: 'active' as const,
+            selected_theme: themeId,
+            theme_name: theme.name,
+            blog_enabled: true
+          };
+
+          await supabase
+            .from('domains')
+            .update(updateData)
+            .eq('id', domain.id);
+
+          setDomains(prev => prev.map(d =>
+            d.id === domain.id ? { ...d, ...updateData } : d
+          ));
+
+          toast.success(`${domain.domain} is now ready for blog generation with ${theme.name} theme!`);
+        } else {
+          throw new Error(result.error);
+        }
+      } else {
+        throw new Error('Theme selection failed');
+      }
+    } catch (error: any) {
+      console.error('Error setting domain theme:', error);
+      toast.error(`Failed to set theme: ${error.message}`);
+    }
+  };
+
   const deleteDomain = async (domainId: string, domainName: string) => {
     if (!confirm(`Are you sure you want to delete ${domainName}?`)) {
       return;
