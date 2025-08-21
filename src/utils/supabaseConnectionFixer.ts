@@ -10,6 +10,115 @@ export class SupabaseConnectionFixer {
   private static maxRetries = 3;
   private static retryDelay = 1000;
   private static isFixing = false;
+  private static connectionBlocked = false;
+  private static lastFailureTime = 0;
+  private static readonly BLOCK_DURATION = 30000; // 30 seconds
+
+  /**
+   * Check if connection is currently blocked due to failures
+   */
+  static isConnectionBlocked(): boolean {
+    // Check if we're within the block duration
+    if (this.connectionBlocked && Date.now() - this.lastFailureTime < this.BLOCK_DURATION) {
+      return true;
+    }
+
+    // Auto-clear block after duration
+    if (this.connectionBlocked && Date.now() - this.lastFailureTime >= this.BLOCK_DURATION) {
+      this.connectionBlocked = false;
+      console.log('🔓 Connection block automatically cleared after timeout');
+    }
+
+    return false;
+  }
+
+  /**
+   * Clear connection failure flag manually
+   */
+  static clearConnectionFailureFlag(): void {
+    this.connectionBlocked = false;
+    this.lastFailureTime = 0;
+    this.retryAttempts = 0;
+    console.log('🔓 Connection failure flag manually cleared');
+  }
+
+  /**
+   * Get comprehensive diagnostics
+   */
+  static getDiagnostics(): any {
+    const config = this.checkConfiguration();
+    const environmentVariables = {
+      hasUrl: !!import.meta.env.VITE_SUPABASE_URL,
+      hasKey: !!import.meta.env.VITE_SUPABASE_ANON_KEY,
+      urlValue: import.meta.env.VITE_SUPABASE_URL ?
+        import.meta.env.VITE_SUPABASE_URL.substring(0, 30) + '...' : 'missing',
+      keyPrefix: import.meta.env.VITE_SUPABASE_ANON_KEY ?
+        import.meta.env.VITE_SUPABASE_ANON_KEY.substring(0, 10) + '...' : 'missing'
+    };
+
+    return {
+      configValid: config.isValid,
+      configIssues: config.issues,
+      configRecommendations: config.recommendations,
+      environmentVariables,
+      connectionBlocked: this.connectionBlocked,
+      lastFailureTime: this.lastFailureTime,
+      retryAttempts: this.retryAttempts,
+      isOnline: navigator.onLine,
+      timestamp: new Date().toISOString()
+    };
+  }
+
+  /**
+   * Test connection with simple endpoint
+   */
+  static async testConnection(): Promise<{ success: boolean; message: string; actions: string[] }> {
+    try {
+      const config = this.checkConfiguration();
+
+      if (!config.isValid) {
+        return {
+          success: false,
+          message: 'Configuration invalid: ' + config.issues.join(', '),
+          actions: config.recommendations
+        };
+      }
+
+      const connectivity = await this.testConnectivity();
+
+      if (!connectivity.internet) {
+        return {
+          success: false,
+          message: 'No internet connection detected',
+          actions: ['Check your network connection']
+        };
+      }
+
+      if (!connectivity.supabase) {
+        return {
+          success: false,
+          message: 'Cannot reach Supabase servers',
+          actions: ['Check Supabase status', 'Verify VITE_SUPABASE_URL']
+        };
+      }
+
+      // Clear any existing blocks
+      this.clearConnectionFailureFlag();
+
+      return {
+        success: true,
+        message: 'Connection test successful',
+        actions: ['All systems operational']
+      };
+
+    } catch (error: any) {
+      return {
+        success: false,
+        message: 'Test failed: ' + (error.message || 'Unknown error'),
+        actions: ['Try emergency fix', 'Check environment variables']
+      };
+    }
+  }
 
   /**
    * Enhanced error detection for Supabase issues
@@ -156,8 +265,10 @@ export class SupabaseConnectionFixer {
    */
   static async emergencyFix(): Promise<{
     success: boolean;
-    appliedFixes: string[];
-    remainingIssues: string[];
+    message: string;
+    actions: string[];
+    appliedFixes?: string[];
+    remainingIssues?: string[];
   }> {
     if (this.isFixing) {
       return {
@@ -240,16 +351,32 @@ export class SupabaseConnectionFixer {
 
       const success = remainingIssues.length === 0 || (connectivity.internet && connectivity.supabase);
 
+      // Clear connection block on successful fix
+      if (success) {
+        this.clearConnectionFailureFlag();
+      }
+
       console.log(`🚨 Emergency fix completed. Success: ${success}`);
       console.log('Applied fixes:', appliedFixes);
       console.log('Remaining issues:', remainingIssues);
 
       return {
         success,
+        message: success ? 'Emergency fix applied successfully' : 'Some issues remain after emergency fix',
+        actions: appliedFixes,
         appliedFixes,
         remainingIssues
       };
 
+    } catch (error: any) {
+      console.error('🚨 Emergency fix failed:', error);
+      return {
+        success: false,
+        message: 'Emergency fix failed: ' + (error.message || 'Unknown error'),
+        actions: ['Manual intervention required'],
+        appliedFixes: [],
+        remainingIssues: [error.message || 'Unknown error']
+      };
     } finally {
       this.isFixing = false;
     }
@@ -319,14 +446,20 @@ export class SupabaseConnectionFixer {
         if (this.isSupabaseNetworkError(error)) {
           console.error(`❌ ${context} network error:`, error);
 
+          // Block connection if too many failures
+          this.retryAttempts++;
+          if (this.retryAttempts >= this.maxRetries) {
+            this.connectionBlocked = true;
+            this.lastFailureTime = Date.now();
+            console.warn('🚫 Connection blocked due to repeated failures');
+          }
+
           // Show user-friendly error message
-          if (this.retryAttempts === 0) {
+          if (this.retryAttempts === 1) {
             toast.error('Connection issue detected. Attempting to reconnect...', {
               duration: 3000
             });
           }
-
-          this.retryAttempts++;
         }
         throw error;
       }
