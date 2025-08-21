@@ -88,10 +88,21 @@ const Login = () => {
 
       // Only redirect if user is signed in AND email is verified
       if (event === 'SIGNED_IN' && session && session.user && session.user.email_confirmed_at) {
-        console.log('🔐 Auth state change: user verified, redirecting to dashboard');
-        // Prevent redirect loops and ensure we're not already on dashboard
-        if (window.location.pathname !== '/dashboard') {
-          setTimeout(() => navigate('/dashboard'), 100);
+        console.log('🔐 Auth state change: user verified, checking redirect destination');
+
+        // Check if user was trying to access domains page
+        const intendedRoute = localStorage.getItem('intended_route');
+        if (intendedRoute === '/domains') {
+          localStorage.removeItem('intended_route');
+          // Prevent redirect loops and ensure we're not already on domains
+          if (window.location.pathname !== '/domains') {
+            setTimeout(() => navigate('/domains'), 100);
+          }
+        } else {
+          // Prevent redirect loops and ensure we're not already on dashboard
+          if (window.location.pathname !== '/dashboard') {
+            setTimeout(() => navigate('/dashboard'), 100);
+          }
         }
       } else if (event === 'SIGNED_IN' && session && session.user && !session.user.email_confirmed_at) {
         console.log('📬 Auth state change: user signed in but email not verified');
