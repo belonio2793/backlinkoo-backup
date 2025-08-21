@@ -93,12 +93,17 @@ function extractKeywordFromTitle(title: string): string {
   return words[0] || 'blog';
 }
 
+// Make it available globally for easy testing in console
+if (typeof window !== 'undefined') {
+  (window as any).createBlogPost = createBlogPost;
+}
+
 /**
- * Example usage:
+ * Example usage in browser console:
  * 
  * await createBlogPost({
  *   title: "How to Build Great SEO Content",
- *   content: "<h1>How to Build Great SEO Content</h1><p>Your content here...</p>",
+ *   content: "<h1>How to Build Great SEO Content</h1><p>Creating effective SEO content requires understanding your audience and search intent...</p>",
  *   target_url: "https://example.com",
  *   anchor_text: "SEO services",
  *   keyword: "SEO content",
