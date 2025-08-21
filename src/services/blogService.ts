@@ -113,21 +113,11 @@ export class BlogService {
 
     let result;
     try {
-      // Primary save to published_blog_posts table
+      // Primary save to blog_posts table (unified approach)
       result = await supabase
-        .from('published_blog_posts')
+        .from('blog_posts')
         .insert(cleanBlogPostData)
         .select();
-
-      // Also save to blog_posts for backward compatibility
-      try {
-        await supabase
-          .from('blog_posts')
-          .insert(cleanBlogPostData);
-        console.log('✅ [BlogService] Also saved to blog_posts for compatibility');
-      } catch (backupError) {
-        console.warn('⚠️ [BlogService] Backup save to blog_posts failed:', this.getSafeErrorMessage(backupError));
-      }
 
     } catch (networkError: any) {
       console.error('❌ Network error during blog post creation:', networkError);
