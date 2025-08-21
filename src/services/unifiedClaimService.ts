@@ -363,44 +363,72 @@ export class UnifiedClaimService {
   }
 
   /**
-   * Get all available posts for saving to dashboard
-   * Queries published_blog_posts first, then blog_posts as fallback
+   * Get all available posts from both blog_posts and published_blog_posts tables
+   * Combines results from both tables and removes duplicates
    */
   static async getAvailablePosts(limit: number = 20): Promise<BlogPost[]> {
     try {
-      console.log('📖 Fetching available posts from published_blog_posts...');
+      console.log('📖 Fetching posts from both blog_posts and published_blog_posts tables...');
 
-      // Try published_blog_posts first (where new posts are saved)
-      let { data, error } = await supabase
-        .from('published_blog_posts')
-        .select('*')
-        .eq('status', 'published')
-        .order('created_at', { ascending: false })
-        .limit(limit);
+      const allPosts: BlogPost[] = [];
 
-      // If published_blog_posts fails or returns no data, try blog_posts fallback
-      if (error || !data || data.length === 0) {
-        console.log('📖 Trying blog_posts fallback...');
-        const fallbackResult = await supabase
+      // Get posts from published_blog_posts table
+      try {
+        const { data: publishedPosts, error: publishedError } = await supabase
+          .from('published_blog_posts')
+          .select('*')
+          .eq('status', 'published')
+          .order('created_at', { ascending: false });
+
+        if (!publishedError && publishedPosts) {
+          console.log(`✅ Found ${publishedPosts.length} posts in published_blog_posts`);
+          allPosts.push(...publishedPosts);
+        } else {
+          console.warn('⚠️ Error fetching from published_blog_posts:', publishedError?.message);
+        }
+      } catch (error) {
+        console.warn('⚠️ Failed to query published_blog_posts table:', error);
+      }
+
+      // Get posts from blog_posts table
+      try {
+        const { data: blogPosts, error: blogError } = await supabase
           .from('blog_posts')
           .select('*')
           .eq('status', 'published')
-          .order('created_at', { ascending: false })
-          .limit(limit);
+          .order('created_at', { ascending: false });
 
-        if (fallbackResult.error) {
-          console.error('Failed to get available posts from both tables:', fallbackResult.error.message || fallbackResult.error);
-          throw fallbackResult.error;
+        if (!blogError && blogPosts) {
+          console.log(`✅ Found ${blogPosts.length} posts in blog_posts`);
+
+          // Add posts that don't already exist (avoid duplicates)
+          blogPosts.forEach(post => {
+            if (!allPosts.find(existing => existing.slug === post.slug || existing.id === post.id)) {
+              allPosts.push(post);
+            }
+          });
+        } else {
+          console.warn('⚠️ Error fetching from blog_posts:', blogError?.message);
         }
-
-        data = fallbackResult.data;
+      } catch (error) {
+        console.warn('⚠️ Failed to query blog_posts table:', error);
       }
 
-      console.log(`✅ Found ${data?.length || 0} available posts`);
-      return data || [];
+      // If no posts found in either table, throw error
+      if (allPosts.length === 0) {
+        throw new Error('No blog posts found in either blog_posts or published_blog_posts tables');
+      }
+
+      // Sort all posts by creation date and limit
+      const sortedPosts = allPosts
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        .slice(0, limit);
+
+      console.log(`✅ Returning ${sortedPosts.length} total posts (limited to ${limit})`);
+      return sortedPosts;
     } catch (error) {
-      console.error('Error getting available posts:', error.message || error);
-      return [];
+      console.error('❌ Error getting available posts:', error);
+      throw error;
     }
   }
 
