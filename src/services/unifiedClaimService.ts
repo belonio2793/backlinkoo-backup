@@ -143,6 +143,12 @@ export class UnifiedClaimService {
         error = fallbackResult.error;
       }
 
+      // Handle API key missing error gracefully
+      if (error && error.message && error.message.includes('No API key found')) {
+        console.warn('⚠️ Supabase API key missing, cannot fetch blog posts from database');
+        return null;
+      }
+
       if (error) {
         if (error.code === 'PGRST116') {
           return null; // No rows found in either table
@@ -380,6 +386,12 @@ export class UnifiedClaimService {
 
       // If published_blog_posts fails or returns no data, try blog_posts fallback
       if (error || !data || data.length === 0) {
+        // Handle API key missing error gracefully
+        if (error && error.message && error.message.includes('No API key found')) {
+          console.warn('⚠️ Supabase API key missing, returning empty posts list');
+          return [];
+        }
+
         console.log('📖 Trying blog_posts fallback...');
         const fallbackResult = await supabase
           .from('blog_posts')
@@ -389,6 +401,11 @@ export class UnifiedClaimService {
           .limit(limit);
 
         if (fallbackResult.error) {
+          // Handle API key missing error gracefully
+          if (fallbackResult.error.message && fallbackResult.error.message.includes('No API key found')) {
+            console.warn('⚠️ Supabase API key missing, returning empty posts list');
+            return [];
+          }
           console.error('Failed to get available posts from both tables:', fallbackResult.error.message || fallbackResult.error);
           return [];
         }
