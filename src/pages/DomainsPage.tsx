@@ -151,9 +151,9 @@ const DomainsPage = () => {
       setNewDomain('');
       toast.success(`Domain ${cleanedDomain} added successfully`);
 
-      // Auto-validate the domain
-      setTimeout(() => {
-        validateDomain(data.id);
+      // Auto-add to Netlify and fetch DNS records
+      setTimeout(async () => {
+        await addDomainToNetlify(data);
       }, 1000);
 
     } catch (error: any) {
