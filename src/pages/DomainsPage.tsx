@@ -295,7 +295,7 @@ const DomainsPage = () => {
 
         if (!connectionWorking) {
           console.warn('⚠️ Could not establish database connection after retries, continuing in offline mode');
-          setSupabaseConnected(false);
+          setApiConnectionEstablished(false);
           setLoading(false);
         }
 
