@@ -3,7 +3,7 @@
 
 [build]
   publish = "dist"
-  command = "npm run build"
+  command = "yarn build"
 
 # Headers for security and permissions
 [[headers]]
@@ -12,7 +12,7 @@
     Permissions-Policy = "clipboard-write=(self)"
 
 [dev]
-  command = "npm run dev"
+  command = "yarn dev"
   targetPort = 8080
   port = 8888
 
