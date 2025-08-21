@@ -29,6 +29,10 @@ interface Domain {
   last_validation_attempt?: string;
   created_at: string;
   blog_theme?: string;
+  netlify_domain_id?: string;
+  dns_records?: DNSRecord[];
+  is_publishing_platform?: boolean;
+  netlify_state?: string;
 }
 
 const DomainsPage = () => {
@@ -193,7 +197,7 @@ const DomainsPage = () => {
           setShowThemeSelector(true);
         }
       } else {
-        toast.warning(`⚠️ ${result.message}`);
+        toast.warning(`���️ ${result.message}`);
       }
 
     } catch (error: any) {
