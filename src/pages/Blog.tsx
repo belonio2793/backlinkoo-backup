@@ -418,10 +418,13 @@ function Blog() {
     const cleanedDescription = cleanDescription(post.meta_description || '').toLowerCase();
     const searchLower = searchTerm.toLowerCase();
 
+    // Safe keyword/tag access with fallback
+    const keywordsArray = Array.isArray(post.keywords) ? post.keywords : (Array.isArray(post.tags) ? post.tags : []);
+
     const matchesSearch = searchTerm === '' ||
       cleanedTitle.includes(searchLower) ||
       cleanedDescription.includes(searchLower) ||
-      post.keywords.some(keyword => keyword.toLowerCase().includes(searchLower));
+      keywordsArray.some((keyword: string) => (keyword || '').toLowerCase().includes(searchLower));
 
     const matchesCategory = selectedCategory === '' || post.category === selectedCategory;
 
