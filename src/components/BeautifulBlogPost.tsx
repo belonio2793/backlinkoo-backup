@@ -1067,20 +1067,6 @@ const BeautifulBlogPost = () => {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Floating Delete Action Button */}
-      {showDeleteButton && (
-        <div className="fixed bottom-20 right-6 z-50">
-          <Button
-            onClick={() => setShowDeleteDialog(true)}
-            size="lg"
-            className="rounded-full bg-red-600 hover:bg-red-700 text-white shadow-lg border-2 border-white hover:shadow-xl transition-all duration-200"
-          >
-            <Trash2 className="h-5 w-5" />
-            <span className="sr-only">Delete Article</span>
-          </Button>
-        </div>
-      )}
-
       <Footer />
     </div>
   );
