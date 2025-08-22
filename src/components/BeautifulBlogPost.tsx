@@ -981,6 +981,30 @@ const BeautifulBlogPost = () => {
           </CardContent>
         </Card>
 
+        {/* Delete/Recycle Section - Only show if user has permission */}
+        {showDeleteButton && (
+          <Card className="mt-8 border-red-200 bg-red-50">
+            <CardContent className="p-8 text-center">
+              <h3 className="text-xl font-semibold text-red-800 mb-4 flex items-center justify-center gap-2">
+                <Trash2 className="h-5 w-5" />
+                Article Management
+              </h3>
+              <p className="text-red-700 mb-6">
+                Remove this article permanently from the platform
+              </p>
+              <Button
+                onClick={() => setShowDeleteDialog(true)}
+                variant="destructive"
+                size="lg"
+                className="rounded-full bg-red-600 hover:bg-red-700"
+              >
+                <Trash2 className="mr-2 h-5 w-5" />
+                Delete Article
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
       </main>
 
       {/* Delete Dialog */}
