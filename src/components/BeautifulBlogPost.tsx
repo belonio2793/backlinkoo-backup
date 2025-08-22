@@ -950,29 +950,6 @@ const BeautifulBlogPost = () => {
           </CardContent>
         </Card>
 
-        {/* Keywords */}
-        {blogPost.keywords?.length > 0 && (
-          <Card className="mb-8 bg-gradient-to-r from-purple-50 to-blue-50">
-            <CardContent className="p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center justify-center gap-3">
-                <Sparkles className="h-6 w-6 text-purple-600" />
-                Article Keywords
-              </h2>
-              <div className="flex flex-wrap gap-3 justify-center">
-                {blogPost.keywords.map((keyword, index) => (
-                  <Badge
-                    key={index}
-                    variant="outline"
-                    className="px-4 py-2 bg-white/80 border-purple-200 text-gray-700 hover:bg-purple-50 rounded-full"
-                  >
-                    <Hash className="h-3 w-3 mr-1 text-purple-500" />
-                    {keyword}
-                  </Badge>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
 
         {/* Engagement Section */}
         <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
