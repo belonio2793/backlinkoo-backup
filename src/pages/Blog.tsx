@@ -178,6 +178,52 @@ function Blog() {
     }
   };
 
+  // Delete handler functions
+  const handleDeleteClick = (post: any, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setPostToDelete(post);
+    setDeleteConfirmOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!postToDelete) return;
+
+    setDeleting(true);
+    try {
+      console.log('🗑️ Deleting blog post:', postToDelete.id);
+
+      const success = await blogService.deleteBlogPost(postToDelete.id);
+
+      if (success) {
+        // Remove the post from the current list
+        setBlogPosts(prevPosts => prevPosts.filter(p => p.id !== postToDelete.id));
+
+        toast({
+          title: "Article Deleted",
+          description: "The article has been permanently removed.",
+        });
+      } else {
+        throw new Error('Delete operation failed');
+      }
+    } catch (error: any) {
+      console.error('❌ Failed to delete blog post:', error);
+      toast({
+        title: "Delete Failed",
+        description: error.message || "Unable to delete article. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setDeleting(false);
+      setDeleteConfirmOpen(false);
+      setPostToDelete(null);
+    }
+  };
+
+  const canDeletePost = (post: any) => {
+    // User can delete their own posts or trial posts that are unclaimed
+    return (user && post.user_id === user.id) || (post.is_trial_post && !post.user_id);
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
