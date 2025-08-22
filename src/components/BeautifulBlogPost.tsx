@@ -497,18 +497,6 @@ const StatusBadge = ({
           </Button>
         )}
 
-        {/* Show delete button for unclaimed posts - admins can always delete */}
-        {(isAdmin || (canDelete && user)) && (
-          <Button
-            onClick={onDelete}
-            variant="destructive"
-            size="sm"
-            className="rounded-full bg-red-600 hover:bg-red-700 text-white border-0 font-medium"
-          >
-            <Trash2 className="h-4 w-4 mr-2" />
-            Delete
-          </Button>
-        )}
       </div>
     </div>
   );
