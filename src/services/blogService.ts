@@ -74,7 +74,7 @@ export class BlogService {
       content: beautifulContent, // Use beautifully formatted content
       target_url: data.targetUrl,
       anchor_text: data.anchorText || data.title || 'Learn More', // Default anchor text if not provided
-      keyword: data.primaryKeyword || this.extractKeywordFromTitle(data.title), // Extract keyword from title if not provided
+      keywords: [data.primaryKeyword || this.extractKeywordFromTitle(data.title)], // Extract keyword from title if not provided
       published_url: `${baseUrl}/blog/${tempSlug}`, // Set published URL with temporary slug
       status: 'published',
       is_trial_post: isTrialPost,
@@ -344,7 +344,6 @@ export class BlogService {
         meta_description: data.meta_description || '',
         excerpt: data.excerpt || '',
         keywords: data.keywords || [],
-        keyword: data.keyword || this.extractKeywordFromTitle(data.title || ''),
         published_at: data.published_at || data.created_at
       } as BlogPost;
 
@@ -384,7 +383,6 @@ export class BlogService {
       meta_description: '',
       excerpt: '',
       keywords: [],
-      keyword: this.extractKeywordFromTitle(data.title || ''),
       published_at: data.created_at,
       updated_at: data.created_at,
       published_url: data.published_url || `/blog/${data.slug}`,
@@ -553,7 +551,6 @@ export class BlogService {
       return (data || []).map(post => ({
         ...post,
         // Ensure safe defaults for potentially missing fields
-        keyword: post.keyword || this.extractKeywordFromTitle(post.title || ''),
         meta_description: post.meta_description || '',
         excerpt: post.excerpt || '',
         keywords: post.keywords || [],
