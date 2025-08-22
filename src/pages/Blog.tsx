@@ -1197,15 +1197,25 @@ function BlogPostCard({ post, navigate, formatDate, onLoginRequired, cleanTitle,
             )}
           </div>
           <div className="flex items-center gap-2">
+            {canDelete && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => onDelete(post, e)}
+                className="text-red-600 hover:text-red-800 hover:bg-red-50"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            )}
             <Button
               variant="ghost"
               size="sm"
               asChild
               onClick={(e) => e.stopPropagation()}
             >
-              <a 
-                href={post.target_url} 
-                target="_blank" 
+              <a
+                href={post.target_url}
+                target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-600 hover:text-blue-800"
               >
