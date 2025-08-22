@@ -435,9 +435,9 @@ const StatusBadge = ({
           </span>
         </div>
         
-        {isOwnPost && (
+        {(isOwnPost || isAdmin) && (
           <div className="flex gap-2">
-            {canUnclaim && (
+            {isOwnPost && canUnclaim && (
               <Button
                 onClick={onUnclaim}
                 variant="outline"
@@ -448,7 +448,7 @@ const StatusBadge = ({
                 Unclaim
               </Button>
             )}
-            {canDelete && (
+            {(isAdmin || canDelete) && (
               <Button
                 onClick={onDelete}
                 variant="outline"
