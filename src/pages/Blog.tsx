@@ -1280,7 +1280,19 @@ function BlogPostListItem({ post, navigate, formatDate, onLoginRequired, cleanTi
                 </div>
               </div>
 
-              <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
+              <div className="flex items-center gap-2">
+                {canDelete && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => onDelete(post, e)}
+                    className="text-red-600 hover:text-red-800 hover:bg-red-50"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
+                <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
+              </div>
             </div>
           </div>
         </div>
