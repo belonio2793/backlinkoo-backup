@@ -494,8 +494,8 @@ const StatusBadge = ({
           </Button>
         )}
 
-        {/* Show delete button for unclaimed posts (anyone can delete) or for admins */}
-        {canDelete && (user || isAdmin) && (
+        {/* Show delete button for unclaimed posts - admins can always delete */}
+        {(isAdmin || (canDelete && user)) && (
           <Button
             onClick={onDelete}
             variant="outline"
