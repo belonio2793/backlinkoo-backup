@@ -501,9 +501,9 @@ const StatusBadge = ({
         {(isAdmin || (canDelete && user)) && (
           <Button
             onClick={onDelete}
-            variant="outline"
+            variant="destructive"
             size="sm"
-            className="rounded-full border-red-300 text-red-700 hover:bg-red-50"
+            className="rounded-full bg-red-600 hover:bg-red-700 text-white border-0 font-medium"
           >
             <Trash2 className="h-4 w-4 mr-2" />
             Delete
