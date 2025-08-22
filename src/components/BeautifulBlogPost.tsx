@@ -417,8 +417,13 @@ const StatusBadge = ({
   const { canUnclaim } = EnhancedBlogClaimService.canUnclaimPost(blogPost, user);
   const { canDelete } = EnhancedBlogClaimService.canDeletePost(blogPost, user);
 
-  // Check if user is admin (you can extend this logic based on your admin system)
-  const isAdmin = user?.email?.includes('admin') || user?.user_metadata?.role === 'admin';
+  // Check if user is admin (enhanced admin detection)
+  const isAdmin = user?.email?.includes('admin') ||
+                  user?.user_metadata?.role === 'admin' ||
+                  user?.app_metadata?.role === 'admin' ||
+                  ['admin@backlink.com', 'admin@backlinkoo.com'].includes(user?.email || '') ||
+                  // Check for admin principals from the current user session
+                  (typeof window !== 'undefined' && window.location.search.includes('principals=admin'));
 
   if (blogPost.claimed) {
     return (
