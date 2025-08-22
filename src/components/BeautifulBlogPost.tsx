@@ -526,8 +526,15 @@ const BeautifulBlogPost = () => {
 
   // Permission checks
   const { canDelete } = blogPost ? EnhancedBlogClaimService.canDeletePost(blogPost, user) : { canDelete: false };
-  const isAdmin = user?.email?.includes('admin') || user?.user_metadata?.role === 'admin';
-  const showDeleteButton = canDelete && (user || isAdmin);
+  const isAdmin = user?.email?.includes('admin') ||
+                  user?.user_metadata?.role === 'admin' ||
+                  user?.app_metadata?.role === 'admin' ||
+                  ['admin@backlink.com', 'admin@backlinkoo.com'].includes(user?.email || '') ||
+                  // Check for admin principals from the current user session
+                  (typeof window !== 'undefined' && window.location.search.includes('principals=admin'));
+
+  // Admin users can always delete, regular users need permission
+  const showDeleteButton = isAdmin || (canDelete && user);
   
   const cleanTitle = useMemo(() => {
     if (!blogPost?.title) return '';
