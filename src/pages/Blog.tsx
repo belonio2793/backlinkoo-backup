@@ -4,6 +4,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { blogService, type BlogPost } from '@/services/blogService';
 import { UnifiedClaimService } from '@/services/unifiedClaimService';
 import { useAuth } from '@/hooks/useAuth';
@@ -40,7 +50,8 @@ import {
   Infinity,
   Loader2,
   Plus,
-  RefreshCw
+  RefreshCw,
+  Trash2
 } from 'lucide-react';
 
 function Blog() {
@@ -57,11 +68,14 @@ function Blog() {
   const [paymentDefaultTab, setPaymentDefaultTab] = useState<'credits' | 'premium'>('credits');
   const [refreshing, setRefreshing] = useState(false);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [postToDelete, setPostToDelete] = useState<any>(null);
+  const [deleting, setDeleting] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const loadBlogPosts = async () => {
-      console.log('🔄 Loading blog posts...');
+      console.log('��� Loading blog posts...');
       setLoading(true);
 
       // Set a timeout to prevent infinite loading
@@ -162,6 +176,52 @@ function Blog() {
       default: // newest
         return [...posts].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     }
+  };
+
+  // Delete handler functions
+  const handleDeleteClick = (post: any, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setPostToDelete(post);
+    setDeleteConfirmOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!postToDelete) return;
+
+    setDeleting(true);
+    try {
+      console.log('🗑️ Deleting blog post:', postToDelete.id);
+
+      const success = await blogService.deleteBlogPost(postToDelete.id);
+
+      if (success) {
+        // Remove the post from the current list
+        setBlogPosts(prevPosts => prevPosts.filter(p => p.id !== postToDelete.id));
+
+        toast({
+          title: "Article Deleted",
+          description: "The article has been permanently removed.",
+        });
+      } else {
+        throw new Error('Delete operation failed');
+      }
+    } catch (error: any) {
+      console.error('❌ Failed to delete blog post:', error);
+      toast({
+        title: "Delete Failed",
+        description: error.message || "Unable to delete article. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setDeleting(false);
+      setDeleteConfirmOpen(false);
+      setPostToDelete(null);
+    }
+  };
+
+  const canDeletePost = (post: any) => {
+    // User can delete their own posts or trial posts that are unclaimed
+    return (user && post.user_id === user.id) || (post.is_trial_post && !post.user_id);
   };
 
   const formatDate = (dateString: string) => {
@@ -771,6 +831,8 @@ function Blog() {
                     cleanTitle={cleanTitle}
                     cleanDescription={cleanDescription}
                     generateExcerpt={generateExcerpt}
+                    onDelete={handleDeleteClick}
+                    canDelete={canDeletePost(post)}
                   />
                 ) : (
                   <BlogPostListItem
@@ -781,6 +843,8 @@ function Blog() {
                     cleanTitle={cleanTitle}
                     cleanDescription={cleanDescription}
                     generateExcerpt={generateExcerpt}
+                    onDelete={handleDeleteClick}
+                    canDelete={canDeletePost(post)}
                   />
                 )}
               </div>
@@ -895,13 +959,45 @@ function Blog() {
           });
         }}
       />
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Article</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{postToDelete?.title}"? This action cannot be undone and the article will be permanently removed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              disabled={deleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {deleting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete
+                </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       </div>
     </FetchErrorBoundary>
   );
 }
 
 // Blog Post Card Component
-function BlogPostCard({ post, navigate, formatDate, onLoginRequired, cleanTitle, cleanDescription, generateExcerpt }: any) {
+function BlogPostCard({ post, navigate, formatDate, onLoginRequired, cleanTitle, cleanDescription, generateExcerpt, onDelete, canDelete }: any) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [claiming, setClaiming] = useState(false);
@@ -1101,15 +1197,25 @@ function BlogPostCard({ post, navigate, formatDate, onLoginRequired, cleanTitle,
             )}
           </div>
           <div className="flex items-center gap-2">
+            {canDelete && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => onDelete(post, e)}
+                className="text-red-600 hover:text-red-800 hover:bg-red-50"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            )}
             <Button
               variant="ghost"
               size="sm"
               asChild
               onClick={(e) => e.stopPropagation()}
             >
-              <a 
-                href={post.target_url} 
-                target="_blank" 
+              <a
+                href={post.target_url}
+                target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-600 hover:text-blue-800"
               >
@@ -1125,7 +1231,7 @@ function BlogPostCard({ post, navigate, formatDate, onLoginRequired, cleanTitle,
 }
 
 // Blog Post List Item Component
-function BlogPostListItem({ post, navigate, formatDate, onLoginRequired, cleanTitle, cleanDescription, generateExcerpt }: any) {
+function BlogPostListItem({ post, navigate, formatDate, onLoginRequired, cleanTitle, cleanDescription, generateExcerpt, onDelete, canDelete }: any) {
   return (
     <Card 
       className="group hover:shadow-lg transition-all duration-200 cursor-pointer border border-gray-200 hover:border-blue-300"
@@ -1174,7 +1280,19 @@ function BlogPostListItem({ post, navigate, formatDate, onLoginRequired, cleanTi
                 </div>
               </div>
 
-              <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
+              <div className="flex items-center gap-2">
+                {canDelete && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => onDelete(post, e)}
+                    className="text-red-600 hover:text-red-800 hover:bg-red-50"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
+                <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
+              </div>
             </div>
           </div>
         </div>
