@@ -869,17 +869,6 @@ const BeautifulBlogPost = () => {
                 <Copy className="h-4 w-4 mr-2" />
                 Copy
               </Button>
-              {showDeleteButton && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowDeleteDialog(true)}
-                  className="rounded-full border-red-400 text-red-700 hover:bg-red-50 hover:border-red-500 bg-red-50/50 font-medium"
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete
-                </Button>
-              )}
             </div>
           </div>
         </div>
