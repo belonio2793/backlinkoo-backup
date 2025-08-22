@@ -833,24 +833,35 @@ const BeautifulBlogPost = () => {
               Back to Articles
             </Button>
             <div className="flex items-center gap-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={handleShare}
                 className="rounded-full"
               >
                 <Share2 className="h-4 w-4 mr-2" />
                 Share
               </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={handleCopyLink}
                 className="rounded-full"
               >
                 <Copy className="h-4 w-4 mr-2" />
                 Copy
               </Button>
+              {showDeleteButton && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowDeleteDialog(true)}
+                  className="rounded-full border-red-300 text-red-700 hover:bg-red-50 hover:border-red-400"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete
+                </Button>
+              )}
             </div>
           </div>
         </div>
