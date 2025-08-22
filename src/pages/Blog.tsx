@@ -843,6 +843,8 @@ function Blog() {
                     cleanTitle={cleanTitle}
                     cleanDescription={cleanDescription}
                     generateExcerpt={generateExcerpt}
+                    onDelete={handleDeleteClick}
+                    canDelete={canDeletePost(post)}
                   />
                 )}
               </div>
