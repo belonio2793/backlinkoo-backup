@@ -523,6 +523,11 @@ const BeautifulBlogPost = () => {
 
   // Computed values
   const { effectiveScore, isPremiumScore } = usePremiumSEOScore(blogPost);
+
+  // Permission checks
+  const { canDelete } = blogPost ? EnhancedBlogClaimService.canDeletePost(blogPost, user) : { canDelete: false };
+  const isAdmin = user?.email?.includes('admin') || user?.user_metadata?.role === 'admin';
+  const showDeleteButton = canDelete && (user || isAdmin);
   
   const cleanTitle = useMemo(() => {
     if (!blogPost?.title) return '';
