@@ -75,7 +75,7 @@ function Blog() {
 
   useEffect(() => {
     const loadBlogPosts = async () => {
-      console.log('🔄 Loading blog posts...');
+      console.log('��� Loading blog posts...');
       setLoading(true);
 
       // Set a timeout to prevent infinite loading
@@ -831,6 +831,8 @@ function Blog() {
                     cleanTitle={cleanTitle}
                     cleanDescription={cleanDescription}
                     generateExcerpt={generateExcerpt}
+                    onDelete={handleDeleteClick}
+                    canDelete={canDeletePost(post)}
                   />
                 ) : (
                   <BlogPostListItem
