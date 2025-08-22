@@ -997,7 +997,7 @@ function Blog() {
 }
 
 // Blog Post Card Component
-function BlogPostCard({ post, navigate, formatDate, onLoginRequired, cleanTitle, cleanDescription, generateExcerpt }: any) {
+function BlogPostCard({ post, navigate, formatDate, onLoginRequired, cleanTitle, cleanDescription, generateExcerpt, onDelete, canDelete }: any) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [claiming, setClaiming] = useState(false);
