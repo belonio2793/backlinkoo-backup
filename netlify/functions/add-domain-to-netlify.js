@@ -81,7 +81,7 @@ exports.handler = async (event, context) => {
       };
     }
 
-    console.log(`🚀 Adding domain ${domain} to Netlify site ${siteId}...`);
+    console.log(`🚀 Adding domain ${domain} as alias to Netlify site ${siteId} (preserving primary domain)...`);
 
     // Clean the domain name (remove protocol, www, trailing slash)
     const cleanDomain = domain.trim()
