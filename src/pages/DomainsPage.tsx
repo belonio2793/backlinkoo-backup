@@ -624,7 +624,7 @@ const DomainsPage = () => {
   const runDiagnostic = async () => {
     setRunningDiagnostic(true);
     try {
-      toast.info('🔍 Running network diagnostic...');
+      toast.info('���� Running network diagnostic...');
       const results = await runNetworkDiagnostic();
       setDiagnosticResults(results);
 
@@ -1016,12 +1016,12 @@ const DomainsPage = () => {
                         {addingToNetlify.has(domain.id) ? (
                           <>
                             <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                            Adding...
+                            Adding via API...
                           </>
                         ) : (
                           <>
                             <Globe className="h-4 w-4 mr-1" />
-                            Add to Netlify
+                            Add via Netlify API
                           </>
                         )}
                       </Button>
