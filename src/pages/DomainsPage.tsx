@@ -507,10 +507,10 @@ const DomainsPage = () => {
     }
   };
 
-  // Add domain to Netlify using the optimized function
+  // Add domain to Netlify using the official Netlify API
   const addDomainToNetlify = async (domain: Domain) => {
     try {
-      toast.info(`Adding ${domain.domain} to Netlify...`);
+      toast.info(`Adding ${domain.domain} to Netlify via official API...`);
 
       // Update status to show we're processing
       await supabase
@@ -523,34 +523,20 @@ const DomainsPage = () => {
         d.id === domain.id ? { ...d, status: 'validating' } : d
       ));
 
-      // Use the smart Netlify function caller (with mock fallback in development)
-      console.log(`🔄 Calling Netlify function for domain: ${domain.domain}`);
+      console.log(`🔄 Adding domain via official Netlify API: ${domain.domain}`);
 
-      let result;
-      try {
-        result = await callNetlifyDomainFunction(domain.domain, domain.id);
-        console.log(`📋 Netlify function result:`, result);
-      } catch (functionError: any) {
-        console.error('❌ Error calling Netlify function:', functionError);
-        throw new Error(`Network error: Could not reach Netlify function. ${functionError.message || 'Please check your internet connection and try again.'}`);
-      }
+      // Try official Netlify API first
+      const apiResult = await NetlifyApiService.addDomainAlias(domain.domain);
 
-      if (result.success) {
-        // Update domain with available fields only
-        const updateData: any = {};
+      if (apiResult.success) {
+        console.log('✅ Official Netlify API succeeded:', apiResult);
 
-        // Only update fields that exist in the schema
-        try {
-          updateData.error_message = null;
-          if (result.netlifyData?.site_id) {
-            updateData.netlify_site_id = result.netlifyData.site_id;
-          }
-          if (result.dnsInstructions?.dnsRecords) {
-            updateData.dns_records = result.dnsInstructions.dnsRecords;
-          }
-        } catch (schemaError) {
-          console.log('Using basic update for domain');
-        }
+        // Update domain with success status
+        const updateData = {
+          netlify_verified: true,
+          status: 'dns_ready' as const,
+          error_message: null
+        };
 
         const { error: updateError } = await supabase
           .from('domains')
@@ -571,46 +557,63 @@ const DomainsPage = () => {
           } : d
         ));
 
-        toast.success(`✅ ${domain.domain} successfully added to Netlify! Configure DNS records to activate.`);
+        toast.success(`✅ ${domain.domain} successfully added to Netlify via official API! Configure DNS records to activate.`);
+
+        // Auto-validate after a short delay to check DNS
+        setTimeout(() => {
+          validateDomain(domain.id);
+        }, 3000);
+
+        return; // Success, exit early
+      }
+
+      // Fallback: Try the previous implementation
+      console.warn('⚠️ Official API failed, trying fallback method:', apiResult.error);
+
+      let result;
+      try {
+        result = await callNetlifyDomainFunction(domain.domain, domain.id);
+        console.log(`📋 Fallback function result:`, result);
+      } catch (functionError: any) {
+        console.error('❌ Error calling fallback function:', functionError);
+        throw new Error(`Both official API and fallback failed. Official API: ${apiResult.error}. Fallback: ${functionError.message}`);
+      }
+
+      if (result.success) {
+        // Update domain with available fields only
+        const updateData: any = {
+          netlify_verified: true,
+          status: 'dns_ready' as const,
+          error_message: null
+        };
+
+        const { error: updateError } = await supabase
+          .from('domains')
+          .update(updateData)
+          .eq('id', domain.id)
+          .eq('user_id', user?.id);
+
+        if (updateError) {
+          console.warn('Domain update error:', updateError);
+        }
+
+        setDomains(prev => prev.map(d =>
+          d.id === domain.id ? {
+            ...d,
+            netlify_verified: true,
+            status: 'dns_ready' as const,
+            error_message: null
+          } : d
+        ));
+
+        toast.success(`✅ ${domain.domain} successfully added to Netlify via fallback method! Configure DNS records to activate.`);
 
         // Auto-validate after a short delay to check DNS
         setTimeout(() => {
           validateDomain(domain.id);
         }, 3000);
       } else {
-        // Extract detailed error information from Netlify function response
-        console.error('❌ Netlify function returned error:', result);
-
-        let detailedError = 'Failed to add domain to Netlify';
-
-        // Try to extract specific error message
-        if (result.error) {
-          detailedError = result.error;
-        } else if (result.details?.specificError) {
-          detailedError = result.details.specificError;
-        } else if (result.details?.originalError) {
-          detailedError = result.details.originalError;
-        } else if (result.details?.rawResponse) {
-          detailedError = result.details.rawResponse;
-        } else if (result.message) {
-          detailedError = result.message;
-        }
-
-        // Include additional context if available
-        let errorContext = detailedError;
-        if (result.details?.status) {
-          errorContext = `HTTP ${result.details.status}: ${detailedError}`;
-        }
-
-        // Log full error for debugging
-        console.error('❌ Full error details:', {
-          domain: domain.domain,
-          error: detailedError,
-          status: result.details?.status,
-          response: result
-        });
-
-        throw new Error(errorContext);
+        throw new Error(result.error || 'Both official API and fallback methods failed');
       }
     } catch (error: any) {
       console.error('Error adding domain to Netlify:', error);
@@ -628,9 +631,7 @@ const DomainsPage = () => {
       } else if (error.message.includes('429')) {
         errorMessage = 'Rate limit exceeded. Please try again in a few minutes.';
       } else if (!error.message || error.message === 'Failed to fetch' || error.message.includes('Failed to fetch')) {
-        errorMessage = 'Network error: Could not connect to Netlify services. Please check your internet connection and try again. If the issue persists, the Netlify functions may need to be deployed.';
-      } else if (error.message.includes('TypeError: Failed to fetch')) {
-        errorMessage = 'Network connectivity issue: Unable to reach the domain management service. Please ensure you have an active internet connection.';
+        errorMessage = 'Network error: Could not connect to Netlify services. Please check your internet connection and try again.';
       }
 
       // Update domain status to error with detailed message
@@ -779,7 +780,7 @@ const DomainsPage = () => {
         toast.error(`❌ Netlify function test failed: ${result.error}`);
         console.error('🧪 Function test failed:', result);
       } else {
-        toast.success('�� Netlify function test passed!');
+        toast.success('✅ Netlify function test passed!');
         console.log('🧪 Function test succeeded:', result);
       }
     } catch (error: any) {
