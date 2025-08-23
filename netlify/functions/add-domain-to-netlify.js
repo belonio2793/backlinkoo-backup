@@ -38,12 +38,16 @@ exports.handler = async (event, context) => {
   }
 
   try {
+    console.log('🚀 Netlify function started, processing domain addition request...');
+
     // Parse request body
     let requestData = {};
     if (event.body) {
       try {
         requestData = JSON.parse(event.body);
+        console.log('📋 Request data parsed:', { domain: requestData.domain, domainId: requestData.domainId });
       } catch (error) {
+        console.error('❌ Invalid JSON in request body:', error);
         return {
           statusCode: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
