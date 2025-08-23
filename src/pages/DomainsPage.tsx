@@ -943,9 +943,12 @@ const DomainsPage = () => {
         {/* Domain Addition Interface */}
         <Card className="mb-8">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Plus className="h-5 w-5" />
-              Add Domains to Netlify
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Plus className="h-5 w-5" />
+                Add Domains to Netlify
+              </div>
+              <FunctionStatusIndicator />
             </CardTitle>
           </CardHeader>
           <CardContent>
