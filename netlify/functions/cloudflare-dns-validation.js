@@ -33,14 +33,14 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    console.log('🌐 Starting Cloudflare DNS validation...');
+    console.log('Starting Cloudflare DNS validation...');
 
     // Parse request body
     let requestData = {};
     if (event.body) {
       try {
         requestData = JSON.parse(event.body);
-        console.log('📋 DNS validation request:', { 
+        console.log('DNS validation request:', { 
           domain: requestData.domain, 
           action: requestData.action,
           zoneId: requestData.zoneId ? 'provided' : 'auto-detect'
@@ -75,7 +75,7 @@ exports.handler = async (event, context) => {
     const cloudflareEmail = process.env.CLOUDFLARE_EMAIL;
     const cloudflareApiKey = process.env.CLOUDFLARE_API_KEY;
 
-    console.log('🔑 Cloudflare credentials check:', {
+    console.log('Cloudflare credentials check:', {
       hasApiToken: !!cloudflareApiToken,
       hasEmail: !!cloudflareEmail,
       hasApiKey: !!cloudflareApiKey,
@@ -91,7 +91,7 @@ exports.handler = async (event, context) => {
       authHeaders['X-Auth-Key'] = cloudflareApiKey;
     } else {
       // Fallback to public DNS resolution if no Cloudflare API access
-      console.warn('⚠️ No Cloudflare API credentials found, using public DNS resolution');
+      console.warn('No Cloudflare API credentials found, using public DNS resolution');
       return await performPublicDnsValidation(domain);
     }
 
@@ -119,7 +119,7 @@ exports.handler = async (event, context) => {
     }
 
   } catch (error) {
-    console.error('❌ Error in Cloudflare DNS validation:', error);
+    console.error('Error in Cloudflare DNS validation:', error);
     
     return {
       statusCode: 500,
