@@ -130,11 +130,15 @@ exports.handler = async (event, context) => {
     if (!netlifyResponse.ok) {
       const errorData = await netlifyResponse.text();
       let errorMessage = `${netlifyResponse.status} ${netlifyResponse.statusText}`;
-      
+      let detailedError = '';
+
       try {
         const errorJson = JSON.parse(errorData);
         if (errorJson.message) {
           errorMessage = errorJson.message;
+        }
+        if (errorJson.errors) {
+          detailedError = JSON.stringify(errorJson.errors);
         }
       } catch {
         if (errorData) {
@@ -142,15 +146,53 @@ exports.handler = async (event, context) => {
         }
       }
 
-      console.error(`❌ Failed to add domain ${cleanDomain}:`, errorMessage);
+      // Provide user-friendly error messages based on status codes
+      let userFriendlyMessage = errorMessage;
+      switch (netlifyResponse.status) {
+        case 401:
+          userFriendlyMessage = 'Authentication failed. Please check Netlify access token configuration.';
+          break;
+        case 403:
+          userFriendlyMessage = 'Permission denied. Your Netlify token may not have sufficient permissions.';
+          break;
+        case 404:
+          userFriendlyMessage = 'Netlify site not found. Please verify the site ID is correct.';
+          break;
+        case 422:
+          userFriendlyMessage = `Domain validation failed. ${cleanDomain} may already be in use or invalid.`;
+          break;
+        case 429:
+          userFriendlyMessage = 'Rate limit exceeded. Please wait a few minutes before trying again.';
+          break;
+        case 500:
+          userFriendlyMessage = 'Netlify server error. Please try again later.';
+          break;
+        default:
+          if (errorMessage.includes('domain')) {
+            userFriendlyMessage = `Domain ${cleanDomain} could not be added: ${errorMessage}`;
+          }
+      }
+
+      console.error(`❌ Failed to add domain ${cleanDomain}:`, {
+        status: netlifyResponse.status,
+        statusText: netlifyResponse.statusText,
+        errorMessage,
+        detailedError,
+        userFriendlyMessage
+      });
 
       return {
         statusCode: netlifyResponse.status,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           success: false,
-          error: `Failed to add domain to Netlify: ${errorMessage}`,
-          domain: cleanDomain
+          error: userFriendlyMessage,
+          domain: cleanDomain,
+          details: {
+            status: netlifyResponse.status,
+            originalError: errorMessage,
+            detailedError
+          }
         }),
       };
     }
