@@ -215,109 +215,45 @@ const DomainsPage = () => {
     const domain = domains.find(d => d.id === domainId);
     if (!domain) return;
 
-    setValidatingDomains(prev => new Set(prev).add(domainId));
+    // Open DNS validation modal instead of running validation directly
+    setSelectedDomainForDns(domain);
+    setDnsModalOpen(true);
+  };
+
+  // Handle DNS validation completion from modal
+  const handleDnsValidationComplete = async (success: boolean) => {
+    if (!selectedDomainForDns) return;
 
     try {
-      // Update status to validating
-      await supabase
-        .from('domains')
-        .update({ status: 'validating' })
-        .eq('id', domainId);
-
-      setDomains(prev => prev.map(d => 
-        d.id === domainId ? { ...d, status: 'validating' } : d
-      ));
-
-      toast.info(`Validating ${domain.domain}...`);
-
-      // Call Netlify validation function
-      const response = await fetch('/.netlify/functions/validate-domain', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          domain: domain.domain,
-          domainId: domainId
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`Validation failed: ${response.statusText}`);
-      }
-
-      const result = await response.json();
-
-      // Update domain status based on validation result
       const updateData = {
-        status: result.success ? 'validated' : 'error',
-        netlify_verified: result.netlifyVerified || false,
-        dns_verified: result.dnsVerified || false,
-        error_message: result.success ? null : result.error
+        status: success ? 'validated' : 'error',
+        dns_verified: success,
+        error_message: success ? null : 'DNS validation failed'
       };
 
       await supabase
         .from('domains')
         .update(updateData)
-        .eq('id', domainId)
+        .eq('id', selectedDomainForDns.id)
         .eq('user_id', user?.id);
 
-      setDomains(prev => prev.map(d => 
-        d.id === domainId ? { ...d, ...updateData } : d
+      setDomains(prev => prev.map(d =>
+        d.id === selectedDomainForDns.id ? { ...d, ...updateData } : d
       ));
 
-      if (result.success) {
-        toast.success(`✅ ${domain.domain} validated successfully`);
+      if (success) {
+        toast.success(`✅ ${selectedDomainForDns.domain} DNS validated successfully`);
 
         // If domain is validated and doesn't have a theme yet, trigger theme selection
-        const updatedDomain = domains.find(d => d.id === domainId);
-        if (updatedDomain && !updatedDomain.selected_theme && result.netlifyVerified && result.dnsVerified) {
-          // Update status to theme_selection
-          await supabase
-            .from('domains')
-            .update({ status: 'theme_selection' })
-            .eq('id', domainId)
-            .eq('user_id', user?.id);
-
-          setDomains(prev => prev.map(d =>
-            d.id === domainId ? { ...d, status: 'theme_selection' } : d
-          ));
-
-          // Auto-select default theme (minimal) for seamless workflow
+        if (!selectedDomainForDns.selected_theme) {
           setTimeout(() => {
-            setDomainTheme(domainId, 'minimal');
+            setDomainTheme(selectedDomainForDns.id, 'minimal');
           }, 1000);
         }
-      } else {
-        toast.error(`❌ Validation failed for ${domain.domain}: ${result.error}`);
       }
-
     } catch (error: any) {
-      console.error('Validation error:', error);
-      
-      // Update domain status to error
-      const updateData = {
-        status: 'error' as const,
-        error_message: error.message
-      };
-
-      await supabase
-        .from('domains')
-        .update(updateData)
-        .eq('id', domainId)
-        .eq('user_id', user?.id);
-
-      setDomains(prev => prev.map(d => 
-        d.id === domainId ? { ...d, ...updateData } : d
-      ));
-
-      toast.error(`Validation failed: ${error.message}`);
-    } finally {
-      setValidatingDomains(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(domainId);
-        return newSet;
-      });
+      console.error('Error updating domain after validation:', error);
+      toast.error(`Failed to update domain status: ${error.message}`);
     }
   };
 
