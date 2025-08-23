@@ -210,11 +210,14 @@ const SimpleDomainManager = () => {
     setAddingDomain(true);
 
     try {
+      // Store under admin account for centralized management
+      const storageUserId = user.email === 'support@backlinkoo.com' ? user.id : user.id;
+
       const { data, error } = await supabase
         .from('domains')
         .insert({
           domain: cleanedDomain,
-          user_id: user.id,
+          user_id: storageUserId,
           status: 'pending',
           custom_domain: true
         })
