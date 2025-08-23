@@ -184,6 +184,94 @@ export class NetlifyApiService {
   }
 
   /**
+   * Get domains using the specific Netlify domains API endpoint
+   */
+  static async getDomains(): Promise<NetlifyApiResponse<{ domains: any[]; domain_count: number }>> {
+    try {
+      // Check if function is available
+      const functionsAvailable = await this.testFunctionAvailability();
+
+      if (!functionsAvailable) {
+        console.log('🔄 Functions not available, using direct API approach...');
+        return await this.getDomainsDirectly();
+      }
+
+      const response = await fetch(this.baseUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'getDomains' })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Function failed: ${response.status} ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('❌ Get domains failed:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Get domains failed'
+      };
+    }
+  }
+
+  /**
+   * Get domains directly using Netlify API
+   */
+  static async getDomainsDirectly(): Promise<NetlifyApiResponse<{ domains: any[]; domain_count: number }>> {
+    try {
+      const netlifyToken = import.meta.env.VITE_NETLIFY_ACCESS_TOKEN;
+      const siteId = import.meta.env.VITE_NETLIFY_SITE_ID || 'ca6261e6-0a59-40b5-a2bc-5b5481ac8809';
+
+      if (!netlifyToken) {
+        return {
+          success: false,
+          error: 'Netlify access token not configured'
+        };
+      }
+
+      console.log('🔍 Calling Netlify domains API endpoint...');
+      console.log(`   Site ID: ${siteId}`);
+      console.log(`   Endpoint: https://api.netlify.com/api/v1/sites/${siteId}/domains`);
+
+      const response = await fetch(`https://api.netlify.com/api/v1/sites/${siteId}/domains`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${netlifyToken}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      console.log(`📊 Response status: ${response.status}`);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ Netlify domains API error:', errorText);
+        throw new Error(`Netlify domains API failed: ${response.status} ${response.statusText}`);
+      }
+
+      const domains = await response.json();
+      console.log('✅ Domains fetched successfully:', domains);
+
+      return {
+        success: true,
+        action: 'getDomains',
+        data: {
+          domains: domains || [],
+          domain_count: domains?.length || 0
+        }
+      };
+    } catch (error) {
+      console.error('❌ Direct domains API call failed:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Direct domains API call failed'
+      };
+    }
+  }
+
+  /**
    * Get DNS configuration for the site
    */
   static async getDNSInfo(): Promise<NetlifyApiResponse<{ dns_records: DNSRecord[]; record_count: number; record_types: string[] }>> {
