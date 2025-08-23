@@ -225,6 +225,6 @@ export { handleNetworkError, SupabaseConnectionFixer };
 
 console.log('✅ Enhanced Supabase client initialized with error resilience');
 
-// TEMPORARY: Use direct client to bypass any configuration issues
-export const supabase = supabaseDirect;
-console.log('🔄 Using direct Supabase client for debugging');
+// Use enhanced client with error handling and recovery
+export const supabase = enhancedSupabase;
+console.log('✅ Using enhanced Supabase client with error handling');
