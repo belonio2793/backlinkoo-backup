@@ -1003,6 +1003,42 @@ const DomainsPage = () => {
               <TabsContent value="api" className="mt-6">
                 <NetlifyApiTester />
               </TabsContent>
+
+              <TabsContent value="comprehensive" className="mt-6">
+                <div className="space-y-4">
+                  <div className="text-center">
+                    <h3 className="text-lg font-medium mb-2">Comprehensive Domain Validation</h3>
+                    <p className="text-sm text-gray-600 mb-4">
+                      Get detailed validation results combining Netlify configuration, DNS records, SSL certificates, and connectivity checks.
+                    </p>
+                  </div>
+
+                  {domains.length > 0 ? (
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Select Domain to Validate:</label>
+                      <div className="flex gap-2 flex-wrap">
+                        {domains.map((domain) => (
+                          <Button
+                            key={domain.id}
+                            variant={selectedDomainForComprehensive?.id === domain.id ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => {
+                              setSelectedDomainForComprehensive(domain);
+                              setShowComprehensiveValidation(true);
+                            }}
+                          >
+                            {domain.domain}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-gray-500">Add a domain first to run comprehensive validation</p>
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
             </Tabs>
           </CardContent>
         </Card>
