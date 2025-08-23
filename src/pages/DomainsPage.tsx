@@ -19,6 +19,7 @@ import { toast } from 'sonner';
 import { runNetworkDiagnostic, DiagnosticResult } from '@/utils/networkDiagnostic';
 import { testNetlifyDomainFunction } from '@/utils/testNetlifyFunction';
 import { callNetlifyDomainFunction } from '@/services/netlifyDomainMock';
+import { DnsValidationModal } from '@/components/DnsValidationModal';
 
 interface Domain {
   id: string;
