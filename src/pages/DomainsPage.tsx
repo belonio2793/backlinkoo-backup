@@ -408,6 +408,11 @@ const DomainsPage = () => {
       // Use the same logic as addDomainToNetlify
       await addDomainToNetlify(domain);
 
+      // Verify domain was actually added
+      setTimeout(async () => {
+        await verifyDomainInNetlify(domain);
+      }, 2000);
+
     } catch (error: any) {
       console.error('Retry error:', error);
       toast.error(`Retry failed: ${error.message}`);
