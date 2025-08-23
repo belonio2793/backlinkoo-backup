@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Netlify API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .test-section { border: 1px solid #ddd; margin: 10px 0; padding: 15px; border-radius: 5px; }
+        .success { background: #d4edda; border-color: #c3e6cb; }
+        .error { background: #f8d7da; border-color: #f5c6cb; }
+        .warning { background: #fff3cd; border-color: #ffeeba; }
+        button { background: #007bff; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; }
+        input { padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Netlify Domain API Test Suite</h1>
+    <p>This tests your Netlify API integration for the /domains page</p>
+
+    <!-- Test Connectivity -->
+    <div class="test-section">
+        <h3>1️⃣ Test API Connectivity</h3>
+        <button onclick="testConnectivity()">Test Connection</button>
+        <div id="connectivity-result"></div>
+    </div>
+
+    <!-- Get Site Info -->
+    <div class="test-section">
+        <h3>2️⃣ Get Site Information</h3>
+        <button onclick="getSiteInfo()">Get Site Info</button>
+        <div id="siteinfo-result"></div>
+    </div>
+
+    <!-- List Current Aliases -->
+    <div class="test-section">
+        <h3>3️⃣ List Current Domain Aliases</h3>
+        <button onclick="listAliases()">List Aliases</button>
+        <div id="aliases-result"></div>
+    </div>
+
+    <!-- Test Add Domain -->
+    <div class="test-section">
+        <h3>4️⃣ Test Add Domain Alias</h3>
+        <input type="text" id="domain-to-add" placeholder="example.com" value="test-domain.example.com">
+        <button onclick="addDomain()">Add Domain</button>
+        <div id="add-result"></div>
+    </div>
+
+    <!-- Test Remove Domain -->
+    <div class="test-section">
+        <h3>5️⃣ Test Remove Domain Alias</h3>
+        <input type="text" id="domain-to-remove" placeholder="domain to remove" value="test-domain.example.com">
+        <button onclick="removeDomain()">Remove Domain</button>
+        <div id="remove-result"></div>
+    </div>
+
+    <!-- Test Domain Validation -->
+    <div class="test-section">
+        <h3>6️⃣ Test Domain Validation</h3>
+        <input type="text" id="domain-to-validate" placeholder="domain.com" value="backlinkoo.com">
+        <button onclick="validateDomain()">Validate Domain</button>
+        <div id="validate-result"></div>
+    </div>
+
+    <script>
+        // Helper function to display results
+        function displayResult(elementId, data, isSuccess = true) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `
+                <div class="${isSuccess ? 'success' : 'error'}" style="margin-top: 10px; padding: 10px; border-radius: 4px;">
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                </div>
+            `;
+        }
+
+        function displayError(elementId, error) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `
+                <div class="error" style="margin-top: 10px; padding: 10px; border-radius: 4px;">
+                    <strong>Error:</strong> ${error.message || error}
+                    <pre>${error.stack || ''}</pre>
+                </div>
+            `;
+        }
+
+        // Test 1: Connectivity
+        async function testConnectivity() {
+            try {
+                console.log('🧪 Testing Netlify API connectivity...');
+                
+                const response = await fetch('/.netlify/functions/netlify-domain-validation', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'getSiteInfo' })
+                });
+
+                if (response.status === 404) {
+                    displayResult('connectivity-result', {
+                        status: 'Functions not deployed',
+                        message: 'Netlify functions are not deployed. The domains page will use mock/fallback mode.',
+                        recommendation: 'Deploy functions to enable real Netlify API integration'
+                    }, false);
+                    return;
+                }
+
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    displayResult('connectivity-result', {
+                        status: 'Connected ✅',
+                        message: 'Netlify API is accessible and working',
+                        response: data
+                    });
+                } else {
+                    displayResult('connectivity-result', {
+                        status: 'API Error',
+                        error: data.error || 'Unknown error',
+                        response: data
+                    }, false);
+                }
+            } catch (error) {
+                displayError('connectivity-result', error);
+            }
+        }
+
+        // Test 2: Get Site Info
+        async function getSiteInfo() {
+            try {
+                console.log('📋 Getting site information...');
+                
+                const response = await fetch('/.netlify/functions/netlify-domain-validation', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'getSiteInfo' })
+                });
+
+                const data = await response.json();
+                displayResult('siteinfo-result', data, data.success);
+            } catch (error) {
+                displayError('siteinfo-result', error);
+            }
+        }
+
+        // Test 3: List Aliases
+        async function listAliases() {
+            try {
+                console.log('📋 Listing domain aliases...');
+                
+                const response = await fetch('/.netlify/functions/netlify-domain-validation', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'listDomainAliases' })
+                });
+
+                const data = await response.json();
+                displayResult('aliases-result', data, data.success);
+            } catch (error) {
+                displayError('aliases-result', error);
+            }
+        }
+
+        // Test 4: Add Domain
+        async function addDomain() {
+            try {
+                const domain = document.getElementById('domain-to-add').value.trim();
+                if (!domain) {
+                    displayError('add-result', new Error('Please enter a domain'));
+                    return;
+                }
+
+                console.log(`➕ Adding domain: ${domain}`);
+                
+                const response = await fetch('/.netlify/functions/netlify-domain-validation', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        action: 'addDomainAlias',
+                        domain: domain
+                    })
+                });
+
+                const data = await response.json();
+                displayResult('add-result', data, data.success);
+            } catch (error) {
+                displayError('add-result', error);
+            }
+        }
+
+        // Test 5: Remove Domain
+        async function removeDomain() {
+            try {
+                const domain = document.getElementById('domain-to-remove').value.trim();
+                if (!domain) {
+                    displayError('remove-result', new Error('Please enter a domain'));
+                    return;
+                }
+
+                console.log(`➖ Removing domain: ${domain}`);
+                
+                const response = await fetch('/.netlify/functions/netlify-domain-validation', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        action: 'removeDomainAlias',
+                        domain: domain
+                    })
+                });
+
+                const data = await response.json();
+                displayResult('remove-result', data, data.success);
+            } catch (error) {
+                displayError('remove-result', error);
+            }
+        }
+
+        // Test 6: Validate Domain
+        async function validateDomain() {
+            try {
+                const domain = document.getElementById('domain-to-validate').value.trim();
+                if (!domain) {
+                    displayError('validate-result', new Error('Please enter a domain'));
+                    return;
+                }
+
+                console.log(`🔍 Validating domain: ${domain}`);
+                
+                const response = await fetch('/.netlify/functions/netlify-domain-validation', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        action: 'validateDomain',
+                        domain: domain
+                    })
+                });
+
+                const data = await response.json();
+                displayResult('validate-result', data, data.success);
+            } catch (error) {
+                displayError('validate-result', error);
+            }
+        }
+
+        // Auto-run connectivity test on page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                testConnectivity();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
