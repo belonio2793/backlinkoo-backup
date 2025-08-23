@@ -695,61 +695,6 @@ const DomainsPage = () => {
     }
   };
 
-  // Run network diagnostic to troubleshoot connectivity issues
-  const runDiagnostic = async () => {
-    setRunningDiagnostic(true);
-    try {
-      toast.info('Running network diagnostic...');
-      const results = await runNetworkDiagnostic();
-      setDiagnosticResults(results);
-
-      const errorCount = results.filter(r => r.status === 'error').length;
-      const warningCount = results.filter(r => r.status === 'warning').length;
-
-      if (errorCount > 0) {
-        toast.error(`Diagnostic found ${errorCount} critical issues. Check console for details.`);
-      } else if (warningCount > 0) {
-        toast.warning(`Diagnostic found ${warningCount} warnings. Check console for details.`);
-      } else {
-        toast.success('All connectivity tests passed!');
-      }
-
-      // Log detailed results to console
-      console.log('Network Diagnostic Results:', results);
-      results.forEach(result => {
-        const indicator = result.status === 'success' ? 'SUCCESS' : result.status === 'warning' ? 'WARNING' : 'ERROR';
-        console.log(`[${indicator}] ${result.service}: ${result.message}`, result.details);
-      });
-
-    } catch (error: any) {
-      console.error('Diagnostic error:', error);
-      toast.error(`Diagnostic failed: ${error.message}`);
-    } finally {
-      setRunningDiagnostic(false);
-    }
-  };
-
-  // Test Netlify function directly for debugging
-  const testNetlifyFunction = async () => {
-    setRunningDiagnostic(true);
-    try {
-      toast.info('Testing Netlify function directly...');
-      const result = await testNetlifyDomainFunction('leadpages.org');
-
-      if (result.error) {
-        toast.error(`Netlify function test failed: ${result.error}`);
-        console.error('Function test failed:', result);
-      } else {
-        toast.success('Netlify function test passed!');
-        console.log('Function test succeeded:', result);
-      }
-    } catch (error: any) {
-      console.error('💥 Test execution failed:', error);
-      toast.error(`Test failed: ${error.message}`);
-    } finally {
-      setRunningDiagnostic(false);
-    }
-  };
 
   const deleteDomain = async (domainId: string, domainName: string) => {
     const confirmed = confirm(
