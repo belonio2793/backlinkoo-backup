@@ -283,8 +283,19 @@ exports.handler = async (event, context) => {
           domain: cleanDomain,
           details: {
             status: netlifyResponse.status,
+            statusText: netlifyResponse.statusText,
             originalError: errorMessage,
-            detailedError
+            specificError: specificError,
+            detailedError: detailedError,
+            rawResponse: errorData,
+            siteId: siteId,
+            operation: 'domain_aliases_update',
+            timestamp: new Date().toISOString()
+          },
+          debug: {
+            message: 'Check server logs for complete error details',
+            endpoint: `PATCH /api/v1/sites/${siteId}`,
+            body: { domain_aliases: 'attempted_update' }
           }
         }),
       };
