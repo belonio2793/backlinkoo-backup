@@ -152,10 +152,13 @@ const SimpleDomainManager = () => {
     }
   }, [domains, user]);
 
-  const loadDomains = async () => {
+  const loadDomains = async (silent = false) => {
     if (!user) return;
 
-    setLoading(true);
+    if (!silent) setLoading(true);
+
+    // Update last sync time
+    setLastSyncTime(new Date());
     try {
       console.log('🔍 Loading domains from Supabase edge function...');
       console.log('👤 Current user:', user.email);
