@@ -936,168 +936,198 @@ const DomainsPage = () => {
             ) : (
               <div className="space-y-3 max-h-96 overflow-y-auto">
                 {domains.map((domain) => (
-                  <div
-                    key={domain.id}
-                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
-                  >
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="font-medium text-lg">{domain.domain}</h3>
-                        {getStatusBadge(domain)}
+                  <Card key={domain.id} className="overflow-hidden hover:shadow-md transition-shadow">
+                    <CardContent className="p-6">
+                      {/* Header Section */}
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <Globe className="h-5 w-5 text-blue-600" />
+                            <h3 className="font-semibold text-xl text-gray-900">{domain.domain}</h3>
+                            {getStatusBadge(domain)}
+                          </div>
+                          <p className="text-sm text-gray-500">
+                            Added {new Date(domain.created_at).toLocaleDateString()}
+                          </p>
+                        </div>
+
+                        {/* Delete Action - Separate for safety */}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => deleteDomain(domain.id, domain.domain)}
+                          className="text-gray-400 hover:text-red-600 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
-                      
-                      <div className="flex items-center gap-4 text-sm text-gray-600">
-                        <div className="flex items-center gap-1">
+
+                      {/* Status Section */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                           {verifyingDomains.has(domain.id) ? (
-                            <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                            <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
                           ) : domain.netlify_verified !== undefined ? (
                             domain.netlify_verified ? (
-                              <CheckCircle2 className="h-4 w-4 text-green-600" />
+                              <CheckCircle2 className="h-5 w-5 text-green-600" />
                             ) : (
-                              <AlertTriangle className="h-4 w-4 text-red-600" />
+                              <AlertTriangle className="h-5 w-5 text-red-600" />
                             )
                           ) : (
-                            <AlertTriangle className="h-4 w-4 text-gray-400" />
+                            <AlertTriangle className="h-5 w-5 text-gray-400" />
                           )}
-                          <span>
-                            Netlify: {
-                              verifyingDomains.has(domain.id) ? 'Checking...' :
-                              domain.netlify_verified ? 'Verified in Site' :
-                              domain.netlify_verified === false ? 'Not Found in Site' : 'Pending Verification'
-                            }
-                          </span>
+                          <div>
+                            <p className="font-medium text-sm text-gray-900">Netlify Status</p>
+                            <p className="text-xs text-gray-600">
+                              {verifyingDomains.has(domain.id) ? 'Checking...' :
+                               domain.netlify_verified ? 'Verified in Site' :
+                               domain.netlify_verified === false ? 'Not Found in Site' : 'Pending Verification'}
+                            </p>
+                          </div>
                         </div>
 
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                           {domain.dns_verified !== undefined ? (
                             domain.dns_verified ? (
-                              <CheckCircle2 className="h-4 w-4 text-green-600" />
+                              <CheckCircle2 className="h-5 w-5 text-green-600" />
                             ) : (
-                              <AlertTriangle className="h-4 w-4 text-red-600" />
+                              <AlertTriangle className="h-5 w-5 text-red-600" />
                             )
                           ) : (
-                            <AlertTriangle className="h-4 w-4 text-gray-400" />
+                            <AlertTriangle className="h-5 w-5 text-gray-400" />
                           )}
-                          <span>DNS: {domain.dns_verified ? 'Valid' : domain.dns_verified === false ? 'Invalid' : 'Pending'}</span>
+                          <div>
+                            <p className="font-medium text-sm text-gray-900">DNS Status</p>
+                            <p className="text-xs text-gray-600">
+                              {domain.dns_verified ? 'Valid Configuration' :
+                               domain.dns_verified === false ? 'Invalid Configuration' : 'Pending Validation'}
+                            </p>
+                          </div>
                         </div>
                       </div>
 
+                      {/* Error Section */}
                       {domain.error_message && (
-                        <div className="mt-2">
-                          <p className="text-sm text-red-600 mb-2">
-                            Error: {domain.error_message}
-                          </p>
-                          <div className="flex gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => retryDomainToNetlify(domain.id)}
-                              disabled={retryingDomains.has(domain.id) || diagnosingDomains.has(domain.id)}
-                              className="text-blue-600 border-blue-300 hover:bg-blue-50"
-                            >
-                              {retryingDomains.has(domain.id) ? (
-                                <>
-                                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                                  Retrying API...
-                                </>
-                              ) : (
-                                <>
-                                  <CheckCircle2 className="h-3 w-3 mr-1" />
-                                  Retry Netlify API
-                                </>
-                              )}
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => diagnoseDomainIssue(domain.id)}
-                              disabled={diagnosingDomains.has(domain.id) || retryingDomains.has(domain.id)}
-                              className="text-amber-600 border-amber-300 hover:bg-amber-50"
-                            >
-                              {diagnosingDomains.has(domain.id) ? (
-                                <>
-                                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                                  Diagnosing...
-                                </>
-                              ) : (
-                                <>
-                                  <AlertTriangle className="h-3 w-3 mr-1" />
-                                  Diagnose
-                                </>
-                              )}
-                            </Button>
+                        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                          <div className="flex items-start gap-3">
+                            <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+                            <div className="flex-1">
+                              <p className="font-medium text-sm text-red-900 mb-2">Error Details</p>
+                              <p className="text-sm text-red-700 mb-3">{domain.error_message}</p>
+                              <div className="flex flex-wrap gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => retryDomainToNetlify(domain.id)}
+                                  disabled={retryingDomains.has(domain.id) || diagnosingDomains.has(domain.id)}
+                                  className="text-blue-600 border-blue-300 hover:bg-blue-50"
+                                >
+                                  {retryingDomains.has(domain.id) ? (
+                                    <>
+                                      <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                      Retrying...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <CheckCircle2 className="h-3 w-3 mr-1" />
+                                      Retry API
+                                    </>
+                                  )}
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => diagnoseDomainIssue(domain.id)}
+                                  disabled={diagnosingDomains.has(domain.id) || retryingDomains.has(domain.id)}
+                                  className="text-amber-600 border-amber-300 hover:bg-amber-50"
+                                >
+                                  {diagnosingDomains.has(domain.id) ? (
+                                    <>
+                                      <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                      Diagnosing...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <AlertTriangle className="h-3 w-3 mr-1" />
+                                      Diagnose
+                                    </>
+                                  )}
+                                </Button>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       )}
-                    </div>
 
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => verifyDomainInNetlify(domain)}
-                        disabled={verifyingDomains.has(domain.id)}
-                        className="text-blue-600 border-blue-300 hover:bg-blue-50"
-                      >
-                        {verifyingDomains.has(domain.id) ? (
-                          <>
-                            <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                            Verifying...
-                          </>
-                        ) : (
-                          <>
-                            <CheckCircle2 className="h-4 w-4 mr-1" />
-                            Verify in Netlify
-                          </>
-                        )}
-                      </Button>
+                      {/* Actions Section */}
+                      <div className="border-t pt-4">
+                        <p className="text-sm font-medium text-gray-900 mb-3">Available Actions</p>
+                        <div className="flex flex-wrap gap-3">
+                          {/* Primary Actions */}
+                          <Button
+                            variant="default"
+                            size="sm"
+                            onClick={() => validateDomain(domain.id)}
+                            disabled={validatingDomains.has(domain.id)}
+                            className="bg-blue-600 hover:bg-blue-700"
+                          >
+                            {validatingDomains.has(domain.id) ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Checking DNS...
+                              </>
+                            ) : (
+                              <>
+                                <CheckCircle2 className="h-4 w-4 mr-2" />
+                                DNS Check
+                              </>
+                            )}
+                          </Button>
 
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => validateDomain(domain.id)}
-                        disabled={validatingDomains.has(domain.id)}
-                      >
-                        {validatingDomains.has(domain.id) ? (
-                          <>
-                            <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                            DNS Check
-                          </>
-                        ) : (
-                          'DNS Check'
-                        )}
-                      </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleAddToNetlify(domain.id)}
+                            disabled={addingToNetlify.has(domain.id) || validatingDomains.has(domain.id)}
+                            className="text-green-600 border-green-300 hover:bg-green-50"
+                          >
+                            {addingToNetlify.has(domain.id) ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Adding...
+                              </>
+                            ) : (
+                              <>
+                                <Globe className="h-4 w-4 mr-2" />
+                                Add to Netlify
+                              </>
+                            )}
+                          </Button>
 
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleAddToNetlify(domain.id)}
-                        disabled={addingToNetlify.has(domain.id) || validatingDomains.has(domain.id)}
-                        className="text-green-600 border-green-300 hover:bg-green-50"
-                      >
-                        {addingToNetlify.has(domain.id) ? (
-                          <>
-                            <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                            Adding via API...
-                          </>
-                        ) : (
-                          <>
-                            <Globe className="h-4 w-4 mr-1" />
-                            Add via Netlify API
-                          </>
-                        )}
-                      </Button>
-
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => deleteDomain(domain.id, domain.domain)}
-                        className="text-red-600 hover:text-red-700"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
+                          {/* Secondary Actions */}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => verifyDomainInNetlify(domain)}
+                            disabled={verifyingDomains.has(domain.id)}
+                            className="text-purple-600 border-purple-300 hover:bg-purple-50"
+                          >
+                            {verifyingDomains.has(domain.id) ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Verifying...
+                              </>
+                            ) : (
+                              <>
+                                <CheckCircle2 className="h-4 w-4 mr-2" />
+                                Verify Status
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
                 ))}
               </div>
             )}
