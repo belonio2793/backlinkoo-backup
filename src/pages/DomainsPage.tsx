@@ -21,6 +21,7 @@ import { toast } from 'sonner';
 import { runNetworkDiagnostic, DiagnosticResult } from '@/utils/networkDiagnostic';
 import { testNetlifyDomainFunction } from '@/utils/testNetlifyFunction';
 import { callNetlifyDomainFunction } from '@/services/netlifyDomainMock';
+import NetlifyApiService from '@/services/netlifyApiService';
 import { DnsValidationModal } from '@/components/DnsValidationModal';
 import { BulkDomainManager } from '@/components/BulkDomainManager';
 
@@ -778,7 +779,7 @@ const DomainsPage = () => {
         toast.error(`❌ Netlify function test failed: ${result.error}`);
         console.error('🧪 Function test failed:', result);
       } else {
-        toast.success('✅ Netlify function test passed!');
+        toast.success('�� Netlify function test passed!');
         console.log('🧪 Function test succeeded:', result);
       }
     } catch (error: any) {
