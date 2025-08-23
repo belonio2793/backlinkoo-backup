@@ -18,6 +18,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { runNetworkDiagnostic, DiagnosticResult } from '@/utils/networkDiagnostic';
 import { testNetlifyDomainFunction } from '@/utils/testNetlifyFunction';
+import { callNetlifyDomainFunction } from '@/services/netlifyDomainMock';
 
 interface Domain {
   id: string;
