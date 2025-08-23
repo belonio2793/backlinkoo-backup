@@ -222,31 +222,48 @@ exports.handler = async (event, context) => {
         }
       }
 
-      // Provide user-friendly error messages based on status codes
-      let userFriendlyMessage = errorMessage;
-      switch (netlifyResponse.status) {
-        case 401:
-          userFriendlyMessage = 'Authentication failed. Please check Netlify access token configuration.';
-          break;
-        case 403:
-          userFriendlyMessage = 'Permission denied. Your Netlify token may not have sufficient permissions.';
-          break;
-        case 404:
-          userFriendlyMessage = 'Netlify site not found. Please verify the site ID is correct.';
-          break;
-        case 422:
-          userFriendlyMessage = `Domain alias update failed. ${cleanDomain} may already be added as an alias, be invalid, or conflict with existing configuration.`;
-          break;
-        case 429:
-          userFriendlyMessage = 'Rate limit exceeded. Please wait a few minutes before trying again.';
-          break;
-        case 500:
-          userFriendlyMessage = 'Netlify server error. Please try again later.';
-          break;
-        default:
-          if (errorMessage.includes('domain')) {
-            userFriendlyMessage = `Domain ${cleanDomain} could not be added: ${errorMessage}`;
-          }
+      // Provide user-friendly error messages based on status codes and specific errors
+      let userFriendlyMessage = specificError || errorMessage || 'Unknown error';
+
+      // Check for specific domain-related error messages
+      if (specificError && specificError.toLowerCase().includes('already')) {
+        userFriendlyMessage = `Domain ${cleanDomain} is already configured as an alias for this Netlify site. No further action needed.`;
+      } else if (specificError && specificError.toLowerCase().includes('invalid')) {
+        userFriendlyMessage = `Domain ${cleanDomain} is invalid or cannot be added as an alias. Please verify the domain format.`;
+      } else if (specificError && specificError.toLowerCase().includes('conflict')) {
+        userFriendlyMessage = `Domain ${cleanDomain} conflicts with existing configuration. It may be configured elsewhere.`;
+      } else {
+        // Fallback to status-based messages if no specific error found
+        switch (netlifyResponse.status) {
+          case 401:
+            userFriendlyMessage = 'Authentication failed. Please check Netlify access token configuration.';
+            break;
+          case 403:
+            userFriendlyMessage = 'Permission denied. Your Netlify token may not have sufficient permissions.';
+            break;
+          case 404:
+            userFriendlyMessage = 'Netlify site not found. Please verify the site ID is correct.';
+            break;
+          case 422:
+            userFriendlyMessage = specificError ?
+              `Domain alias update failed: ${specificError}` :
+              `Domain alias update failed. ${cleanDomain} may already be added as an alias, be invalid, or conflict with existing configuration.`;
+            break;
+          case 429:
+            userFriendlyMessage = 'Rate limit exceeded. Please wait a few minutes before trying again.';
+            break;
+          case 500:
+            userFriendlyMessage = 'Netlify server error. Please try again later.';
+            break;
+          default:
+            if (specificError) {
+              userFriendlyMessage = `Failed to add domain ${cleanDomain}: ${specificError}`;
+            } else if (errorMessage.includes('domain')) {
+              userFriendlyMessage = `Domain ${cleanDomain} could not be added: ${errorMessage}`;
+            } else {
+              userFriendlyMessage = `Failed to add domain ${cleanDomain}: ${errorMessage}`;
+            }
+        }
       }
 
       console.error(`❌ Failed to add domain ${cleanDomain}:`, {
