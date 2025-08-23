@@ -156,24 +156,13 @@ const DomainsPage = () => {
 
       console.log('Database connection test successful');
 
-      // Add domain to database with basic required fields only
-      const domainData: any = {
-        domain: cleanedDomain,
-        user_id: user.id
-      };
-
-      // Add optional fields only if they exist in the schema
-      try {
-        domainData.status = 'pending';
-        domainData.netlify_verified = false;
-        domainData.dns_verified = false;
-      } catch (schemaError) {
-        console.log('Using basic schema for domain insertion');
-      }
-
+      // Add domain to database with minimal required fields
       const { data, error } = await supabase
         .from('domains')
-        .insert(domainData)
+        .insert({
+          domain: cleanedDomain,
+          user_id: user.id
+        })
         .select()
         .single();
 
