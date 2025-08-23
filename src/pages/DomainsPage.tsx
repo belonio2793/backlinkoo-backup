@@ -22,11 +22,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { callNetlifyDomainFunction } from '@/services/netlifyDomainMock';
 import NetlifyApiService from '@/services/netlifyApiService';
-import { DnsValidationModal } from '@/components/DnsValidationModal';
-import { BulkDomainManager } from '@/components/BulkDomainManager';
-import { NetlifyDeploymentChecker } from '@/components/NetlifyDeploymentChecker';
-import DomainSyncFixer from '@/components/DomainSyncFixer';
-import DomainManagementTable from '@/components/domains/DomainManagementTable';
+import NetlifyDomainManager from '@/components/domains/NetlifyDomainManager';
 
 interface Domain {
   id: string;
