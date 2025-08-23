@@ -701,9 +701,32 @@ const DomainsPage = () => {
                       </div>
 
                       {domain.error_message && (
-                        <p className="text-sm text-red-600 mt-1">
-                          Error: {domain.error_message}
-                        </p>
+                        <div className="mt-2">
+                          <p className="text-sm text-red-600 mb-2">
+                            Error: {domain.error_message}
+                          </p>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => retryDomainToNetlify(domain.id)}
+                              disabled={retryingDomains.has(domain.id)}
+                              className="text-blue-600 border-blue-300 hover:bg-blue-50"
+                            >
+                              {retryingDomains.has(domain.id) ? (
+                                <>
+                                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                  Retrying...
+                                </>
+                              ) : (
+                                <>
+                                  <CheckCircle2 className="h-3 w-3 mr-1" />
+                                  Retry Netlify
+                                </>
+                              )}
+                            </Button>
+                          </div>
+                        </div>
                       )}
                     </div>
 
