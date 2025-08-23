@@ -17,6 +17,7 @@ import { useAuthState } from '@/hooks/useAuthState';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { runNetworkDiagnostic, DiagnosticResult } from '@/utils/networkDiagnostic';
+import { testNetlifyDomainFunction } from '@/utils/testNetlifyFunction';
 
 interface Domain {
   id: string;
