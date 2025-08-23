@@ -85,9 +85,14 @@ interface NetlifyDomain {
 
 const DomainManagementTable = () => {
   const { user } = useAuthState();
-  const [domains, setDomains] = useState<Domain[]>([]);
+  const {
+    domains,
+    syncStatus,
+    isLoading,
+    actions: { triggerSync, loadDomains, checkNetlifySync }
+  } = useDomainRealTimeSync(user?.id);
+
   const [netlifyDomains, setNetlifyDomains] = useState<NetlifyDomain[]>([]);
-  const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [editingDomain, setEditingDomain] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
