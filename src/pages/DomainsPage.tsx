@@ -940,8 +940,8 @@ const DomainsPage = () => {
           </p>
         </div>
 
-        {/* Enhanced Domain Management with Two-Way Sync */}
-        <DomainManagementTable />
+        {/* Netlify Domain Manager - Simple and Direct */}
+        <NetlifyDomainManager />
 
       </div>
 
