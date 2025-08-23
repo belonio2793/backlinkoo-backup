@@ -39,7 +39,6 @@ import {
   Edit,
   Trash2,
   RefreshCw,
-  Sync,
   Settings,
   ExternalLink,
   Save,
