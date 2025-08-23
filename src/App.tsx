@@ -85,7 +85,7 @@ const SupabaseErrorMonitor = ({ children }: { children: React.ReactNode }) => {
       const error = 'reason' in event ? event.reason : event.error;
 
       if (SupabaseConnectionFixer.isSupabaseNetworkError(error)) {
-        console.error('🚨 Global Supabase error detected:', error);
+        console.error('��� Global Supabase error detected:', error);
         setGlobalSupabaseError(error);
 
         // Auto-clear error after 10 seconds
@@ -259,6 +259,15 @@ const App = () => (
                     <LazyDomainsPage />
                   </Suspense>
                 </DomainErrorBoundary>
+              }
+            />
+
+            <Route
+              path="/netlify-test"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyNetlifyTest />
+                </Suspense>
               }
             />
 
