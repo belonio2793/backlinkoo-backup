@@ -108,17 +108,45 @@ exports.handler = async (event, context) => {
     // Check if domain is a subdomain (requires TXT verification)
     const isSubdomain = cleanDomain.split('.').length > 2;
 
-    // Use the site aliases endpoint to add additional domains without affecting primary domain
+    // First, get the current site configuration to retrieve existing aliases
+    console.log('📋 Getting current site configuration...');
+    const getCurrentSiteResponse = await fetch(`https://api.netlify.com/api/v1/sites/${siteId}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${netlifyToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!getCurrentSiteResponse.ok) {
+      throw new Error(`Failed to get current site config: ${getCurrentSiteResponse.status} ${getCurrentSiteResponse.statusText}`);
+    }
+
+    const currentSite = await getCurrentSiteResponse.json();
+    const existingAliases = currentSite.domain_aliases || [];
+
+    // Check if domain already exists as alias
+    if (existingAliases.includes(cleanDomain)) {
+      throw new Error(`Domain ${cleanDomain} is already configured as an alias for this site`);
+    }
+
+    // Add new domain to the existing aliases array
+    const updatedAliases = [...existingAliases, cleanDomain];
+
+    console.log(`📝 Adding ${cleanDomain} to aliases. Current aliases:`, existingAliases);
+    console.log(`📝 Updated aliases will be:`, updatedAliases);
+
+    // Use the correct site update endpoint to add domain_aliases without affecting primary domain
     // This preserves backlinkoo.com as the primary domain and adds new domains as aliases
-    // Following Netlify API documentation: POST /api/v1/sites/{site_id}/aliases
-    const netlifyResponse = await fetch(`https://api.netlify.com/api/v1/sites/${siteId}/aliases`, {
-      method: 'POST',
+    // Following Netlify API documentation: PUT /api/v1/sites/{site_id} with domain_aliases array
+    const netlifyResponse = await fetch(`https://api.netlify.com/api/v1/sites/${siteId}`, {
+      method: 'PATCH',
       headers: {
         'Authorization': `Bearer ${netlifyToken}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        name: cleanDomain
+        domain_aliases: updatedAliases
       }),
     });
 
