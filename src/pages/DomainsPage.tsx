@@ -579,7 +579,7 @@ const DomainsPage = () => {
         } else if (method === 'function') {
           successMessage = `✅ ${domain.domain} successfully added to Netlify! Configure DNS records to activate.`;
         } else if (method === 'mock') {
-          successMessage = `⚠️ ${domain.domain} simulated (functions not deployed). Add manually to Netlify for real functionality.`;
+          successMessage = `��️ ${domain.domain} simulated (functions not deployed). Add manually to Netlify for real functionality.`;
         } else {
           successMessage = `✅ ${domain.domain} processed successfully! Configure DNS records to activate.`;
         }
@@ -664,7 +664,10 @@ const DomainsPage = () => {
 
           // Show detailed instructions to user
           console.log('📋 Manual addition instructions:', instructions);
-          toast.error(`❌ Automated addition failed. Manual addition required - check console for instructions.`);
+          toast.error(`❌ Automated addition failed. Manual addition required.`);
+
+          // Show manual instructions for this domain
+          setShowManualInstructions(prev => new Set(prev).add(domain.id));
 
           return;
         }
