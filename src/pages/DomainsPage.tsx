@@ -538,12 +538,16 @@ const DomainsPage = () => {
       const apiResult = await NetlifyApiService.addDomainAlias(domain.domain);
 
       if (apiResult.success) {
-        console.log('✅ Official Netlify API succeeded:', apiResult);
+        console.log('✅ Domain addition succeeded:', apiResult);
+
+        // Determine the method used and update status accordingly
+        const method = apiResult.data?.method || 'function';
+        const isSimulation = method === 'mock';
 
         // Update domain with success status
         const updateData = {
-          netlify_verified: true,
-          status: 'dns_ready' as const,
+          netlify_verified: !isSimulation, // Only mark as verified if not simulation
+          status: isSimulation ? 'pending' as const : 'dns_ready' as const,
           error_message: null
         };
 
@@ -560,18 +564,32 @@ const DomainsPage = () => {
         setDomains(prev => prev.map(d =>
           d.id === domain.id ? {
             ...d,
-            netlify_verified: true,
-            status: 'dns_ready' as const,
+            netlify_verified: !isSimulation,
+            status: isSimulation ? 'pending' as const : 'dns_ready' as const,
             error_message: null
           } : d
         ));
 
-        toast.success(`✅ ${domain.domain} successfully added to Netlify via official API! Configure DNS records to activate.`);
+        // Customize success message based on method
+        let successMessage = '';
+        if (method === 'direct_api') {
+          successMessage = `✅ ${domain.domain} added to Netlify via direct API! Configure DNS records to activate.`;
+        } else if (method === 'function') {
+          successMessage = `✅ ${domain.domain} successfully added to Netlify! Configure DNS records to activate.`;
+        } else if (method === 'mock') {
+          successMessage = `⚠️ ${domain.domain} simulated (functions not deployed). Add manually to Netlify for real functionality.`;
+        } else {
+          successMessage = `✅ ${domain.domain} processed successfully! Configure DNS records to activate.`;
+        }
 
-        // Auto-validate after a short delay to check DNS
-        setTimeout(() => {
-          validateDomain(domain.id);
-        }, 3000);
+        toast.success(successMessage);
+
+        // Only auto-validate for real additions, not simulations
+        if (!isSimulation) {
+          setTimeout(() => {
+            validateDomain(domain.id);
+          }, 3000);
+        }
 
         return; // Success, exit early
       }
