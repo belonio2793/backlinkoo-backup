@@ -155,5 +155,5 @@ export default async (req: Request, context: Context): Promise<Response> => {
 };
 
 export const config: Config = {
-  path: "/api/set-domain-theme"
+  path: "/.netlify/functions/set-domain-theme"
 };
