@@ -109,38 +109,16 @@ const DomainManagementTable = () => {
   }, [user]);
 
   const loadAllDomains = async () => {
-    setLoading(true);
     try {
-      // Load domains from database
-      await loadDatabaseDomains();
-      
       // Load domains from Netlify
       await loadNetlifyDomains();
-      
-      // Perform automatic sync
-      await performTwoWaySync();
+
+      // Trigger sync (domains are loaded via hook)
+      await triggerSync();
     } catch (error: any) {
       console.error('Error loading domains:', error);
       toast.error(`Failed to load domains: ${error.message}`);
-    } finally {
-      setLoading(false);
     }
-  };
-
-  const loadDatabaseDomains = async () => {
-    if (!user) return;
-
-    const { data, error } = await supabase
-      .from('domains')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      throw new Error(`Database error: ${error.message}`);
-    }
-
-    setDomains(data || []);
   };
 
   const loadNetlifyDomains = async () => {
