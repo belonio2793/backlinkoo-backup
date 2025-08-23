@@ -448,7 +448,13 @@ const DomainsPage = () => {
             .eq('user_id', user?.id);
 
           setDomains(prev => prev.map(d =>
-            d.id === domain.id ? { ...d, ...updateData } : d
+            d.id === domain.id ? {
+              ...d,
+              status: 'active' as const,
+              selected_theme: themeId,
+              theme_name: theme.name,
+              blog_enabled: true
+            } : d
           ));
 
           toast.success(`${domain.domain} is now ready for blog generation with ${theme.name} theme!`);
