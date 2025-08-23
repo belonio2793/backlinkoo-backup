@@ -608,21 +608,29 @@ const DomainsPage = () => {
                       
                       <div className="flex items-center gap-4 text-sm text-gray-600">
                         <div className="flex items-center gap-1">
-                          {domain.netlify_verified ? (
-                            <CheckCircle2 className="h-4 w-4 text-green-600" />
+                          {domain.netlify_verified !== undefined ? (
+                            domain.netlify_verified ? (
+                              <CheckCircle2 className="h-4 w-4 text-green-600" />
+                            ) : (
+                              <AlertTriangle className="h-4 w-4 text-red-600" />
+                            )
                           ) : (
-                            <AlertTriangle className="h-4 w-4 text-red-600" />
+                            <AlertTriangle className="h-4 w-4 text-gray-400" />
                           )}
-                          <span>Netlify: {domain.netlify_verified ? 'Verified' : 'Not Found'}</span>
+                          <span>Netlify: {domain.netlify_verified ? 'Verified' : domain.netlify_verified === false ? 'Not Found' : 'Pending'}</span>
                         </div>
-                        
+
                         <div className="flex items-center gap-1">
-                          {domain.dns_verified ? (
-                            <CheckCircle2 className="h-4 w-4 text-green-600" />
+                          {domain.dns_verified !== undefined ? (
+                            domain.dns_verified ? (
+                              <CheckCircle2 className="h-4 w-4 text-green-600" />
+                            ) : (
+                              <AlertTriangle className="h-4 w-4 text-red-600" />
+                            )
                           ) : (
-                            <AlertTriangle className="h-4 w-4 text-red-600" />
+                            <AlertTriangle className="h-4 w-4 text-gray-400" />
                           )}
-                          <span>DNS: {domain.dns_verified ? 'Valid' : 'Invalid'}</span>
+                          <span>DNS: {domain.dns_verified ? 'Valid' : domain.dns_verified === false ? 'Invalid' : 'Pending'}</span>
                         </div>
                       </div>
 
