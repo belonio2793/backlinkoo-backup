@@ -70,8 +70,13 @@ const SimpleDomainManager = () => {
       // Setup periodic background sync every 5 minutes
       if (autoSyncEnabled) {
         const interval = setInterval(() => {
-          console.log('🔄 Background sync triggered...');
-          loadDomains(true); // Silent background sync
+          // Check network connectivity before syncing
+          if (navigator.onLine) {
+            console.log('🔄 Background sync triggered...');
+            loadDomains(true); // Silent background sync
+          } else {
+            console.log('📡 Background sync skipped - no network connection');
+          }
         }, 5 * 60 * 1000); // 5 minutes
 
         setBackgroundSyncInterval(interval);
