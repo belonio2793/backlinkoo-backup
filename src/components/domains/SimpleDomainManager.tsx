@@ -56,21 +56,113 @@ const SimpleDomainManager = () => {
 
   const loadDomains = async () => {
     if (!user) return;
-    
+
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      console.log('🔍 Loading domains from database and Netlify...');
+
+      // First, load domains from database
+      const { data: dbDomains, error: dbError } = await supabase
         .from('domains')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (error) {
-        throw new Error(error.message);
+      if (dbError) {
+        throw new Error(`Database error: ${dbError.message}`);
       }
 
-      setDomains(data || []);
-      console.log(`✅ Loaded ${data?.length || 0} domains`);
+      console.log(`📊 Found ${dbDomains?.length || 0} domains in database`);
+
+      // Now fetch domains from Netlify
+      try {
+        const netlifyResponse = await fetch('/.netlify/functions/netlify-domain-validation', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'getSiteInfo' })
+        });
+
+        if (netlifyResponse.ok) {
+          const netlifyResult = await netlifyResponse.json();
+
+          if (netlifyResult.success && netlifyResult.data) {
+            console.log('🌐 Found Netlify domains:', netlifyResult.data);
+
+            const netlifyDomains = [];
+
+            // Add custom domain if exists
+            if (netlifyResult.data.custom_domain) {
+              netlifyDomains.push({
+                domain: netlifyResult.data.custom_domain,
+                is_custom: true
+              });
+            }
+
+            // Add domain aliases
+            if (netlifyResult.data.domain_aliases?.length > 0) {
+              netlifyResult.data.domain_aliases.forEach(alias => {
+                netlifyDomains.push({
+                  domain: alias,
+                  is_custom: false
+                });
+              });
+            }
+
+            console.log(`🔗 Found ${netlifyDomains.length} domains in Netlify`);
+
+            // Sync missing domains from Netlify to database
+            const dbDomainNames = new Set((dbDomains || []).map(d => d.domain));
+            const domainsToAdd = netlifyDomains.filter(nd => !dbDomainNames.has(nd.domain));
+
+            if (domainsToAdd.length > 0) {
+              console.log(`➕ Syncing ${domainsToAdd.length} domains from Netlify to database`);
+
+              const domainInserts = domainsToAdd.map(nd => ({
+                domain: nd.domain,
+                user_id: user.id,
+                status: 'verified' as const,
+                netlify_verified: true,
+                custom_domain: nd.is_custom,
+                created_at: new Date().toISOString()
+              }));
+
+              const { data: newDomains, error: insertError } = await supabase
+                .from('domains')
+                .insert(domainInserts)
+                .select();
+
+              if (insertError) {
+                console.warn('⚠️ Some domains could not be synced:', insertError.message);
+              } else {
+                console.log(`✅ Successfully synced ${newDomains?.length || 0} domains from Netlify`);
+                toast.success(`Synced ${newDomains?.length || 0} domains from Netlify`);
+              }
+
+              // Reload domains from database to get the complete list
+              const { data: updatedDomains } = await supabase
+                .from('domains')
+                .select('*')
+                .eq('user_id', user.id)
+                .order('created_at', { ascending: false });
+
+              setDomains(updatedDomains || []);
+              console.log(`✅ Total domains loaded: ${updatedDomains?.length || 0}`);
+            } else {
+              setDomains(dbDomains || []);
+              console.log('✅ All Netlify domains already in database');
+            }
+          } else {
+            console.warn('⚠️ Could not fetch Netlify domains:', netlifyResult.error);
+            setDomains(dbDomains || []);
+          }
+        } else {
+          console.warn('⚠️ Netlify API not available, showing database domains only');
+          setDomains(dbDomains || []);
+        }
+      } catch (netlifyError) {
+        console.warn('⚠️ Netlify sync failed:', netlifyError);
+        setDomains(dbDomains || []);
+      }
 
     } catch (error: any) {
       console.error('❌ Failed to load domains:', error);
