@@ -4,6 +4,7 @@ import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { useAuthState } from '@/hooks/useAuthState';
 import SimpleDomainManager from '@/components/domains/SimpleDomainManager';
+import DomainsAuthGuard from '@/components/DomainsAuthGuard';
 
 const DomainsPage = () => {
   const { isAuthenticated } = useAuthState();
