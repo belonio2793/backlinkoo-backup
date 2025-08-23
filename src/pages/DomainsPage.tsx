@@ -86,7 +86,6 @@ const DomainsPage = () => {
     try {
       // First check if user is authenticated
       if (!user) {
-        console.log('User not authenticated, skipping domain load');
         setDomains([]);
         return;
       }
@@ -111,7 +110,6 @@ const DomainsPage = () => {
         return;
       }
 
-      console.log(`Loaded ${data?.length || 0} domains for user`);
       setDomains(data || []);
     } catch (error: any) {
       console.error('Error loading domains:', error);
@@ -168,7 +166,6 @@ const DomainsPage = () => {
         .select('id')
         .limit(1);
 
-      console.log('Database connection test successful');
 
       // Add domain to database with minimal required fields
       const { data, error } = await supabase
@@ -343,12 +340,10 @@ const DomainsPage = () => {
     setVerifyingDomains(prev => new Set(prev).add(domain.id));
 
     try {
-      console.log(`Verifying ${domain.domain} in Netlify via official API...`);
 
       // Use the official Netlify API to check domain status
       const result = await NetlifyApiService.quickDomainCheck(domain.domain);
 
-      console.log('Official API verification result:', result);
 
       if (result.error) {
         console.error('Verification API error:', result.error);
@@ -429,13 +424,11 @@ const DomainsPage = () => {
         d.id === domain.id ? { ...d, status: 'validating' } : d
       ));
 
-      console.log(`Adding domain via official Netlify API: ${domain.domain}`);
 
       // Try official Netlify API first
       const apiResult = await NetlifyApiService.addDomainAlias(domain.domain);
 
       if (apiResult.success) {
-        console.log('Domain addition succeeded:', apiResult);
 
         // Determine the method used and update status accordingly
         const method = apiResult.data?.method || 'function';
@@ -497,7 +490,6 @@ const DomainsPage = () => {
       let result;
       try {
         result = await callNetlifyDomainFunction(domain.domain, domain.id);
-        console.log(`Fallback function result:`, result);
       } catch (functionError: any) {
         console.error('Error calling fallback function:', functionError);
         throw new Error(`Both official API and fallback failed. Official API: ${apiResult.error}. Fallback: ${functionError.message}`);
@@ -558,7 +550,6 @@ const DomainsPage = () => {
           ));
 
           // Show detailed instructions to user
-          console.log('Manual addition instructions:', instructions);
           toast.error(`Automated addition failed. Manual addition required.`);
 
           return;
@@ -632,7 +623,6 @@ const DomainsPage = () => {
           const result = await response.json();
           if (result.success) {
             functionSuccess = true;
-            console.log('Netlify function successfully set theme');
           } else {
             console.warn('Netlify function returned error:', result.error);
           }
@@ -644,7 +634,6 @@ const DomainsPage = () => {
       }
 
       // Fallback: Update directly via Supabase (always do this to ensure consistency)
-      console.log('Updating domain theme via Supabase...');
 
       const updateData = {
         status: 'active' as const,
@@ -734,7 +723,6 @@ const DomainsPage = () => {
             }
           }
         } else {
-          console.log(`Domain ${domainName} not found in Netlify, skipping removal`);
         }
       } catch (netlifyError: any) {
         console.warn('Netlify removal failed:', netlifyError);
