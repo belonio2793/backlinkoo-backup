@@ -327,9 +327,8 @@ const ComprehensiveDomainStatus: React.FC<DomainStatusProps> = ({
                         ))}
                       </ul>
                     </AlertDescription>
-                  )}
-                </Alert>
-              )}
+                  </Alert>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
