@@ -292,7 +292,7 @@ const DomainManagementTable = () => {
       // Refresh data
       setNewDomain('');
       setAddDialogOpen(false);
-      await loadAllDomains();
+      await loadDomains();
 
     } catch (error: any) {
       console.error('Add domain error:', error);
