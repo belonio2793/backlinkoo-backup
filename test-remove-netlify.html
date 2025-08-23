@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Remove from Netlify</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .test-section { border: 1px solid #ddd; margin: 10px 0; padding: 15px; border-radius: 5px; }
+        .success { background: #d4edda; border-color: #c3e6cb; }
+        .error { background: #f8d7da; border-color: #f5c6cb; }
+        .warning { background: #fff3cd; border-color: #ffeeba; }
+        button { background: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin: 5px; }
+        button:hover { background: #c82333; }
+        .add-btn { background: #28a745; }
+        .add-btn:hover { background: #218838; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; }
+        input { padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Remove from Netlify Test</h1>
+    <p>Test the remove domain from Netlify functionality</p>
+
+    <!-- Test Add Domain First -->
+    <div class="test-section">
+        <h3>1️⃣ Add Test Domain (for removal testing)</h3>
+        <input type="text" id="domain-to-add" placeholder="test-domain.example.com" value="test-remove-domain.example.com">
+        <button class="add-btn" onclick="addTestDomain()">Add Test Domain</button>
+        <div id="add-result"></div>
+    </div>
+
+    <!-- Test Remove Domain -->
+    <div class="test-section">
+        <h3>2️⃣ Remove Domain from Netlify</h3>
+        <input type="text" id="domain-to-remove" placeholder="domain to remove" value="test-remove-domain.example.com">
+        <button onclick="removeDomainFromNetlify()">Remove from Netlify</button>
+        <div id="remove-result"></div>
+    </div>
+
+    <!-- Test Direct API -->
+    <div class="test-section">
+        <h3>3️⃣ Test Direct Netlify API</h3>
+        <button onclick="testNetlifyRemoveAPI()">Test Remove API</button>
+        <div id="api-result"></div>
+    </div>
+
+    <!-- List Current Domains -->
+    <div class="test-section">
+        <h3>4️⃣ List Current Netlify Domains</h3>
+        <button onclick="listNetlifyDomains()">List Domains</button>
+        <div id="list-result"></div>
+    </div>
+
+    <script>
+        function displayResult(elementId, data, isSuccess = true) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `
+                <div class="${isSuccess ? 'success' : 'error'}" style="margin-top: 10px; padding: 10px; border-radius: 4px;">
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                </div>
+            `;
+        }
+
+        function displayError(elementId, error) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `
+                <div class="error" style="margin-top: 10px; padding: 10px; border-radius: 4px;">
+                    <strong>Error:</strong> ${error.message || error}
+                </div>
+            `;
+        }
+
+        // Test 1: Add a test domain first
+        async function addTestDomain() {
+            try {
+                const domain = document.getElementById('domain-to-add').value.trim();
+                if (!domain) {
+                    displayError('add-result', new Error('Please enter a domain'));
+                    return;
+                }
+
+                console.log(`➕ Adding test domain: ${domain}`);
+                
+                const response = await fetch('/.netlify/functions/netlify-domain-validation', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        action: 'addDomainAlias',
+                        domain: domain
+                    })
+                });
+
+                const data = await response.json();
+                displayResult('add-result', {
+                    status: data.success ? 'Added successfully' : 'Add failed',
+                    message: data.message,
+                    response: data
+                }, data.success);
+                
+                // Auto-fill remove field
+                document.getElementById('domain-to-remove').value = domain;
+
+            } catch (error) {
+                displayError('add-result', error);
+            }
+        }
+
+        // Test 2: Remove domain from Netlify
+        async function removeDomainFromNetlify() {
+            try {
+                const domain = document.getElementById('domain-to-remove').value.trim();
+                if (!domain) {
+                    displayError('remove-result', new Error('Please enter a domain'));
+                    return;
+                }
+
+                console.log(`➖ Removing domain from Netlify: ${domain}`);
+                
+                const response = await fetch('/.netlify/functions/netlify-domain-validation', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        action: 'removeDomainAlias',
+                        domain: domain
+                    })
+                });
+
+                const data = await response.json();
+                displayResult('remove-result', {
+                    status: data.success ? 'Removed successfully ✅' : 'Remove failed ❌',
+                    message: data.message,
+                    domain: data.domain,
+                    previous_aliases: data.previous_aliases,
+                    current_aliases: data.current_aliases,
+                    response: data
+                }, data.success);
+
+            } catch (error) {
+                displayError('remove-result', error);
+            }
+        }
+
+        // Test 3: Test API directly
+        async function testNetlifyRemoveAPI() {
+            try {
+                console.log('🧪 Testing Netlify remove API...');
+                
+                const response = await fetch('/.netlify/functions/netlify-domain-validation', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        action: 'removeDomainAlias',
+                        domain: 'non-existent-domain-test.example.com'
+                    })
+                });
+
+                const data = await response.json();
+                displayResult('api-result', {
+                    api_status: response.ok ? 'API accessible ✅' : 'API error ❌',
+                    response_status: response.status,
+                    data: data
+                }, response.ok);
+
+            } catch (error) {
+                displayError('api-result', error);
+            }
+        }
+
+        // Test 4: List current domains
+        async function listNetlifyDomains() {
+            try {
+                console.log('📋 Listing Netlify domains...');
+                
+                const response = await fetch('/.netlify/functions/netlify-domain-validation', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'listDomainAliases' })
+                });
+
+                const data = await response.json();
+                displayResult('list-result', {
+                    status: data.success ? 'Listed successfully' : 'List failed',
+                    site_name: data.data?.site_name,
+                    custom_domain: data.data?.custom_domain,
+                    domain_aliases: data.data?.domain_aliases,
+                    total_domains: data.data?.total_domains,
+                    full_response: data
+                }, data.success);
+
+            } catch (error) {
+                displayError('list-result', error);
+            }
+        }
+
+        // Auto-run API test
+        setTimeout(() => {
+            testNetlifyRemoveAPI();
+        }, 1000);
+    </script>
+</body>
+</html>
