@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quick Domains Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; }
+        .test { margin: 10px 0; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background: #d4edda; border-color: #c3e6cb; }
+        .error { background: #f8d7da; border-color: #f5c6cb; }
+        button { background: #007bff; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Quick Domains Page Test</h1>
+    
+    <div class="test">
+        <h3>Test Result:</h3>
+        <div id="result">Click the button to test</div>
+    </div>
+    
+    <button onclick="testDomainsPage()">Test Domains Page</button>
+    <button onclick="window.location.href='/domains'">Go to Domains Page</button>
+    
+    <div class="test">
+        <h3>Debug Info:</h3>
+        <div id="debug">
+            <p><strong>Current URL:</strong> <span id="current-url"></span></p>
+            <p><strong>Environment:</strong> <span id="env-info"></span></p>
+        </div>
+    </div>
+
+    <script>
+        // Update debug info
+        document.getElementById('current-url').textContent = window.location.href;
+        document.getElementById('env-info').textContent = typeof import !== 'undefined' ? 'Module support available' : 'No module support';
+
+        async function testDomainsPage() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '🔄 Testing...';
+            
+            try {
+                // Test 1: Try to access the domains page
+                console.log('Testing domains page access...');
+                
+                const testResponse = await fetch('/domains', {
+                    method: 'GET'
+                });
+                
+                if (testResponse.ok) {
+                    const html = await testResponse.text();
+                    
+                    if (html.includes('Domain Manager') || html.includes('domains')) {
+                        resultDiv.innerHTML = '<div class="success">✅ Domains page is accessible and contains domain content!</div>';
+                    } else {
+                        resultDiv.innerHTML = '<div class="error">⚠️ Domains page loads but may not be showing the right content</div>';
+                    }
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ Domains page returned status: ${testResponse.status}</div>`;
+                }
+                
+            } catch (error) {
+                console.error('Test error:', error);
+                resultDiv.innerHTML = `<div class="error">❌ Test failed: ${error.message}</div>`;
+            }
+        }
+        
+        // Auto-run test after 1 second
+        setTimeout(() => {
+            testDomainsPage();
+        }, 1000);
+    </script>
+</body>
+</html>
