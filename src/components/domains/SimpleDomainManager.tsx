@@ -60,12 +60,23 @@ const SimpleDomainManager = () => {
     setLoading(true);
     try {
       console.log('🔍 Loading domains from database and Netlify...');
+      console.log('👤 Current user:', user.email);
 
-      // First, load domains from database
+      // Get the admin user ID for centralized domain management
+      const { data: adminUser, error: adminError } = await supabase
+        .from('auth.users')
+        .select('id')
+        .eq('email', 'support@backlinkoo.com')
+        .single();
+
+      const domainUserId = adminUser?.id || user.id; // Fallback to current user if admin not found
+      console.log('🏢 Using domain management account:', domainUserId === user.id ? 'current user' : 'support@backlinkoo.com');
+
+      // Load domains from database (centralized under admin account)
       const { data: dbDomains, error: dbError } = await supabase
         .from('domains')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', domainUserId)
         .order('created_at', { ascending: false });
 
       if (dbError) {
