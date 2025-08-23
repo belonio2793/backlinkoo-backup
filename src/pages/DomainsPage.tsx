@@ -1288,6 +1288,38 @@ const DomainsPage = () => {
             )}
           </CardContent>
         </Card>
+
+        {/* Comprehensive Domain Validation Section */}
+        {showComprehensiveValidation && selectedDomainForComprehensive && (
+          <Card className="mt-8">
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <span>Comprehensive Validation Results</span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setShowComprehensiveValidation(false);
+                    setSelectedDomainForComprehensive(null);
+                  }}
+                >
+                  Close
+                </Button>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ComprehensiveDomainStatus
+                domain={selectedDomainForComprehensive.domain}
+                domainId={selectedDomainForComprehensive.id}
+                autoCheck={true}
+                onStatusChange={(status) => {
+                  console.log('Domain validation status updated:', status);
+                  // You can update the domain status in the domains list here if needed
+                }}
+              />
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       <Footer />
