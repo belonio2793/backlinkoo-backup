@@ -27,7 +27,7 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    console.log('🔍 Netlify domain validation function called');
+    console.log('�� Netlify domain validation function called');
 
     // Get environment variables
     const netlifyToken = process.env.NETLIFY_ACCESS_TOKEN;
@@ -77,7 +77,10 @@ exports.handler = async (event, context) => {
       
       case 'addDomainAlias':
         return await addDomainAlias(siteId, domain, headers);
-      
+
+      case 'removeDomainAlias':
+        return await removeDomainAlias(siteId, domain, headers);
+
       case 'listDomainAliases':
         return await listDomainAliases(siteId, headers);
       
