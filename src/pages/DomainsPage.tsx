@@ -29,6 +29,7 @@ import { NetlifyApiTester } from '@/components/NetlifyApiTester';
 import { NetlifyDeploymentChecker } from '@/components/NetlifyDeploymentChecker';
 import { ManualDomainInstructions } from '@/components/ManualDomainInstructions';
 import { FunctionStatusIndicator } from '@/components/FunctionStatusIndicator';
+import ComprehensiveDomainStatus from '@/components/ComprehensiveDomainStatus';
 
 interface Domain {
   id: string;
@@ -69,6 +70,8 @@ const DomainsPage = () => {
   const [selectedDomainForDns, setSelectedDomainForDns] = useState<Domain | null>(null);
   const [verifyingDomains, setVerifyingDomains] = useState<Set<string>>(new Set());
   const [showManualInstructions, setShowManualInstructions] = useState<Set<string>>(new Set());
+  const [selectedDomainForComprehensive, setSelectedDomainForComprehensive] = useState<Domain | null>(null);
+  const [showComprehensiveValidation, setShowComprehensiveValidation] = useState(false);
 
   const BLOG_THEMES = [
     { id: 'minimal', name: 'Minimal Clean', description: 'Clean and simple design' },
@@ -257,7 +260,7 @@ const DomainsPage = () => {
       ));
 
       if (success) {
-        toast.success(`✅ ${selectedDomainForDns.domain} DNS validated successfully`);
+        toast.success(`${selectedDomainForDns.domain} DNS validated successfully`);
 
         // If domain is validated and doesn't have a theme yet, trigger theme selection
         if (!selectedDomainForDns.selected_theme) {
@@ -283,7 +286,7 @@ const DomainsPage = () => {
     setAddingToNetlify(prev => new Set(prev).add(domainId));
 
     try {
-      toast.info(`🚀 Adding ${domain.domain} to Netlify...`);
+      toast.info(`Adding ${domain.domain} to Netlify...`);
       await addDomainToNetlify(domain);
     } catch (error: any) {
       console.error('Manual Netlify addition error:', error);
@@ -308,7 +311,7 @@ const DomainsPage = () => {
     setDiagnosingDomains(prev => new Set(prev).add(domainId));
 
     try {
-      toast.info(`🔍 Running diagnostics for ${domain.domain}...`);
+      toast.info(`Running diagnostics for ${domain.domain}...`);
 
       const diagnosticResponse = await fetch('/.netlify/functions/diagnose-domain-issue', {
         method: 'POST',
@@ -326,7 +329,7 @@ const DomainsPage = () => {
         const { diagnostics } = result;
 
         // Create a detailed diagnostic message
-        let diagnosticMessage = `📊 Diagnostic Results for ${domain.domain}:\n\n`;
+        let diagnosticMessage = `Diagnostic Results for ${domain.domain}:\n\n`;
 
         diagnosticMessage += `Status: ${diagnostics.assessment.status.toUpperCase()}\n`;
         diagnosticMessage += `Can Add Domain: ${diagnostics.assessment.canAddDomain ? 'Yes' : 'No'}\n\n`;
@@ -339,14 +342,14 @@ const DomainsPage = () => {
         }
 
         // Show detailed diagnostics in console for debugging
-        console.log('🔍 Full diagnostic report:', diagnostics);
+        console.log('Full diagnostic report:', diagnostics);
 
         if (diagnostics.assessment.status === 'critical') {
           toast.error('Critical issues found. Check console for details.');
         } else if (diagnostics.assessment.status === 'warning') {
           toast.warning('Some issues detected. Check console for details.');
         } else {
-          toast.success('✅ Configuration looks good! Ready to retry.');
+          toast.success('Configuration looks good! Ready to retry.');
         }
 
         // Update error message with diagnostic info
@@ -397,7 +400,7 @@ const DomainsPage = () => {
     setRetryingDomains(prev => new Set(prev).add(domainId));
 
     try {
-      toast.info(`🔄 Retrying ${domain.domain} addition to Netlify...`);
+      toast.info(`Retrying ${domain.domain} addition to Netlify...`);
 
       // Reset domain status before retry
       await supabase
@@ -440,16 +443,16 @@ const DomainsPage = () => {
     setVerifyingDomains(prev => new Set(prev).add(domain.id));
 
     try {
-      console.log(`🔍 Verifying ${domain.domain} in Netlify via official API...`);
+      console.log(`Verifying ${domain.domain} in Netlify via official API...`);
 
       // Use the official Netlify API to check domain status
       const result = await NetlifyApiService.quickDomainCheck(domain.domain);
 
-      console.log('🔍 Official API verification result:', result);
+      console.log('Official API verification result:', result);
 
       if (result.error) {
-        console.error('❌ Verification API error:', result.error);
-        toast.warning(`⚠️ Could not verify ${domain.domain}: ${result.error}`);
+        console.error('Verification API error:', result.error);
+        toast.warning(`Could not verify ${domain.domain}: ${result.error}`);
         return;
       }
 
@@ -474,7 +477,7 @@ const DomainsPage = () => {
         ));
 
         const domainType = result.isCustomDomain ? 'custom domain' : 'domain alias';
-        toast.success(`✅ ${domain.domain} verified in Netlify as ${domainType}!`);
+        toast.success(`${domain.domain} verified in Netlify as ${domainType}!`);
       } else {
         // Domain not found in Netlify
         await supabase
@@ -495,12 +498,12 @@ const DomainsPage = () => {
           } : d
         ));
 
-        toast.error(`❌ ${domain.domain} not found in Netlify site configuration`);
+        toast.error(`${domain.domain} not found in Netlify site configuration`);
       }
 
     } catch (error: any) {
       console.error('Verification error:', error);
-      toast.warning(`⚠️ Verification failed for ${domain.domain}: ${error.message}`);
+      toast.warning(`Verification failed for ${domain.domain}: ${error.message}`);
     } finally {
       setVerifyingDomains(prev => {
         const newSet = new Set(prev);
@@ -526,22 +529,22 @@ const DomainsPage = () => {
         d.id === domain.id ? { ...d, status: 'validating' } : d
       ));
 
-      console.log(`🔄 Adding domain via official Netlify API: ${domain.domain}`);
+      console.log(`Adding domain via official Netlify API: ${domain.domain}`);
 
       // Run diagnostic first to understand function availability
       const diagnostic = await NetlifyFunctionDiagnostic.getDeploymentStatus();
-      console.log('🏥 Function deployment status:', diagnostic);
+      console.log('Function deployment status:', diagnostic);
 
       if (diagnostic.status === 'critical') {
-        console.warn('⚠️ No functions available, this will likely fail');
-        toast.warning('⚠️ Netlify functions not deployed. Domain addition may fail.');
+        console.warn('No functions available, this will likely fail');
+        toast.warning('Netlify functions not deployed. Domain addition may fail.');
       }
 
       // Try official Netlify API first
       const apiResult = await NetlifyApiService.addDomainAlias(domain.domain);
 
       if (apiResult.success) {
-        console.log('✅ Domain addition succeeded:', apiResult);
+        console.log('Domain addition succeeded:', apiResult);
 
         // Determine the method used and update status accordingly
         const method = apiResult.data?.method || 'function';
@@ -576,13 +579,13 @@ const DomainsPage = () => {
         // Customize success message based on method
         let successMessage = '';
         if (method === 'direct_api') {
-          successMessage = `✅ ${domain.domain} added to Netlify via direct API! Configure DNS records to activate.`;
+          successMessage = `${domain.domain} added to Netlify via direct API! Configure DNS records to activate.`;
         } else if (method === 'function') {
-          successMessage = `✅ ${domain.domain} successfully added to Netlify! Configure DNS records to activate.`;
+          successMessage = `${domain.domain} successfully added to Netlify! Configure DNS records to activate.`;
         } else if (method === 'mock') {
-          successMessage = `��️ ${domain.domain} simulated (functions not deployed). Add manually to Netlify for real functionality.`;
+          successMessage = `${domain.domain} simulated (functions not deployed). Add manually to Netlify for real functionality.`;
         } else {
-          successMessage = `✅ ${domain.domain} processed successfully! Configure DNS records to activate.`;
+          successMessage = `${domain.domain} processed successfully! Configure DNS records to activate.`;
         }
 
         toast.success(successMessage);
@@ -598,14 +601,14 @@ const DomainsPage = () => {
       }
 
       // Fallback: Try the previous implementation
-      console.warn('⚠️ Official API failed, trying fallback method:', apiResult.error);
+      console.warn('Official API failed, trying fallback method:', apiResult.error);
 
       let result;
       try {
         result = await callNetlifyDomainFunction(domain.domain, domain.id);
-        console.log(`📋 Fallback function result:`, result);
+        console.log(`Fallback function result:`, result);
       } catch (functionError: any) {
-        console.error('❌ Error calling fallback function:', functionError);
+        console.error('Error calling fallback function:', functionError);
         throw new Error(`Both official API and fallback failed. Official API: ${apiResult.error}. Fallback: ${functionError.message}`);
       }
 
@@ -636,7 +639,7 @@ const DomainsPage = () => {
           } : d
         ));
 
-        toast.success(`✅ ${domain.domain} successfully added to Netlify via fallback method! Configure DNS records to activate.`);
+        toast.success(`${domain.domain} successfully added to Netlify via fallback method! Configure DNS records to activate.`);
 
         // Auto-validate after a short delay to check DNS
         setTimeout(() => {
@@ -664,8 +667,8 @@ const DomainsPage = () => {
           ));
 
           // Show detailed instructions to user
-          console.log('📋 Manual addition instructions:', instructions);
-          toast.error(`❌ Automated addition failed. Manual addition required.`);
+          console.log('Manual addition instructions:', instructions);
+          toast.error(`Automated addition failed. Manual addition required.`);
 
           // Show manual instructions for this domain
           setShowManualInstructions(prev => new Set(prev).add(domain.id));
@@ -712,9 +715,9 @@ const DomainsPage = () => {
       if (errorMessage.includes('Network error') || errorMessage.includes('Failed to fetch') ||
           errorMessage.includes('404') || errorMessage.includes('function')) {
         setShowManualInstructions(prev => new Set(prev).add(domain.id));
-        toast.error(`❌ Functions not deployed. Manual addition required for ${domain.domain}.`);
+        toast.error(`Functions not deployed. Manual addition required for ${domain.domain}.`);
       } else {
-        toast.error(`❌ Failed to add ${domain.domain} to Netlify: ${errorMessage}`);
+        toast.error(`Failed to add ${domain.domain} to Netlify: ${errorMessage}`);
       }
     }
   };
@@ -748,19 +751,19 @@ const DomainsPage = () => {
           const result = await response.json();
           if (result.success) {
             functionSuccess = true;
-            console.log('✅ Netlify function successfully set theme');
+            console.log('Netlify function successfully set theme');
           } else {
-            console.warn('⚠️ Netlify function returned error:', result.error);
+            console.warn('Netlify function returned error:', result.error);
           }
         } else {
-          console.warn(`⚠️ Netlify function failed with status ${response.status}`);
+          console.warn(`Netlify function failed with status ${response.status}`);
         }
       } catch (functionError) {
-        console.warn('⚠️ Netlify function call failed:', functionError);
+        console.warn('Netlify function call failed:', functionError);
       }
 
       // Fallback: Update directly via Supabase (always do this to ensure consistency)
-      console.log('📊 Updating domain theme via Supabase...');
+      console.log('Updating domain theme via Supabase...');
 
       const updateData = {
         status: 'active' as const,
@@ -806,7 +809,7 @@ const DomainsPage = () => {
   const runDiagnostic = async () => {
     setRunningDiagnostic(true);
     try {
-      toast.info('🔍 Running network diagnostic...');
+      toast.info('Running network diagnostic...');
       const results = await runNetworkDiagnostic();
       setDiagnosticResults(results);
 
@@ -814,18 +817,18 @@ const DomainsPage = () => {
       const warningCount = results.filter(r => r.status === 'warning').length;
 
       if (errorCount > 0) {
-        toast.error(`❌ Diagnostic found ${errorCount} critical issues. Check console for details.`);
+        toast.error(`Diagnostic found ${errorCount} critical issues. Check console for details.`);
       } else if (warningCount > 0) {
-        toast.warning(`⚠️ Diagnostic found ${warningCount} warnings. Check console for details.`);
+        toast.warning(`Diagnostic found ${warningCount} warnings. Check console for details.`);
       } else {
-        toast.success('✅ All connectivity tests passed!');
+        toast.success('All connectivity tests passed!');
       }
 
       // Log detailed results to console
-      console.log('🔍 Network Diagnostic Results:', results);
+      console.log('Network Diagnostic Results:', results);
       results.forEach(result => {
-        const emoji = result.status === 'success' ? '✅' : result.status === 'warning' ? '⚠️' : '❌';
-        console.log(`${emoji} ${result.service}: ${result.message}`, result.details);
+        const indicator = result.status === 'success' ? 'SUCCESS' : result.status === 'warning' ? 'WARNING' : 'ERROR';
+        console.log(`[${indicator}] ${result.service}: ${result.message}`, result.details);
       });
 
     } catch (error: any) {
@@ -840,15 +843,15 @@ const DomainsPage = () => {
   const testNetlifyFunction = async () => {
     setRunningDiagnostic(true);
     try {
-      toast.info('🧪 Testing Netlify function directly...');
+      toast.info('Testing Netlify function directly...');
       const result = await testNetlifyDomainFunction('leadpages.org');
 
       if (result.error) {
-        toast.error(`❌ Netlify function test failed: ${result.error}`);
-        console.error('🧪 Function test failed:', result);
+        toast.error(`Netlify function test failed: ${result.error}`);
+        console.error('Function test failed:', result);
       } else {
-        toast.success('✅ Netlify function test passed!');
-        console.log('🧪 Function test succeeded:', result);
+        toast.success('Netlify function test passed!');
+        console.log('Function test succeeded:', result);
       }
     } catch (error: any) {
       console.error('💥 Test execution failed:', error);
@@ -953,10 +956,11 @@ const DomainsPage = () => {
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="single" className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="single">Single Domain</TabsTrigger>
                 <TabsTrigger value="bulk">Bulk Addition</TabsTrigger>
                 <TabsTrigger value="api">API Testing</TabsTrigger>
+                <TabsTrigger value="comprehensive">Comprehensive Check</TabsTrigger>
               </TabsList>
 
               <TabsContent value="single" className="space-y-4 mt-6">
@@ -998,6 +1002,42 @@ const DomainsPage = () => {
 
               <TabsContent value="api" className="mt-6">
                 <NetlifyApiTester />
+              </TabsContent>
+
+              <TabsContent value="comprehensive" className="mt-6">
+                <div className="space-y-4">
+                  <div className="text-center">
+                    <h3 className="text-lg font-medium mb-2">Comprehensive Domain Validation</h3>
+                    <p className="text-sm text-gray-600 mb-4">
+                      Get detailed validation results combining Netlify configuration, DNS records, SSL certificates, and connectivity checks.
+                    </p>
+                  </div>
+
+                  {domains.length > 0 ? (
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Select Domain to Validate:</label>
+                      <div className="flex gap-2 flex-wrap">
+                        {domains.map((domain) => (
+                          <Button
+                            key={domain.id}
+                            variant={selectedDomainForComprehensive?.id === domain.id ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => {
+                              setSelectedDomainForComprehensive(domain);
+                              setShowComprehensiveValidation(true);
+                            }}
+                          >
+                            {domain.domain}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-gray-500">Add a domain first to run comprehensive validation</p>
+                    </div>
+                  )}
+                </div>
               </TabsContent>
             </Tabs>
           </CardContent>
@@ -1239,6 +1279,19 @@ const DomainsPage = () => {
                               </>
                             )}
                           </Button>
+
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedDomainForComprehensive(domain);
+                              setShowComprehensiveValidation(true);
+                            }}
+                            className="text-blue-600 border-blue-300 hover:bg-blue-50"
+                          >
+                            <Globe className="h-4 w-4 mr-2" />
+                            Comprehensive Check
+                          </Button>
                         </div>
                       </div>
                     </CardContent>
@@ -1248,6 +1301,38 @@ const DomainsPage = () => {
             )}
           </CardContent>
         </Card>
+
+        {/* Comprehensive Domain Validation Section */}
+        {showComprehensiveValidation && selectedDomainForComprehensive && (
+          <Card className="mt-8">
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <span>Comprehensive Validation Results</span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setShowComprehensiveValidation(false);
+                    setSelectedDomainForComprehensive(null);
+                  }}
+                >
+                  Close
+                </Button>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ComprehensiveDomainStatus
+                domain={selectedDomainForComprehensive.domain}
+                domainId={selectedDomainForComprehensive.id}
+                autoCheck={true}
+                onStatusChange={(status) => {
+                  console.log('Domain validation status updated:', status);
+                  // You can update the domain status in the domains list here if needed
+                }}
+              />
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       <Footer />
