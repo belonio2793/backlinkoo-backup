@@ -58,7 +58,7 @@ const SimpleDomainManager = () => {
     if (user) {
       console.log('🚀 Domains page: Activating all background functionality...');
       console.log('✅ Auto-sync: ON');
-      console.log('✅ Periodic sync: Every 5 minutes');
+      console.log('��� Periodic sync: Every 5 minutes');
       console.log('✅ Real-time monitoring: ON');
       console.log('✅ Dev server integration: ON');
       console.log('✅ Domain auto-detection: ON');
@@ -100,6 +100,28 @@ const SimpleDomainManager = () => {
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [user, autoSyncEnabled]);
+
+  // Network connectivity monitoring
+  useEffect(() => {
+    const handleOnline = () => {
+      if (user && autoSyncEnabled) {
+        console.log('🌐 Network connection restored, syncing domains...');
+        loadDomains(true);
+      }
+    };
+
+    const handleOffline = () => {
+      console.log('📡 Network connection lost, background sync paused');
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
   }, [user, autoSyncEnabled]);
 
   // Dev server integration - listen for file changes
