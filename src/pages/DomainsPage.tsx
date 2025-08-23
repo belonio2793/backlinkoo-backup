@@ -260,7 +260,7 @@ const DomainsPage = () => {
       ));
 
       if (success) {
-        toast.success(`✅ ${selectedDomainForDns.domain} DNS validated successfully`);
+        toast.success(`${selectedDomainForDns.domain} DNS validated successfully`);
 
         // If domain is validated and doesn't have a theme yet, trigger theme selection
         if (!selectedDomainForDns.selected_theme) {
@@ -286,7 +286,7 @@ const DomainsPage = () => {
     setAddingToNetlify(prev => new Set(prev).add(domainId));
 
     try {
-      toast.info(`🚀 Adding ${domain.domain} to Netlify...`);
+      toast.info(`Adding ${domain.domain} to Netlify...`);
       await addDomainToNetlify(domain);
     } catch (error: any) {
       console.error('Manual Netlify addition error:', error);
@@ -311,7 +311,7 @@ const DomainsPage = () => {
     setDiagnosingDomains(prev => new Set(prev).add(domainId));
 
     try {
-      toast.info(`🔍 Running diagnostics for ${domain.domain}...`);
+      toast.info(`Running diagnostics for ${domain.domain}...`);
 
       const diagnosticResponse = await fetch('/.netlify/functions/diagnose-domain-issue', {
         method: 'POST',
@@ -342,14 +342,14 @@ const DomainsPage = () => {
         }
 
         // Show detailed diagnostics in console for debugging
-        console.log('🔍 Full diagnostic report:', diagnostics);
+        console.log('Full diagnostic report:', diagnostics);
 
         if (diagnostics.assessment.status === 'critical') {
           toast.error('Critical issues found. Check console for details.');
         } else if (diagnostics.assessment.status === 'warning') {
           toast.warning('Some issues detected. Check console for details.');
         } else {
-          toast.success('✅ Configuration looks good! Ready to retry.');
+          toast.success('Configuration looks good! Ready to retry.');
         }
 
         // Update error message with diagnostic info
@@ -400,7 +400,7 @@ const DomainsPage = () => {
     setRetryingDomains(prev => new Set(prev).add(domainId));
 
     try {
-      toast.info(`🔄 Retrying ${domain.domain} addition to Netlify...`);
+      toast.info(`Retrying ${domain.domain} addition to Netlify...`);
 
       // Reset domain status before retry
       await supabase
@@ -443,12 +443,12 @@ const DomainsPage = () => {
     setVerifyingDomains(prev => new Set(prev).add(domain.id));
 
     try {
-      console.log(`🔍 Verifying ${domain.domain} in Netlify via official API...`);
+      console.log(`Verifying ${domain.domain} in Netlify via official API...`);
 
       // Use the official Netlify API to check domain status
       const result = await NetlifyApiService.quickDomainCheck(domain.domain);
 
-      console.log('🔍 Official API verification result:', result);
+      console.log('Official API verification result:', result);
 
       if (result.error) {
         console.error('❌ Verification API error:', result.error);
