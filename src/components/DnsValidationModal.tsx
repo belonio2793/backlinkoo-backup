@@ -262,7 +262,14 @@ export function DnsValidationModal({
             DNS Configuration for {domain}
           </DialogTitle>
           <DialogDescription>
-            Configure these DNS records at your domain registrar to point {domain} to your Netlify site.
+            {nameservers.length > 0 ? (
+              <>
+                Configure nameservers at your domain registrar, then add the required DNS record to complete setup for {domain}.
+                Only the CNAME record is required for verification.
+              </>
+            ) : (
+              <>Configure these DNS records at your domain registrar to point {domain} to your Netlify site.</>
+            )}
           </DialogDescription>
         </DialogHeader>
 
