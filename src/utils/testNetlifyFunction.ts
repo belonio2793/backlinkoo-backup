@@ -97,11 +97,12 @@ export async function testNetlifyDomainFunction(domain: string = 'test.example.c
     }
 
   } catch (error: any) {
-    console.error('❌ Test function error:', error);
+    const formattedError = formatErrorSafely(error);
+    console.error('❌ Test function error:', formattedError);
     return {
       error: 'Network or execution error',
-      message: error.message,
-      stack: error.stack
+      message: formattedError,
+      originalError: error
     };
   }
 }
