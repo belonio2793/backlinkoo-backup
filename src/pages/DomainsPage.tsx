@@ -524,6 +524,15 @@ const DomainsPage = () => {
 
       console.log(`🔄 Adding domain via official Netlify API: ${domain.domain}`);
 
+      // Run diagnostic first to understand function availability
+      const diagnostic = await NetlifyFunctionDiagnostic.getDeploymentStatus();
+      console.log('🏥 Function deployment status:', diagnostic);
+
+      if (diagnostic.status === 'critical') {
+        console.warn('⚠️ No functions available, this will likely fail');
+        toast.warning('⚠️ Netlify functions not deployed. Domain addition may fail.');
+      }
+
       // Try official Netlify API first
       const apiResult = await NetlifyApiService.addDomainAlias(domain.domain);
 
