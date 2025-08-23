@@ -707,7 +707,14 @@ const DomainsPage = () => {
         d.id === domain.id ? { ...d, status: 'error', error_message: errorMessage } : d
       ));
 
-      toast.error(`❌ Failed to add ${domain.domain} to Netlify: ${errorMessage}`);
+      // Show manual instructions for function deployment issues
+      if (errorMessage.includes('Network error') || errorMessage.includes('Failed to fetch') ||
+          errorMessage.includes('404') || errorMessage.includes('function')) {
+        setShowManualInstructions(prev => new Set(prev).add(domain.id));
+        toast.error(`❌ Functions not deployed. Manual addition required for ${domain.domain}.`);
+      } else {
+        toast.error(`❌ Failed to add ${domain.domain} to Netlify: ${errorMessage}`);
+      }
     }
   };
 
