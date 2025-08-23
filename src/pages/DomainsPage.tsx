@@ -1084,16 +1084,36 @@ const DomainsPage = () => {
                       <Button
                         variant="outline"
                         size="sm"
+                        onClick={() => verifyDomainInNetlify(domain)}
+                        disabled={verifyingDomains.has(domain.id)}
+                        className="text-blue-600 border-blue-300 hover:bg-blue-50"
+                      >
+                        {verifyingDomains.has(domain.id) ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                            Verifying...
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle2 className="h-4 w-4 mr-1" />
+                            Verify in Netlify
+                          </>
+                        )}
+                      </Button>
+
+                      <Button
+                        variant="outline"
+                        size="sm"
                         onClick={() => validateDomain(domain.id)}
                         disabled={validatingDomains.has(domain.id)}
                       >
                         {validatingDomains.has(domain.id) ? (
                           <>
                             <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                            Validating
+                            DNS Check
                           </>
                         ) : (
-                          'Validate'
+                          'DNS Check'
                         )}
                       </Button>
 
