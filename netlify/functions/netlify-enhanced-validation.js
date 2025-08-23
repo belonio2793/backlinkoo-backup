@@ -244,7 +244,7 @@ async function getNetlifyConfiguration() {
  */
 async function validateDomainInNetlify(domain, config) {
   try {
-    console.log(`🔍 Checking Netlify configuration for: ${domain}`);
+    console.log(`Checking Netlify configuration for: ${domain}`);
 
     // Get site information
     const siteResponse = await fetch(
@@ -317,7 +317,7 @@ async function validateDomainInNetlify(domain, config) {
  */
 async function getDetailedRoutingInfo(domain, config) {
   try {
-    console.log(`🛣️ Getting routing information for: ${domain}`);
+    console.log(`Getting routing information for: ${domain}`);
 
     // Get deployment information
     const deploymentsResponse = await fetch(
@@ -370,7 +370,7 @@ async function getDetailedRoutingInfo(domain, config) {
  */
 async function getDetailedSslInfo(domain, config) {
   try {
-    console.log(`🔒 Getting SSL information for: ${domain}`);
+    console.log(`Getting SSL information for: ${domain}`);
 
     // Get SSL certificate information
     const sslResponse = await fetch(
@@ -417,7 +417,7 @@ async function getDetailedSslInfo(domain, config) {
  */
 async function performDnsValidation(domain) {
   try {
-    console.log(`🌐 Performing DNS validation for: ${domain}`);
+    console.log(`Performing DNS validation for: ${domain}`);
 
     // Call the Cloudflare DNS validation function
     const cloudflareResponse = await fetch('/.netlify/functions/cloudflare-dns-validation', {
