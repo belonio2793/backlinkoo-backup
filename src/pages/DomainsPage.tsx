@@ -49,6 +49,7 @@ const DomainsPage = () => {
   const [retryingDomains, setRetryingDomains] = useState<Set<string>>(new Set());
   const [diagnosingDomains, setDiagnosingDomains] = useState<Set<string>>(new Set());
   const [addingToNetlify, setAddingToNetlify] = useState<Set<string>>(new Set());
+  const [debuggingNetlify, setDebuggingNetlify] = useState<Set<string>>(new Set());
   const [selectedThemeForDomain, setSelectedThemeForDomain] = useState<{[key: string]: string}>({});
 
   const BLOG_THEMES = [
