@@ -3,6 +3,7 @@
  */
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
+import { formatErrorForUI } from '@/utils/errorUtils';
 
 // Direct hardcoded credentials to eliminate any environment variable issues
 const SUPABASE_URL = 'https://dfhanacsmsvvkpunurnp.supabase.co';
