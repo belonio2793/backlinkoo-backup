@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Environment Variables Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .env-test { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .warning { background-color: #fff3cd; border-color: #ffeaa7; }
+        button { padding: 10px 20px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; }
+        .status { font-weight: bold; margin: 10px 0; }
+        .env-item { margin: 10px 0; padding: 10px; border-left: 4px solid #ddd; }
+        .env-present { border-left-color: #28a745; }
+        .env-missing { border-left-color: #dc3545; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Environment Variables Test</h1>
+    <p>Testing critical environment variables for domain management functionality.</p>
+
+    <div class="env-test">
+        <h3>Environment Variables Check</h3>
+        <button onclick="checkEnvironmentVariables()">Check Environment Variables</button>
+        <div id="envStatus" class="status">Ready to test...</div>
+        <div id="envResults"></div>
+    </div>
+
+    <div class="env-test">
+        <h3>API Key Validation</h3>
+        <button onclick="testAPIKeys()">Test API Key Access</button>
+        <div id="apiStatus" class="status">Ready to test...</div>
+        <pre id="apiResults"></pre>
+    </div>
+
+    <script>
+        async function checkEnvironmentVariables() {
+            const statusEl = document.getElementById('envStatus');
+            const resultsEl = document.getElementById('envResults');
+            
+            statusEl.textContent = '🔄 Checking environment variables...';
+            statusEl.className = 'status';
+            
+            // Test via a simple API call that would expose env var status
+            try {
+                const response = await fetch('/.netlify/functions/netlify-domain-validation', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'getSiteInfo' })
+                });
+
+                const result = await response.json();
+                
+                let html = '<h4>Environment Variable Status:</h4>';
+                
+                if (result.success) {
+                    html += '<div class="env-item env-present">✅ NETLIFY_ACCESS_TOKEN: Present and working</div>';
+                    html += '<div class="env-item env-present">✅ NETLIFY_SITE_ID: Present and working</div>';
+                    statusEl.textContent = '✅ All required environment variables are present';
+                    statusEl.className = 'status success';
+                } else if (result.error && result.error.includes('NETLIFY_ACCESS_TOKEN')) {
+                    html += '<div class="env-item env-missing">❌ NETLIFY_ACCESS_TOKEN: Missing or invalid</div>';
+                    html += '<div class="env-item env-missing">❓ NETLIFY_SITE_ID: Unknown (dependent on token)</div>';
+                    statusEl.textContent = '❌ Critical environment variables missing';
+                    statusEl.className = 'status error';
+                } else {
+                    html += '<div class="env-item env-missing">❌ Environment variables not properly configured</div>';
+                    statusEl.textContent = '⚠️ Environment configuration issues detected';
+                    statusEl.className = 'status warning';
+                }
+                
+                // Check client-side environment variables
+                html += '<h4>Client-side Environment Variables:</h4>';
+                
+                const clientVars = [
+                    'VITE_SUPABASE_URL',
+                    'VITE_SUPABASE_ANON_KEY',
+                    'VITE_STRIPE_PUBLISHABLE_KEY'
+                ];
+                
+                clientVars.forEach(varName => {
+                    const value = import.meta.env[varName];
+                    if (value && !value.includes('placeholder')) {
+                        html += `<div class="env-item env-present">✅ ${varName}: Present</div>`;
+                    } else {
+                        html += `<div class="env-item env-missing">❌ ${varName}: Missing or placeholder</div>`;
+                    }
+                });
+                
+                resultsEl.innerHTML = html;
+                
+            } catch (error) {
+                statusEl.textContent = `❌ Error checking environment: ${error.message}`;
+                statusEl.className = 'status error';
+                resultsEl.innerHTML = `<div class="env-item env-missing">Network Error: ${error.message}</div>`;
+            }
+        }
+
+        async function testAPIKeys() {
+            const statusEl = document.getElementById('apiStatus');
+            const resultsEl = document.getElementById('apiResults');
+            
+            statusEl.textContent = '🔄 Testing API key access...';
+            statusEl.className = 'status';
+            
+            try {
+                // Test multiple endpoints to verify API access
+                const tests = [
+                    { name: 'Netlify Domain Validation', endpoint: 'netlify-domain-validation', data: { action: 'getSiteInfo' } },
+                    { name: 'Supabase Connection', endpoint: 'api-status', data: {} }
+                ];
+                
+                let results = 'API Access Test Results:\n\n';
+                
+                for (const test of tests) {
+                    try {
+                        const response = await fetch(`/.netlify/functions/${test.endpoint}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(test.data)
+                        });
+                        
+                        const result = await response.json();
+                        
+                        if (response.ok && result.success !== false) {
+                            results += `✅ ${test.name}: Working\n`;
+                        } else {
+                            results += `⚠️ ${test.name}: ${result.error || 'Unknown issue'}\n`;
+                        }
+                    } catch (error) {
+                        results += `❌ ${test.name}: ${error.message}\n`;
+                    }
+                }
+                
+                resultsEl.textContent = results;
+                statusEl.textContent = '✅ API key testing complete';
+                statusEl.className = 'status success';
+                
+            } catch (error) {
+                statusEl.textContent = `❌ API key test error: ${error.message}`;
+                statusEl.className = 'status error';
+                resultsEl.textContent = `Error: ${error.message}`;
+            }
+        }
+
+        // Auto-run environment check on page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                console.log('🚀 Running automatic environment check...');
+                checkEnvironmentVariables();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
