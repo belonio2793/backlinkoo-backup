@@ -70,6 +70,8 @@ const DomainsPage = () => {
   const [selectedDomainForDns, setSelectedDomainForDns] = useState<Domain | null>(null);
   const [verifyingDomains, setVerifyingDomains] = useState<Set<string>>(new Set());
   const [showManualInstructions, setShowManualInstructions] = useState<Set<string>>(new Set());
+  const [selectedDomainForComprehensive, setSelectedDomainForComprehensive] = useState<Domain | null>(null);
+  const [showComprehensiveValidation, setShowComprehensiveValidation] = useState(false);
 
   const BLOG_THEMES = [
     { id: 'minimal', name: 'Minimal Clean', description: 'Clean and simple design' },
