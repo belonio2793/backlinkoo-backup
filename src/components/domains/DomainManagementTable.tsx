@@ -509,15 +509,15 @@ const DomainManagementTable = () => {
         <div className="flex gap-2">
           <Button
             variant="outline"
-            onClick={loadAllDomains}
-            disabled={loading || syncing}
+            onClick={triggerSync}
+            disabled={isLoading || syncing}
           >
-            {loading || syncing ? (
+            {isLoading || syncing ? (
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
             ) : (
               <RefreshCw className="h-4 w-4 mr-2" />
             )}
-            {syncing ? 'Syncing...' : 'Refresh'}
+            {syncing ? 'Syncing...' : 'Refresh & Sync'}
           </Button>
           
           <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
