@@ -26,7 +26,6 @@ import NetlifyFunctionDiagnostic from '@/utils/netlifyFunctionDiagnostic';
 import { DnsValidationModal } from '@/components/DnsValidationModal';
 import { BulkDomainManager } from '@/components/BulkDomainManager';
 import { NetlifyDeploymentChecker } from '@/components/NetlifyDeploymentChecker';
-import { FunctionStatusIndicator } from '@/components/FunctionStatusIndicator';
 
 interface Domain {
   id: string;
