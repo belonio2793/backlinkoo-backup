@@ -29,6 +29,7 @@ import { NetlifyApiTester } from '@/components/NetlifyApiTester';
 import { NetlifyDeploymentChecker } from '@/components/NetlifyDeploymentChecker';
 import { ManualDomainInstructions } from '@/components/ManualDomainInstructions';
 import { FunctionStatusIndicator } from '@/components/FunctionStatusIndicator';
+import ComprehensiveDomainStatus from '@/components/ComprehensiveDomainStatus';
 
 interface Domain {
   id: string;
