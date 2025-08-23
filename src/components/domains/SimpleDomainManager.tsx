@@ -401,7 +401,7 @@ another-site.net`}
               ) : (
                 <RefreshCw className="h-4 w-4 mr-2" />
               )}
-              Refresh
+              Sync from Netlify
             </Button>
           </div>
         </CardHeader>
