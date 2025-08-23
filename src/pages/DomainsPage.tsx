@@ -24,6 +24,7 @@ import NetlifyApiService from '@/services/netlifyApiService';
 import { DnsValidationModal } from '@/components/DnsValidationModal';
 import { BulkDomainManager } from '@/components/BulkDomainManager';
 import { NetlifyDeploymentChecker } from '@/components/NetlifyDeploymentChecker';
+import DomainSyncFixer from '@/components/DomainSyncFixer';
 
 interface Domain {
   id: string;
