@@ -57,12 +57,42 @@ export interface SSLStatus {
 
 export class NetlifyApiService {
   private static baseUrl = '/.netlify/functions/netlify-domain-validation';
+  private static fallbackUrl = '/.netlify/functions/add-domain-to-netlify';
+
+  /**
+   * Test if the main function is available
+   */
+  private static async testFunctionAvailability(): Promise<boolean> {
+    try {
+      const response = await fetch(this.baseUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'getSiteInfo' })
+      });
+
+      return response.status !== 404;
+    } catch (error) {
+      console.warn('Function availability test failed:', error);
+      return false;
+    }
+  }
 
   /**
    * Get comprehensive site information
    */
   static async getSiteInfo(): Promise<NetlifyApiResponse<SiteInfo>> {
     try {
+      // Test function availability first
+      const isAvailable = await this.testFunctionAvailability();
+
+      if (!isAvailable) {
+        console.warn('⚠️ Main function not available, using fallback data');
+        return {
+          success: false,
+          error: 'Netlify domain validation function not deployed. Please deploy the function first.'
+        };
+      }
+
       const response = await fetch(this.baseUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
