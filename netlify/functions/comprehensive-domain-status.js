@@ -250,7 +250,7 @@ function determineChecksToRun(checks, priority) {
  */
 async function performNetlifyValidation(domain) {
   try {
-    console.log(`🚀 Running Netlify validation for ${domain}...`);
+    console.log(`Running Netlify validation for ${domain}...`);
 
     const response = await fetch('/.netlify/functions/netlify-enhanced-validation', {
       method: 'POST',
@@ -277,7 +277,7 @@ async function performNetlifyValidation(domain) {
     }
 
   } catch (error) {
-    console.error(`❌ Netlify validation failed for ${domain}:`, error);
+    console.error(`Netlify validation failed for ${domain}:`, error);
     return {
       service: 'netlify',
       success: false,
@@ -291,7 +291,7 @@ async function performNetlifyValidation(domain) {
  */
 async function performDnsValidation(domain) {
   try {
-    console.log(`🌐 Running DNS validation for ${domain}...`);
+    console.log(`Running DNS validation for ${domain}...`);
 
     const response = await fetch('/.netlify/functions/cloudflare-dns-validation', {
       method: 'POST',
@@ -315,7 +315,7 @@ async function performDnsValidation(domain) {
     }
 
   } catch (error) {
-    console.error(`❌ DNS validation failed for ${domain}:`, error);
+    console.error(`DNS validation failed for ${domain}:`, error);
     return {
       service: 'dns',
       success: false,
@@ -329,7 +329,7 @@ async function performDnsValidation(domain) {
  */
 async function performSslValidation(domain) {
   try {
-    console.log(`🔒 Running SSL validation for ${domain}...`);
+    console.log(`Running SSL validation for ${domain}...`);
 
     const response = await fetch('/.netlify/functions/netlify-enhanced-validation', {
       method: 'POST',
@@ -354,7 +354,7 @@ async function performSslValidation(domain) {
     }
 
   } catch (error) {
-    console.error(`❌ SSL validation failed for ${domain}:`, error);
+    console.error(`SSL validation failed for ${domain}:`, error);
     return await performFallbackSslCheck(domain);
   }
 }
