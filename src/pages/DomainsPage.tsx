@@ -1168,7 +1168,7 @@ const DomainsPage = () => {
                             variant="outline"
                             size="sm"
                             onClick={() => handleAddToNetlify(domain.id)}
-                            disabled={addingToNetlify.has(domain.id) || validatingDomains.has(domain.id)}
+                            disabled={addingToNetlify.has(domain.id) || validatingDomains.has(domain.id) || removingFromNetlify.has(domain.id)}
                             className="text-green-600 border-green-300 hover:bg-green-50"
                           >
                             {addingToNetlify.has(domain.id) ? (
@@ -1180,6 +1180,26 @@ const DomainsPage = () => {
                               <>
                                 <Globe className="h-4 w-4 mr-2" />
                                 Add to Netlify
+                              </>
+                            )}
+                          </Button>
+
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleRemoveFromNetlify(domain.id)}
+                            disabled={removingFromNetlify.has(domain.id) || validatingDomains.has(domain.id) || addingToNetlify.has(domain.id)}
+                            className="text-red-600 border-red-300 hover:bg-red-50"
+                          >
+                            {removingFromNetlify.has(domain.id) ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Removing...
+                              </>
+                            ) : (
+                              <>
+                                <Minus className="h-4 w-4 mr-2" />
+                                Remove from Netlify
                               </>
                             )}
                           </Button>
