@@ -53,9 +53,8 @@ export const DomainsAuthGuard = ({ children }: DomainsAuthGuardProps) => {
       setIsAuthenticated(true);
       setUserEmail(user.email || '');
 
-      // For development: Allow any authenticated user access to domain management
-      // In production: Check if user email matches authorized email
-      const authorized = true; // user.email === AUTHORIZED_EMAIL;
+      // Require support@backlinkoo.com for domain management
+      const authorized = user.email === AUTHORIZED_EMAIL;
       setIsAuthorized(authorized);
 
       console.log(`🔐 Domains access check: ${user.email} -> ${authorized ? 'AUTHORIZED' : 'DENIED'}`);
