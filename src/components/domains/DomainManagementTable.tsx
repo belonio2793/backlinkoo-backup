@@ -335,13 +335,10 @@ const DomainManagementTable = () => {
       if (domain?.netlify_verified) {
         try {
           // Remove old domain from Netlify
-          await fetch('/.netlify/functions/netlify-domain-validation', {
-            method: 'POST',
+          await fetch('https://dfhanacsmsvvkpunurnp.functions.supabase.co/netlify-domains', {
+            method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              action: 'removeDomainAlias',
-              domain: oldDomain
-            })
+            body: JSON.stringify({ domain: oldDomain })
           });
 
           // Add new domain to Netlify
@@ -391,13 +388,10 @@ const DomainManagementTable = () => {
       // Remove from Netlify if it exists there
       if (domain?.netlify_verified) {
         try {
-          await fetch('/.netlify/functions/netlify-domain-validation', {
-            method: 'POST',
+          await fetch('https://dfhanacsmsvvkpunurnp.functions.supabase.co/netlify-domains', {
+            method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              action: 'removeDomainAlias',
-              domain: domainName
-            })
+            body: JSON.stringify({ domain: domainName })
           });
           toast.success(`Removed ${domainName} from Netlify`);
         } catch (netlifyError: any) {
