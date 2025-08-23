@@ -37,6 +37,7 @@ const DomainSyncFixer = ({ onSyncComplete }: { onSyncComplete?: () => void }) =>
   const [mismatches, setMismatches] = useState<DomainMismatch[]>([]);
   const [fixing, setFixing] = useState<Set<string>>(new Set());
   const [removing, setRemoving] = useState<Set<string>>(new Set());
+  const [functionsAvailable, setFunctionsAvailable] = useState<boolean | null>(null);
 
   useEffect(() => {
     scanForMismatches();
