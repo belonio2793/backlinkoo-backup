@@ -58,7 +58,7 @@ const SimpleDomainManager = () => {
     if (user) {
       console.log('🚀 Domains page: Activating all background functionality...');
       console.log('✅ Auto-sync: ON');
-      console.log('��� Periodic sync: Every 5 minutes');
+      console.log('✅ Periodic sync: Every 5 minutes');
       console.log('✅ Real-time monitoring: ON');
       console.log('✅ Dev server integration: ON');
       console.log('✅ Domain auto-detection: ON');
@@ -324,6 +324,32 @@ const SimpleDomainManager = () => {
       }
     };
   }, [backgroundSyncInterval]);
+
+  // Comprehensive status logging every 2 minutes
+  useEffect(() => {
+    if (!user || !autoSyncEnabled) return;
+
+    const statusLogger = () => {
+      console.log('📊 ===== DOMAINS PAGE BACKGROUND STATUS =====');
+      console.log(`🌐 Online: ${navigator.onLine ? 'YES' : 'NO'}`);
+      console.log(`👤 User: ${user.email}`);
+      console.log(`📝 Domains loaded: ${domains.length}`);
+      console.log(`⏰ Last sync: ${lastSyncTime ? lastSyncTime.toLocaleTimeString() : 'Never'}`);
+      console.log(`🔄 Auto-sync: ${autoSyncEnabled ? 'ACTIVE' : 'INACTIVE'}`);
+      console.log(`📡 Background monitoring: ACTIVE`);
+      console.log(`🔧 Dev mode: ${window.location.hostname === 'localhost' ? 'YES' : 'NO'}`);
+      console.log(`🏥 Health checks: ${domains.filter(d => d.status === 'pending').length} pending domains`);
+      console.log('============================================');
+    };
+
+    // Initial status log
+    setTimeout(statusLogger, 5000);
+
+    // Periodic status logging every 2 minutes
+    const statusInterval = setInterval(statusLogger, 2 * 60 * 1000);
+
+    return () => clearInterval(statusInterval);
+  }, [user, autoSyncEnabled, domains, lastSyncTime]);
 
   const cleanDomain = (domain: string): string => {
     return domain.trim().toLowerCase()
