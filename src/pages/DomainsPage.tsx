@@ -942,6 +942,8 @@ const DomainsPage = () => {
           </p>
         </div>
 
+        {/* Domain Sync Checker */}
+        <DomainSyncFixer onSyncComplete={loadDomains} />
 
         {/* Domain Addition Interface */}
         <Card className="mb-8">
