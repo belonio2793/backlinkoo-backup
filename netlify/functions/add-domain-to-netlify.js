@@ -163,21 +163,62 @@ exports.handler = async (event, context) => {
     });
 
     if (!netlifyResponse.ok) {
-      const errorData = await netlifyResponse.text();
+      console.error(`❌ Netlify API request failed with status ${netlifyResponse.status}`);
+
+      let errorData;
+      try {
+        errorData = await netlifyResponse.text();
+        console.error('❌ Raw error response:', errorData);
+      } catch (readError) {
+        console.error('❌ Could not read error response:', readError);
+        errorData = `HTTP ${netlifyResponse.status}: ${netlifyResponse.statusText}`;
+      }
+
       let errorMessage = `${netlifyResponse.status} ${netlifyResponse.statusText}`;
       let detailedError = '';
+      let specificError = '';
 
       try {
         const errorJson = JSON.parse(errorData);
+        console.error('❌ Parsed error JSON:', errorJson);
+
+        // Extract specific error messages from various Netlify API response formats
         if (errorJson.message) {
           errorMessage = errorJson.message;
+          specificError = errorJson.message;
         }
+
+        if (errorJson.error) {
+          errorMessage = errorJson.error;
+          specificError = errorJson.error;
+        }
+
         if (errorJson.errors) {
-          detailedError = JSON.stringify(errorJson.errors);
+          if (Array.isArray(errorJson.errors)) {
+            specificError = errorJson.errors.map(err => err.message || err).join(', ');
+          } else if (typeof errorJson.errors === 'object') {
+            specificError = Object.values(errorJson.errors).join(', ');
+          } else {
+            specificError = JSON.stringify(errorJson.errors);
+          }
+          detailedError = specificError;
         }
-      } catch {
-        if (errorData) {
-          errorMessage = errorData;
+
+        // Check for domain-specific errors
+        if (errorJson.domain_aliases) {
+          specificError = `Domain aliases error: ${JSON.stringify(errorJson.domain_aliases)}`;
+        }
+
+        // Check for validation errors
+        if (errorJson.code) {
+          specificError += ` (Code: ${errorJson.code})`;
+        }
+
+      } catch (parseError) {
+        console.error('❌ Could not parse error as JSON:', parseError);
+        if (errorData && errorData.trim().length > 0) {
+          errorMessage = errorData.trim();
+          specificError = errorData.trim();
         }
       }
 
