@@ -27,7 +27,7 @@ export async function testNetlifyDomainFunction(domain: string = 'test.example.c
     let responseText;
     try {
       responseText = await response.text();
-      console.log(`📋 Raw response text:`, responseText);
+      console.log(`📋 Raw response text (${responseText?.length || 0} chars):`, responseText?.substring(0, 200) + (responseText?.length > 200 ? '...' : ''));
     } catch (textError) {
       console.error('❌ Could not read response as text:', textError);
       return {
@@ -36,19 +36,44 @@ export async function testNetlifyDomainFunction(domain: string = 'test.example.c
         statusText: response.statusText
       };
     }
-    
-    // Try to parse as JSON
+
+    // Validate response text before parsing
+    if (!responseText || responseText.trim() === '') {
+      console.error('❌ Empty response received');
+      return {
+        error: 'Empty response received',
+        status: response.status,
+        statusText: response.statusText
+      };
+    }
+
+    // Try to parse as JSON with better error handling
     let jsonResult;
     try {
+      // Check if response looks like JSON
+      const trimmedResponse = responseText.trim();
+      if (!trimmedResponse.startsWith('{') && !trimmedResponse.startsWith('[')) {
+        console.error('❌ Response does not appear to be JSON:', trimmedResponse.substring(0, 100));
+        return {
+          error: 'Response is not JSON format',
+          rawResponse: responseText,
+          status: response.status,
+          statusText: response.statusText
+        };
+      }
+
       jsonResult = JSON.parse(responseText);
       console.log(`📋 Parsed JSON result:`, jsonResult);
     } catch (jsonError) {
       console.error('❌ Could not parse response as JSON:', jsonError);
+      console.error('❌ Response content type:', response.headers.get('content-type'));
       return {
         error: 'Invalid JSON response',
         rawResponse: responseText,
         status: response.status,
-        statusText: response.statusText
+        statusText: response.statusText,
+        contentType: response.headers.get('content-type'),
+        parseError: jsonError instanceof Error ? jsonError.message : String(jsonError)
       };
     }
 
