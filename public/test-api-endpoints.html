@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Endpoint Tests</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .loading { background-color: #fff3cd; border-color: #ffeaa7; }
+        button { padding: 10px 20px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; }
+        .status { font-weight: bold; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>🧪 API Endpoint Tests</h1>
+    <p>Testing domain management API endpoints for connectivity and functionality.</p>
+
+    <div class="test-section">
+        <h3>1. Netlify Domain Validation - Get Site Info</h3>
+        <button onclick="testGetSiteInfo()">Test Get Site Info</button>
+        <div id="siteInfo" class="status">Ready to test...</div>
+        <pre id="siteInfoResponse"></pre>
+    </div>
+
+    <div class="test-section">
+        <h3>2. Netlify Domain Validation - List Domain Aliases</h3>
+        <button onclick="testListDomains()">Test List Domain Aliases</button>
+        <div id="listDomains" class="status">Ready to test...</div>
+        <pre id="listDomainsResponse"></pre>
+    </div>
+
+    <div class="test-section">
+        <h3>3. Add Domain to Netlify (Legacy)</h3>
+        <button onclick="testAddDomain()">Test Add Domain</button>
+        <div id="addDomain" class="status">Ready to test...</div>
+        <pre id="addDomainResponse"></pre>
+    </div>
+
+    <div class="test-section">
+        <h3>4. Add Domain Alias (New API)</h3>
+        <button onclick="testAddDomainAlias()">Test Add Domain Alias</button>
+        <div id="addAlias" class="status">Ready to test...</div>
+        <pre id="addAliasResponse"></pre>
+    </div>
+
+    <div class="test-section">
+        <h3>5. Remove Domain Alias</h3>
+        <button onclick="testRemoveDomainAlias()">Test Remove Domain Alias</button>
+        <div id="removeAlias" class="status">Ready to test...</div>
+        <pre id="removeAliasResponse"></pre>
+    </div>
+
+    <div class="test-section">
+        <h3>6. DNS Validation</h3>
+        <button onclick="testDNSValidation()">Test DNS Validation</button>
+        <div id="dnsValidation" class="status">Ready to test...</div>
+        <pre id="dnsValidationResponse"></pre>
+    </div>
+
+    <script>
+        const BASE_URL = '/.netlify/functions';
+
+        async function testAPI(endpoint, data, statusElementId, responseElementId) {
+            const statusEl = document.getElementById(statusElementId);
+            const responseEl = document.getElementById(responseElementId);
+            
+            statusEl.textContent = '🔄 Testing...';
+            statusEl.className = 'status loading';
+            responseEl.textContent = '';
+
+            try {
+                const response = await fetch(`${BASE_URL}/${endpoint}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                
+                if (response.ok && result.success !== false) {
+                    statusEl.textContent = `✅ Success (${response.status})`;
+                    statusEl.className = 'status success';
+                } else {
+                    statusEl.textContent = `⚠️ API Response Issue (${response.status})`;
+                    statusEl.className = 'status error';
+                }
+                
+                responseEl.textContent = JSON.stringify(result, null, 2);
+                
+            } catch (error) {
+                statusEl.textContent = `❌ Network Error: ${error.message}`;
+                statusEl.className = 'status error';
+                responseEl.textContent = `Error: ${error.message}`;
+            }
+        }
+
+        async function testGetSiteInfo() {
+            await testAPI('netlify-domain-validation', 
+                { action: 'getSiteInfo' }, 
+                'siteInfo', 'siteInfoResponse'
+            );
+        }
+
+        async function testListDomains() {
+            await testAPI('netlify-domain-validation', 
+                { action: 'listDomainAliases' }, 
+                'listDomains', 'listDomainsResponse'
+            );
+        }
+
+        async function testAddDomain() {
+            await testAPI('add-domain-to-netlify', 
+                { domain: 'test-endpoint.com', domainId: 'test-123' }, 
+                'addDomain', 'addDomainResponse'
+            );
+        }
+
+        async function testAddDomainAlias() {
+            await testAPI('netlify-domain-validation', 
+                { action: 'addDomainAlias', domain: 'test-alias.com' }, 
+                'addAlias', 'addAliasResponse'
+            );
+        }
+
+        async function testRemoveDomainAlias() {
+            await testAPI('netlify-domain-validation', 
+                { action: 'removeDomainAlias', domain: 'test-alias.com' }, 
+                'removeAlias', 'removeAliasResponse'
+            );
+        }
+
+        async function testDNSValidation() {
+            await testAPI('validate-domain', 
+                { domain: 'example.com' }, 
+                'dnsValidation', 'dnsValidationResponse'
+            );
+        }
+
+        // Auto-run basic connectivity test on page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                console.log('🚀 Running automatic connectivity test...');
+                testGetSiteInfo();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
