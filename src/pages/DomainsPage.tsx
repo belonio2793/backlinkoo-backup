@@ -911,44 +911,6 @@ const DomainsPage = () => {
             <CardTitle className="flex items-center justify-between">
               <span>Your Domains ({domains.length})</span>
               <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={testNetlifyFunction}
-                  disabled={runningDiagnostic}
-                  className="text-purple-600 border-purple-300 hover:bg-purple-50"
-                >
-                  {runningDiagnostic ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                      Testing...
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle2 className="h-4 w-4 mr-1" />
-                      Test Function
-                    </>
-                  )}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={runDiagnostic}
-                  disabled={runningDiagnostic}
-                  className="text-blue-600 border-blue-300 hover:bg-blue-50"
-                >
-                  {runningDiagnostic ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                      Diagnosing...
-                    </>
-                  ) : (
-                    <>
-                      <AlertTriangle className="h-4 w-4 mr-1" />
-                      Debug Network
-                    </>
-                  )}
-                </Button>
                 <Button variant="outline" size="sm" onClick={loadDomains}>
                   Refresh
                 </Button>
