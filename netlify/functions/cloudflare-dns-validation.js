@@ -325,7 +325,7 @@ function analyzeRecordsForDomain(domain, allRecords, zoneName) {
   const isSubdomain = domain !== zoneName;
   const subdomain = isSubdomain ? domain.replace(`.${zoneName}`, '') : '@';
 
-  console.log(`🔍 Analyzing records for ${domain} (subdomain: ${subdomain}, isSubdomain: ${isSubdomain})`);
+  console.log(`Analyzing records for ${domain} (subdomain: ${subdomain}, isSubdomain: ${isSubdomain})`);
 
   // Filter records relevant to this domain
   const relevantRecords = allRecords.filter(record => {
@@ -344,7 +344,7 @@ function analyzeRecordsForDomain(domain, allRecords, zoneName) {
     relevantRecords.push(...wwwRecords);
   }
 
-  console.log(`📋 Found ${relevantRecords.length} relevant records:`, 
+  console.log(`Found ${relevantRecords.length} relevant records:`, 
     relevantRecords.map(r => ({ name: r.name, type: r.type, content: r.content }))
   );
 
@@ -494,7 +494,7 @@ async function listCloudflareZones(authHeaders) {
     };
 
   } catch (error) {
-    console.error('❌ Failed to list zones:', error);
+    console.error('Failed to list zones:', error);
     return {
       statusCode: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -552,7 +552,7 @@ async function getZoneRecords(domain, zoneId, authHeaders) {
     };
 
   } catch (error) {
-    console.error('❌ Failed to get zone records:', error);
+    console.error('Failed to get zone records:', error);
     return {
       statusCode: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -569,7 +569,7 @@ async function getZoneRecords(domain, zoneId, authHeaders) {
  * Fallback public DNS validation when Cloudflare API is not available
  */
 async function performPublicDnsValidation(domain) {
-  console.log(`🌐 Performing public DNS validation for ${domain} (no Cloudflare API access)`);
+  console.log(`Performing public DNS validation for ${domain} (no Cloudflare API access)`);
 
   // Simulate DNS lookup results
   const isSubdomain = domain.split('.').length > 2;
@@ -662,7 +662,7 @@ async function updateDnsRecord(requestData, authHeaders) {
     };
 
   } catch (error) {
-    console.error('❌ Failed to update DNS record:', error);
+    console.error('Failed to update DNS record:', error);
     return {
       statusCode: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
