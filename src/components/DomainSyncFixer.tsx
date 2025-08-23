@@ -114,7 +114,11 @@ const DomainSyncFixer = ({ onSyncComplete }: { onSyncComplete?: () => void }) =>
       setMismatches(foundMismatches);
 
       if (foundMismatches.length === 0) {
-        toast.success('No domain sync issues found!');
+        if (netlifyResult.success) {
+          toast.success('No domain sync issues found!');
+        } else {
+          toast.info('Local domains scanned. Deploy Netlify functions for full sync checking.');
+        }
       } else {
         toast.warning(`Found ${foundMismatches.length} domain sync issue(s)`);
       }
