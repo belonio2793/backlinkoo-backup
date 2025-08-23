@@ -65,16 +65,19 @@ exports.handler = async (event, context) => {
     switch (action) {
       case 'getSiteInfo':
         return await getSiteInfo(siteId, headers);
-      
+
+      case 'getDomains':
+        return await getDomains(siteId, headers);
+
       case 'getDNSInfo':
         return await getDNSInfo(siteId, headers);
-      
+
       case 'getSSLStatus':
         return await getSSLStatus(siteId, headers);
-      
+
       case 'validateDomain':
         return await validateDomain(siteId, domain, headers);
-      
+
       case 'addDomainAlias':
         return await addDomainAlias(siteId, domain, headers);
 
@@ -83,7 +86,7 @@ exports.handler = async (event, context) => {
 
       case 'listDomainAliases':
         return await listDomainAliases(siteId, headers);
-      
+
       default:
         return await getFullDomainReport(siteId, domain, headers);
     }
@@ -371,7 +374,7 @@ async function addDomainAlias(siteId, domain, headers) {
       }),
     };
   } catch (error) {
-    console.error(`❌ Add domain alias failed for ${domain}:`, error);
+    console.error(`�� Add domain alias failed for ${domain}:`, error);
     throw error;
   }
 }
