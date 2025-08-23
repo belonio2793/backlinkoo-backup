@@ -60,6 +60,7 @@ const DomainsPage = () => {
   const [diagnosticResults, setDiagnosticResults] = useState<DiagnosticResult[]>([]);
   const [dnsModalOpen, setDnsModalOpen] = useState(false);
   const [selectedDomainForDns, setSelectedDomainForDns] = useState<Domain | null>(null);
+  const [verifyingDomains, setVerifyingDomains] = useState<Set<string>>(new Set());
 
   const BLOG_THEMES = [
     { id: 'minimal', name: 'Minimal Clean', description: 'Clean and simple design' },
@@ -437,7 +438,7 @@ const DomainsPage = () => {
       let result;
       try {
         result = await callNetlifyDomainFunction(domain.domain, domain.id);
-        console.log(`📋 Netlify function result:`, result);
+        console.log(`���� Netlify function result:`, result);
       } catch (functionError: any) {
         console.error('❌ Error calling Netlify function:', functionError);
         throw new Error(`Network error: Could not reach Netlify function. ${functionError.message || 'Please check your internet connection and try again.'}`);
