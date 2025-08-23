@@ -241,7 +241,8 @@ export function NetlifyApiTester() {
 
       {/* Main Content Tabs */}
       <Tabs defaultValue="site" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
+          <TabsTrigger value="deployment">Deployment</TabsTrigger>
           <TabsTrigger value="site">Site Info</TabsTrigger>
           <TabsTrigger value="dns">DNS Records</TabsTrigger>
           <TabsTrigger value="ssl">SSL Status</TabsTrigger>
