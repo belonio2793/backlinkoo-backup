@@ -115,8 +115,8 @@ export async function testNetlifyDomainFunction(domain: string = 'test.example.c
   }
 }
 
-// Auto-run test in development
-if (import.meta.env.DEV) {
+// Auto-run test in development (disabled to prevent initialization errors)
+if (import.meta.env.DEV && false) { // Disabled to prevent errors during page load
   // Run test after a short delay to avoid blocking initial load
   setTimeout(() => {
     console.log('🚀 Auto-running Netlify function test...');
