@@ -367,7 +367,7 @@ const DomainManagementTable = () => {
 
       toast.success(`Domain updated: ${oldDomain} → ${cleanedDomain}`);
       setEditingDomain(null);
-      await loadAllDomains();
+      await loadDomains();
 
     } catch (error: any) {
       console.error('Edit domain error:', error);
