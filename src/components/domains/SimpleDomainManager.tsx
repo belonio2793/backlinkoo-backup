@@ -62,22 +62,20 @@ const SimpleDomainManager = () => {
       console.log('🔍 Loading domains from database and Netlify...');
       console.log('👤 Current user:', user.email);
 
-      // Get the admin user ID for centralized domain management
-      const { data: adminUser, error: adminError } = await supabase
-        .from('auth.users')
-        .select('id')
-        .eq('email', 'support@backlinkoo.com')
-        .single();
+      const isAdminUser = user.email === 'support@backlinkoo.com';
+      console.log('🏢 Admin access:', isAdminUser ? 'YES - Loading all domains' : 'NO - Loading user domains only');
 
-      const domainUserId = adminUser?.id || user.id; // Fallback to current user if admin not found
-      console.log('🏢 Using domain management account:', domainUserId === user.id ? 'current user' : 'support@backlinkoo.com');
-
-      // Load domains from database (centralized under admin account)
-      const { data: dbDomains, error: dbError } = await supabase
+      // Load domains from database
+      // Admin user (support@backlinkoo.com) sees all domains, others see only their own
+      let query = supabase
         .from('domains')
-        .select('*')
-        .eq('user_id', domainUserId)
-        .order('created_at', { ascending: false });
+        .select('*');
+
+      if (!isAdminUser) {
+        query = query.eq('user_id', user.id);
+      }
+
+      const { data: dbDomains, error: dbError } = await query.order('created_at', { ascending: false });
 
       if (dbError) {
         throw new Error(`Database error: ${dbError.message}`);
