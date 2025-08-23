@@ -734,7 +734,7 @@ const DomainsPage = () => {
       // Log detailed results to console
       console.log('🔍 Network Diagnostic Results:', results);
       results.forEach(result => {
-        const emoji = result.status === 'success' ? '��' : result.status === 'warning' ? '⚠️' : '❌';
+        const emoji = result.status === 'success' ? '✅' : result.status === 'warning' ? '⚠️' : '❌';
         console.log(`${emoji} ${result.service}: ${result.message}`, result.details);
       });
 
@@ -849,59 +849,6 @@ const DomainsPage = () => {
           </p>
         </div>
 
-        {/* Netlify Integration Notice */}
-        <Card className="mb-6 border-green-200 bg-green-50/50">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3 mb-3">
-              <Globe className="h-6 w-6 text-green-600" />
-              <div>
-                <h3 className="font-semibold text-green-900">Netlify API Integration</h3>
-                <p className="text-sm text-green-700">
-                  Domains are automatically added as aliases to your Netlify site via API
-                </p>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm mb-3">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-green-600" />
-                <span>Programmatic domain addition</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-green-600" />
-                <span>Automatic DNS configuration</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-green-600" />
-                <span>SSL certificate provisioning</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-green-600" />
-                <span>Real-time verification</span>
-              </div>
-            </div>
-            <div className="bg-white rounded-lg p-3 border border-green-200">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm">
-                  <span className="font-medium">Configuration Status:</span>
-                  <Badge variant="outline" className="bg-green-50 border-green-200 text-green-800">
-                    ✅ Ready for Domain Management
-                  </Badge>
-                </div>
-                <a
-                  href="https://app.netlify.com/projects/backlinkoo/domain-management"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-green-600 hover:text-green-800 text-sm underline"
-                >
-                  View Netlify Dashboard →
-                </a>
-              </div>
-              <p className="text-xs text-gray-600 mt-1">
-                Using NETLIFY_ACCESS_TOKEN from environment variables for secure API access
-              </p>
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Domain Addition Interface */}
         <Card className="mb-8">
