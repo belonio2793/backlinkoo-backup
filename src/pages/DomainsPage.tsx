@@ -675,6 +675,40 @@ const DomainsPage = () => {
     }
   };
 
+  // Run network diagnostic to troubleshoot connectivity issues
+  const runDiagnostic = async () => {
+    setRunningDiagnostic(true);
+    try {
+      toast.info('🔍 Running network diagnostic...');
+      const results = await runNetworkDiagnostic();
+      setDiagnosticResults(results);
+
+      const errorCount = results.filter(r => r.status === 'error').length;
+      const warningCount = results.filter(r => r.status === 'warning').length;
+
+      if (errorCount > 0) {
+        toast.error(`❌ Diagnostic found ${errorCount} critical issues. Check console for details.`);
+      } else if (warningCount > 0) {
+        toast.warning(`⚠️ Diagnostic found ${warningCount} warnings. Check console for details.`);
+      } else {
+        toast.success('✅ All connectivity tests passed!');
+      }
+
+      // Log detailed results to console
+      console.log('🔍 Network Diagnostic Results:', results);
+      results.forEach(result => {
+        const emoji = result.status === 'success' ? '✅' : result.status === 'warning' ? '⚠️' : '❌';
+        console.log(`${emoji} ${result.service}: ${result.message}`, result.details);
+      });
+
+    } catch (error: any) {
+      console.error('Diagnostic error:', error);
+      toast.error(`Diagnostic failed: ${error.message}`);
+    } finally {
+      setRunningDiagnostic(false);
+    }
+  };
+
   const deleteDomain = async (domainId: string, domainName: string) => {
     if (!confirm(`Are you sure you want to delete ${domainName}?`)) {
       return;
