@@ -956,11 +956,9 @@ const DomainsPage = () => {
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="single" className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="single">Single Domain</TabsTrigger>
                 <TabsTrigger value="bulk">Bulk Addition</TabsTrigger>
-                <TabsTrigger value="api">API Testing</TabsTrigger>
-                <TabsTrigger value="comprehensive">Comprehensive Check</TabsTrigger>
               </TabsList>
 
               <TabsContent value="single" className="space-y-4 mt-6">
@@ -1000,45 +998,6 @@ const DomainsPage = () => {
                 <BulkDomainManager onDomainsAdded={loadDomains} />
               </TabsContent>
 
-              <TabsContent value="api" className="mt-6">
-                <NetlifyApiTester />
-              </TabsContent>
-
-              <TabsContent value="comprehensive" className="mt-6">
-                <div className="space-y-4">
-                  <div className="text-center">
-                    <h3 className="text-lg font-medium mb-2">Comprehensive Domain Validation</h3>
-                    <p className="text-sm text-gray-600 mb-4">
-                      Get detailed validation results combining Netlify configuration, DNS records, SSL certificates, and connectivity checks.
-                    </p>
-                  </div>
-
-                  {domains.length > 0 ? (
-                    <div>
-                      <label className="block text-sm font-medium mb-2">Select Domain to Validate:</label>
-                      <div className="flex gap-2 flex-wrap">
-                        {domains.map((domain) => (
-                          <Button
-                            key={domain.id}
-                            variant={selectedDomainForComprehensive?.id === domain.id ? "default" : "outline"}
-                            size="sm"
-                            onClick={() => {
-                              setSelectedDomainForComprehensive(domain);
-                              setShowComprehensiveValidation(true);
-                            }}
-                          >
-                            {domain.domain}
-                          </Button>
-                        ))}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="text-center py-8">
-                      <p className="text-gray-500">Add a domain first to run comprehensive validation</p>
-                    </div>
-                  )}
-                </div>
-              </TabsContent>
             </Tabs>
           </CardContent>
         </Card>
@@ -1197,22 +1156,6 @@ const DomainsPage = () => {
                         </div>
                       )}
 
-                      {/* Manual Instructions Section */}
-                      {showManualInstructions.has(domain.id) && (
-                        <div className="mb-4">
-                          <ManualDomainInstructions
-                            domain={domain.domain}
-                            isVisible={true}
-                            onClose={() => {
-                              setShowManualInstructions(prev => {
-                                const newSet = new Set(prev);
-                                newSet.delete(domain.id);
-                                return newSet;
-                              });
-                            }}
-                          />
-                        </div>
-                      )}
 
                       {/* Actions Section */}
                       <div className="border-t pt-4">
@@ -1280,18 +1223,6 @@ const DomainsPage = () => {
                             )}
                           </Button>
 
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedDomainForComprehensive(domain);
-                              setShowComprehensiveValidation(true);
-                            }}
-                            className="text-blue-600 border-blue-300 hover:bg-blue-50"
-                          >
-                            <Globe className="h-4 w-4 mr-2" />
-                            Comprehensive Check
-                          </Button>
                         </div>
                       </div>
                     </CardContent>
@@ -1302,37 +1233,6 @@ const DomainsPage = () => {
           </CardContent>
         </Card>
 
-        {/* Comprehensive Domain Validation Section */}
-        {showComprehensiveValidation && selectedDomainForComprehensive && (
-          <Card className="mt-8">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span>Comprehensive Validation Results</span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setShowComprehensiveValidation(false);
-                    setSelectedDomainForComprehensive(null);
-                  }}
-                >
-                  Close
-                </Button>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ComprehensiveDomainStatus
-                domain={selectedDomainForComprehensive.domain}
-                domainId={selectedDomainForComprehensive.id}
-                autoCheck={true}
-                onStatusChange={(status) => {
-                  console.log('Domain validation status updated:', status);
-                  // You can update the domain status in the domains list here if needed
-                }}
-              />
-            </CardContent>
-          </Card>
-        )}
       </div>
 
       <Footer />
