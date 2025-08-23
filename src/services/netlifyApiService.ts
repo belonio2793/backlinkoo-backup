@@ -253,33 +253,76 @@ export class NetlifyApiService {
         })
       });
 
-      if (!response.ok) {
-        throw new Error(`Fallback failed: HTTP ${response.status}: ${response.statusText}`);
+      if (response.ok) {
+        const result = await response.json();
+
+        // Convert fallback response format to expected format
+        if (result.success) {
+          return {
+            success: true,
+            action: 'addDomainAlias',
+            message: result.message || `Successfully added ${domain} via fallback method`,
+            domain: domain
+          };
+        } else {
+          throw new Error(result.error || 'Fallback method failed');
+        }
       }
 
-      const result = await response.json();
-
-      // Convert fallback response format to expected format
-      if (result.success) {
-        return {
-          success: true,
-          action: 'addDomainAlias',
-          message: result.message || `Successfully added ${domain} via fallback method`,
-          domain: domain
-        };
-      } else {
-        return {
-          success: false,
-          error: result.error || 'Fallback method failed',
-          domain: domain
-        };
+      // If fallback also fails with 404, try direct API approach
+      if (response.status === 404) {
+        console.warn(`⚠️ Fallback function also not available (404), trying direct API for ${domain}`);
+        return await this.addDomainDirectFallback(domain);
       }
+
+      throw new Error(`Fallback failed: HTTP ${response.status}: ${response.statusText}`);
+
     } catch (error) {
       console.error(`❌ Fallback method failed for ${domain}:`, error);
+
+      // If fallback fails, try direct API as final attempt
+      console.warn(`⚠️ All functions failed, trying direct API for ${domain}`);
+      return await this.addDomainDirectFallback(domain);
+    }
+  }
+
+  /**
+   * Final fallback using direct API or simulation
+   */
+  private static async addDomainDirectFallback(domain: string): Promise<NetlifyApiResponse> {
+    try {
+      console.log(`🔗 Using direct API fallback for ${domain}`);
+
+      // Use the direct API approach
+      const result = await DirectNetlifyApi.addDomainWithFallbacks(domain);
+
+      // Convert direct API response to expected format
+      return {
+        success: result.success,
+        action: 'addDomainAlias',
+        message: result.message || (result.success ? `Domain ${domain} processed via direct method` : undefined),
+        error: result.error,
+        domain: domain,
+        data: {
+          method: result.method,
+          note: result.method === 'mock' ? 'This is a simulation. Deploy Netlify functions for real functionality.' : undefined,
+          ...result.data
+        }
+      };
+    } catch (error) {
+      console.error(`❌ Direct API fallback failed for ${domain}:`, error);
+
+      // Return instructions for manual addition
+      const instructions = DirectNetlifyApi.getDomainAdditionInstructions(domain);
+
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Fallback method failed',
-        domain: domain
+        error: 'All automated methods failed. Manual addition required.',
+        domain: domain,
+        data: {
+          method: 'manual_required',
+          instructions: instructions
+        }
       };
     }
   }
