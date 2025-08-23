@@ -754,6 +754,28 @@ const DomainsPage = () => {
     }
   };
 
+  // Test Netlify function directly for debugging
+  const testNetlifyFunction = async () => {
+    setRunningDiagnostic(true);
+    try {
+      toast.info('🧪 Testing Netlify function directly...');
+      const result = await testNetlifyDomainFunction('leadpages.org');
+
+      if (result.error) {
+        toast.error(`❌ Netlify function test failed: ${result.error}`);
+        console.error('🧪 Function test failed:', result);
+      } else {
+        toast.success('✅ Netlify function test passed!');
+        console.log('🧪 Function test succeeded:', result);
+      }
+    } catch (error: any) {
+      console.error('💥 Test execution failed:', error);
+      toast.error(`Test failed: ${error.message}`);
+    } finally {
+      setRunningDiagnostic(false);
+    }
+  };
+
   const deleteDomain = async (domainId: string, domainName: string) => {
     if (!confirm(`Are you sure you want to delete ${domainName}?`)) {
       return;
