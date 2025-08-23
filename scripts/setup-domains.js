@@ -146,11 +146,11 @@ async function manualSetup() {
 }
 
 // Main execution
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   setupDomainsTable().catch(error => {
     console.error('❌ Setup script failed:', error);
     manualSetup();
   });
 }
 
-module.exports = { setupDomainsTable };
+export { setupDomainsTable };
