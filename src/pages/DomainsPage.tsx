@@ -819,7 +819,7 @@ const DomainsPage = () => {
                               variant="outline"
                               size="sm"
                               onClick={() => retryDomainToNetlify(domain.id)}
-                              disabled={retryingDomains.has(domain.id)}
+                              disabled={retryingDomains.has(domain.id) || diagnosingDomains.has(domain.id)}
                               className="text-blue-600 border-blue-300 hover:bg-blue-50"
                             >
                               {retryingDomains.has(domain.id) ? (
@@ -831,6 +831,25 @@ const DomainsPage = () => {
                                 <>
                                   <CheckCircle2 className="h-3 w-3 mr-1" />
                                   Retry Netlify
+                                </>
+                              )}
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => diagnoseDomainIssue(domain.id)}
+                              disabled={diagnosingDomains.has(domain.id) || retryingDomains.has(domain.id)}
+                              className="text-amber-600 border-amber-300 hover:bg-amber-50"
+                            >
+                              {diagnosingDomains.has(domain.id) ? (
+                                <>
+                                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                  Diagnosing...
+                                </>
+                              ) : (
+                                <>
+                                  <AlertTriangle className="h-3 w-3 mr-1" />
+                                  Diagnose
                                 </>
                               )}
                             </Button>
