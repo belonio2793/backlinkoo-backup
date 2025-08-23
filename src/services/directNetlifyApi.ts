@@ -30,7 +30,7 @@ export class DirectNetlifyApi {
       const response = await fetch(`https://api.netlify.com/api/v1/sites/ca6261e6-0a59-40b5-a2bc-5b5481ac8809`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${process.env.NETLIFY_ACCESS_TOKEN}`,
+          'Authorization': `Bearer ${import.meta.env.VITE_NETLIFY_ACCESS_TOKEN}`,
           'Content-Type': 'application/json'
         }
       });
