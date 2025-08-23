@@ -35,13 +35,13 @@ Users receive specific instructions based on domain type:
 ```
 A Record: @ → 75.2.60.5
 A Record: @ → 99.83.190.102
-CNAME: www → ca6261e6-0a59-40b5-a2bc-5b5481ac8809.netlify.app
+CNAME: www → backlinkoo.netlify.app
 ```
 
 #### **Subdomains** (blog.example.com)
 ```
 TXT: netlify-challenge.blog.example.com → verification-value
-CNAME: blog → ca6261e6-0a59-40b5-a2bc-5b5481ac8809.netlify.app
+CNAME: blog → backlinkoo.netlify.app
 ```
 
 ### 4. **Status Workflow**

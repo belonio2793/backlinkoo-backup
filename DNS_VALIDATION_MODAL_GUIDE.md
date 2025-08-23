@@ -33,7 +33,7 @@ Description: Secondary Netlify load balancer
 
 Type: CNAME
 Name: www
-Value: ca6261e6-0a59-40b5-a2bc-5b5481ac8809.netlify.app
+Value: backlinkoo.netlify.app
 TTL: 3600
 Description: Points www to Netlify
 ```
@@ -42,7 +42,7 @@ Description: Points www to Netlify
 ```
 Type: CNAME
 Name: blog
-Value: ca6261e6-0a59-40b5-a2bc-5b5481ac8809.netlify.app
+Value: backlinkoo.netlify.app
 TTL: 3600
 Description: Points subdomain to Netlify
 ```

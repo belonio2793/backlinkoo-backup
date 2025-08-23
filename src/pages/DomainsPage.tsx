@@ -3,6 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Globe,
   Plus,
@@ -20,6 +22,7 @@ import { runNetworkDiagnostic, DiagnosticResult } from '@/utils/networkDiagnosti
 import { testNetlifyDomainFunction } from '@/utils/testNetlifyFunction';
 import { callNetlifyDomainFunction } from '@/services/netlifyDomainMock';
 import { DnsValidationModal } from '@/components/DnsValidationModal';
+import { BulkDomainManager } from '@/components/BulkDomainManager';
 
 interface Domain {
   id: string;
@@ -58,6 +61,7 @@ const DomainsPage = () => {
   const [diagnosticResults, setDiagnosticResults] = useState<DiagnosticResult[]>([]);
   const [dnsModalOpen, setDnsModalOpen] = useState(false);
   const [selectedDomainForDns, setSelectedDomainForDns] = useState<Domain | null>(null);
+  const [verifyingDomains, setVerifyingDomains] = useState<Set<string>>(new Set());
 
   const BLOG_THEMES = [
     { id: 'minimal', name: 'Minimal Clean', description: 'Clean and simple design' },
@@ -201,6 +205,10 @@ const DomainsPage = () => {
       // Auto-add to Netlify and fetch DNS records
       setTimeout(async () => {
         await addDomainToNetlify(data);
+        // Verify domain was actually added after a short delay
+        setTimeout(async () => {
+          await verifyDomainInNetlify(data);
+        }, 2000);
       }, 1000);
 
     } catch (error: any) {
@@ -401,6 +409,11 @@ const DomainsPage = () => {
       // Use the same logic as addDomainToNetlify
       await addDomainToNetlify(domain);
 
+      // Verify domain was actually added
+      setTimeout(async () => {
+        await verifyDomainInNetlify(domain);
+      }, 2000);
+
     } catch (error: any) {
       console.error('Retry error:', error);
       toast.error(`Retry failed: ${error.message}`);
@@ -408,6 +421,86 @@ const DomainsPage = () => {
       setRetryingDomains(prev => {
         const newSet = new Set(prev);
         newSet.delete(domainId);
+        return newSet;
+      });
+    }
+  };
+
+  // Verify domain exists in Netlify
+  const verifyDomainInNetlify = async (domain: Domain) => {
+    if (!domain) return;
+
+    setVerifyingDomains(prev => new Set(prev).add(domain.id));
+
+    try {
+      console.log(`🔍 Verifying ${domain.domain} in Netlify...`);
+
+      const response = await fetch('/.netlify/functions/verify-netlify-domain', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ domain: domain.domain })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+
+        console.log('🔍 Verification result:', result);
+
+        if (result.success && result.verification.domain_found) {
+          // Update domain status to show it's verified in Netlify
+          await supabase
+            .from('domains')
+            .update({
+              netlify_verified: true,
+              status: 'dns_ready',
+              error_message: null
+            })
+            .eq('id', domain.id);
+
+          setDomains(prev => prev.map(d =>
+            d.id === domain.id ? {
+              ...d,
+              netlify_verified: true,
+              status: 'dns_ready',
+              error_message: null
+            } : d
+          ));
+
+          toast.success(`✅ ${domain.domain} verified in Netlify!`);
+        } else {
+          // Domain not found in Netlify
+          await supabase
+            .from('domains')
+            .update({
+              netlify_verified: false,
+              status: 'error',
+              error_message: 'Domain not found in Netlify site aliases'
+            })
+            .eq('id', domain.id);
+
+          setDomains(prev => prev.map(d =>
+            d.id === domain.id ? {
+              ...d,
+              netlify_verified: false,
+              status: 'error',
+              error_message: 'Domain not found in Netlify site aliases'
+            } : d
+          ));
+
+          toast.error(`❌ ${domain.domain} not found in Netlify`);
+        }
+      } else {
+        console.error('Verification failed:', response.statusText);
+        toast.warning(`⚠️ Could not verify ${domain.domain} in Netlify`);
+      }
+
+    } catch (error: any) {
+      console.error('Verification error:', error);
+      toast.warning(`⚠️ Verification failed for ${domain.domain}: ${error.message}`);
+    } finally {
+      setVerifyingDomains(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(domain.id);
         return newSet;
       });
     }
@@ -756,42 +849,112 @@ const DomainsPage = () => {
           </p>
         </div>
 
-        {/* Add Domain Section */}
+        {/* Netlify Integration Notice */}
+        <Card className="mb-6 border-blue-200 bg-blue-50/50">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3 mb-3">
+              <Globe className="h-6 w-6 text-blue-600" />
+              <div>
+                <h3 className="font-semibold text-blue-900">Netlify API Integration</h3>
+                <p className="text-sm text-blue-700">
+                  Domains are automatically added as aliases to your Netlify site via API
+                </p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm mb-3">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-green-600" />
+                <span>Programmatic domain addition</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-green-600" />
+                <span>Automatic DNS configuration</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-green-600" />
+                <span>SSL certificate provisioning</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-green-600" />
+                <span>Real-time verification</span>
+              </div>
+            </div>
+            <div className="bg-white rounded-lg p-3 border border-blue-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="font-medium">Configuration Status:</span>
+                  <Badge variant="outline" className="bg-orange-50 border-orange-200 text-orange-800">
+                    ⚠️ Requires Netlify Access Token
+                  </Badge>
+                </div>
+                <a
+                  href="https://app.netlify.com/projects/backlinkoo/domain-management"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-800 text-sm underline"
+                >
+                  View Netlify Dashboard →
+                </a>
+              </div>
+              <p className="text-xs text-gray-600 mt-1">
+                Set NETLIFY_ACCESS_TOKEN environment variable to enable real domain addition
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Domain Addition Interface */}
         <Card className="mb-8">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Plus className="h-5 w-5" />
-              Add New Domain
+              Add Domains to Netlify
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex gap-3">
-              <Input
-                placeholder="example.com"
-                value={newDomain}
-                onChange={(e) => setNewDomain(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && !addingDomain && addDomain()}
-                disabled={addingDomain}
-                className="flex-1"
-              />
-              <Button 
-                onClick={addDomain}
-                disabled={addingDomain || !newDomain.trim()}
-                className="min-w-[120px]"
-              >
-                {addingDomain ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Adding...
-                  </>
-                ) : (
-                  <>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Domain
-                  </>
-                )}
-              </Button>
-            </div>
+            <Tabs defaultValue="single" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="single">Single Domain</TabsTrigger>
+                <TabsTrigger value="bulk">Bulk Addition</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="single" className="space-y-4 mt-6">
+                <div className="flex gap-3">
+                  <Input
+                    placeholder="example.com"
+                    value={newDomain}
+                    onChange={(e) => setNewDomain(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && !addingDomain && addDomain()}
+                    disabled={addingDomain}
+                    className="flex-1"
+                  />
+                  <Button
+                    onClick={addDomain}
+                    disabled={addingDomain || !newDomain.trim()}
+                    className="min-w-[140px]"
+                  >
+                    {addingDomain ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Adding...
+                      </>
+                    ) : (
+                      <>
+                        <Globe className="h-4 w-4 mr-2" />
+                        Add to Netlify
+                      </>
+                    )}
+                  </Button>
+                </div>
+                <p className="text-sm text-gray-600">
+                  Domain will be automatically added as an alias to your Netlify site and configured via API
+                </p>
+              </TabsContent>
+
+              <TabsContent value="bulk" className="mt-6">
+                <BulkDomainManager onDomainsAdded={loadDomains} />
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
 
@@ -876,7 +1039,9 @@ const DomainsPage = () => {
                       
                       <div className="flex items-center gap-4 text-sm text-gray-600">
                         <div className="flex items-center gap-1">
-                          {domain.netlify_verified !== undefined ? (
+                          {verifyingDomains.has(domain.id) ? (
+                            <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                          ) : domain.netlify_verified !== undefined ? (
                             domain.netlify_verified ? (
                               <CheckCircle2 className="h-4 w-4 text-green-600" />
                             ) : (
@@ -885,7 +1050,13 @@ const DomainsPage = () => {
                           ) : (
                             <AlertTriangle className="h-4 w-4 text-gray-400" />
                           )}
-                          <span>Netlify: {domain.netlify_verified ? 'Verified' : domain.netlify_verified === false ? 'Not Found' : 'Pending'}</span>
+                          <span>
+                            Netlify: {
+                              verifyingDomains.has(domain.id) ? 'Checking...' :
+                              domain.netlify_verified ? 'Verified in Site' :
+                              domain.netlify_verified === false ? 'Not Found in Site' : 'Pending Verification'
+                            }
+                          </span>
                         </div>
 
                         <div className="flex items-center gap-1">
@@ -918,12 +1089,12 @@ const DomainsPage = () => {
                               {retryingDomains.has(domain.id) ? (
                                 <>
                                   <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                                  Retrying...
+                                  Retrying API...
                                 </>
                               ) : (
                                 <>
                                   <CheckCircle2 className="h-3 w-3 mr-1" />
-                                  Retry Netlify
+                                  Retry Netlify API
                                 </>
                               )}
                             </Button>
@@ -955,16 +1126,36 @@ const DomainsPage = () => {
                       <Button
                         variant="outline"
                         size="sm"
+                        onClick={() => verifyDomainInNetlify(domain)}
+                        disabled={verifyingDomains.has(domain.id)}
+                        className="text-blue-600 border-blue-300 hover:bg-blue-50"
+                      >
+                        {verifyingDomains.has(domain.id) ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                            Verifying...
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle2 className="h-4 w-4 mr-1" />
+                            Verify in Netlify
+                          </>
+                        )}
+                      </Button>
+
+                      <Button
+                        variant="outline"
+                        size="sm"
                         onClick={() => validateDomain(domain.id)}
                         disabled={validatingDomains.has(domain.id)}
                       >
                         {validatingDomains.has(domain.id) ? (
                           <>
                             <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                            Validating
+                            DNS Check
                           </>
                         ) : (
-                          'Validate'
+                          'DNS Check'
                         )}
                       </Button>
 
@@ -978,12 +1169,12 @@ const DomainsPage = () => {
                         {addingToNetlify.has(domain.id) ? (
                           <>
                             <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                            Adding...
+                            Adding via API...
                           </>
                         ) : (
                           <>
                             <Globe className="h-4 w-4 mr-1" />
-                            Add to Netlify
+                            Add via Netlify API
                           </>
                         )}
                       </Button>
