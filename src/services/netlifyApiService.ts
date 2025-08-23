@@ -1,0 +1,331 @@
+/**
+ * Netlify API Service
+ * 
+ * Official Netlify API integration for domain management and validation
+ * Based on Netlify API documentation: https://docs.netlify.com/api/get-started/
+ */
+
+export interface NetlifyApiResponse<T = any> {
+  success: boolean;
+  action?: string;
+  data?: T;
+  error?: string;
+  domain?: string;
+  validation?: DomainValidation;
+  message?: string;
+}
+
+export interface DomainValidation {
+  domain_exists_in_netlify: boolean;
+  is_custom_domain: boolean;
+  is_domain_alias: boolean;
+  dns_records_found: boolean;
+  ssl_configured: boolean;
+  validation_status: 'valid' | 'not_configured' | 'pending' | 'error';
+}
+
+export interface SiteInfo {
+  id: string;
+  name: string;
+  url: string;
+  ssl_url?: string;
+  custom_domain?: string;
+  domain_aliases: string[];
+  state: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DNSRecord {
+  id: string;
+  hostname: string;
+  type: string;
+  value: string;
+  ttl: number;
+  priority?: number;
+  dns_zone_id: string;
+  site_id: string;
+  managed: boolean;
+}
+
+export interface SSLStatus {
+  state: string;
+  domains: string[];
+  expires_at?: string;
+  created_at?: string;
+}
+
+export class NetlifyApiService {
+  private static baseUrl = '/.netlify/functions/netlify-domain-validation';
+
+  /**
+   * Get comprehensive site information
+   */
+  static async getSiteInfo(): Promise<NetlifyApiResponse<SiteInfo>> {
+    try {
+      const response = await fetch(this.baseUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'getSiteInfo' })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('❌ Get site info failed:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to get site info'
+      };
+    }
+  }
+
+  /**
+   * Get DNS configuration for the site
+   */
+  static async getDNSInfo(): Promise<NetlifyApiResponse<{ dns_records: DNSRecord[]; record_count: number; record_types: string[] }>> {
+    try {
+      const response = await fetch(this.baseUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'getDNSInfo' })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('❌ Get DNS info failed:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to get DNS info'
+      };
+    }
+  }
+
+  /**
+   * Get SSL certificate status
+   */
+  static async getSSLStatus(): Promise<NetlifyApiResponse<SSLStatus>> {
+    try {
+      const response = await fetch(this.baseUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'getSSLStatus' })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('❌ Get SSL status failed:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to get SSL status'
+      };
+    }
+  }
+
+  /**
+   * Validate a specific domain
+   */
+  static async validateDomain(domain: string): Promise<NetlifyApiResponse> {
+    try {
+      const response = await fetch(this.baseUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          action: 'validateDomain',
+          domain: domain
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error(`❌ Validate domain failed for ${domain}:`, error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to validate domain',
+        domain: domain
+      };
+    }
+  }
+
+  /**
+   * Add domain as alias to Netlify site
+   */
+  static async addDomainAlias(domain: string): Promise<NetlifyApiResponse> {
+    try {
+      const response = await fetch(this.baseUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          action: 'addDomainAlias',
+          domain: domain
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error(`❌ Add domain alias failed for ${domain}:`, error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to add domain alias',
+        domain: domain
+      };
+    }
+  }
+
+  /**
+   * List all domain aliases for the site
+   */
+  static async listDomainAliases(): Promise<NetlifyApiResponse<{ 
+    site_name: string; 
+    custom_domain?: string; 
+    domain_aliases: string[]; 
+    ssl_url?: string; 
+    total_domains: number; 
+  }>> {
+    try {
+      const response = await fetch(this.baseUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'listDomainAliases' })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('❌ List domain aliases failed:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to list domain aliases'
+      };
+    }
+  }
+
+  /**
+   * Get comprehensive domain report
+   */
+  static async getFullDomainReport(domain?: string): Promise<NetlifyApiResponse> {
+    try {
+      const response = await fetch(this.baseUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          action: 'getFullDomainReport',
+          domain: domain
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('❌ Full domain report failed:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to get domain report'
+      };
+    }
+  }
+
+  /**
+   * Test Netlify API connectivity
+   */
+  static async testConnection(): Promise<NetlifyApiResponse> {
+    try {
+      console.log('🧪 Testing Netlify API connectivity...');
+      
+      const siteInfo = await this.getSiteInfo();
+      
+      if (siteInfo.success) {
+        console.log('✅ Netlify API connection successful');
+        return {
+          success: true,
+          message: 'Netlify API connection successful',
+          data: {
+            site_name: siteInfo.data?.name,
+            domain_count: siteInfo.data?.domain_aliases?.length || 0,
+            has_custom_domain: !!siteInfo.data?.custom_domain,
+            ssl_enabled: !!siteInfo.data?.ssl_url
+          }
+        };
+      } else {
+        console.error('❌ Netlify API connection failed:', siteInfo.error);
+        return {
+          success: false,
+          error: `Connection test failed: ${siteInfo.error}`
+        };
+      }
+    } catch (error) {
+      console.error('❌ Netlify API test failed:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Connection test failed'
+      };
+    }
+  }
+
+  /**
+   * Check if domain exists in Netlify site (quick check)
+   */
+  static async quickDomainCheck(domain: string): Promise<{
+    exists: boolean;
+    isCustomDomain: boolean;
+    isAlias: boolean;
+    error?: string;
+  }> {
+    try {
+      const siteInfo = await this.getSiteInfo();
+      
+      if (!siteInfo.success || !siteInfo.data) {
+        return {
+          exists: false,
+          isCustomDomain: false,
+          isAlias: false,
+          error: siteInfo.error || 'Failed to get site info'
+        };
+      }
+
+      const { custom_domain, domain_aliases } = siteInfo.data;
+      const isCustomDomain = custom_domain === domain;
+      const isAlias = domain_aliases.includes(domain);
+
+      return {
+        exists: isCustomDomain || isAlias,
+        isCustomDomain,
+        isAlias
+      };
+    } catch (error) {
+      return {
+        exists: false,
+        isCustomDomain: false,
+        isAlias: false,
+        error: error instanceof Error ? error.message : 'Quick check failed'
+      };
+    }
+  }
+}
+
+export default NetlifyApiService;
