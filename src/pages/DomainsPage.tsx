@@ -311,6 +311,48 @@ const DomainsPage = () => {
     }
   };
 
+  // Retry adding domain to Netlify with enhanced error handling
+  const retryDomainToNetlify = async (domainId: string) => {
+    const domain = domains.find(d => d.id === domainId);
+    if (!domain) {
+      toast.error('Domain not found');
+      return;
+    }
+
+    setRetryingDomains(prev => new Set(prev).add(domainId));
+
+    try {
+      toast.info(`🔄 Retrying ${domain.domain} addition to Netlify...`);
+
+      // Reset domain status before retry
+      await supabase
+        .from('domains')
+        .update({
+          error_message: null
+        })
+        .eq('id', domainId)
+        .eq('user_id', user?.id);
+
+      // Clear error from local state
+      setDomains(prev => prev.map(d =>
+        d.id === domainId ? { ...d, error_message: null, status: 'validating' } : d
+      ));
+
+      // Use the same logic as addDomainToNetlify
+      await addDomainToNetlify(domain);
+
+    } catch (error: any) {
+      console.error('Retry error:', error);
+      toast.error(`Retry failed: ${error.message}`);
+    } finally {
+      setRetryingDomains(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(domainId);
+        return newSet;
+      });
+    }
+  };
+
   // Add domain to Netlify using the optimized function
   const addDomainToNetlify = async (domain: Domain) => {
     try {
