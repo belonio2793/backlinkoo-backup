@@ -122,8 +122,8 @@ export class NetlifyApiService {
   private static async getSiteInfoDirect(): Promise<NetlifyApiResponse<SiteInfo>> {
     try {
       // Get environment variables from window if available
-      const netlifyToken = (window as any)?.ENV?.NETLIFY_ACCESS_TOKEN || process.env.NETLIFY_ACCESS_TOKEN;
-      const siteId = (window as any)?.ENV?.NETLIFY_SITE_ID || process.env.NETLIFY_SITE_ID || 'ca6261e6-0a59-40b5-a2bc-5b5481ac8809';
+      const netlifyToken = (window as any)?.ENV?.NETLIFY_ACCESS_TOKEN || import.meta.env.VITE_NETLIFY_ACCESS_TOKEN;
+      const siteId = (window as any)?.ENV?.NETLIFY_SITE_ID || import.meta.env.VITE_NETLIFY_SITE_ID || 'ca6261e6-0a59-40b5-a2bc-5b5481ac8809';
 
       if (!netlifyToken) {
         // Return a mock response for now - this is better than failing completely
