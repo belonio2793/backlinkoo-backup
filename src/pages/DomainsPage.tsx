@@ -28,6 +28,7 @@ import { BulkDomainManager } from '@/components/BulkDomainManager';
 import { NetlifyApiTester } from '@/components/NetlifyApiTester';
 import { NetlifyDeploymentChecker } from '@/components/NetlifyDeploymentChecker';
 import { ManualDomainInstructions } from '@/components/ManualDomainInstructions';
+import { FunctionStatusIndicator } from '@/components/FunctionStatusIndicator';
 
 interface Domain {
   id: string;
