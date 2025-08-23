@@ -119,8 +119,8 @@ async function simulateDnsValidation(domain) {
       {
         type: 'CNAME',
         name: domain.split('.')[0],
-        expectedValue: 'ca6261e6-0a59-40b5-a2bc-5b5481ac8809.netlify.app',
-        currentValue: Math.random() > 0.3 ? 'ca6261e6-0a59-40b5-a2bc-5b5481ac8809.netlify.app' : 'old-server.example.com',
+        expectedValue: 'backlinkoo.netlify.app',
+        currentValue: Math.random() > 0.3 ? 'backlinkoo.netlify.app' : 'old-server.example.com',
         status: Math.random() > 0.3 ? 'verified' : 'error',
         error: Math.random() > 0.7 ? 'CNAME record not found' : undefined
       }
@@ -147,8 +147,8 @@ async function simulateDnsValidation(domain) {
       {
         type: 'CNAME',
         name: 'www',
-        expectedValue: 'ca6261e6-0a59-40b5-a2bc-5b5481ac8809.netlify.app',
-        currentValue: Math.random() > 0.5 ? 'ca6261e6-0a59-40b5-a2bc-5b5481ac8809.netlify.app' : 'old-server.example.com',
+        expectedValue: 'backlinkoo.netlify.app',
+        currentValue: Math.random() > 0.5 ? 'backlinkoo.netlify.app' : 'old-server.example.com',
         status: Math.random() > 0.5 ? 'verified' : 'error',
         error: Math.random() > 0.7 ? 'WWW CNAME record not found' : undefined
       }

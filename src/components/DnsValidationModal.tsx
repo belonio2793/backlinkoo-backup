@@ -96,7 +96,7 @@ export function DnsValidationModal({
         {
           type: 'CNAME',
           name: domain.split('.')[0],
-          value: 'ca6261e6-0a59-40b5-a2bc-5b5481ac8809.netlify.app',
+          value: 'backlinkoo.netlify.app',
           ttl: 3600,
           required: true,
           description: 'Points subdomain to Netlify',
@@ -127,7 +127,7 @@ export function DnsValidationModal({
         {
           type: 'CNAME',
           name: 'www',
-          value: 'ca6261e6-0a59-40b5-a2bc-5b5481ac8809.netlify.app',
+          value: 'backlinkoo.netlify.app',
           ttl: 3600,
           required: true,
           description: 'Points www to Netlify',
