@@ -1005,7 +1005,9 @@ const DomainsPage = () => {
                       
                       <div className="flex items-center gap-4 text-sm text-gray-600">
                         <div className="flex items-center gap-1">
-                          {domain.netlify_verified !== undefined ? (
+                          {verifyingDomains.has(domain.id) ? (
+                            <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                          ) : domain.netlify_verified !== undefined ? (
                             domain.netlify_verified ? (
                               <CheckCircle2 className="h-4 w-4 text-green-600" />
                             ) : (
@@ -1014,7 +1016,13 @@ const DomainsPage = () => {
                           ) : (
                             <AlertTriangle className="h-4 w-4 text-gray-400" />
                           )}
-                          <span>Netlify: {domain.netlify_verified ? 'Verified' : domain.netlify_verified === false ? 'Not Found' : 'Pending'}</span>
+                          <span>
+                            Netlify: {
+                              verifyingDomains.has(domain.id) ? 'Checking...' :
+                              domain.netlify_verified ? 'Verified in Site' :
+                              domain.netlify_verified === false ? 'Not Found in Site' : 'Pending Verification'
+                            }
+                          </span>
                         </div>
 
                         <div className="flex items-center gap-1">
