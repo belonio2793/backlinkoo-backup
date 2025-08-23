@@ -60,6 +60,7 @@ const DomainsPage = () => {
   const [selectedDomainForDns, setSelectedDomainForDns] = useState<Domain | null>(null);
   const [verifyingDomains, setVerifyingDomains] = useState<Set<string>>(new Set());
   const [deletingDomains, setDeletingDomains] = useState<Set<string>>(new Set());
+  const [removingFromNetlify, setRemovingFromNetlify] = useState<Set<string>>(new Set());
 
   const BLOG_THEMES = [
     { id: 'minimal', name: 'Minimal Clean', description: 'Clean and simple design' },
