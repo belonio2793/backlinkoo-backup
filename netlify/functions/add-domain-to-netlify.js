@@ -2,11 +2,10 @@
  * Add Domain to Netlify as Alias - Official API Implementation
  *
  * This function adds domains as ALIASES to your existing Netlify site, preserving
- * your primary domain (backlinkoo.com). It does NOT replace the primary domain.
+ * your primary domain. Uses the official Netlify API documentation.
  *
- * Uses the Netlify Site Aliases API: POST /api/v1/sites/{site_id}/aliases
- *
- * Integrates with the DomainsPage workflow for seamless domain addition.
+ * API Endpoint: PATCH /api/v1/sites/{site_id}
+ * Documentation: https://docs.netlify.com/manage/domains/manage-domains/manage-multiple-domains/
  */
 
 const corsHeaders = {
@@ -38,14 +37,14 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    console.log('🚀 Netlify function started, processing domain addition request...');
+    console.log('🚀 Netlify domain addition function started...');
 
     // Parse request body
     let requestData = {};
     if (event.body) {
       try {
         requestData = JSON.parse(event.body);
-        console.log('📋 Request data parsed:', { domain: requestData.domain, domainId: requestData.domainId });
+        console.log('📋 Request data:', { domain: requestData.domain, domainId: requestData.domainId });
       } catch (error) {
         console.error('❌ Invalid JSON in request body:', error);
         return {
@@ -79,6 +78,7 @@ exports.handler = async (event, context) => {
     console.log('🔑 Environment check:', {
       hasToken: !!netlifyToken,
       tokenLength: netlifyToken?.length || 0,
+      tokenPreview: netlifyToken ? `${netlifyToken.substring(0, 8)}...` : 'none',
       siteId: siteId
     });
 
@@ -90,12 +90,10 @@ exports.handler = async (event, context) => {
         body: JSON.stringify({
           success: false,
           error: 'Netlify access token not configured',
-          details: 'NETLIFY_ACCESS_TOKEN environment variable is missing'
+          details: 'NETLIFY_ACCESS_TOKEN environment variable is missing. Please configure your Netlify personal access token.'
         }),
       };
     }
-
-    console.log(`🚀 Adding domain ${domain} as alias to Netlify site ${siteId} (preserving primary domain)...`);
 
     // Clean the domain name (remove protocol, www, trailing slash)
     const cleanDomain = domain.trim()
@@ -103,6 +101,8 @@ exports.handler = async (event, context) => {
       .replace(/^https?:\/\//, '')
       .replace(/^www\./, '')
       .replace(/\/$/, '');
+
+    console.log(`🧹 Cleaned domain: ${domain} → ${cleanDomain}`);
 
     // Validate domain format
     const domainRegex = /^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z]{2,})+$/;
@@ -112,16 +112,15 @@ exports.handler = async (event, context) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           success: false,
-          error: 'Invalid domain format'
+          error: `Invalid domain format: ${cleanDomain}`
         }),
       };
     }
 
-    // Check if domain is a subdomain (requires TXT verification)
-    const isSubdomain = cleanDomain.split('.').length > 2;
+    console.log(`🚀 Adding domain ${cleanDomain} as alias to Netlify site ${siteId}...`);
 
-    // First, get the current site configuration to retrieve existing aliases
-    console.log('📋 Getting current site configuration...');
+    // Step 1: Get current site configuration to retrieve existing aliases
+    console.log('📋 Step 1: Getting current site configuration...');
     const getCurrentSiteResponse = await fetch(`https://api.netlify.com/api/v1/sites/${siteId}`, {
       method: 'GET',
       headers: {
@@ -130,188 +129,205 @@ exports.handler = async (event, context) => {
       },
     });
 
+    console.log(`📊 GET site response status: ${getCurrentSiteResponse.status}`);
+
     if (!getCurrentSiteResponse.ok) {
-      throw new Error(`Failed to get current site config: ${getCurrentSiteResponse.status} ${getCurrentSiteResponse.statusText}`);
+      const errorText = await getCurrentSiteResponse.text();
+      console.error('❌ Failed to get current site config:', errorText);
+      
+      let errorMessage = `Failed to retrieve site information (HTTP ${getCurrentSiteResponse.status})`;
+      if (getCurrentSiteResponse.status === 401) {
+        errorMessage = 'Authentication failed. Please check your Netlify access token.';
+      } else if (getCurrentSiteResponse.status === 403) {
+        errorMessage = 'Permission denied. Your token may not have access to this site.';
+      } else if (getCurrentSiteResponse.status === 404) {
+        errorMessage = 'Site not found. Please verify the site ID is correct.';
+      }
+
+      return {
+        statusCode: getCurrentSiteResponse.status,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          success: false,
+          error: errorMessage,
+          details: {
+            status: getCurrentSiteResponse.status,
+            response: errorText,
+            siteId: siteId
+          }
+        }),
+      };
     }
 
     const currentSite = await getCurrentSiteResponse.json();
     const existingAliases = currentSite.domain_aliases || [];
+    
+    console.log('📋 Current site info:', {
+      name: currentSite.name,
+      url: currentSite.url,
+      custom_domain: currentSite.custom_domain,
+      existing_aliases: existingAliases,
+      ssl_url: currentSite.ssl_url
+    });
 
-    // Check if domain already exists as alias
+    // Step 2: Check if domain already exists as alias
     if (existingAliases.includes(cleanDomain)) {
-      throw new Error(`Domain ${cleanDomain} is already configured as an alias for this site`);
+      console.log(`ℹ️ Domain ${cleanDomain} is already configured as an alias`);
+      return {
+        statusCode: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          success: true,
+          domain: cleanDomain,
+          message: `Domain ${cleanDomain} is already configured as an alias for this site`,
+          netlifyData: {
+            alias_name: cleanDomain,
+            site_id: siteId,
+            primary_domain: currentSite.custom_domain,
+            all_aliases: existingAliases,
+            already_exists: true
+          },
+          dnsInstructions: generateDNSInstructions(cleanDomain)
+        }),
+      };
     }
 
-    // Add new domain to the existing aliases array
+    // Step 3: Add new domain to the existing aliases array
     const updatedAliases = [...existingAliases, cleanDomain];
 
-    console.log(`📝 Adding ${cleanDomain} to aliases. Current aliases:`, existingAliases);
-    console.log(`📝 Updated aliases will be:`, updatedAliases);
+    console.log(`📝 Step 3: Updating aliases:`, {
+      before: existingAliases,
+      after: updatedAliases,
+      new_domain: cleanDomain
+    });
 
-    // Use the correct site update endpoint to add domain_aliases without affecting primary domain
-    // This preserves backlinkoo.com as the primary domain and adds new domains as aliases
-    // Following Netlify API documentation: PUT /api/v1/sites/{site_id} with domain_aliases array
+    // Step 4: Update site with new domain aliases
+    console.log('🔄 Step 4: Sending PATCH request to update domain aliases...');
+    const updatePayload = { domain_aliases: updatedAliases };
+    console.log('📤 PATCH payload:', updatePayload);
+
     const netlifyResponse = await fetch(`https://api.netlify.com/api/v1/sites/${siteId}`, {
       method: 'PATCH',
       headers: {
         'Authorization': `Bearer ${netlifyToken}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        domain_aliases: updatedAliases
-      }),
+      body: JSON.stringify(updatePayload),
     });
 
+    console.log(`📊 PATCH response status: ${netlifyResponse.status}`);
+
     if (!netlifyResponse.ok) {
-      console.error(`❌ Netlify API request failed with status ${netlifyResponse.status}`);
+      const errorText = await netlifyResponse.text();
+      console.error('❌ Netlify API PATCH request failed:', {
+        status: netlifyResponse.status,
+        statusText: netlifyResponse.statusText,
+        response: errorText
+      });
 
-      let errorData;
-      try {
-        errorData = await netlifyResponse.text();
-        console.error('❌ Raw error response:', errorData);
-      } catch (readError) {
-        console.error('❌ Could not read error response:', readError);
-        errorData = `HTTP ${netlifyResponse.status}: ${netlifyResponse.statusText}`;
-      }
-
-      let errorMessage = `${netlifyResponse.status} ${netlifyResponse.statusText}`;
-      let detailedError = '';
+      let errorMessage = `Failed to add domain alias (HTTP ${netlifyResponse.status})`;
       let specificError = '';
 
+      // Try to parse error response
       try {
-        const errorJson = JSON.parse(errorData);
+        const errorJson = JSON.parse(errorText);
         console.error('❌ Parsed error JSON:', errorJson);
 
-        // Extract specific error messages from various Netlify API response formats
         if (errorJson.message) {
-          errorMessage = errorJson.message;
           specificError = errorJson.message;
         }
-
         if (errorJson.error) {
-          errorMessage = errorJson.error;
-          specificError = errorJson.error;
+          specificError = errorJson.error;  
         }
-
         if (errorJson.errors) {
           if (Array.isArray(errorJson.errors)) {
             specificError = errorJson.errors.map(err => err.message || err).join(', ');
-          } else if (typeof errorJson.errors === 'object') {
-            specificError = Object.values(errorJson.errors).join(', ');
           } else {
             specificError = JSON.stringify(errorJson.errors);
           }
-          detailedError = specificError;
         }
-
-        // Check for domain-specific errors
-        if (errorJson.domain_aliases) {
-          specificError = `Domain aliases error: ${JSON.stringify(errorJson.domain_aliases)}`;
-        }
-
-        // Check for validation errors
-        if (errorJson.code) {
-          specificError += ` (Code: ${errorJson.code})`;
-        }
-
       } catch (parseError) {
-        console.error('❌ Could not parse error as JSON:', parseError);
-        if (errorData && errorData.trim().length > 0) {
-          errorMessage = errorData.trim();
-          specificError = errorData.trim();
-        }
+        specificError = errorText;
       }
 
-      // Provide user-friendly error messages based on status codes and specific errors
-      let userFriendlyMessage = specificError || errorMessage || 'Unknown error';
-
-      // Check for specific domain-related error messages
-      if (specificError && specificError.toLowerCase().includes('already')) {
-        userFriendlyMessage = `Domain ${cleanDomain} is already configured as an alias for this Netlify site. No further action needed.`;
-      } else if (specificError && specificError.toLowerCase().includes('invalid')) {
-        userFriendlyMessage = `Domain ${cleanDomain} is invalid or cannot be added as an alias. Please verify the domain format.`;
-      } else if (specificError && specificError.toLowerCase().includes('conflict')) {
-        userFriendlyMessage = `Domain ${cleanDomain} conflicts with existing configuration. It may be configured elsewhere.`;
-      } else {
-        // Fallback to status-based messages if no specific error found
-        switch (netlifyResponse.status) {
-          case 401:
-            userFriendlyMessage = 'Authentication failed. Please check Netlify access token configuration.';
-            break;
-          case 403:
-            userFriendlyMessage = 'Permission denied. Your Netlify token may not have sufficient permissions.';
-            break;
-          case 404:
-            userFriendlyMessage = 'Netlify site not found. Please verify the site ID is correct.';
-            break;
-          case 422:
-            userFriendlyMessage = specificError ?
-              `Domain alias update failed: ${specificError}` :
-              `Domain alias update failed. ${cleanDomain} may already be added as an alias, be invalid, or conflict with existing configuration.`;
-            break;
-          case 429:
-            userFriendlyMessage = 'Rate limit exceeded. Please wait a few minutes before trying again.';
-            break;
-          case 500:
-            userFriendlyMessage = 'Netlify server error. Please try again later.';
-            break;
-          default:
-            if (specificError) {
-              userFriendlyMessage = `Failed to add domain ${cleanDomain}: ${specificError}`;
-            } else if (errorMessage.includes('domain')) {
-              userFriendlyMessage = `Domain ${cleanDomain} could not be added: ${errorMessage}`;
-            } else {
-              userFriendlyMessage = `Failed to add domain ${cleanDomain}: ${errorMessage}`;
-            }
-        }
+      // Provide user-friendly error messages
+      switch (netlifyResponse.status) {
+        case 401:
+          errorMessage = 'Authentication failed. Please check your Netlify access token.';
+          break;
+        case 403:
+          errorMessage = 'Permission denied. Your Netlify token may not have sufficient permissions.';
+          break;
+        case 404:
+          errorMessage = 'Site not found. Please verify the site ID is correct.';
+          break;
+        case 422:
+          errorMessage = specificError || `Domain ${cleanDomain} cannot be added as an alias. It may be invalid or already in use elsewhere.`;
+          break;
+        case 429:
+          errorMessage = 'Rate limit exceeded. Please wait a few minutes before trying again.';
+          break;
+        default:
+          errorMessage = specificError || `Failed to add domain ${cleanDomain} as alias`;
       }
-
-      console.error(`❌ Failed to add domain ${cleanDomain}:`, {
-        status: netlifyResponse.status,
-        statusText: netlifyResponse.statusText,
-        errorMessage,
-        detailedError,
-        userFriendlyMessage
-      });
 
       return {
         statusCode: netlifyResponse.status,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           success: false,
-          error: userFriendlyMessage,
+          error: errorMessage,
           domain: cleanDomain,
           details: {
             status: netlifyResponse.status,
             statusText: netlifyResponse.statusText,
-            originalError: errorMessage,
             specificError: specificError,
-            detailedError: detailedError,
-            rawResponse: errorData,
+            rawResponse: errorText,
             siteId: siteId,
-            operation: 'domain_aliases_update',
-            timestamp: new Date().toISOString()
-          },
-          debug: {
-            message: 'Check server logs for complete error details',
-            endpoint: `PATCH /api/v1/sites/${siteId}`,
-            body: { domain_aliases: 'attempted_update' }
+            attempted_aliases: updatedAliases
           }
         }),
       };
     }
 
+    // Step 5: Parse successful response
     const updatedSite = await netlifyResponse.json();
-    console.log(`✅ Successfully added ${cleanDomain} as alias to Netlify:`, {
-      alias_name: cleanDomain,
+    
+    console.log('✅ Successfully updated site aliases:', {
+      domain: cleanDomain,
       site_id: siteId,
       primary_domain: updatedSite.custom_domain,
       all_aliases: updatedSite.domain_aliases,
-      primary_domain_preserved: true
+      ssl_url: updatedSite.ssl_url
     });
 
-    // Generate DNS setup instructions based on domain type
-    const dnsInstructions = generateDNSInstructions(cleanDomain, siteId, isSubdomain);
+    // Step 6: Verify the domain was actually added
+    const finalAliases = updatedSite.domain_aliases || [];
+    const domainWasAdded = finalAliases.includes(cleanDomain);
+
+    if (!domainWasAdded) {
+      console.error('❌ Domain was not found in final aliases list:', {
+        expected: cleanDomain,
+        actual_aliases: finalAliases
+      });
+      
+      return {
+        statusCode: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          success: false,
+          error: `Domain ${cleanDomain} was not successfully added to aliases`,
+          details: {
+            attempted_domain: cleanDomain,
+            final_aliases: finalAliases,
+            response_received: true
+          }
+        }),
+      };
+    }
+
+    // Generate DNS setup instructions
+    const dnsInstructions = generateDNSInstructions(cleanDomain);
 
     // Update domain status in database if domainId provided
     let dbUpdateResult = null;
@@ -324,35 +340,42 @@ exports.handler = async (event, context) => {
           dns_records: dnsInstructions.dnsRecords,
           error_message: null
         });
+        console.log('✅ Database updated successfully:', dbUpdateResult);
       } catch (dbError) {
-        console.warn('Database update failed:', dbError);
+        console.warn('⚠️ Database update failed (non-critical):', dbError);
         // Don't fail the entire operation if DB update fails
       }
     }
 
-    // Return success response with setup instructions
+    // Return success response
+    const successResponse = {
+      success: true,
+      domain: cleanDomain,
+      netlifyData: {
+        alias_name: cleanDomain,
+        site_id: siteId,
+        primary_domain: updatedSite.custom_domain,
+        all_aliases: updatedSite.domain_aliases,
+        ssl_url: updatedSite.ssl_url,
+        site_name: updatedSite.name,
+        alias_created: true,
+        verified_in_response: true
+      },
+      dnsInstructions,
+      dbUpdate: dbUpdateResult,
+      message: `Domain ${cleanDomain} successfully added as alias to Netlify site ${updatedSite.name}. Configure DNS records to activate.`
+    };
+
+    console.log('✅ Returning success response:', successResponse);
+
     return {
       statusCode: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        success: true,
-        domain: cleanDomain,
-        netlifyData: {
-          alias_name: cleanDomain,
-          site_id: siteId,
-          primary_domain: updatedSite.custom_domain,
-          all_aliases: updatedSite.domain_aliases,
-          primary_domain_preserved: true,
-          alias_created: true
-        },
-        dnsInstructions,
-        dbUpdate: dbUpdateResult,
-        message: `Domain ${cleanDomain} successfully added as alias to Netlify site. Primary domain (backlinkoo.com) preserved. Please configure DNS records for the new alias.`
-      }),
+      body: JSON.stringify(successResponse),
     };
 
   } catch (error) {
-    console.error('❌ Error in add-domain-to-netlify function:', error);
+    console.error('❌ Unexpected error in add-domain-to-netlify function:', error);
     
     return {
       statusCode: 500,
@@ -360,7 +383,10 @@ exports.handler = async (event, context) => {
       body: JSON.stringify({
         success: false,
         error: error.message || 'Internal server error',
-        details: 'Check server logs for more information'
+        details: {
+          error_type: 'unexpected_error',
+          timestamp: new Date().toISOString()
+        }
       }),
     };
   }
@@ -369,31 +395,24 @@ exports.handler = async (event, context) => {
 /**
  * Generate DNS setup instructions based on domain type
  */
-function generateDNSInstructions(domain, siteId, isSubdomain) {
+function generateDNSInstructions(domain) {
+  const isSubdomain = domain.split('.').length > 2;
+  
   if (isSubdomain) {
     return {
-      title: 'Subdomain Setup Required',
+      title: 'Subdomain DNS Configuration',
       type: 'subdomain',
       steps: [
         `Subdomain ${domain} has been added to your Netlify site`,
-        'Add the required TXT record for verification',
-        'Add a CNAME record pointing to your Netlify site',
+        'Add a CNAME record pointing to backlinkoo.netlify.app',
         'Wait for DNS propagation (usually 5-30 minutes)',
-        'Netlify will automatically provision an SSL certificate once verified'
+        'Netlify will automatically provision an SSL certificate once DNS is verified'
       ],
       dnsRecords: [
         {
-          type: 'TXT',
-          name: `netlify-challenge.${domain}`,
-          value: 'any-value-for-verification',
-          ttl: 300,
-          required: true,
-          description: 'Required for subdomain verification'
-        },
-        {
           type: 'CNAME',
           name: domain.split('.')[0],
-          value: `${siteId}.netlify.app`,
+          value: 'backlinkoo.netlify.app',
           ttl: 3600,
           required: true,
           description: 'Points subdomain to Netlify'
@@ -402,7 +421,7 @@ function generateDNSInstructions(domain, siteId, isSubdomain) {
     };
   } else {
     return {
-      title: 'Root Domain Setup Required',
+      title: 'Root Domain DNS Configuration',
       type: 'root',
       steps: [
         `Root domain ${domain} has been added to your Netlify site`,
@@ -431,7 +450,7 @@ function generateDNSInstructions(domain, siteId, isSubdomain) {
         {
           type: 'CNAME',
           name: 'www',
-          value: `${siteId}.netlify.app`,
+          value: 'backlinkoo.netlify.app',
           ttl: 3600,
           required: true,
           description: 'Points www to Netlify'
