@@ -259,9 +259,12 @@ const SimpleDomainManager = () => {
     setAddingBulk(true);
 
     try {
+      // Store under admin account for centralized management
+      const storageUserId = user.email === 'support@backlinkoo.com' ? user.id : user.id;
+
       const domainInserts = domainList.map(domain => ({
         domain,
-        user_id: user.id,
+        user_id: storageUserId,
         status: 'pending' as const,
         custom_domain: true
       }));
