@@ -57,8 +57,6 @@ export interface SSLStatus {
   created_at?: string;
 }
 
-import DirectNetlifyApi from './directNetlifyApi';
-
 export class NetlifyApiService {
   private static baseUrl = '/.netlify/functions/netlify-domain-validation';
   private static fallbackUrl = '/.netlify/functions/add-domain-to-netlify';
