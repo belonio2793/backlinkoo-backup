@@ -26,6 +26,7 @@ import { DnsValidationModal } from '@/components/DnsValidationModal';
 import { BulkDomainManager } from '@/components/BulkDomainManager';
 import { NetlifyDeploymentChecker } from '@/components/NetlifyDeploymentChecker';
 import DomainSyncFixer from '@/components/DomainSyncFixer';
+import DomainManagementTable from '@/components/domains/DomainManagementTable';
 
 interface Domain {
   id: string;
