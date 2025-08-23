@@ -1148,7 +1148,7 @@ const DomainsPage = () => {
                             variant="default"
                             size="sm"
                             onClick={() => validateDomain(domain.id)}
-                            disabled={validatingDomains.has(domain.id)}
+                            disabled={validatingDomains.has(domain.id) || removingFromNetlify.has(domain.id)}
                             className="bg-blue-600 hover:bg-blue-700"
                           >
                             {validatingDomains.has(domain.id) ? (
