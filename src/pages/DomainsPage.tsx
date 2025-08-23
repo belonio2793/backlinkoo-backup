@@ -451,8 +451,8 @@ const DomainsPage = () => {
       console.log('Official API verification result:', result);
 
       if (result.error) {
-        console.error('❌ Verification API error:', result.error);
-        toast.warning(`⚠️ Could not verify ${domain.domain}: ${result.error}`);
+        console.error('Verification API error:', result.error);
+        toast.warning(`Could not verify ${domain.domain}: ${result.error}`);
         return;
       }
 
@@ -477,7 +477,7 @@ const DomainsPage = () => {
         ));
 
         const domainType = result.isCustomDomain ? 'custom domain' : 'domain alias';
-        toast.success(`✅ ${domain.domain} verified in Netlify as ${domainType}!`);
+        toast.success(`${domain.domain} verified in Netlify as ${domainType}!`);
       } else {
         // Domain not found in Netlify
         await supabase
@@ -498,12 +498,12 @@ const DomainsPage = () => {
           } : d
         ));
 
-        toast.error(`❌ ${domain.domain} not found in Netlify site configuration`);
+        toast.error(`${domain.domain} not found in Netlify site configuration`);
       }
 
     } catch (error: any) {
       console.error('Verification error:', error);
-      toast.warning(`⚠️ Verification failed for ${domain.domain}: ${error.message}`);
+      toast.warning(`Verification failed for ${domain.domain}: ${error.message}`);
     } finally {
       setVerifyingDomains(prev => {
         const newSet = new Set(prev);
@@ -529,15 +529,15 @@ const DomainsPage = () => {
         d.id === domain.id ? { ...d, status: 'validating' } : d
       ));
 
-      console.log(`🔄 Adding domain via official Netlify API: ${domain.domain}`);
+      console.log(`Adding domain via official Netlify API: ${domain.domain}`);
 
       // Run diagnostic first to understand function availability
       const diagnostic = await NetlifyFunctionDiagnostic.getDeploymentStatus();
-      console.log('🏥 Function deployment status:', diagnostic);
+      console.log('Function deployment status:', diagnostic);
 
       if (diagnostic.status === 'critical') {
-        console.warn('⚠️ No functions available, this will likely fail');
-        toast.warning('⚠️ Netlify functions not deployed. Domain addition may fail.');
+        console.warn('No functions available, this will likely fail');
+        toast.warning('Netlify functions not deployed. Domain addition may fail.');
       }
 
       // Try official Netlify API first
@@ -639,7 +639,7 @@ const DomainsPage = () => {
           } : d
         ));
 
-        toast.success(`✅ ${domain.domain} successfully added to Netlify via fallback method! Configure DNS records to activate.`);
+        toast.success(`�� ${domain.domain} successfully added to Netlify via fallback method! Configure DNS records to activate.`);
 
         // Auto-validate after a short delay to check DNS
         setTimeout(() => {
