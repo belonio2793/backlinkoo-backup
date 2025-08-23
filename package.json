@@ -30,7 +30,9 @@
     "admin:create": "node scripts/create-admin-user.js create",
     "admin:list": "node scripts/create-admin-user.js list",
     "admin:test": "node scripts/create-admin-user.js test",
-    "verify:deployment": "node scripts/verify-deployment.js"
+    "verify:deployment": "node scripts/verify-deployment.js",
+    "domains:setup": "node scripts/setup-domains.js",
+    "domains:test": "node -e \"console.log('Testing domain system...'); require('./scripts/setup-domains.js').setupDomainsTable().then(() => console.log('✅ Domain system ready!')).catch(console.error)\""
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
