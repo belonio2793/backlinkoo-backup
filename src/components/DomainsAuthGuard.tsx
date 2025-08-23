@@ -36,13 +36,65 @@ export const DomainsAuthGuard = ({ children }: DomainsAuthGuardProps) => {
     setConnectionError(null);
 
     try {
-      // Use enhanced auth operations with retry logic
-      const { data: { user }, error } = await SupabaseConnectionFixer.wrapSupabaseOperation(
-        () => supabase.auth.getUser(),
-        'Domains auth check'
-      );
+      console.log('🔍 Starting domains auth check...');
 
-      if (error || !user) {
+      // First check if we're online
+      if (!navigator.onLine) {
+        throw new Error('No internet connection available');
+      }
+
+      // Use resilient auth operations with enhanced error handling
+      let authResult;
+      let attempts = 0;
+      const maxAttempts = 3;
+
+      while (attempts < maxAttempts) {
+        try {
+          attempts++;
+          console.log(`🔍 Auth attempt ${attempts}/${maxAttempts}...`);
+
+          authResult = await supabase.auth.getUser();
+          console.log('✅ Auth request successful');
+          break;
+
+        } catch (authError: any) {
+          console.error(`❌ Auth attempt ${attempts} failed:`, authError.message);
+
+          if (attempts >= maxAttempts) {
+            throw authError;
+          }
+
+          // Wait before retrying
+          const delay = Math.min(1000 * attempts, 5000);
+          console.log(`⏳ Waiting ${delay}ms before retry...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+        }
+      }
+
+      if (!authResult) {
+        throw new Error('Failed to get auth result after all attempts');
+      }
+
+      const { data: { user }, error } = authResult;
+
+      if (error) {
+        console.error('❌ Auth error from Supabase:', error);
+
+        // Handle specific auth errors gracefully
+        if (error.message?.includes('Auth session missing')) {
+          console.log('ℹ️ No active session (user not logged in)');
+          setIsAuthenticated(false);
+          setIsAuthorized(false);
+          setUserEmail('');
+          setIsLoading(false);
+          return;
+        }
+
+        throw error;
+      }
+
+      if (!user) {
+        console.log('ℹ️ No user found (not logged in)');
         setIsAuthenticated(false);
         setIsAuthorized(false);
         setUserEmail('');
@@ -50,10 +102,11 @@ export const DomainsAuthGuard = ({ children }: DomainsAuthGuardProps) => {
         return;
       }
 
+      console.log('✅ User authenticated:', user.email);
       setIsAuthenticated(true);
       setUserEmail(user.email || '');
 
-      // Require support@backlinkoo.com for domain management
+      // Check authorization
       const authorized = user.email === AUTHORIZED_EMAIL;
       setIsAuthorized(authorized);
 
@@ -62,17 +115,30 @@ export const DomainsAuthGuard = ({ children }: DomainsAuthGuardProps) => {
     } catch (error: any) {
       console.error('❌ Domains auth check failed:', error);
 
-      // Check if this is a network error
+      // Check if this is a network/connection error
       if (SupabaseConnectionFixer.isSupabaseNetworkError(error)) {
-        setConnectionError(error);
         console.warn('⚠️ Network error during domains auth check');
+        setConnectionError(error);
+
+        // Still allow fallback behavior
+        setIsAuthenticated(false);
+        setIsAuthorized(false);
+        setUserEmail('');
+      } else if (error.message?.includes('No internet connection')) {
+        console.warn('⚠️ No internet connection available');
+        setConnectionError(new Error('No internet connection. Please check your network and try again.'));
+        setIsAuthenticated(false);
+        setIsAuthorized(false);
+        setUserEmail('');
       } else {
+        console.error('❌ Unknown auth error:', error);
         setIsAuthenticated(false);
         setIsAuthorized(false);
         setUserEmail('');
       }
     } finally {
       setIsLoading(false);
+      console.log('🏁 Domains auth check complete');
     }
   };
 

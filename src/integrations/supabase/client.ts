@@ -77,17 +77,48 @@ const enhancedSupabase = createClient<Database>(finalUrl, finalKey, {
     fetch: async (url, options = {}) => {
       // Use the connection fixer's retry mechanism for all Supabase requests
       return SupabaseConnectionFixer.wrapSupabaseOperation(async () => {
-        const response = await fetch(url, {
-          ...options,
-          // Add timeout and cache control
-          signal: options.signal || AbortSignal.timeout(30000), // 30 second timeout
-          cache: 'no-cache',
-          headers: {
-            ...options.headers,
-            'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache',
-          },
-        });
+        // Add more robust fetch with retry logic
+        let attempts = 0;
+        const maxAttempts = 3;
+
+        while (attempts < maxAttempts) {
+          try {
+            console.log(`🔍 Supabase fetch attempt ${attempts + 1}/${maxAttempts} to ${url}`);
+
+            const response = await fetch(url, {
+              ...options,
+              // Shorter timeout to fail fast and retry
+              signal: options.signal || AbortSignal.timeout(15000), // 15 second timeout
+              cache: 'no-cache',
+              headers: {
+                ...options.headers,
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache',
+                'Connection': 'keep-alive',
+              },
+            });
+
+            console.log(`✅ Supabase fetch successful: ${response.status}`);
+            return response;
+
+          } catch (fetchError: any) {
+            attempts++;
+            console.error(`❌ Supabase fetch attempt ${attempts} failed:`, fetchError.message);
+
+            // If this is the last attempt, throw the error
+            if (attempts >= maxAttempts) {
+              console.error(`💥 All ${maxAttempts} fetch attempts failed for ${url}`);
+              throw new Error(`Supabase connection failed after ${maxAttempts} attempts: ${fetchError.message}`);
+            }
+
+            // Wait before retrying (exponential backoff)
+            const delay = Math.min(1000 * Math.pow(2, attempts - 1), 5000);
+            console.log(`⏳ Waiting ${delay}ms before retry...`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+          }
+        }
+
+        throw new Error('Should not reach here');
 
         // Handle non-200 responses
         if (!response.ok && response.status >= 500) {
@@ -225,6 +256,6 @@ export { handleNetworkError, SupabaseConnectionFixer };
 
 console.log('✅ Enhanced Supabase client initialized with error resilience');
 
-// TEMPORARY: Use direct client to bypass any configuration issues
-export const supabase = supabaseDirect;
-console.log('🔄 Using direct Supabase client for debugging');
+// Use enhanced client with error handling and recovery
+export const supabase = enhancedSupabase;
+console.log('✅ Using enhanced Supabase client with error handling');
