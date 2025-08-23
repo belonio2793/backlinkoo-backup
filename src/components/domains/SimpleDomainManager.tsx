@@ -253,6 +253,46 @@ const SimpleDomainManager = () => {
     }
   };
 
+  const removeDomain = async (domainName: string) => {
+    if (!user) return;
+
+    setRemovingDomain(domainName);
+
+    try {
+      console.log(`🗑️ Removing domain: ${domainName}`);
+
+      // Use the new Supabase edge function to remove domain
+      const response = await fetch('https://dfhanacsmsvvkpunurnp.functions.supabase.co/netlify-domains', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+        },
+        body: JSON.stringify({ domain: domainName })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      console.log('📊 Remove domain result:', result);
+
+      if (result.success) {
+        toast.success(`✅ Domain ${domainName} removed successfully`);
+        await loadDomains();
+      } else {
+        throw new Error(result.error || 'Failed to remove domain');
+      }
+
+    } catch (error: any) {
+      console.error('❌ Failed to remove domain:', error);
+      toast.error(`Failed to remove domain: ${error.message}`);
+    } finally {
+      setRemovingDomain(null);
+    }
+  };
+
   const getStatusBadge = (domain: Domain) => {
     if (domain.error_message) {
       return <Badge variant="destructive">Error</Badge>;
