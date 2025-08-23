@@ -57,6 +57,7 @@ export function DnsValidationModal({
   onValidationComplete
 }: DnsValidationModalProps) {
   const [dnsRecords, setDnsRecords] = useState<DNSRecord[]>([]);
+  const [nameservers, setNameservers] = useState<string[]>([]);
   const [isValidating, setIsValidating] = useState(false);
   const [lastValidation, setLastValidation] = useState<Date | null>(null);
   const [validationResults, setValidationResults] = useState<{
@@ -89,7 +90,7 @@ export function DnsValidationModal({
   const initializeDnsRecords = () => {
     // Determine if this is a subdomain or root domain
     const isSubdomain = domain.split('.').length > 2;
-    
+
     if (isSubdomain) {
       // Subdomain configuration
       setDnsRecords([
@@ -103,34 +104,25 @@ export function DnsValidationModal({
           status: 'pending'
         }
       ]);
+      setNameservers([]);
     } else {
-      // Root domain configuration  
+      // Root domain configuration with nameservers
+      setNameservers([
+        'dns1.p05.nsone.net',
+        'dns2.p05.nsone.net',
+        'dns3.p05.nsone.net',
+        'dns4.p05.nsone.net'
+      ]);
+
+      // Only CNAME is required for validation
       setDnsRecords([
-        {
-          type: 'A',
-          name: '@',
-          value: '75.2.60.5',
-          ttl: 3600,
-          required: true,
-          description: 'Primary Netlify load balancer',
-          status: 'pending'
-        },
-        {
-          type: 'A',
-          name: '@',
-          value: '99.83.190.102',
-          ttl: 3600,
-          required: true,
-          description: 'Secondary Netlify load balancer',
-          status: 'pending'
-        },
         {
           type: 'CNAME',
           name: 'www',
           value: 'backlinkoo.netlify.app',
           ttl: 3600,
           required: true,
-          description: 'Points www to Netlify',
+          description: 'Points www subdomain to Netlify (required for verification)',
           status: 'pending'
         }
       ]);
@@ -180,12 +172,15 @@ export function DnsValidationModal({
         setDnsRecords(updatedRecords);
         setValidationResults(result);
 
-        const allValid = updatedRecords.every(record => record.status === 'verified');
-        if (allValid) {
-          toast.success(`✅ All DNS records validated for ${domain}`);
+        // Only check required records for validation
+        const requiredRecords = updatedRecords.filter(record => record.required);
+        const allRequiredValid = requiredRecords.every(record => record.status === 'verified');
+
+        if (allRequiredValid) {
+          toast.success(`✅ Required DNS records validated for ${domain}`);
           onValidationComplete?.(true);
         } else {
-          toast.warning(`⚠️ Some DNS records need attention for ${domain}`);
+          toast.warning(`⚠️ Required DNS records need attention for ${domain}`);
         }
       } else {
         setValidationResults(result);
