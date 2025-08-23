@@ -203,7 +203,9 @@ const SimpleDomainManager = () => {
 
     } catch (error: any) {
       console.error('❌ Failed to load domains:', error);
-      toast.error(`Failed to load domains: ${error.message}`);
+      if (!silent) {
+        toast.error(`Failed to load domains: ${error.message}`);
+      }
 
       // Fallback to direct database query
       try {
