@@ -197,25 +197,86 @@ export class NetlifyApiService {
    */
   static async addDomainAlias(domain: string): Promise<NetlifyApiResponse> {
     try {
+      // First try the main function
       const response = await fetch(this.baseUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           action: 'addDomainAlias',
           domain: domain
         })
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      if (response.ok) {
+        return await response.json();
       }
 
-      return await response.json();
+      // If 404, try the fallback function
+      if (response.status === 404) {
+        console.warn(`⚠️ Main function not available (404), trying fallback for ${domain}`);
+        return await this.addDomainAliasFallback(domain);
+      }
+
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     } catch (error) {
       console.error(`❌ Add domain alias failed for ${domain}:`, error);
+
+      // If it's a network error, try fallback
+      if (error instanceof Error && error.message.includes('Failed to fetch')) {
+        console.warn(`⚠️ Network error, trying fallback for ${domain}`);
+        return await this.addDomainAliasFallback(domain);
+      }
+
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to add domain alias',
+        domain: domain
+      };
+    }
+  }
+
+  /**
+   * Fallback method using existing add-domain-to-netlify function
+   */
+  private static async addDomainAliasFallback(domain: string): Promise<NetlifyApiResponse> {
+    try {
+      console.log(`🔄 Using fallback method for ${domain}`);
+
+      const response = await fetch(this.fallbackUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          domain: domain,
+          domainId: `fallback-${Date.now()}`
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Fallback failed: HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+
+      // Convert fallback response format to expected format
+      if (result.success) {
+        return {
+          success: true,
+          action: 'addDomainAlias',
+          message: result.message || `Successfully added ${domain} via fallback method`,
+          domain: domain
+        };
+      } else {
+        return {
+          success: false,
+          error: result.error || 'Fallback method failed',
+          domain: domain
+        };
+      }
+    } catch (error) {
+      console.error(`❌ Fallback method failed for ${domain}:`, error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Fallback method failed',
         domain: domain
       };
     }
