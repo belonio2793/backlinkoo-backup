@@ -46,6 +46,7 @@ const DomainsPage = () => {
   const [newDomain, setNewDomain] = useState('');
   const [addingDomain, setAddingDomain] = useState(false);
   const [validatingDomains, setValidatingDomains] = useState<Set<string>>(new Set());
+  const [retryingDomains, setRetryingDomains] = useState<Set<string>>(new Set());
   const [selectedThemeForDomain, setSelectedThemeForDomain] = useState<{[key: string]: string}>({});
 
   const BLOG_THEMES = [
