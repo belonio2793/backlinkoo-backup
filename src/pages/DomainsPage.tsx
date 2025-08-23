@@ -1279,6 +1279,19 @@ const DomainsPage = () => {
                               </>
                             )}
                           </Button>
+
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedDomainForComprehensive(domain);
+                              setShowComprehensiveValidation(true);
+                            }}
+                            className="text-blue-600 border-blue-300 hover:bg-blue-50"
+                          >
+                            <Globe className="h-4 w-4 mr-2" />
+                            Comprehensive Check
+                          </Button>
                         </div>
                       </div>
                     </CardContent>
