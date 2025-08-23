@@ -419,7 +419,7 @@ const DomainManagementTable = () => {
 
       toast.success(`Domain ${domainName} deleted successfully`);
       setDeletingDomain(null);
-      await loadAllDomains();
+      await loadDomains();
 
     } catch (error: any) {
       console.error('Delete domain error:', error);
