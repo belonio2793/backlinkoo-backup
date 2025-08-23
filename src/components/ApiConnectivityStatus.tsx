@@ -113,15 +113,14 @@ export function ApiConnectivityStatus() {
 
       setStatus(newStatus);
 
-      // Show appropriate toast message
+      // Show appropriate toast message (only for significant issues)
       if (newStatus.domainManagement === 'working') {
         toast.success('All domain management APIs are working correctly');
       } else if (newStatus.domainManagement === 'missing_config') {
-        toast.warning('Domain management requires Netlify API configuration');
+        toast.info('Domain management requires Netlify API configuration');
       } else if (newStatus.netlifyFunctions === 'offline') {
-        toast.error('Netlify functions are not available. Please restart with "npm run dev:netlify"');
-      } else {
-        toast.warning('Some API issues detected. Check the status for details.');
+        // Don't show error toast for offline functions - this is expected in dev mode
+        console.info('Netlify functions are offline. This is normal when running "npm run dev". Use "npm run dev:netlify" for full functionality.');
       }
 
     } catch (error) {
