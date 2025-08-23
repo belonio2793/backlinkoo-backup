@@ -39,19 +39,8 @@ const DomainsPage = () => {
       <Header />
 
       <div className="container mx-auto px-4 py-8 max-w-6xl">
-        {/* Header Section */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4 flex items-center justify-center gap-3">
-            <Globe className="h-10 w-10 text-blue-600" />
-            Domain Manager
-          </h1>
-          <p className="text-xl text-gray-600">
-            Automatic two-way sync between your database and Netlify account
-          </p>
-        </div>
-
-        {/* Enhanced Domain Manager with Netlify API Integration */}
-        <EnhancedDomainManager />
+        {/* Simple Domain Manager */}
+        <SimpleDomainManager />
       </div>
 
       <Footer />
