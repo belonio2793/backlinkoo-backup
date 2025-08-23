@@ -817,18 +817,18 @@ const DomainsPage = () => {
       const warningCount = results.filter(r => r.status === 'warning').length;
 
       if (errorCount > 0) {
-        toast.error(`❌ Diagnostic found ${errorCount} critical issues. Check console for details.`);
+        toast.error(`Diagnostic found ${errorCount} critical issues. Check console for details.`);
       } else if (warningCount > 0) {
-        toast.warning(`⚠️ Diagnostic found ${warningCount} warnings. Check console for details.`);
+        toast.warning(`Diagnostic found ${warningCount} warnings. Check console for details.`);
       } else {
-        toast.success('✅ All connectivity tests passed!');
+        toast.success('All connectivity tests passed!');
       }
 
       // Log detailed results to console
-      console.log('🔍 Network Diagnostic Results:', results);
+      console.log('Network Diagnostic Results:', results);
       results.forEach(result => {
-        const emoji = result.status === 'success' ? '✅' : result.status === 'warning' ? '⚠️' : '❌';
-        console.log(`${emoji} ${result.service}: ${result.message}`, result.details);
+        const indicator = result.status === 'success' ? 'SUCCESS' : result.status === 'warning' ? 'WARNING' : 'ERROR';
+        console.log(`[${indicator}] ${result.service}: ${result.message}`, result.details);
       });
 
     } catch (error: any) {
