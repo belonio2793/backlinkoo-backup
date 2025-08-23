@@ -59,138 +59,66 @@ const SimpleDomainManager = () => {
 
     setLoading(true);
     try {
-      console.log('🔍 Loading domains from database and Netlify...');
+      console.log('🔍 Loading domains from Supabase edge function...');
       console.log('👤 Current user:', user.email);
 
-      const isAdminUser = user.email === 'support@backlinkoo.com';
-      console.log('🏢 Admin access:', isAdminUser ? 'YES - Loading all domains' : 'NO - Loading user domains only');
-
-      // Load domains from database
-      // Admin user (support@backlinkoo.com) sees all domains, others see only their own
-      let query = supabase
-        .from('domains')
-        .select('*');
-
-      if (!isAdminUser) {
-        query = query.eq('user_id', user.id);
-      }
-
-      const { data: dbDomains, error: dbError } = await query.order('created_at', { ascending: false });
-
-      if (dbError) {
-        throw new Error(`Database error: ${dbError.message}`);
-      }
-
-      console.log(`📊 Found ${dbDomains?.length || 0} domains in database`);
-
-      // Now fetch domains from Netlify
-      try {
-        console.log('🌐 Fetching domains from Netlify...');
-        const netlifyResponse = await fetch('/.netlify/functions/netlify-domain-validation', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'getSiteInfo' })
-        });
-
-        console.log('📡 Netlify API response status:', netlifyResponse.status);
-
-        if (netlifyResponse.ok) {
-          const netlifyResult = await netlifyResponse.json();
-          console.log('📊 Netlify API result:', netlifyResult);
-
-          if (netlifyResult.success && netlifyResult.data) {
-            console.log('🌐 Found Netlify domains:', netlifyResult.data);
-
-            const netlifyDomains = [];
-
-            // Add custom domain if exists
-            if (netlifyResult.data.custom_domain) {
-              netlifyDomains.push({
-                domain: netlifyResult.data.custom_domain,
-                is_custom: true
-              });
-            }
-
-            // Add domain aliases
-            if (netlifyResult.data.domain_aliases?.length > 0) {
-              netlifyResult.data.domain_aliases.forEach(alias => {
-                netlifyDomains.push({
-                  domain: alias,
-                  is_custom: false
-                });
-              });
-            }
-
-            console.log(`🔗 Found ${netlifyDomains.length} domains in Netlify`);
-
-            // Sync missing domains from Netlify to database
-            const dbDomainNames = new Set((dbDomains || []).map(d => d.domain));
-            const domainsToAdd = netlifyDomains.filter(nd => !dbDomainNames.has(nd.domain));
-
-            if (domainsToAdd.length > 0) {
-              console.log(`➕ Syncing ${domainsToAdd.length} domains from Netlify to database`);
-              console.log('📝 Domains to add:', domainsToAdd.map(d => d.domain).join(', '));
-
-              // Show user that sync is happening
-              toast.info(`Found ${domainsToAdd.length} domains in Netlify, syncing...`);
-
-              // Store domains under admin account (support@backlinkoo.com) for centralized management
-              const storageUserId = user.email === 'support@backlinkoo.com' ? user.id : user.id;
-
-              const domainInserts = domainsToAdd.map(nd => ({
-                domain: nd.domain,
-                user_id: storageUserId,
-                status: 'verified' as const,
-                netlify_verified: true,
-                custom_domain: nd.is_custom,
-                created_at: new Date().toISOString()
-              }));
-
-              const { data: newDomains, error: insertError } = await supabase
-                .from('domains')
-                .insert(domainInserts)
-                .select();
-
-              if (insertError) {
-                console.warn('⚠️ Some domains could not be synced:', insertError.message);
-                toast.error(`Sync failed: ${insertError.message}`);
-              } else {
-                console.log(`✅ Successfully synced ${newDomains?.length || 0} domains from Netlify`);
-                toast.success(`✅ Synced ${newDomains?.length || 0} domains from Netlify!`);
-              }
-
-              // Reload domains from database to get the complete list
-              const { data: updatedDomains } = await supabase
-                .from('domains')
-                .select('*')
-                .eq('user_id', user.id)
-                .order('created_at', { ascending: false });
-
-              setDomains(updatedDomains || []);
-              console.log(`✅ Total domains loaded: ${updatedDomains?.length || 0}`);
-            } else {
-              setDomains(dbDomains || []);
-              console.log('✅ All Netlify domains already in database');
-            }
-          } else {
-            console.warn('⚠️ Could not fetch Netlify domains:', netlifyResult.error);
-            toast.warning('Could not sync from Netlify: ' + (netlifyResult.error || 'Unknown error'));
-            setDomains(dbDomains || []);
-          }
-        } else {
-          console.warn('⚠️ Netlify API not available, response:', netlifyResponse.status, netlifyResponse.statusText);
-          toast.warning(`Netlify API unavailable (${netlifyResponse.status}). Showing database domains only.`);
-          setDomains(dbDomains || []);
+      // Use the new Supabase edge function to list and sync domains
+      const response = await fetch('https://dfhanacsmsvvkpunurnp.functions.supabase.co/netlify-domains', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
         }
-      } catch (netlifyError) {
-        console.warn('⚠️ Netlify sync failed:', netlifyError);
-        toast.warning('Netlify sync failed: ' + netlifyError.message);
-        setDomains(dbDomains || []);
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      console.log('📊 Edge function result:', result);
+
+      if (result.success) {
+        const syncedDomains = result.domains || [];
+        console.log(`✅ Successfully loaded ${syncedDomains.length} domains`);
+
+        if (result.synced > 0) {
+          toast.success(`✅ Synced ${result.synced} new domains from Netlify!`);
+        }
+
+        // Filter domains based on user permissions
+        const isAdminUser = user.email === 'support@backlinkoo.com';
+        const filteredDomains = isAdminUser
+          ? syncedDomains
+          : syncedDomains.filter(d => d.user_id === user.id);
+
+        setDomains(filteredDomains);
+        console.log(`📊 Showing ${filteredDomains.length} domains for user`);
+      } else {
+        throw new Error(result.error || 'Unknown error from edge function');
       }
 
     } catch (error: any) {
       console.error('❌ Failed to load domains:', error);
       toast.error(`Failed to load domains: ${error.message}`);
+
+      // Fallback to direct database query
+      try {
+        console.log('🔄 Falling back to direct database query...');
+        const isAdminUser = user.email === 'support@backlinkoo.com';
+        let query = supabase.from('domains').select('*');
+
+        if (!isAdminUser) {
+          query = query.eq('user_id', user.id);
+        }
+
+        const { data: fallbackDomains } = await query.order('created_at', { ascending: false });
+        setDomains(fallbackDomains || []);
+        console.log(`📊 Fallback: loaded ${fallbackDomains?.length || 0} domains from database`);
+      } catch (fallbackError) {
+        console.error('❌ Fallback also failed:', fallbackError);
+        setDomains([]);
+      }
     } finally {
       setLoading(false);
     }
@@ -210,34 +138,41 @@ const SimpleDomainManager = () => {
     setAddingDomain(true);
 
     try {
-      // Store under admin account for centralized management
-      const storageUserId = user.email === 'support@backlinkoo.com' ? user.id : user.id;
+      console.log(`➕ Adding domain: ${cleanedDomain}`);
 
-      const { data, error } = await supabase
-        .from('domains')
-        .insert({
-          domain: cleanedDomain,
-          user_id: storageUserId,
-          status: 'pending',
-          custom_domain: true
-        })
-        .select()
-        .single();
+      // Use the new Supabase edge function to add domain
+      const response = await fetch('https://dfhanacsmsvvkpunurnp.functions.supabase.co/netlify-domains', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+        },
+        body: JSON.stringify({ domain: cleanedDomain })
+      });
 
-      if (error) {
-        if (error.code === '23505') {
-          throw new Error('Domain already exists');
-        }
-        throw new Error(error.message);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
-      setNewDomain('');
-      toast.success(`Domain ${cleanedDomain} added successfully`);
-      await loadDomains();
+      const result = await response.json();
+      console.log('📊 Add domain result:', result);
+
+      if (result.success) {
+        setNewDomain('');
+        toast.success(`✅ Domain ${cleanedDomain} added successfully`);
+        await loadDomains();
+      } else {
+        throw new Error(result.error || 'Failed to add domain');
+      }
 
     } catch (error: any) {
       console.error('❌ Failed to add domain:', error);
-      toast.error(`Failed to add domain: ${error.message}`);
+
+      if (error.message.includes('23505') || error.message.includes('already exists')) {
+        toast.error(`Domain ${cleanedDomain} already exists`);
+      } else {
+        toast.error(`Failed to add domain: ${error.message}`);
+      }
     } finally {
       setAddingDomain(false);
     }
@@ -259,27 +194,53 @@ const SimpleDomainManager = () => {
     setAddingBulk(true);
 
     try {
-      // Store under admin account for centralized management
-      const storageUserId = user.email === 'support@backlinkoo.com' ? user.id : user.id;
+      console.log(`➕ Adding ${domainList.length} domains in bulk:`, domainList);
 
-      const domainInserts = domainList.map(domain => ({
-        domain,
-        user_id: storageUserId,
-        status: 'pending' as const,
-        custom_domain: true
-      }));
+      let successCount = 0;
+      let errorCount = 0;
+      const errors = [];
 
-      const { data, error } = await supabase
-        .from('domains')
-        .insert(domainInserts)
-        .select();
+      // Add domains one by one using the edge function
+      for (const domain of domainList) {
+        try {
+          const response = await fetch('https://dfhanacsmsvvkpunurnp.functions.supabase.co/netlify-domains', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+            },
+            body: JSON.stringify({ domain })
+          });
 
-      if (error) {
-        throw new Error(error.message);
+          if (response.ok) {
+            const result = await response.json();
+            if (result.success) {
+              successCount++;
+            } else {
+              errorCount++;
+              errors.push(`${domain}: ${result.error}`);
+            }
+          } else {
+            errorCount++;
+            errors.push(`${domain}: HTTP ${response.status}`);
+          }
+        } catch (domainError) {
+          errorCount++;
+          errors.push(`${domain}: ${domainError.message}`);
+        }
       }
 
       setBulkDomains('');
-      toast.success(`Successfully added ${data?.length || 0} domains`);
+
+      if (successCount > 0) {
+        toast.success(`✅ Successfully added ${successCount} domains`);
+      }
+
+      if (errorCount > 0) {
+        console.warn('⚠️ Some domains failed:', errors);
+        toast.warning(`⚠️ ${errorCount} domains failed to add. Check console for details.`);
+      }
+
       await loadDomains();
 
     } catch (error: any) {
