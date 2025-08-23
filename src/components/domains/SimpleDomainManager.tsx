@@ -120,6 +120,10 @@ const SimpleDomainManager = () => {
 
             if (domainsToAdd.length > 0) {
               console.log(`➕ Syncing ${domainsToAdd.length} domains from Netlify to database`);
+              console.log('📝 Domains to add:', domainsToAdd.map(d => d.domain).join(', '));
+
+              // Show user that sync is happening
+              toast.info(`Found ${domainsToAdd.length} domains in Netlify, syncing...`);
 
               const domainInserts = domainsToAdd.map(nd => ({
                 domain: nd.domain,
@@ -137,9 +141,10 @@ const SimpleDomainManager = () => {
 
               if (insertError) {
                 console.warn('⚠️ Some domains could not be synced:', insertError.message);
+                toast.error(`Sync failed: ${insertError.message}`);
               } else {
                 console.log(`✅ Successfully synced ${newDomains?.length || 0} domains from Netlify`);
-                toast.success(`Synced ${newDomains?.length || 0} domains from Netlify`);
+                toast.success(`✅ Synced ${newDomains?.length || 0} domains from Netlify!`);
               }
 
               // Reload domains from database to get the complete list
