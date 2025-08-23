@@ -329,7 +329,7 @@ const DomainsPage = () => {
         const { diagnostics } = result;
 
         // Create a detailed diagnostic message
-        let diagnosticMessage = `��� Diagnostic Results for ${domain.domain}:\n\n`;
+        let diagnosticMessage = `Diagnostic Results for ${domain.domain}:\n\n`;
 
         diagnosticMessage += `Status: ${diagnostics.assessment.status.toUpperCase()}\n`;
         diagnosticMessage += `Can Add Domain: ${diagnostics.assessment.canAddDomain ? 'Yes' : 'No'}\n\n`;
