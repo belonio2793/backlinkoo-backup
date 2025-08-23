@@ -270,6 +270,15 @@ const App = () => (
               }
             />
 
+            <Route
+              path="/test"
+              element={
+                <Suspense fallback={<div>Loading...</div>}>
+                  {React.createElement(React.lazy(() => import('./pages/TestPage')))}
+                </Suspense>
+              }
+            />
+
             {/* Authentication routes */}
             <Route
               path="/auth/callback"
