@@ -640,7 +640,34 @@ const DomainsPage = () => {
           validateDomain(domain.id);
         }, 3000);
       } else {
-        throw new Error(result.error || 'Both official API and fallback methods failed');
+        // Check if manual instructions are provided
+        if (apiResult.data?.method === 'manual_required' && apiResult.data?.instructions) {
+          const instructions = apiResult.data.instructions;
+
+          // Update domain with manual instructions
+          const updateData = {
+            status: 'error' as const,
+            error_message: `Automated addition failed. ${instructions.message}`
+          };
+
+          await supabase
+            .from('domains')
+            .update(updateData)
+            .eq('id', domain.id)
+            .eq('user_id', user?.id);
+
+          setDomains(prev => prev.map(d =>
+            d.id === domain.id ? { ...d, status: 'error', error_message: updateData.error_message } : d
+          ));
+
+          // Show detailed instructions to user
+          console.log('📋 Manual addition instructions:', instructions);
+          toast.error(`❌ Automated addition failed. Manual addition required - check console for instructions.`);
+
+          return;
+        }
+
+        throw new Error(apiResult.error || 'All domain addition methods failed');
       }
     } catch (error: any) {
       console.error('Error adding domain to Netlify:', error);
