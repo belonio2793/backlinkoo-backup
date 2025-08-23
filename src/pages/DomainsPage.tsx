@@ -329,7 +329,7 @@ const DomainsPage = () => {
         const { diagnostics } = result;
 
         // Create a detailed diagnostic message
-        let diagnosticMessage = `📊 Diagnostic Results for ${domain.domain}:\n\n`;
+        let diagnosticMessage = `��� Diagnostic Results for ${domain.domain}:\n\n`;
 
         diagnosticMessage += `Status: ${diagnostics.assessment.status.toUpperCase()}\n`;
         diagnosticMessage += `Can Add Domain: ${diagnostics.assessment.canAddDomain ? 'Yes' : 'No'}\n\n`;
@@ -956,10 +956,11 @@ const DomainsPage = () => {
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="single" className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="single">Single Domain</TabsTrigger>
                 <TabsTrigger value="bulk">Bulk Addition</TabsTrigger>
                 <TabsTrigger value="api">API Testing</TabsTrigger>
+                <TabsTrigger value="comprehensive">Comprehensive Check</TabsTrigger>
               </TabsList>
 
               <TabsContent value="single" className="space-y-4 mt-6">
