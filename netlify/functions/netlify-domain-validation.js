@@ -27,7 +27,7 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    console.log('�� Netlify domain validation function called');
+    console.log('🔍 Netlify domain validation function called');
 
     // Get environment variables
     const netlifyToken = process.env.NETLIFY_ACCESS_TOKEN;
@@ -372,6 +372,79 @@ async function addDomainAlias(siteId, domain, headers) {
     };
   } catch (error) {
     console.error(`❌ Add domain alias failed for ${domain}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Remove domain alias from site
+ */
+async function removeDomainAlias(siteId, domain, headers) {
+  try {
+    console.log(`➖ Removing domain alias: ${domain}`);
+
+    // First get current aliases
+    const siteResponse = await fetch(`https://api.netlify.com/api/v1/sites/${siteId}`, {
+      method: 'GET',
+      headers
+    });
+
+    if (!siteResponse.ok) {
+      throw new Error(`Failed to get current aliases: ${siteResponse.status}`);
+    }
+
+    const siteData = await siteResponse.json();
+    const currentAliases = siteData.domain_aliases || [];
+
+    // Check if domain exists in aliases
+    if (!currentAliases.includes(domain)) {
+      return {
+        statusCode: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          success: true,
+          action: 'removeDomainAlias',
+          message: `Domain ${domain} was not found in domain aliases`,
+          domain: domain,
+          not_found: true,
+          current_aliases: currentAliases
+        }),
+      };
+    }
+
+    // Remove domain from aliases
+    const updatedAliases = currentAliases.filter(alias => alias !== domain);
+
+    const updateResponse = await fetch(`https://api.netlify.com/api/v1/sites/${siteId}`, {
+      method: 'PATCH',
+      headers,
+      body: JSON.stringify({
+        domain_aliases: updatedAliases
+      })
+    });
+
+    if (!updateResponse.ok) {
+      const errorText = await updateResponse.text();
+      throw new Error(`Failed to remove domain alias: ${updateResponse.status} - ${errorText}`);
+    }
+
+    const updatedSite = await updateResponse.json();
+
+    return {
+      statusCode: 200,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        success: true,
+        action: 'removeDomainAlias',
+        message: `Successfully removed ${domain} from domain aliases`,
+        domain: domain,
+        previous_aliases: currentAliases,
+        current_aliases: updatedSite.domain_aliases,
+        site_url: updatedSite.ssl_url || updatedSite.url
+      }),
+    };
+  } catch (error) {
+    console.error(`❌ Remove domain alias failed for ${domain}:`, error);
     throw error;
   }
 }
