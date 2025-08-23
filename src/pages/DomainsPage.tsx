@@ -923,6 +923,10 @@ const DomainsPage = () => {
               <TabsContent value="bulk" className="mt-6">
                 <BulkDomainManager onDomainsAdded={loadDomains} />
               </TabsContent>
+
+              <TabsContent value="api" className="mt-6">
+                <NetlifyApiTester />
+              </TabsContent>
             </Tabs>
           </CardContent>
         </Card>
