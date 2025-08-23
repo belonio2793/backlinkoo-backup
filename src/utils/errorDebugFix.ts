@@ -465,10 +465,10 @@ export class ErrorDebugFix {
   }
 }
 
-// Auto-initialize
-if (typeof window !== 'undefined') {
+// Auto-initialize (disabled to prevent startup errors)
+if (typeof window !== 'undefined' && false) { // Disabled to prevent JSON.parse override issues
   const errorFix = ErrorDebugFix.getInstance();
-  
+
   // Initialize after DOM is ready
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
@@ -477,9 +477,14 @@ if (typeof window !== 'undefined') {
   } else {
     errorFix.initialize();
   }
-  
+
   // Make available globally for debugging
   (window as any).errorDebugFix = errorFix;
+}
+
+// Make class available globally for manual initialization if needed
+if (typeof window !== 'undefined') {
+  (window as any).ErrorDebugFix = ErrorDebugFix;
 }
 
 export default ErrorDebugFix;
