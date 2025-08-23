@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import { 
   Globe,
   Plus,
@@ -624,7 +625,7 @@ const DomainsPage = () => {
   const runDiagnostic = async () => {
     setRunningDiagnostic(true);
     try {
-      toast.info('���� Running network diagnostic...');
+      toast.info('🔍 Running network diagnostic...');
       const results = await runNetworkDiagnostic();
       setDiagnosticResults(results);
 
