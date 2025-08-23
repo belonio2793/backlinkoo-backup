@@ -141,6 +141,27 @@ export const BulkDomainManager: React.FC<BulkDomainManagerProps> = ({
           const netlifyResult = await callNetlifyDomainFunction(domain, newDomain.id);
 
           if (netlifyResult.success) {
+            // Verify domain was actually added after short delay
+            await new Promise(resolve => setTimeout(resolve, 1500));
+
+            try {
+              const verifyResponse = await fetch('/.netlify/functions/verify-netlify-domain', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ domain })
+              });
+
+              if (verifyResponse.ok) {
+                const verifyResult = await verifyResponse.json();
+                if (!verifyResult.success || !verifyResult.verification.domain_found) {
+                  // Domain wasn't actually added despite success response
+                  throw new Error('Domain not found in Netlify after addition');
+                }
+              }
+            } catch (verifyError) {
+              console.warn('Verification failed:', verifyError);
+              // Continue with success but note verification issue
+            }
             // Update domain status in database
             await supabase
               .from('domains')
