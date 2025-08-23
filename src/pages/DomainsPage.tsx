@@ -56,6 +56,8 @@ const DomainsPage = () => {
   const [selectedThemeForDomain, setSelectedThemeForDomain] = useState<{[key: string]: string}>({});
   const [runningDiagnostic, setRunningDiagnostic] = useState(false);
   const [diagnosticResults, setDiagnosticResults] = useState<DiagnosticResult[]>([]);
+  const [dnsModalOpen, setDnsModalOpen] = useState(false);
+  const [selectedDomainForDns, setSelectedDomainForDns] = useState<Domain | null>(null);
 
   const BLOG_THEMES = [
     { id: 'minimal', name: 'Minimal Clean', description: 'Clean and simple design' },
