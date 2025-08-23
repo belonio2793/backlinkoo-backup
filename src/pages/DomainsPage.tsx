@@ -420,6 +420,86 @@ const DomainsPage = () => {
     }
   };
 
+  // Verify domain exists in Netlify
+  const verifyDomainInNetlify = async (domain: Domain) => {
+    if (!domain) return;
+
+    setVerifyingDomains(prev => new Set(prev).add(domain.id));
+
+    try {
+      console.log(`🔍 Verifying ${domain.domain} in Netlify...`);
+
+      const response = await fetch('/.netlify/functions/verify-netlify-domain', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ domain: domain.domain })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+
+        console.log('🔍 Verification result:', result);
+
+        if (result.success && result.verification.domain_found) {
+          // Update domain status to show it's verified in Netlify
+          await supabase
+            .from('domains')
+            .update({
+              netlify_verified: true,
+              status: 'dns_ready',
+              error_message: null
+            })
+            .eq('id', domain.id);
+
+          setDomains(prev => prev.map(d =>
+            d.id === domain.id ? {
+              ...d,
+              netlify_verified: true,
+              status: 'dns_ready',
+              error_message: null
+            } : d
+          ));
+
+          toast.success(`✅ ${domain.domain} verified in Netlify!`);
+        } else {
+          // Domain not found in Netlify
+          await supabase
+            .from('domains')
+            .update({
+              netlify_verified: false,
+              status: 'error',
+              error_message: 'Domain not found in Netlify site aliases'
+            })
+            .eq('id', domain.id);
+
+          setDomains(prev => prev.map(d =>
+            d.id === domain.id ? {
+              ...d,
+              netlify_verified: false,
+              status: 'error',
+              error_message: 'Domain not found in Netlify site aliases'
+            } : d
+          ));
+
+          toast.error(`❌ ${domain.domain} not found in Netlify`);
+        }
+      } else {
+        console.error('Verification failed:', response.statusText);
+        toast.warning(`⚠️ Could not verify ${domain.domain} in Netlify`);
+      }
+
+    } catch (error: any) {
+      console.error('Verification error:', error);
+      toast.warning(`⚠️ Verification failed for ${domain.domain}: ${error.message}`);
+    } finally {
+      setVerifyingDomains(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(domain.id);
+        return newSet;
+      });
+    }
+  };
+
   // Add domain to Netlify using the optimized function
   const addDomainToNetlify = async (domain: Domain) => {
     try {
