@@ -183,8 +183,10 @@ const SimpleDomainManager = () => {
         const syncedDomains = result.domains || [];
         console.log(`✅ Successfully loaded ${syncedDomains.length} domains`);
 
-        if (result.synced > 0) {
+        if (result.synced > 0 && !silent) {
           toast.success(`✅ Synced ${result.synced} new domains from Netlify!`);
+        } else if (result.synced > 0 && silent) {
+          console.log(`🔄 Background sync: ${result.synced} new domains synced`);
         }
 
         // Filter domains based on user permissions
