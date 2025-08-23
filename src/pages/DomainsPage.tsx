@@ -757,12 +757,46 @@ const DomainsPage = () => {
           </p>
         </div>
 
-        {/* Add Domain Section */}
+        {/* Netlify Integration Notice */}
+        <Card className="mb-6 border-blue-200 bg-blue-50/50">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3 mb-3">
+              <Globe className="h-6 w-6 text-blue-600" />
+              <div>
+                <h3 className="font-semibold text-blue-900">Netlify API Integration Active</h3>
+                <p className="text-sm text-blue-700">
+                  Domains are automatically added as aliases to your Netlify site via API
+                </p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-green-600" />
+                <span>Programmatic domain addition</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-green-600" />
+                <span>Automatic DNS configuration</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-green-600" />
+                <span>SSL certificate provisioning</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Bulk Domain Manager */}
+        <div className="mb-8">
+          <BulkDomainManager onDomainsAdded={loadDomains} />
+        </div>
+
+        {/* Add Single Domain Section */}
         <Card className="mb-8">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Plus className="h-5 w-5" />
-              Add New Domain
+              Add Single Domain
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -775,10 +809,10 @@ const DomainsPage = () => {
                 disabled={addingDomain}
                 className="flex-1"
               />
-              <Button 
+              <Button
                 onClick={addDomain}
                 disabled={addingDomain || !newDomain.trim()}
-                className="min-w-[120px]"
+                className="min-w-[140px]"
               >
                 {addingDomain ? (
                   <>
@@ -787,12 +821,15 @@ const DomainsPage = () => {
                   </>
                 ) : (
                   <>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Domain
+                    <Globe className="h-4 w-4 mr-2" />
+                    Add to Netlify
                   </>
                 )}
               </Button>
             </div>
+            <p className="text-sm text-gray-600 mt-2">
+              Domain will be automatically added as an alias to your Netlify site and configured via API
+            </p>
           </CardContent>
         </Card>
 
