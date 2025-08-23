@@ -1,9 +1,11 @@
 /**
  * Netlify API Service
- * 
+ *
  * Official Netlify API integration for domain management and validation
  * Based on Netlify API documentation: https://docs.netlify.com/api/get-started/
  */
+
+import DirectNetlifyApi from './directNetlifyApi';
 
 export interface NetlifyApiResponse<T = any> {
   success: boolean;
