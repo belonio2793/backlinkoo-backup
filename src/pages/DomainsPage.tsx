@@ -287,6 +287,125 @@ const DomainsPage = () => {
     }
   };
 
+  // Remove domain from Netlify
+  const handleRemoveFromNetlify = async (domainId: string) => {
+    const domain = domains.find(d => d.id === domainId);
+    if (!domain) {
+      toast.error('Domain not found');
+      return;
+    }
+
+    const confirmed = confirm(
+      `Are you sure you want to remove ${domain.domain} from Netlify?\n\n` +
+      `This will:\n` +
+      `• Remove the domain alias from your Netlify site\n` +
+      `• Keep the domain in your database\n` +
+      `• You can add it back to Netlify later\n\n` +
+      `Continue with removal?`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setRemovingFromNetlify(prev => new Set(prev).add(domainId));
+
+    try {
+      toast.info(`Removing ${domain.domain} from Netlify...`);
+
+      // Check if domain exists in Netlify first
+      const netlifyCheck = await NetlifyApiService.quickDomainCheck(domain.domain);
+
+      if (!netlifyCheck.exists) {
+        toast.warning(`${domain.domain} is not currently in Netlify`);
+
+        // Update database to reflect current state
+        await supabase
+          .from('domains')
+          .update({
+            netlify_verified: false,
+            status: 'pending',
+            error_message: 'Domain not found in Netlify'
+          })
+          .eq('id', domainId)
+          .eq('user_id', user?.id);
+
+        setDomains(prev => prev.map(d =>
+          d.id === domainId ? {
+            ...d,
+            netlify_verified: false,
+            status: 'pending' as const,
+            error_message: 'Domain not found in Netlify'
+          } : d
+        ));
+
+        return;
+      }
+
+      // Remove domain from Netlify using the API
+      const removeResponse = await fetch('/.netlify/functions/netlify-domain-validation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'removeDomainAlias',
+          domain: domain.domain
+        })
+      });
+
+      if (!removeResponse.ok) {
+        throw new Error(`Failed to remove from Netlify: HTTP ${removeResponse.status}`);
+      }
+
+      const removeResult = await removeResponse.json();
+
+      if (removeResult.success) {
+        // Update domain status in database
+        await supabase
+          .from('domains')
+          .update({
+            netlify_verified: false,
+            status: 'pending',
+            error_message: null
+          })
+          .eq('id', domainId)
+          .eq('user_id', user?.id);
+
+        // Update local state
+        setDomains(prev => prev.map(d =>
+          d.id === domainId ? {
+            ...d,
+            netlify_verified: false,
+            status: 'pending' as const,
+            error_message: null
+          } : d
+        ));
+
+        toast.success(`${domain.domain} removed from Netlify successfully`);
+      } else {
+        throw new Error(removeResult.error || 'Failed to remove domain from Netlify');
+      }
+
+    } catch (error: any) {
+      console.error('Error removing domain from Netlify:', error);
+
+      let errorMessage = error.message;
+      if (error.message.includes('404')) {
+        errorMessage = 'Domain not found in Netlify (may already be removed)';
+      } else if (error.message.includes('401')) {
+        errorMessage = 'Authentication failed. Check Netlify access token.';
+      } else if (error.message.includes('403')) {
+        errorMessage = 'Permission denied. Check Netlify account permissions.';
+      }
+
+      toast.error(`Failed to remove ${domain.domain} from Netlify: ${errorMessage}`);
+    } finally {
+      setRemovingFromNetlify(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(domainId);
+        return newSet;
+      });
+    }
+  };
 
   // Retry adding domain to Netlify with enhanced error handling
   const retryDomainToNetlify = async (domainId: string) => {
