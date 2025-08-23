@@ -1006,6 +1006,17 @@ const DomainsPage = () => {
       </div>
 
       <Footer />
+
+      {/* DNS Validation Modal */}
+      {selectedDomainForDns && (
+        <DnsValidationModal
+          isOpen={dnsModalOpen}
+          onOpenChange={setDnsModalOpen}
+          domain={selectedDomainForDns.domain}
+          domainId={selectedDomainForDns.id}
+          onValidationComplete={handleDnsValidationComplete}
+        />
+      )}
     </div>
   );
 };
