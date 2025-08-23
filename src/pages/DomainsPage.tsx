@@ -903,50 +903,58 @@ const DomainsPage = () => {
           </CardContent>
         </Card>
 
-        {/* Bulk Domain Manager */}
-        <div className="mb-8">
-          <BulkDomainManager onDomainsAdded={loadDomains} />
-        </div>
-
-        {/* Add Single Domain Section */}
+        {/* Domain Addition Interface */}
         <Card className="mb-8">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Plus className="h-5 w-5" />
-              Add Single Domain
+              Add Domains to Netlify
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex gap-3">
-              <Input
-                placeholder="example.com"
-                value={newDomain}
-                onChange={(e) => setNewDomain(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && !addingDomain && addDomain()}
-                disabled={addingDomain}
-                className="flex-1"
-              />
-              <Button
-                onClick={addDomain}
-                disabled={addingDomain || !newDomain.trim()}
-                className="min-w-[140px]"
-              >
-                {addingDomain ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Adding...
-                  </>
-                ) : (
-                  <>
-                    <Globe className="h-4 w-4 mr-2" />
-                    Add to Netlify
-                  </>
-                )}
-              </Button>
-            </div>
-            <p className="text-sm text-gray-600 mt-2">
-              Domain will be automatically added as an alias to your Netlify site and configured via API
-            </p>
+            <Tabs defaultValue="single" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="single">Single Domain</TabsTrigger>
+                <TabsTrigger value="bulk">Bulk Addition</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="single" className="space-y-4 mt-6">
+                <div className="flex gap-3">
+                  <Input
+                    placeholder="example.com"
+                    value={newDomain}
+                    onChange={(e) => setNewDomain(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && !addingDomain && addDomain()}
+                    disabled={addingDomain}
+                    className="flex-1"
+                  />
+                  <Button
+                    onClick={addDomain}
+                    disabled={addingDomain || !newDomain.trim()}
+                    className="min-w-[140px]"
+                  >
+                    {addingDomain ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Adding...
+                      </>
+                    ) : (
+                      <>
+                        <Globe className="h-4 w-4 mr-2" />
+                        Add to Netlify
+                      </>
+                    )}
+                  </Button>
+                </div>
+                <p className="text-sm text-gray-600">
+                  Domain will be automatically added as an alias to your Netlify site and configured via API
+                </p>
+              </TabsContent>
+
+              <TabsContent value="bulk" className="mt-6">
+                <BulkDomainManager onDomainsAdded={loadDomains} />
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
 
