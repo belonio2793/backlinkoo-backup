@@ -583,7 +583,7 @@ const DomainsPage = () => {
         } else if (method === 'function') {
           successMessage = `✅ ${domain.domain} successfully added to Netlify! Configure DNS records to activate.`;
         } else if (method === 'mock') {
-          successMessage = `��️ ${domain.domain} simulated (functions not deployed). Add manually to Netlify for real functionality.`;
+          successMessage = `${domain.domain} simulated (functions not deployed). Add manually to Netlify for real functionality.`;
         } else {
           successMessage = `✅ ${domain.domain} processed successfully! Configure DNS records to activate.`;
         }
