@@ -42,7 +42,7 @@ if (import.meta.env.DEV) {
         .limit(1);
         
       if (profilesError) {
-        console.error('❌ Direct client profiles test failed:', profilesError);
+        console.error('❌ Direct client profiles test failed:', formatErrorForUI(profilesError));
       } else {
         console.log('✅ Direct client profiles test successful');
       }
@@ -55,7 +55,7 @@ if (import.meta.env.DEV) {
         .limit(1);
         
       if (postsError) {
-        console.error('❌ Direct client blog_posts test failed:', postsError);
+        console.error('❌ Direct client blog_posts test failed:', formatErrorForUI(postsError));
       } else {
         console.log('✅ Direct client blog_posts test successful');
       }
@@ -68,13 +68,13 @@ if (import.meta.env.DEV) {
         .limit(1);
         
       if (publishedError) {
-        console.error('❌ Direct client published_blog_posts test failed:', publishedError);
+        console.error('❌ Direct client published_blog_posts test failed:', formatErrorForUI(publishedError));
       } else {
         console.log('✅ Direct client published_blog_posts test successful');
       }
       
     } catch (error) {
-      console.error('❌ Direct client test failed:', error);
+      console.error('❌ Direct client test failed:', formatErrorForUI(error));
     }
   }, 2000);
 }
