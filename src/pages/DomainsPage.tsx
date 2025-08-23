@@ -854,13 +854,13 @@ const DomainsPage = () => {
             <div className="flex items-center gap-3 mb-3">
               <Globe className="h-6 w-6 text-blue-600" />
               <div>
-                <h3 className="font-semibold text-blue-900">Netlify API Integration Active</h3>
+                <h3 className="font-semibold text-blue-900">Netlify API Integration</h3>
                 <p className="text-sm text-blue-700">
                   Domains are automatically added as aliases to your Netlify site via API
                 </p>
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm mb-3">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-green-600" />
                 <span>Programmatic domain addition</span>
@@ -873,6 +873,31 @@ const DomainsPage = () => {
                 <CheckCircle2 className="h-4 w-4 text-green-600" />
                 <span>SSL certificate provisioning</span>
               </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-green-600" />
+                <span>Real-time verification</span>
+              </div>
+            </div>
+            <div className="bg-white rounded-lg p-3 border border-blue-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="font-medium">Configuration Status:</span>
+                  <Badge variant="outline" className="bg-orange-50 border-orange-200 text-orange-800">
+                    ⚠️ Requires Netlify Access Token
+                  </Badge>
+                </div>
+                <a
+                  href="https://app.netlify.com/projects/backlinkoo/domain-management"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-800 text-sm underline"
+                >
+                  View Netlify Dashboard →
+                </a>
+              </div>
+              <p className="text-xs text-gray-600 mt-1">
+                Set NETLIFY_ACCESS_TOKEN environment variable to enable real domain addition
+              </p>
             </div>
           </CardContent>
         </Card>
