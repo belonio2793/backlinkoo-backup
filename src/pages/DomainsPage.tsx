@@ -472,7 +472,8 @@ const DomainsPage = () => {
   };
 
   const getStatusBadge = (domain: Domain) => {
-    switch (domain.status) {
+    const status = domain.status || 'pending';
+    switch (status) {
       case 'pending':
         return <Badge variant="secondary">Pending</Badge>;
       case 'validating':
@@ -488,7 +489,7 @@ const DomainsPage = () => {
       case 'error':
         return <Badge variant="destructive">Error</Badge>;
       default:
-        return <Badge variant="secondary">Unknown</Badge>;
+        return <Badge variant="secondary">Added</Badge>;
     }
   };
 
