@@ -548,7 +548,7 @@ const SimpleDomainManager = () => {
       {/* Header */}
       <div className="text-center">
         <h2 className="text-3xl font-bold text-gray-900 mb-2">Domain Manager</h2>
-        <p className="text-gray-600">Add and manage your domains with Netlify integration</p>
+        <p className="text-gray-600">Add and manage your domains with link building automation</p>
       </div>
 
       {/* Add Domains Interface */}
