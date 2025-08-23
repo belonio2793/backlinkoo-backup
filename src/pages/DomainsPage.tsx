@@ -579,13 +579,13 @@ const DomainsPage = () => {
         // Customize success message based on method
         let successMessage = '';
         if (method === 'direct_api') {
-          successMessage = `✅ ${domain.domain} added to Netlify via direct API! Configure DNS records to activate.`;
+          successMessage = `${domain.domain} added to Netlify via direct API! Configure DNS records to activate.`;
         } else if (method === 'function') {
-          successMessage = `✅ ${domain.domain} successfully added to Netlify! Configure DNS records to activate.`;
+          successMessage = `${domain.domain} successfully added to Netlify! Configure DNS records to activate.`;
         } else if (method === 'mock') {
           successMessage = `${domain.domain} simulated (functions not deployed). Add manually to Netlify for real functionality.`;
         } else {
-          successMessage = `✅ ${domain.domain} processed successfully! Configure DNS records to activate.`;
+          successMessage = `${domain.domain} processed successfully! Configure DNS records to activate.`;
         }
 
         toast.success(successMessage);
@@ -715,9 +715,9 @@ const DomainsPage = () => {
       if (errorMessage.includes('Network error') || errorMessage.includes('Failed to fetch') ||
           errorMessage.includes('404') || errorMessage.includes('function')) {
         setShowManualInstructions(prev => new Set(prev).add(domain.id));
-        toast.error(`❌ Functions not deployed. Manual addition required for ${domain.domain}.`);
+        toast.error(`Functions not deployed. Manual addition required for ${domain.domain}.`);
       } else {
-        toast.error(`❌ Failed to add ${domain.domain} to Netlify: ${errorMessage}`);
+        toast.error(`Failed to add ${domain.domain} to Netlify: ${errorMessage}`);
       }
     }
   };
