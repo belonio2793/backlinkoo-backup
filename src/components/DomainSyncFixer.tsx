@@ -70,8 +70,8 @@ const DomainSyncFixer = ({ onSyncComplete }: { onSyncComplete?: () => void }) =>
         toast.warning('Netlify functions not deployed. Using local database only.');
       }
 
-      const netlifyDomains = netlifyResult.data?.domain_aliases || [];
-      const customDomain = netlifyResult.data?.custom_domain;
+      const netlifyDomains = netlifyResult.success ? (netlifyResult.data?.domain_aliases || []) : [];
+      const customDomain = netlifyResult.success ? netlifyResult.data?.custom_domain : undefined;
 
       // Create a set of all domains
       const allDomains = new Set([
