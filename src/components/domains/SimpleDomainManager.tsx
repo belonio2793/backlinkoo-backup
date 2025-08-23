@@ -409,7 +409,8 @@ another-site.net`}
           {loading ? (
             <div className="text-center py-8">
               <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-              <p className="text-gray-600">Loading domains...</p>
+              <p className="text-gray-600">Loading domains from database and Netlify...</p>
+              <p className="text-sm text-gray-500 mt-2">This will sync any missing domains automatically</p>
             </div>
           ) : domains.length === 0 ? (
             <div className="text-center py-12">
