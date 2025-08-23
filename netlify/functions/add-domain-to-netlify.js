@@ -82,11 +82,6 @@ exports.handler = async (event, context) => {
     }
 
     console.log(`🚀 Adding domain ${domain} to Netlify site ${siteId}...`);
-    console.log('Environment check:', {
-      hasToken: !!netlifyToken,
-      tokenStart: netlifyToken?.substring(0, 8) + '...',
-      siteId
-    });
 
     // Clean the domain name (remove protocol, www, trailing slash)
     const cleanDomain = domain.trim()
@@ -95,12 +90,9 @@ exports.handler = async (event, context) => {
       .replace(/^www\./, '')
       .replace(/\/$/, '');
 
-    console.log(`Domain cleaned: ${domain} → ${cleanDomain}`);
-
     // Validate domain format
     const domainRegex = /^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z]{2,})+$/;
     if (!domainRegex.test(cleanDomain)) {
-      console.error(`❌ Invalid domain format: ${cleanDomain}`);
       return {
         statusCode: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -113,7 +105,6 @@ exports.handler = async (event, context) => {
 
     // Check if domain is a subdomain (requires TXT verification)
     const isSubdomain = cleanDomain.split('.').length > 2;
-    console.log(`Domain type: ${isSubdomain ? 'subdomain' : 'root domain'}`);
 
     // Prepare the payload following official Netlify API documentation
     const payload = {
@@ -123,11 +114,7 @@ exports.handler = async (event, context) => {
     // For subdomains, we need to add txt_record_value if provided
     if (isSubdomain && requestData.txt_record_value) {
       payload.txt_record_value = requestData.txt_record_value;
-      console.log('Added TXT record value for subdomain verification');
     }
-
-    console.log('API payload:', JSON.stringify(payload, null, 2));
-    console.log('Making PATCH request to:', `https://api.netlify.com/api/v1/sites/${siteId}`);
 
     // Make the PATCH request to update the site with custom domain
     // Following official documentation: PATCH /api/v1/sites/{site_id}
@@ -139,8 +126,6 @@ exports.handler = async (event, context) => {
       },
       body: JSON.stringify(payload),
     });
-
-    console.log('Netlify API response status:', netlifyResponse.status, netlifyResponse.statusText);
 
     if (!netlifyResponse.ok) {
       const errorData = await netlifyResponse.text();
