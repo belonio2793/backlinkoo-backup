@@ -957,12 +957,12 @@ const DomainsPage = () => {
                               {retryingDomains.has(domain.id) ? (
                                 <>
                                   <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                                  Retrying...
+                                  Retrying API...
                                 </>
                               ) : (
                                 <>
                                   <CheckCircle2 className="h-3 w-3 mr-1" />
-                                  Retry Netlify
+                                  Retry Netlify API
                                 </>
                               )}
                             </Button>
