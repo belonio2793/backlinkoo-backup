@@ -428,26 +428,45 @@ const DomainsPage = () => {
           validateDomain(domain.id);
         }, 3000);
       } else {
-        throw new Error(result.error || 'Failed to add domain to Netlify');
+        // Provide more specific error information
+        const detailedError = result.error || 'Failed to add domain to Netlify';
+        const errorContext = `Response status: ${netlifyResponse.status}. ${detailedError}`;
+        throw new Error(errorContext);
       }
     } catch (error: any) {
       console.error('Error adding domain to Netlify:', error);
 
-      // Update domain status to error
+      // Create detailed error message
+      let errorMessage = error.message;
+      if (error.message.includes('401')) {
+        errorMessage = 'Authentication failed. Check Netlify access token.';
+      } else if (error.message.includes('403')) {
+        errorMessage = 'Permission denied. Check Netlify account permissions.';
+      } else if (error.message.includes('404')) {
+        errorMessage = 'Netlify site not found. Check site ID configuration.';
+      } else if (error.message.includes('422')) {
+        errorMessage = 'Domain validation failed. Domain may already be in use.';
+      } else if (error.message.includes('429')) {
+        errorMessage = 'Rate limit exceeded. Please try again in a few minutes.';
+      } else if (!error.message || error.message === 'Failed to fetch') {
+        errorMessage = 'Network error. Check your internet connection and try again.';
+      }
+
+      // Update domain status to error with detailed message
       await supabase
         .from('domains')
         .update({
           status: 'error' as const,
-          error_message: error.message
+          error_message: errorMessage
         })
         .eq('id', domain.id)
         .eq('user_id', user?.id);
 
       setDomains(prev => prev.map(d =>
-        d.id === domain.id ? { ...d, status: 'error', error_message: error.message } : d
+        d.id === domain.id ? { ...d, status: 'error', error_message: errorMessage } : d
       ));
 
-      toast.error(`❌ Failed to add ${domain.domain} to Netlify: ${error.message}`);
+      toast.error(`❌ Failed to add ${domain.domain} to Netlify: ${errorMessage}`);
     }
   };
 
