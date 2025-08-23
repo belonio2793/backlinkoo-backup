@@ -486,6 +486,8 @@ const DomainsPage = () => {
       ));
 
       // Use the new optimized Netlify API function
+      console.log(`🔄 Calling Netlify function for domain: ${domain.domain}`);
+
       const netlifyResponse = await fetch('/.netlify/functions/add-domain-to-netlify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -494,6 +496,8 @@ const DomainsPage = () => {
           domainId: domain.id
         })
       });
+
+      console.log(`📡 Netlify function response status: ${netlifyResponse.status} ${netlifyResponse.statusText}`);
 
       if (!netlifyResponse.ok) {
         // Get more detailed error information
