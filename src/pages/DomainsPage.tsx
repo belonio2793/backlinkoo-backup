@@ -582,8 +582,10 @@ const DomainsPage = () => {
         errorMessage = 'Domain validation failed. Domain may already be in use.';
       } else if (error.message.includes('429')) {
         errorMessage = 'Rate limit exceeded. Please try again in a few minutes.';
-      } else if (!error.message || error.message === 'Failed to fetch') {
-        errorMessage = 'Network error. Check your internet connection and try again.';
+      } else if (!error.message || error.message === 'Failed to fetch' || error.message.includes('Failed to fetch')) {
+        errorMessage = 'Network error: Could not connect to Netlify services. Please check your internet connection and try again. If the issue persists, the Netlify functions may need to be deployed.';
+      } else if (error.message.includes('TypeError: Failed to fetch')) {
+        errorMessage = 'Network connectivity issue: Unable to reach the domain management service. Please ensure you have an active internet connection.';
       }
 
       // Update domain status to error with detailed message
