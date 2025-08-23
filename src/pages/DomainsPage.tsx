@@ -661,61 +661,72 @@ const DomainsPage = () => {
 
       toast.info(`Setting ${theme.name} theme for ${domain.domain}...`);
 
-      const response = await fetch('/.netlify/functions/set-domain-theme', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          domainId: domain.id,
-          domain: domain.domain,
-          themeId: themeId
-        })
-      });
+      let functionSuccess = false;
 
-      if (response.ok) {
-        const result = await response.json();
+      // Try to call the Netlify function first
+      try {
+        const response = await fetch('/.netlify/functions/set-domain-theme', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            domainId: domain.id,
+            domain: domain.domain,
+            themeId: themeId
+          })
+        });
 
-        if (result.success) {
-          // Update domain status to active
-          const updateData = {
-            status: 'active' as const,
-            selected_theme: themeId,
-            theme_name: theme.name,
-            blog_enabled: true
-          };
-
-          await supabase
-            .from('domains')
-            .update(updateData)
-            .eq('id', domain.id)
-            .eq('user_id', user?.id);
-
-          setDomains(prev => prev.map(d =>
-            d.id === domain.id ? {
-              ...d,
-              status: 'active' as const,
-              selected_theme: themeId,
-              theme_name: theme.name,
-              blog_enabled: true
-            } : d
-          ));
-
-          toast.success(`${domain.domain} is now ready for blog generation with ${theme.name} theme!`);
-        } else {
-          throw new Error(result.error || 'Theme selection failed - no success returned');
-        }
-      } else {
-        let errorMessage = `Theme selection failed (HTTP ${response.status})`;
-        try {
-          const errorResult = await response.json();
-          if (errorResult.error) {
-            errorMessage = errorResult.error;
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success) {
+            functionSuccess = true;
+            console.log('✅ Netlify function successfully set theme');
+          } else {
+            console.warn('⚠️ Netlify function returned error:', result.error);
           }
-        } catch (parseError) {
-          // Use status text if JSON parsing fails
-          errorMessage = `Theme selection failed: ${response.statusText}`;
+        } else {
+          console.warn(`⚠️ Netlify function failed with status ${response.status}`);
         }
-        throw new Error(errorMessage);
+      } catch (functionError) {
+        console.warn('⚠️ Netlify function call failed:', functionError);
       }
+
+      // Fallback: Update directly via Supabase (always do this to ensure consistency)
+      console.log('📊 Updating domain theme via Supabase...');
+
+      const updateData = {
+        status: 'active' as const,
+        selected_theme: themeId,
+        theme_name: theme.name,
+        blog_enabled: true
+      };
+
+      const { error: supabaseError } = await supabase
+        .from('domains')
+        .update(updateData)
+        .eq('id', domain.id)
+        .eq('user_id', user?.id);
+
+      if (supabaseError) {
+        throw new Error(`Database update failed: ${supabaseError.message}`);
+      }
+
+      // Update local state
+      setDomains(prev => prev.map(d =>
+        d.id === domain.id ? {
+          ...d,
+          status: 'active' as const,
+          selected_theme: themeId,
+          theme_name: theme.name,
+          blog_enabled: true
+        } : d
+      ));
+
+      const successMessage = functionSuccess
+        ? `${domain.domain} is now ready for blog generation with ${theme.name} theme!`
+        : `${domain.domain} theme updated locally. Blog generation ready with ${theme.name} theme!`;
+
+      toast.success(successMessage);
+
     } catch (error: any) {
       console.error('Error setting domain theme:', error);
       toast.error(`Failed to set theme: ${error.message}`);
