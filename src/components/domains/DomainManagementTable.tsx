@@ -481,8 +481,30 @@ const DomainManagementTable = () => {
       {/* Header with Actions */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Domain Management</h2>
+          <div className="flex items-center gap-3 mb-2">
+            <h2 className="text-2xl font-bold text-gray-900">Domain Management</h2>
+            <div className="flex items-center gap-2">
+              {syncStatus.isMonitoring ? (
+                <div className="flex items-center gap-1 text-green-600">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="text-xs font-medium">Live Sync</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1 text-gray-400">
+                  <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                  <span className="text-xs font-medium">Offline</span>
+                </div>
+              )}
+            </div>
+          </div>
           <p className="text-gray-600">Manage domains with two-way sync between database and Netlify</p>
+          {syncStatus.lastSync && (
+            <p className="text-xs text-gray-500 mt-1">
+              Last sync: {syncStatus.lastSync.toLocaleTimeString()} •
+              {syncStatus.syncCount} sync(s) •
+              {syncStatus.errorCount} error(s)
+            </p>
+          )}
         </div>
         <div className="flex gap-2">
           <Button
