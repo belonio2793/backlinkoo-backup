@@ -525,6 +525,7 @@ const DomainsPage = () => {
       }
 
       const result = await netlifyResponse.json();
+      console.log(`📋 Netlify function result:`, result);
 
       if (result.success) {
         // Update domain with available fields only
