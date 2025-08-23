@@ -370,7 +370,12 @@ const DomainsPage = () => {
         }
 
         setDomains(prev => prev.map(d =>
-          d.id === domain.id ? { ...d, ...updateData } : d
+          d.id === domain.id ? {
+            ...d,
+            netlify_verified: true,
+            status: 'dns_ready' as const,
+            error_message: null
+          } : d
         ));
 
         toast.success(`✅ ${domain.domain} successfully added to Netlify! Configure DNS records to activate.`);
