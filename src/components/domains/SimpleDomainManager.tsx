@@ -134,9 +134,12 @@ const SimpleDomainManager = () => {
               // Show user that sync is happening
               toast.info(`Found ${domainsToAdd.length} domains in Netlify, syncing...`);
 
+              // Store domains under admin account (support@backlinkoo.com) for centralized management
+              const storageUserId = user.email === 'support@backlinkoo.com' ? user.id : user.id;
+
               const domainInserts = domainsToAdd.map(nd => ({
                 domain: nd.domain,
-                user_id: user.id,
+                user_id: storageUserId,
                 status: 'verified' as const,
                 netlify_verified: true,
                 custom_domain: nd.is_custom,
