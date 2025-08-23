@@ -19,7 +19,8 @@ import {
   Loader2,
   RefreshCw,
   List,
-  ExternalLink
+  ExternalLink,
+  Trash2
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -41,10 +42,11 @@ const SimpleDomainManager = () => {
   const [loading, setLoading] = useState(false);
   const [addingDomain, setAddingDomain] = useState(false);
   const [addingBulk, setAddingBulk] = useState(false);
-  
+  const [removingDomain, setRemovingDomain] = useState<string | null>(null);
+
   // Single domain add
   const [newDomain, setNewDomain] = useState('');
-  
+
   // Bulk domain add
   const [bulkDomains, setBulkDomains] = useState('');
 
