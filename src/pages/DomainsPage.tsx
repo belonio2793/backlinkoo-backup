@@ -834,9 +834,30 @@ const DomainsPage = () => {
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
               <span>Your Domains ({domains.length})</span>
-              <Button variant="outline" size="sm" onClick={loadDomains}>
-                Refresh
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={runDiagnostic}
+                  disabled={runningDiagnostic}
+                  className="text-blue-600 border-blue-300 hover:bg-blue-50"
+                >
+                  {runningDiagnostic ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                      Diagnosing...
+                    </>
+                  ) : (
+                    <>
+                      <AlertTriangle className="h-4 w-4 mr-1" />
+                      Debug Network
+                    </>
+                  )}
+                </Button>
+                <Button variant="outline" size="sm" onClick={loadDomains}>
+                  Refresh
+                </Button>
+              </div>
             </CardTitle>
           </CardHeader>
           <CardContent>
