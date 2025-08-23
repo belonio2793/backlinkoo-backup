@@ -3,7 +3,7 @@ import { Globe } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { useAuthState } from '@/hooks/useAuthState';
-import EnhancedDomainManager from '@/components/domains/EnhancedDomainManager';
+import SimpleDomainManager from '@/components/domains/SimpleDomainManager';
 
 const DomainsPage = () => {
   const { isAuthenticated } = useAuthState();
