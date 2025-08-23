@@ -132,8 +132,12 @@ export function ApiConnectivityStatus() {
   };
 
   useEffect(() => {
-    // Auto-check on component mount
-    checkApiStatus();
+    // Auto-check on component mount (with delay to prevent initial load issues)
+    const timer = setTimeout(() => {
+      checkApiStatus();
+    }, 2000);
+
+    return () => clearTimeout(timer);
   }, []);
 
   const getStatusIcon = (statusType: 'netlifyFunctions' | 'domainManagement' | 'environmentConfig') => {
