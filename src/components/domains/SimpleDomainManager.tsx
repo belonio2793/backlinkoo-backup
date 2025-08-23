@@ -56,6 +56,14 @@ const SimpleDomainManager = () => {
   // Auto-sync on page load and setup background functionality
   useEffect(() => {
     if (user) {
+      console.log('🚀 Domains page: Activating all background functionality...');
+      console.log('✅ Auto-sync: ON');
+      console.log('✅ Periodic sync: Every 5 minutes');
+      console.log('✅ Real-time monitoring: ON');
+      console.log('✅ Dev server integration: ON');
+      console.log('✅ Domain auto-detection: ON');
+      console.log('✅ Health monitoring: Every 10 minutes');
+
       // Immediate sync on page load
       loadDomains(true); // true = silent sync
 
