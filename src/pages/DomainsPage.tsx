@@ -49,7 +49,6 @@ const DomainsPage = () => {
   const [retryingDomains, setRetryingDomains] = useState<Set<string>>(new Set());
   const [diagnosingDomains, setDiagnosingDomains] = useState<Set<string>>(new Set());
   const [addingToNetlify, setAddingToNetlify] = useState<Set<string>>(new Set());
-  const [debuggingNetlify, setDebuggingNetlify] = useState<Set<string>>(new Set());
   const [selectedThemeForDomain, setSelectedThemeForDomain] = useState<{[key: string]: string}>({});
 
   const BLOG_THEMES = [
@@ -307,100 +306,6 @@ const DomainsPage = () => {
       toast.error(`Validation failed: ${error.message}`);
     } finally {
       setValidatingDomains(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(domainId);
-        return newSet;
-      });
-    }
-  };
-
-  // Debug Netlify API to identify exact issue
-  const debugNetlifyAPI = async (domainId: string) => {
-    const domain = domains.find(d => d.id === domainId);
-    if (!domain) {
-      toast.error('Domain not found');
-      return;
-    }
-
-    setDebuggingNetlify(prev => new Set(prev).add(domainId));
-
-    try {
-      toast.info(`🔍 Debugging Netlify API for ${domain.domain}...`);
-
-      const debugResponse = await fetch('/.netlify/functions/debug-netlify-api', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ domain: domain.domain })
-      });
-
-      if (!debugResponse.ok) {
-        throw new Error(`Debug failed: ${debugResponse.statusText}`);
-      }
-
-      const result = await debugResponse.json();
-
-      if (result.success) {
-        const { debug } = result;
-
-        console.log('🔍 NETLIFY API DEBUG REPORT:', debug);
-
-        // Analyze the debug results
-        let issueFound = false;
-        let issueDetails = [];
-
-        if (!debug.authTest?.ok) {
-          issueFound = true;
-          issueDetails.push('❌ Authentication failed - Invalid Netlify token');
-        }
-
-        if (!debug.siteTest?.ok) {
-          issueFound = true;
-          issueDetails.push('❌ Site access failed - Invalid site ID or permissions');
-        }
-
-        if (debug.domainTest && !debug.domainTest.ok) {
-          issueFound = true;
-          const errorMsg = debug.domainTest.errorDetails?.message || debug.domainTest.error || 'Unknown error';
-          issueDetails.push(`❌ Domain addition failed: ${errorMsg}`);
-        }
-
-        if (issueFound) {
-          toast.error(`Issues found: ${issueDetails.join(', ')}`);
-          console.error('❌ Netlify API Issues:', issueDetails);
-        } else {
-          toast.success('✅ Netlify API configuration looks good!');
-          console.log('✅ All Netlify API tests passed');
-        }
-
-        // Update error message with debug info
-        const debugSummary = issueFound
-          ? `Debug: ${issueDetails.join('; ')}`
-          : 'Debug: API configuration OK - try manual addition';
-
-        await supabase
-          .from('domains')
-          .update({
-            error_message: debugSummary
-          })
-          .eq('id', domainId)
-          .eq('user_id', user?.id);
-
-        setDomains(prev => prev.map(d =>
-          d.id === domainId ? {
-            ...d,
-            error_message: debugSummary
-          } : d
-        ));
-
-      } else {
-        throw new Error(result.error || 'Debug failed');
-      }
-
-    } catch (error: any) {
-      console.error('Debug API error:', error);
-      toast.error(`Debug failed: ${error.message}`);
-    } finally {
-      setDebuggingNetlify(prev => {
         const newSet = new Set(prev);
         newSet.delete(domainId);
         return newSet;
@@ -1000,7 +905,7 @@ const DomainsPage = () => {
                         variant="outline"
                         size="sm"
                         onClick={() => handleAddToNetlify(domain.id)}
-                        disabled={addingToNetlify.has(domain.id) || validatingDomains.has(domain.id) || debuggingNetlify.has(domain.id)}
+                        disabled={addingToNetlify.has(domain.id) || validatingDomains.has(domain.id)}
                         className="text-green-600 border-green-300 hover:bg-green-50"
                       >
                         {addingToNetlify.has(domain.id) ? (
@@ -1012,26 +917,6 @@ const DomainsPage = () => {
                           <>
                             <Globe className="h-4 w-4 mr-1" />
                             Add to Netlify
-                          </>
-                        )}
-                      </Button>
-
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => debugNetlifyAPI(domain.id)}
-                        disabled={debuggingNetlify.has(domain.id) || addingToNetlify.has(domain.id) || validatingDomains.has(domain.id)}
-                        className="text-purple-600 border-purple-300 hover:bg-purple-50"
-                      >
-                        {debuggingNetlify.has(domain.id) ? (
-                          <>
-                            <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                            Debugging...
-                          </>
-                        ) : (
-                          <>
-                            <AlertTriangle className="h-4 w-4 mr-1" />
-                            Debug API
                           </>
                         )}
                       </Button>
