@@ -20,15 +20,16 @@ import { toast } from 'sonner';
 interface Domain {
   id: string;
   domain: string;
-  status: 'pending' | 'validating' | 'validated' | 'error' | 'dns_ready' | 'theme_selection' | 'active';
-  netlify_verified: boolean;
-  dns_verified: boolean;
+  status?: 'pending' | 'validating' | 'validated' | 'error' | 'dns_ready' | 'theme_selection' | 'active';
+  netlify_verified?: boolean;
+  dns_verified?: boolean;
   created_at: string;
   error_message?: string;
   dns_records?: DNSRecord[];
   selected_theme?: string;
   theme_name?: string;
   blog_enabled?: boolean;
+  user_id?: string;
 }
 
 interface DNSRecord {
@@ -45,6 +46,9 @@ const DomainsPage = () => {
   const [newDomain, setNewDomain] = useState('');
   const [addingDomain, setAddingDomain] = useState(false);
   const [validatingDomains, setValidatingDomains] = useState<Set<string>>(new Set());
+  const [retryingDomains, setRetryingDomains] = useState<Set<string>>(new Set());
+  const [diagnosingDomains, setDiagnosingDomains] = useState<Set<string>>(new Set());
+  const [addingToNetlify, setAddingToNetlify] = useState<Set<string>>(new Set());
   const [selectedThemeForDomain, setSelectedThemeForDomain] = useState<{[key: string]: string}>({});
 
   const BLOG_THEMES = [
@@ -156,14 +160,11 @@ const DomainsPage = () => {
 
       console.log('Database connection test successful');
 
-      // Add domain to database
+      // Add domain to database with minimal required fields
       const { data, error } = await supabase
         .from('domains')
         .insert({
           domain: cleanedDomain,
-          status: 'pending',
-          netlify_verified: false,
-          dns_verified: false,
           user_id: user.id
         })
         .select()
@@ -312,7 +313,163 @@ const DomainsPage = () => {
     }
   };
 
-  // Add domain to Netlify and fetch DNS records
+  // Manually add domain to Netlify from button click
+  const handleAddToNetlify = async (domainId: string) => {
+    const domain = domains.find(d => d.id === domainId);
+    if (!domain) {
+      toast.error('Domain not found');
+      return;
+    }
+
+    setAddingToNetlify(prev => new Set(prev).add(domainId));
+
+    try {
+      toast.info(`🚀 Adding ${domain.domain} to Netlify...`);
+      await addDomainToNetlify(domain);
+    } catch (error: any) {
+      console.error('Manual Netlify addition error:', error);
+      toast.error(`Failed to add to Netlify: ${error.message}`);
+    } finally {
+      setAddingToNetlify(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(domainId);
+        return newSet;
+      });
+    }
+  };
+
+  // Diagnose domain issues for troubleshooting
+  const diagnoseDomainIssue = async (domainId: string) => {
+    const domain = domains.find(d => d.id === domainId);
+    if (!domain) {
+      toast.error('Domain not found');
+      return;
+    }
+
+    setDiagnosingDomains(prev => new Set(prev).add(domainId));
+
+    try {
+      toast.info(`🔍 Running diagnostics for ${domain.domain}...`);
+
+      const diagnosticResponse = await fetch('/.netlify/functions/diagnose-domain-issue', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ domain: domain.domain })
+      });
+
+      if (!diagnosticResponse.ok) {
+        throw new Error(`Diagnostic failed: ${diagnosticResponse.statusText}`);
+      }
+
+      const result = await diagnosticResponse.json();
+
+      if (result.success) {
+        const { diagnostics } = result;
+
+        // Create a detailed diagnostic message
+        let diagnosticMessage = `📊 Diagnostic Results for ${domain.domain}:\n\n`;
+
+        diagnosticMessage += `Status: ${diagnostics.assessment.status.toUpperCase()}\n`;
+        diagnosticMessage += `Can Add Domain: ${diagnostics.assessment.canAddDomain ? 'Yes' : 'No'}\n\n`;
+
+        if (diagnostics.recommendations.length > 0) {
+          diagnosticMessage += 'Recommendations:\n';
+          diagnostics.recommendations.forEach((rec, i) => {
+            diagnosticMessage += `${i + 1}. ${rec.message}\n   Action: ${rec.action}\n`;
+          });
+        }
+
+        // Show detailed diagnostics in console for debugging
+        console.log('🔍 Full diagnostic report:', diagnostics);
+
+        if (diagnostics.assessment.status === 'critical') {
+          toast.error('Critical issues found. Check console for details.');
+        } else if (diagnostics.assessment.status === 'warning') {
+          toast.warning('Some issues detected. Check console for details.');
+        } else {
+          toast.success('✅ Configuration looks good! Ready to retry.');
+        }
+
+        // Update error message with diagnostic info
+        const shortDiagnostic = diagnostics.recommendations
+          .filter(r => r.type === 'critical')
+          .map(r => r.message)
+          .join('; ') || 'Check console for diagnostic details';
+
+        await supabase
+          .from('domains')
+          .update({
+            error_message: `${domain.error_message} | Diagnostic: ${shortDiagnostic}`
+          })
+          .eq('id', domainId)
+          .eq('user_id', user?.id);
+
+        setDomains(prev => prev.map(d =>
+          d.id === domainId ? {
+            ...d,
+            error_message: `${d.error_message} | Diagnostic: ${shortDiagnostic}`
+          } : d
+        ));
+
+      } else {
+        throw new Error(result.error || 'Diagnostic failed');
+      }
+
+    } catch (error: any) {
+      console.error('Diagnostic error:', error);
+      toast.error(`Diagnostic failed: ${error.message}`);
+    } finally {
+      setDiagnosingDomains(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(domainId);
+        return newSet;
+      });
+    }
+  };
+
+  // Retry adding domain to Netlify with enhanced error handling
+  const retryDomainToNetlify = async (domainId: string) => {
+    const domain = domains.find(d => d.id === domainId);
+    if (!domain) {
+      toast.error('Domain not found');
+      return;
+    }
+
+    setRetryingDomains(prev => new Set(prev).add(domainId));
+
+    try {
+      toast.info(`🔄 Retrying ${domain.domain} addition to Netlify...`);
+
+      // Reset domain status before retry
+      await supabase
+        .from('domains')
+        .update({
+          error_message: null
+        })
+        .eq('id', domainId)
+        .eq('user_id', user?.id);
+
+      // Clear error from local state
+      setDomains(prev => prev.map(d =>
+        d.id === domainId ? { ...d, error_message: null, status: 'validating' } : d
+      ));
+
+      // Use the same logic as addDomainToNetlify
+      await addDomainToNetlify(domain);
+
+    } catch (error: any) {
+      console.error('Retry error:', error);
+      toast.error(`Retry failed: ${error.message}`);
+    } finally {
+      setRetryingDomains(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(domainId);
+        return newSet;
+      });
+    }
+  };
+
+  // Add domain to Netlify using the optimized function
   const addDomainToNetlify = async (domain: Domain) => {
     try {
       toast.info(`Adding ${domain.domain} to Netlify...`);
@@ -328,45 +485,104 @@ const DomainsPage = () => {
         d.id === domain.id ? { ...d, status: 'validating' } : d
       ));
 
-      // Step 1: Add domain to Netlify (this happens in the validate function)
-      // Step 2: Fetch DNS records that need to be configured
-      const dnsResponse = await fetch('/.netlify/functions/get-dns-records', {
+      // Use the new optimized Netlify API function
+      const netlifyResponse = await fetch('/.netlify/functions/add-domain-to-netlify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ domain: domain.domain })
+        body: JSON.stringify({
+          domain: domain.domain,
+          domainId: domain.id
+        })
       });
 
-      if (dnsResponse.ok) {
-        const dnsData = await dnsResponse.json();
+      if (!netlifyResponse.ok) {
+        throw new Error(`Failed to add domain: ${netlifyResponse.statusText}`);
+      }
 
-        if (dnsData.success) {
-          // Update domain with DNS records
-          const updateData = {
-            status: 'dns_ready' as const,
-            dns_records: dnsData.records
-          };
+      const result = await netlifyResponse.json();
 
-          await supabase
-            .from('domains')
-            .update(updateData)
-            .eq('id', domain.id)
-            .eq('user_id', user?.id);
+      if (result.success) {
+        // Update domain with available fields only
+        const updateData: any = {};
 
-          setDomains(prev => prev.map(d =>
-            d.id === domain.id ? { ...d, ...updateData } : d
-          ));
-
-          toast.success(`${domain.domain} added to Netlify! DNS records are ready for configuration.`);
-
-          // Auto-validate after a short delay
-          setTimeout(() => {
-            validateDomain(domain.id);
-          }, 2000);
+        // Only update fields that exist in the schema
+        try {
+          updateData.error_message = null;
+          if (result.netlifyData?.site_id) {
+            updateData.netlify_site_id = result.netlifyData.site_id;
+          }
+          if (result.dnsInstructions?.dnsRecords) {
+            updateData.dns_records = result.dnsInstructions.dnsRecords;
+          }
+        } catch (schemaError) {
+          console.log('Using basic update for domain');
         }
+
+        const { error: updateError } = await supabase
+          .from('domains')
+          .update(updateData)
+          .eq('id', domain.id)
+          .eq('user_id', user?.id);
+
+        if (updateError) {
+          console.warn('Domain update error:', updateError);
+        }
+
+        setDomains(prev => prev.map(d =>
+          d.id === domain.id ? {
+            ...d,
+            netlify_verified: true,
+            status: 'dns_ready' as const,
+            error_message: null
+          } : d
+        ));
+
+        toast.success(`✅ ${domain.domain} successfully added to Netlify! Configure DNS records to activate.`);
+
+        // Auto-validate after a short delay to check DNS
+        setTimeout(() => {
+          validateDomain(domain.id);
+        }, 3000);
+      } else {
+        // Provide more specific error information
+        const detailedError = result.error || 'Failed to add domain to Netlify';
+        const errorContext = `Response status: ${netlifyResponse.status}. ${detailedError}`;
+        throw new Error(errorContext);
       }
     } catch (error: any) {
       console.error('Error adding domain to Netlify:', error);
-      toast.error(`Failed to add ${domain.domain} to Netlify: ${error.message}`);
+
+      // Create detailed error message
+      let errorMessage = error.message;
+      if (error.message.includes('401')) {
+        errorMessage = 'Authentication failed. Check Netlify access token.';
+      } else if (error.message.includes('403')) {
+        errorMessage = 'Permission denied. Check Netlify account permissions.';
+      } else if (error.message.includes('404')) {
+        errorMessage = 'Netlify site not found. Check site ID configuration.';
+      } else if (error.message.includes('422')) {
+        errorMessage = 'Domain validation failed. Domain may already be in use.';
+      } else if (error.message.includes('429')) {
+        errorMessage = 'Rate limit exceeded. Please try again in a few minutes.';
+      } else if (!error.message || error.message === 'Failed to fetch') {
+        errorMessage = 'Network error. Check your internet connection and try again.';
+      }
+
+      // Update domain status to error with detailed message
+      await supabase
+        .from('domains')
+        .update({
+          status: 'error' as const,
+          error_message: errorMessage
+        })
+        .eq('id', domain.id)
+        .eq('user_id', user?.id);
+
+      setDomains(prev => prev.map(d =>
+        d.id === domain.id ? { ...d, status: 'error', error_message: errorMessage } : d
+      ));
+
+      toast.error(`❌ Failed to add ${domain.domain} to Netlify: ${errorMessage}`);
     }
   };
 
@@ -410,7 +626,13 @@ const DomainsPage = () => {
             .eq('user_id', user?.id);
 
           setDomains(prev => prev.map(d =>
-            d.id === domain.id ? { ...d, ...updateData } : d
+            d.id === domain.id ? {
+              ...d,
+              status: 'active' as const,
+              selected_theme: themeId,
+              theme_name: theme.name,
+              blog_enabled: true
+            } : d
           ));
 
           toast.success(`${domain.domain} is now ready for blog generation with ${theme.name} theme!`);
@@ -451,7 +673,8 @@ const DomainsPage = () => {
   };
 
   const getStatusBadge = (domain: Domain) => {
-    switch (domain.status) {
+    const status = domain.status || 'pending';
+    switch (status) {
       case 'pending':
         return <Badge variant="secondary">Pending</Badge>;
       case 'validating':
@@ -467,7 +690,7 @@ const DomainsPage = () => {
       case 'error':
         return <Badge variant="destructive">Error</Badge>;
       default:
-        return <Badge variant="secondary">Unknown</Badge>;
+        return <Badge variant="secondary">Added</Badge>;
     }
   };
 
@@ -586,28 +809,78 @@ const DomainsPage = () => {
                       
                       <div className="flex items-center gap-4 text-sm text-gray-600">
                         <div className="flex items-center gap-1">
-                          {domain.netlify_verified ? (
-                            <CheckCircle2 className="h-4 w-4 text-green-600" />
+                          {domain.netlify_verified !== undefined ? (
+                            domain.netlify_verified ? (
+                              <CheckCircle2 className="h-4 w-4 text-green-600" />
+                            ) : (
+                              <AlertTriangle className="h-4 w-4 text-red-600" />
+                            )
                           ) : (
-                            <AlertTriangle className="h-4 w-4 text-red-600" />
+                            <AlertTriangle className="h-4 w-4 text-gray-400" />
                           )}
-                          <span>Netlify: {domain.netlify_verified ? 'Verified' : 'Not Found'}</span>
+                          <span>Netlify: {domain.netlify_verified ? 'Verified' : domain.netlify_verified === false ? 'Not Found' : 'Pending'}</span>
                         </div>
-                        
+
                         <div className="flex items-center gap-1">
-                          {domain.dns_verified ? (
-                            <CheckCircle2 className="h-4 w-4 text-green-600" />
+                          {domain.dns_verified !== undefined ? (
+                            domain.dns_verified ? (
+                              <CheckCircle2 className="h-4 w-4 text-green-600" />
+                            ) : (
+                              <AlertTriangle className="h-4 w-4 text-red-600" />
+                            )
                           ) : (
-                            <AlertTriangle className="h-4 w-4 text-red-600" />
+                            <AlertTriangle className="h-4 w-4 text-gray-400" />
                           )}
-                          <span>DNS: {domain.dns_verified ? 'Valid' : 'Invalid'}</span>
+                          <span>DNS: {domain.dns_verified ? 'Valid' : domain.dns_verified === false ? 'Invalid' : 'Pending'}</span>
                         </div>
                       </div>
 
                       {domain.error_message && (
-                        <p className="text-sm text-red-600 mt-1">
-                          Error: {domain.error_message}
-                        </p>
+                        <div className="mt-2">
+                          <p className="text-sm text-red-600 mb-2">
+                            Error: {domain.error_message}
+                          </p>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => retryDomainToNetlify(domain.id)}
+                              disabled={retryingDomains.has(domain.id) || diagnosingDomains.has(domain.id)}
+                              className="text-blue-600 border-blue-300 hover:bg-blue-50"
+                            >
+                              {retryingDomains.has(domain.id) ? (
+                                <>
+                                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                  Retrying...
+                                </>
+                              ) : (
+                                <>
+                                  <CheckCircle2 className="h-3 w-3 mr-1" />
+                                  Retry Netlify
+                                </>
+                              )}
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => diagnoseDomainIssue(domain.id)}
+                              disabled={diagnosingDomains.has(domain.id) || retryingDomains.has(domain.id)}
+                              className="text-amber-600 border-amber-300 hover:bg-amber-50"
+                            >
+                              {diagnosingDomains.has(domain.id) ? (
+                                <>
+                                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                  Diagnosing...
+                                </>
+                              ) : (
+                                <>
+                                  <AlertTriangle className="h-3 w-3 mr-1" />
+                                  Diagnose
+                                </>
+                              )}
+                            </Button>
+                          </div>
+                        </div>
                       )}
                     </div>
 
@@ -627,7 +900,27 @@ const DomainsPage = () => {
                           'Validate'
                         )}
                       </Button>
-                      
+
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleAddToNetlify(domain.id)}
+                        disabled={addingToNetlify.has(domain.id) || validatingDomains.has(domain.id)}
+                        className="text-green-600 border-green-300 hover:bg-green-50"
+                      >
+                        {addingToNetlify.has(domain.id) ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                            Adding...
+                          </>
+                        ) : (
+                          <>
+                            <Globe className="h-4 w-4 mr-1" />
+                            Add to Netlify
+                          </>
+                        )}
+                      </Button>
+
                       <Button
                         variant="outline"
                         size="sm"
