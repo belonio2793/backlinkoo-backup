@@ -375,7 +375,9 @@ export function DnsValidationModal({
             {/* DNS Records Table */}
             <Card>
               <CardHeader>
-                <CardTitle>Required DNS Records</CardTitle>
+                <CardTitle>
+                  {nameservers.length > 0 ? 'Required DNS Record for Verification' : 'Required DNS Records'}
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
