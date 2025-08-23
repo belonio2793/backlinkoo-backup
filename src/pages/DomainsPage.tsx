@@ -3,7 +3,7 @@ import { Globe } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { useAuthState } from '@/hooks/useAuthState';
-import NetlifyDomainManager from '@/components/domains/NetlifyDomainManager';
+import EnhancedDomainManager from '@/components/domains/EnhancedDomainManager';
 
 const DomainsPage = () => {
   const { isAuthenticated } = useAuthState();
