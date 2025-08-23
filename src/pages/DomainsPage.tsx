@@ -570,9 +570,38 @@ const DomainsPage = () => {
           validateDomain(domain.id);
         }, 3000);
       } else {
-        // Provide more specific error information
-        const detailedError = result.error || 'Failed to add domain to Netlify';
-        const errorContext = `Response status: ${netlifyResponse.status}. ${detailedError}`;
+        // Extract detailed error information from Netlify function response
+        console.error('❌ Netlify function returned error:', result);
+
+        let detailedError = 'Failed to add domain to Netlify';
+
+        // Try to extract specific error message
+        if (result.error) {
+          detailedError = result.error;
+        } else if (result.details?.specificError) {
+          detailedError = result.details.specificError;
+        } else if (result.details?.originalError) {
+          detailedError = result.details.originalError;
+        } else if (result.details?.rawResponse) {
+          detailedError = result.details.rawResponse;
+        } else if (result.message) {
+          detailedError = result.message;
+        }
+
+        // Include additional context if available
+        let errorContext = detailedError;
+        if (result.details?.status) {
+          errorContext = `HTTP ${result.details.status}: ${detailedError}`;
+        }
+
+        // Log full error for debugging
+        console.error('❌ Full error details:', {
+          domain: domain.domain,
+          error: detailedError,
+          status: result.details?.status,
+          response: result
+        });
+
         throw new Error(errorContext);
       }
     } catch (error: any) {
