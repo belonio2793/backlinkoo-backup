@@ -12,7 +12,8 @@ import {
   AlertTriangle,
   Loader2,
   Trash2,
-  Minus
+  Minus,
+  RefreshCw
 } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
