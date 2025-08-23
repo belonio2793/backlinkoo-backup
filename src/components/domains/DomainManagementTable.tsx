@@ -49,6 +49,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthState } from '@/hooks/useAuthState';
 import NetlifyApiService from '@/services/netlifyApiService';
+import useDomainRealTimeSync from '@/hooks/useDomainRealTimeSync';
 
 interface Domain {
   id: string;
