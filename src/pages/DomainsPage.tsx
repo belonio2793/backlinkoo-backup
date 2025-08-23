@@ -1209,7 +1209,7 @@ const DomainsPage = () => {
                             variant="outline"
                             size="sm"
                             onClick={() => verifyDomainInNetlify(domain)}
-                            disabled={verifyingDomains.has(domain.id)}
+                            disabled={verifyingDomains.has(domain.id) || removingFromNetlify.has(domain.id)}
                             className="text-purple-600 border-purple-300 hover:bg-purple-50"
                           >
                             {verifyingDomains.has(domain.id) ? (
