@@ -495,6 +495,19 @@ another-site.net`}
                       <CheckCircle2 className="h-5 w-5 text-green-600" />
                     )}
                     {getStatusBadge(domain)}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeDomain(domain.domain)}
+                      disabled={removingDomain === domain.domain}
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    >
+                      {removingDomain === domain.domain ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-4 w-4" />
+                      )}
+                    </Button>
                   </div>
                 </div>
               ))}
