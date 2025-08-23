@@ -490,57 +490,16 @@ const DomainsPage = () => {
         d.id === domain.id ? { ...d, status: 'validating' } : d
       ));
 
-      // Use the new optimized Netlify API function
+      // Use the smart Netlify function caller (with mock fallback in development)
       console.log(`🔄 Calling Netlify function for domain: ${domain.domain}`);
-
-      let netlifyResponse;
-      try {
-        netlifyResponse = await fetch('/.netlify/functions/add-domain-to-netlify', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            domain: domain.domain,
-            domainId: domain.id
-          })
-        });
-
-        console.log(`📡 Netlify function response status: ${netlifyResponse.status} ${netlifyResponse.statusText}`);
-      } catch (fetchError: any) {
-        console.error('❌ Network error calling Netlify function:', fetchError);
-        throw new Error(`Network error: Could not reach Netlify function. ${fetchError.message || 'Please check your internet connection and try again.'}`);
-      }
-
-      if (!netlifyResponse.ok) {
-        // Get more detailed error information
-        let errorDetails = netlifyResponse.statusText || 'Unknown error';
-
-        try {
-          const errorData = await netlifyResponse.text();
-          if (errorData) {
-            try {
-              const parsedError = JSON.parse(errorData);
-              errorDetails = parsedError.error || parsedError.message || errorData;
-            } catch {
-              errorDetails = errorData;
-            }
-          }
-        } catch {
-          // If we can't read the response, use the status
-          errorDetails = `HTTP ${netlifyResponse.status}: ${netlifyResponse.statusText || 'Network error'}`;
-        }
-
-        throw new Error(`Failed to add domain: ${errorDetails}`);
-      }
 
       let result;
       try {
-        result = await netlifyResponse.json();
+        result = await callNetlifyDomainFunction(domain.domain, domain.id);
         console.log(`📋 Netlify function result:`, result);
-      } catch (jsonError: any) {
-        console.error('❌ Failed to parse Netlify function response as JSON:', jsonError);
-        const responseText = await netlifyResponse.text().catch(() => 'Unable to read response');
-        console.error('❌ Raw response:', responseText);
-        throw new Error(`Invalid response from Netlify function: ${responseText.substring(0, 200)}${responseText.length > 200 ? '...' : ''}`);
+      } catch (functionError: any) {
+        console.error('❌ Error calling Netlify function:', functionError);
+        throw new Error(`Network error: Could not reach Netlify function. ${functionError.message || 'Please check your internet connection and try again.'}`);
       }
 
       if (result.success) {
