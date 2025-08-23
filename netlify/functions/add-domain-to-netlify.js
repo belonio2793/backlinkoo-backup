@@ -397,7 +397,7 @@ exports.handler = async (event, context) => {
  */
 function generateDNSInstructions(domain) {
   const isSubdomain = domain.split('.').length > 2;
-  
+
   if (isSubdomain) {
     return {
       title: 'Subdomain DNS Configuration',
@@ -421,39 +421,29 @@ function generateDNSInstructions(domain) {
     };
   } else {
     return {
-      title: 'Root Domain DNS Configuration',
+      title: 'Root Domain DNS Configuration with Nameservers',
       type: 'root',
       steps: [
         `Root domain ${domain} has been added to your Netlify site`,
-        'Configure your DNS with the following A records',
-        'Add CNAME record for www subdomain',
-        'Wait for DNS propagation (can take up to 48 hours)',
+        'Configure your domain to use our nameservers at your domain registrar',
+        'Add CNAME record for www subdomain (required for verification)',
+        'Wait for DNS propagation (usually 5-30 minutes)',
         'Netlify will automatically provision an SSL certificate once DNS is verified'
       ],
+      nameservers: [
+        'dns1.p05.nsone.net',
+        'dns2.p05.nsone.net',
+        'dns3.p05.nsone.net',
+        'dns4.p05.nsone.net'
+      ],
       dnsRecords: [
-        {
-          type: 'A',
-          name: '@',
-          value: '75.2.60.5',
-          ttl: 3600,
-          required: true,
-          description: 'Primary Netlify load balancer'
-        },
-        {
-          type: 'A',
-          name: '@',
-          value: '99.83.190.102',
-          ttl: 3600,
-          required: true,
-          description: 'Secondary Netlify load balancer'
-        },
         {
           type: 'CNAME',
           name: 'www',
           value: 'backlinkoo.netlify.app',
           ttl: 3600,
           required: true,
-          description: 'Points www to Netlify'
+          description: 'Points www subdomain to Netlify (required for verification)'
         }
       ]
     };

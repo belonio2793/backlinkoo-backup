@@ -56,8 +56,8 @@ export default async (req: Request, context: Context): Promise<Response> => {
     console.log(`Setting theme for domain ${domain}: ${selectedTheme.name}`);
 
     // Get Supabase credentials for database updates
-    const supabaseUrl = Netlify.env.get('VITE_SUPABASE_URL');
-    const supabaseKey = Netlify.env.get('VITE_SUPABASE_SERVICE_ROLE_KEY') || Netlify.env.get('VITE_SUPABASE_ANON_KEY');
+    const supabaseUrl = process.env.VITE_SUPABASE_URL;
+    const supabaseKey = process.env.VITE_SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
 
     if (!supabaseUrl || !supabaseKey) {
       return new Response(JSON.stringify({
@@ -155,5 +155,5 @@ export default async (req: Request, context: Context): Promise<Response> => {
 };
 
 export const config: Config = {
-  path: "/api/set-domain-theme"
+  path: "/.netlify/functions/set-domain-theme"
 };

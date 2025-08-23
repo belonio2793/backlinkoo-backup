@@ -156,17 +156,28 @@ export class ErrorDebugFix {
     const originalParse = JSON.parse;
     JSON.parse = function(text: string, reviver?: any) {
       try {
+        // Ensure text is actually a string
+        if (typeof text !== 'string') {
+          console.warn('🔧 JSON.parse received non-string input:', typeof text);
+          text = String(text);
+        }
+
         return originalParse.call(this, text, reviver);
       } catch (error) {
         console.error('🔧 JSON parse failed, attempting to fix:', {
-          text: text.substring(0, 100) + '...',
+          textType: typeof text,
+          textLength: text?.length || 0,
+          textPreview: typeof text === 'string' ? text.substring(0, 100) + '...' : String(text).substring(0, 100) + '...',
           error: formatErrorForUI(error)
         });
-        
+
+        // Convert to string if not already
+        const textStr = typeof text === 'string' ? text : String(text);
+
         // Try to extract JSON from response
-        if (typeof text === 'string') {
+        if (textStr && textStr.length > 0) {
           // Remove potential HTML or other content
-          const jsonMatch = text.match(/\{.*\}/s);
+          const jsonMatch = textStr.match(/\{.*\}/s);
           if (jsonMatch) {
             try {
               return originalParse.call(this, jsonMatch[0], reviver);
@@ -174,13 +185,18 @@ export class ErrorDebugFix {
               console.error('🔧 Retry JSON parse failed:', formatErrorForUI(retryError));
             }
           }
+
+          // Try to handle empty response
+          if (textStr.trim() === '') {
+            return { error: 'Empty response received' };
+          }
+
+          // Return a safe fallback with the error content
+          if (textStr.includes('error') || textStr.includes('Error')) {
+            return { error: textStr.substring(0, 200) };
+          }
         }
-        
-        // Return a safe fallback
-        if (typeof text === 'string' && text.includes('error')) {
-          return { error: text };
-        }
-        
+
         throw new Error(`Failed to parse response as JSON: ${formatErrorForUI(error)}`);
       }
     };
@@ -449,10 +465,10 @@ export class ErrorDebugFix {
   }
 }
 
-// Auto-initialize
-if (typeof window !== 'undefined') {
+// Auto-initialize (disabled to prevent startup errors)
+if (typeof window !== 'undefined' && false) { // Disabled to prevent JSON.parse override issues
   const errorFix = ErrorDebugFix.getInstance();
-  
+
   // Initialize after DOM is ready
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
@@ -461,9 +477,14 @@ if (typeof window !== 'undefined') {
   } else {
     errorFix.initialize();
   }
-  
+
   // Make available globally for debugging
   (window as any).errorDebugFix = errorFix;
+}
+
+// Make class available globally for manual initialization if needed
+if (typeof window !== 'undefined') {
+  (window as any).ErrorDebugFix = ErrorDebugFix;
 }
 
 export default ErrorDebugFix;

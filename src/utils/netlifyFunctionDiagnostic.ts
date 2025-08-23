@@ -1,137 +1,196 @@
 /**
  * Netlify Function Diagnostic Utility
- * Helps debug 404 and other issues with Netlify functions
+ * 
+ * Helps debug function deployment and availability issues
  */
 
-export interface FunctionTestResult {
+export interface FunctionDiagnosticResult {
   functionName: string;
-  available: boolean;
+  path: string;
+  isAvailable: boolean;
   status: number;
   error?: string;
-  response?: any;
+  responseTime?: number;
 }
 
 export class NetlifyFunctionDiagnostic {
+  
   /**
    * Test if a specific Netlify function is available
    */
-  static async testFunction(functionName: string, testPayload?: any): Promise<FunctionTestResult> {
+  static async testFunction(functionName: string, testPayload: any = {}): Promise<FunctionDiagnosticResult> {
+    const path = `/.netlify/functions/${functionName}`;
+    const startTime = Date.now();
+    
     try {
-      console.log(`🧪 Testing Netlify function: ${functionName}`);
-      
-      const response = await fetch(`/.netlify/functions/${functionName}`, {
+      const response = await fetch(path, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(testPayload || { test: true })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(testPayload)
       });
       
-      let responseData;
-      try {
-        responseData = await response.json();
-      } catch {
-        responseData = await response.text();
-      }
+      const responseTime = Date.now() - startTime;
       
       return {
         functionName,
-        available: response.status !== 404,
+        path,
+        isAvailable: response.status !== 404,
         status: response.status,
-        response: responseData
+        responseTime
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         functionName,
-        available: false,
+        path,
+        isAvailable: false,
         status: 0,
-        error: error.message
+        error: error instanceof Error ? error.message : 'Unknown error',
+        responseTime: Date.now() - startTime
       };
     }
   }
-  
+
   /**
-   * Test all OpenAI-related Netlify functions
+   * Test multiple functions and return a comprehensive report
    */
-  static async testOpenAIFunctions(): Promise<FunctionTestResult[]> {
-    const functions = [
-      'generate-openai',
-      'generate-ai-content', 
-      'generate-post',
-      'api-status'
-    ];
-    
-    console.log('🔍 Testing OpenAI-related Netlify functions...');
-    
-    const results = await Promise.all(
-      functions.map(functionName => this.testFunction(functionName, {
-        keyword: 'test',
-        url: 'https://example.com',
-        anchorText: 'test link'
-      }))
+  static async testMultipleFunctions(functions: string[]): Promise<FunctionDiagnosticResult[]> {
+    const testPromises = functions.map(functionName => 
+      this.testFunction(functionName, { test: true })
     );
     
-    const summary = {
-      total: results.length,
-      available: results.filter(r => r.available).length,
-      unavailable: results.filter(r => !r.available).length
+    return Promise.all(testPromises);
+  }
+
+  /**
+   * Run comprehensive diagnostic for domain management functions
+   */
+  static async runDomainManagementDiagnostic(): Promise<{
+    summary: {
+      totalFunctions: number;
+      availableFunctions: number;
+      unavailableFunctions: number;
+      recommendedAction: string;
     };
-    
-    console.log('📊 Function availability summary:', summary);
-    
-    return results;
-  }
-  
-  /**
-   * Check if we're in a development environment where functions might not be available
-   */
-  static isDevelopmentEnvironment(): boolean {
-    return window.location.hostname === 'localhost' || 
-           window.location.hostname.includes('127.0.0.1') ||
-           window.location.hostname.includes('.dev') ||
-           window.location.hostname.includes('.local');
-  }
-  
-  /**
-   * Get function deployment status and recommendations
-   */
-  static async getDiagnosticReport(): Promise<{
-    environment: string;
-    recommendations: string[];
-    functionTests: FunctionTestResult[];
+    results: FunctionDiagnosticResult[];
   }> {
-    const isDev = this.isDevelopmentEnvironment();
-    const functionTests = await this.testOpenAIFunctions();
-    const availableFunctions = functionTests.filter(f => f.available);
+    console.log('🔍 Running Netlify function diagnostic...');
     
-    const recommendations: string[] = [];
+    const domainFunctions = [
+      'netlify-domain-validation',
+      'add-domain-to-netlify', 
+      'verify-netlify-domain',
+      'validate-domain',
+      'set-domain-theme'
+    ];
     
-    if (isDev) {
-      recommendations.push('Development environment detected - Netlify functions may not be available locally');
-      recommendations.push('Consider using direct API fallbacks or testing in production environment');
+    const results = await this.testMultipleFunctions(domainFunctions);
+    
+    const availableFunctions = results.filter(r => r.isAvailable).length;
+    const unavailableFunctions = results.length - availableFunctions;
+    
+    let recommendedAction = '';
+    if (unavailableFunctions === 0) {
+      recommendedAction = 'All functions are available and working correctly.';
+    } else if (availableFunctions > 0) {
+      recommendedAction = 'Some functions are missing. Using available functions as fallbacks.';
+    } else {
+      recommendedAction = 'No domain management functions are available. Please deploy Netlify functions.';
     }
     
-    if (availableFunctions.length === 0) {
-      recommendations.push('No Netlify functions are responding - check deployment status');
-      recommendations.push('Verify functions are properly deployed and environment variables are set');
-      recommendations.push('Using fallback content generation for now');
-    } else if (availableFunctions.length < functionTests.length) {
-      recommendations.push(`Only ${availableFunctions.length}/${functionTests.length} functions available`);
-      recommendations.push('Some functions may need redeployment or configuration');
+    const summary = {
+      totalFunctions: results.length,
+      availableFunctions,
+      unavailableFunctions,
+      recommendedAction
+    };
+    
+    console.log('📊 Diagnostic summary:', summary);
+    console.log('📋 Function details:', results);
+    
+    return { summary, results };
+  }
+
+  /**
+   * Get deployment status and recommendations
+   */
+  static async getDeploymentStatus(): Promise<{
+    status: 'healthy' | 'partial' | 'critical';
+    message: string;
+    availableFunctions: string[];
+    missingFunctions: string[];
+    recommendations: string[];
+  }> {
+    const diagnostic = await this.runDomainManagementDiagnostic();
+    
+    const availableFunctions = diagnostic.results
+      .filter(r => r.isAvailable)
+      .map(r => r.functionName);
+      
+    const missingFunctions = diagnostic.results
+      .filter(r => !r.isAvailable)
+      .map(r => r.functionName);
+    
+    let status: 'healthy' | 'partial' | 'critical';
+    let message: string;
+    const recommendations: string[] = [];
+    
+    if (diagnostic.summary.unavailableFunctions === 0) {
+      status = 'healthy';
+      message = 'All Netlify functions are deployed and working correctly.';
+    } else if (diagnostic.summary.availableFunctions > 0) {
+      status = 'partial';
+      message = `${diagnostic.summary.availableFunctions} of ${diagnostic.summary.totalFunctions} functions are available.`;
+      recommendations.push('Deploy missing functions to enable full functionality');
+      recommendations.push('Check Netlify deployment logs for errors');
     } else {
-      recommendations.push('All functions appear to be working correctly');
+      status = 'critical';
+      message = 'No domain management functions are available.';
+      recommendations.push('Deploy all Netlify functions immediately');
+      recommendations.push('Check Netlify build and deployment settings');
+      recommendations.push('Verify netlify.toml configuration');
     }
     
     return {
-      environment: isDev ? 'development' : 'production',
-      recommendations,
-      functionTests
+      status,
+      message,
+      availableFunctions,
+      missingFunctions,
+      recommendations
     };
+  }
+
+  /**
+   * Log diagnostic information to console
+   */
+  static async logDiagnostic(): Promise<void> {
+    const deploymentStatus = await this.getDeploymentStatus();
+    
+    console.log('🏥 Netlify Function Health Check');
+    console.log('================================');
+    console.log(`Status: ${deploymentStatus.status.toUpperCase()}`);
+    console.log(`Message: ${deploymentStatus.message}`);
+    
+    if (deploymentStatus.availableFunctions.length > 0) {
+      console.log('✅ Available Functions:');
+      deploymentStatus.availableFunctions.forEach(fn => {
+        console.log(`  - ${fn}`);
+      });
+    }
+    
+    if (deploymentStatus.missingFunctions.length > 0) {
+      console.log('❌ Missing Functions:');
+      deploymentStatus.missingFunctions.forEach(fn => {
+        console.log(`  - ${fn}`);
+      });
+    }
+    
+    if (deploymentStatus.recommendations.length > 0) {
+      console.log('💡 Recommendations:');
+      deploymentStatus.recommendations.forEach(rec => {
+        console.log(`  - ${rec}`);
+      });
+    }
   }
 }
 
-// Make available in browser console for debugging
-if (typeof window !== 'undefined') {
-  (window as any).netlifyDiagnostic = NetlifyFunctionDiagnostic;
-  console.log('🧪 Netlify function diagnostic available via window.netlifyDiagnostic');
-}
+export default NetlifyFunctionDiagnostic;

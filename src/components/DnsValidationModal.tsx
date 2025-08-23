@@ -57,6 +57,7 @@ export function DnsValidationModal({
   onValidationComplete
 }: DnsValidationModalProps) {
   const [dnsRecords, setDnsRecords] = useState<DNSRecord[]>([]);
+  const [nameservers, setNameservers] = useState<string[]>([]);
   const [isValidating, setIsValidating] = useState(false);
   const [lastValidation, setLastValidation] = useState<Date | null>(null);
   const [validationResults, setValidationResults] = useState<{
@@ -89,7 +90,7 @@ export function DnsValidationModal({
   const initializeDnsRecords = () => {
     // Determine if this is a subdomain or root domain
     const isSubdomain = domain.split('.').length > 2;
-    
+
     if (isSubdomain) {
       // Subdomain configuration
       setDnsRecords([
@@ -103,34 +104,25 @@ export function DnsValidationModal({
           status: 'pending'
         }
       ]);
+      setNameservers([]);
     } else {
-      // Root domain configuration  
+      // Root domain configuration with nameservers
+      setNameservers([
+        'dns1.p05.nsone.net',
+        'dns2.p05.nsone.net',
+        'dns3.p05.nsone.net',
+        'dns4.p05.nsone.net'
+      ]);
+
+      // Only CNAME is required for validation
       setDnsRecords([
-        {
-          type: 'A',
-          name: '@',
-          value: '75.2.60.5',
-          ttl: 3600,
-          required: true,
-          description: 'Primary Netlify load balancer',
-          status: 'pending'
-        },
-        {
-          type: 'A',
-          name: '@',
-          value: '99.83.190.102',
-          ttl: 3600,
-          required: true,
-          description: 'Secondary Netlify load balancer',
-          status: 'pending'
-        },
         {
           type: 'CNAME',
           name: 'www',
           value: 'backlinkoo.netlify.app',
           ttl: 3600,
           required: true,
-          description: 'Points www to Netlify',
+          description: 'Points www subdomain to Netlify (required for verification)',
           status: 'pending'
         }
       ]);
@@ -180,12 +172,15 @@ export function DnsValidationModal({
         setDnsRecords(updatedRecords);
         setValidationResults(result);
 
-        const allValid = updatedRecords.every(record => record.status === 'verified');
-        if (allValid) {
-          toast.success(`✅ All DNS records validated for ${domain}`);
+        // Only check required records for validation
+        const requiredRecords = updatedRecords.filter(record => record.required);
+        const allRequiredValid = requiredRecords.every(record => record.status === 'verified');
+
+        if (allRequiredValid) {
+          toast.success(`✅ Required DNS records validated for ${domain}`);
           onValidationComplete?.(true);
         } else {
-          toast.warning(`⚠️ Some DNS records need attention for ${domain}`);
+          toast.warning(`⚠️ Required DNS records need attention for ${domain}`);
         }
       } else {
         setValidationResults(result);
@@ -267,7 +262,14 @@ export function DnsValidationModal({
             DNS Configuration for {domain}
           </DialogTitle>
           <DialogDescription>
-            Configure these DNS records at your domain registrar to point {domain} to your Netlify site.
+            {nameservers.length > 0 ? (
+              <>
+                Configure nameservers at your domain registrar, then add the required DNS record to complete setup for {domain}.
+                Only the CNAME record is required for verification.
+              </>
+            ) : (
+              <>Configure these DNS records at your domain registrar to point {domain} to your Netlify site.</>
+            )}
           </DialogDescription>
         </DialogHeader>
 
@@ -320,10 +322,62 @@ export function DnsValidationModal({
               </CardHeader>
             </Card>
 
+            {/* Nameserver Configuration (for root domains) */}
+            {nameservers.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Globe className="h-5 w-5 text-blue-600" />
+                    Nameserver Configuration
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Alert className="mb-4">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      <strong>Step 1:</strong> Configure your domain to use these nameservers at your domain registrar.
+                      This will handle all DNS routing for your domain.
+                    </AlertDescription>
+                  </Alert>
+
+                  <div className="space-y-3">
+                    <p className="text-sm font-medium text-gray-700">Set these nameservers at your registrar:</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {nameservers.map((nameserver, index) => (
+                        <div key={index} className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg">
+                          <code className="font-mono text-sm font-medium text-blue-900 flex-1">
+                            {nameserver}
+                          </code>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => copyToClipboard(nameserver, `Nameserver ${index + 1}`)}
+                            className="text-blue-600 hover:text-blue-800 hover:bg-blue-100"
+                          >
+                            <Copy className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+
+                    <Alert>
+                      <Clock className="h-4 w-4" />
+                      <AlertDescription>
+                        Nameserver changes can take up to 48 hours to propagate globally.
+                        After updating nameservers, proceed with the DNS record configuration below.
+                      </AlertDescription>
+                    </Alert>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* DNS Records Table */}
             <Card>
               <CardHeader>
-                <CardTitle>Required DNS Records</CardTitle>
+                <CardTitle>
+                  {nameservers.length > 0 ? 'Required DNS Record for Verification' : 'Required DNS Records'}
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">

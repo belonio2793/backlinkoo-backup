@@ -3,6 +3,8 @@
  * Helps debug what's actually happening with the add-domain-to-netlify function
  */
 
+import { safeJsonParse, formatErrorSafely } from './safeJsonParse';
+
 export async function testNetlifyDomainFunction(domain: string = 'test.example.com') {
   console.log('🧪 Testing Netlify domain function directly...');
   
@@ -27,7 +29,7 @@ export async function testNetlifyDomainFunction(domain: string = 'test.example.c
     let responseText;
     try {
       responseText = await response.text();
-      console.log(`📋 Raw response text:`, responseText);
+      console.log(`📋 Raw response text (${responseText?.length || 0} chars):`, responseText?.substring(0, 200) + (responseText?.length > 200 ? '...' : ''));
     } catch (textError) {
       console.error('❌ Could not read response as text:', textError);
       return {
@@ -36,21 +38,35 @@ export async function testNetlifyDomainFunction(domain: string = 'test.example.c
         statusText: response.statusText
       };
     }
-    
-    // Try to parse as JSON
-    let jsonResult;
-    try {
-      jsonResult = JSON.parse(responseText);
-      console.log(`📋 Parsed JSON result:`, jsonResult);
-    } catch (jsonError) {
-      console.error('❌ Could not parse response as JSON:', jsonError);
+
+    // Validate response text before parsing
+    if (!responseText || responseText.trim() === '') {
+      console.error('❌ Empty response received');
       return {
-        error: 'Invalid JSON response',
-        rawResponse: responseText,
+        error: 'Empty response received',
         status: response.status,
         statusText: response.statusText
       };
     }
+
+    // Parse JSON safely
+    const parseResult = safeJsonParse(responseText);
+
+    if (!parseResult.success) {
+      console.error('❌ Failed to parse response as JSON:', parseResult.error);
+      console.error('❌ Response content type:', response.headers.get('content-type'));
+      return {
+        error: `JSON parsing failed: ${parseResult.error}`,
+        rawResponse: responseText,
+        status: response.status,
+        statusText: response.statusText,
+        contentType: response.headers.get('content-type'),
+        parseError: parseResult.error
+      };
+    }
+
+    const jsonResult = parseResult.data;
+    console.log(`📋 Successfully parsed JSON result:`, jsonResult);
 
     // Check if response is successful
     if (!response.ok) {
@@ -81,17 +97,18 @@ export async function testNetlifyDomainFunction(domain: string = 'test.example.c
     }
 
   } catch (error: any) {
-    console.error('❌ Test function error:', error);
+    const formattedError = formatErrorSafely(error);
+    console.error('❌ Test function error:', formattedError);
     return {
       error: 'Network or execution error',
-      message: error.message,
-      stack: error.stack
+      message: formattedError,
+      originalError: error
     };
   }
 }
 
-// Auto-run test in development
-if (import.meta.env.DEV) {
+// Auto-run test in development (disabled to prevent initialization errors)
+if (import.meta.env.DEV && false) { // Disabled to prevent errors during page load
   // Run test after a short delay to avoid blocking initial load
   setTimeout(() => {
     console.log('🚀 Auto-running Netlify function test...');
