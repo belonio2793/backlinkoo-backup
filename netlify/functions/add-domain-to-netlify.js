@@ -259,6 +259,8 @@ exports.handler = async (event, context) => {
         netlifyData: {
           alias_name: cleanDomain,
           site_id: siteId,
+          primary_domain: updatedSite.custom_domain,
+          all_aliases: updatedSite.domain_aliases,
           primary_domain_preserved: true,
           alias_created: true
         },
