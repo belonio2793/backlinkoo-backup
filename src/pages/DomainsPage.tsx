@@ -734,7 +734,7 @@ const DomainsPage = () => {
       // Log detailed results to console
       console.log('🔍 Network Diagnostic Results:', results);
       results.forEach(result => {
-        const emoji = result.status === 'success' ? '✅' : result.status === 'warning' ? '⚠️' : '❌';
+        const emoji = result.status === 'success' ? '��' : result.status === 'warning' ? '⚠️' : '❌';
         console.log(`${emoji} ${result.service}: ${result.message}`, result.details);
       });
 
@@ -850,13 +850,13 @@ const DomainsPage = () => {
         </div>
 
         {/* Netlify Integration Notice */}
-        <Card className="mb-6 border-blue-200 bg-blue-50/50">
+        <Card className="mb-6 border-green-200 bg-green-50/50">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3 mb-3">
-              <Globe className="h-6 w-6 text-blue-600" />
+              <Globe className="h-6 w-6 text-green-600" />
               <div>
-                <h3 className="font-semibold text-blue-900">Netlify API Integration</h3>
-                <p className="text-sm text-blue-700">
+                <h3 className="font-semibold text-green-900">Netlify API Integration</h3>
+                <p className="text-sm text-green-700">
                   Domains are automatically added as aliases to your Netlify site via API
                 </p>
               </div>
@@ -879,25 +879,25 @@ const DomainsPage = () => {
                 <span>Real-time verification</span>
               </div>
             </div>
-            <div className="bg-white rounded-lg p-3 border border-blue-200">
+            <div className="bg-white rounded-lg p-3 border border-green-200">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-sm">
                   <span className="font-medium">Configuration Status:</span>
-                  <Badge variant="outline" className="bg-orange-50 border-orange-200 text-orange-800">
-                    ⚠️ Requires Netlify Access Token
+                  <Badge variant="outline" className="bg-green-50 border-green-200 text-green-800">
+                    ✅ Ready for Domain Management
                   </Badge>
                 </div>
                 <a
                   href="https://app.netlify.com/projects/backlinkoo/domain-management"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-800 text-sm underline"
+                  className="text-green-600 hover:text-green-800 text-sm underline"
                 >
                   View Netlify Dashboard →
                 </a>
               </div>
               <p className="text-xs text-gray-600 mt-1">
-                Set NETLIFY_ACCESS_TOKEN environment variable to enable real domain addition
+                Using NETLIFY_ACCESS_TOKEN from environment variables for secure API access
               </p>
             </div>
           </CardContent>
