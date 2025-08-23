@@ -350,6 +350,16 @@ const DomainSyncFixer = ({ onSyncComplete }: { onSyncComplete?: () => void }) =>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
+          {functionsAvailable === false && (
+            <Alert className="border-yellow-200 bg-yellow-50">
+              <AlertTriangle className="h-4 w-4 text-yellow-600" />
+              <AlertDescription className="text-yellow-700">
+                <strong>Limited Mode:</strong> Netlify functions not deployed. Sync checking uses local database only.
+                Deploy functions for full Netlify integration.
+              </AlertDescription>
+            </Alert>
+          )}
+
           <div className="flex items-center justify-between">
             <p className="text-sm text-gray-600">
               Detects and fixes mismatches between your database and Netlify
