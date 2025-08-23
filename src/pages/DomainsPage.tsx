@@ -427,72 +427,69 @@ const DomainsPage = () => {
     }
   };
 
-  // Verify domain exists in Netlify
+  // Verify domain exists in Netlify using official API
   const verifyDomainInNetlify = async (domain: Domain) => {
     if (!domain) return;
 
     setVerifyingDomains(prev => new Set(prev).add(domain.id));
 
     try {
-      console.log(`🔍 Verifying ${domain.domain} in Netlify...`);
+      console.log(`🔍 Verifying ${domain.domain} in Netlify via official API...`);
 
-      const response = await fetch('/.netlify/functions/verify-netlify-domain', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ domain: domain.domain })
-      });
+      // Use the official Netlify API to check domain status
+      const result = await NetlifyApiService.quickDomainCheck(domain.domain);
 
-      if (response.ok) {
-        const result = await response.json();
+      console.log('🔍 Official API verification result:', result);
 
-        console.log('🔍 Verification result:', result);
+      if (result.error) {
+        console.error('❌ Verification API error:', result.error);
+        toast.warning(`⚠️ Could not verify ${domain.domain}: ${result.error}`);
+        return;
+      }
 
-        if (result.success && result.verification.domain_found) {
-          // Update domain status to show it's verified in Netlify
-          await supabase
-            .from('domains')
-            .update({
-              netlify_verified: true,
-              status: 'dns_ready',
-              error_message: null
-            })
-            .eq('id', domain.id);
+      if (result.exists) {
+        // Update domain status to show it's verified in Netlify
+        await supabase
+          .from('domains')
+          .update({
+            netlify_verified: true,
+            status: 'dns_ready',
+            error_message: null
+          })
+          .eq('id', domain.id);
 
-          setDomains(prev => prev.map(d =>
-            d.id === domain.id ? {
-              ...d,
-              netlify_verified: true,
-              status: 'dns_ready',
-              error_message: null
-            } : d
-          ));
+        setDomains(prev => prev.map(d =>
+          d.id === domain.id ? {
+            ...d,
+            netlify_verified: true,
+            status: 'dns_ready',
+            error_message: null
+          } : d
+        ));
 
-          toast.success(`✅ ${domain.domain} verified in Netlify!`);
-        } else {
-          // Domain not found in Netlify
-          await supabase
-            .from('domains')
-            .update({
-              netlify_verified: false,
-              status: 'error',
-              error_message: 'Domain not found in Netlify site aliases'
-            })
-            .eq('id', domain.id);
-
-          setDomains(prev => prev.map(d =>
-            d.id === domain.id ? {
-              ...d,
-              netlify_verified: false,
-              status: 'error',
-              error_message: 'Domain not found in Netlify site aliases'
-            } : d
-          ));
-
-          toast.error(`❌ ${domain.domain} not found in Netlify`);
-        }
+        const domainType = result.isCustomDomain ? 'custom domain' : 'domain alias';
+        toast.success(`✅ ${domain.domain} verified in Netlify as ${domainType}!`);
       } else {
-        console.error('Verification failed:', response.statusText);
-        toast.warning(`⚠️ Could not verify ${domain.domain} in Netlify`);
+        // Domain not found in Netlify
+        await supabase
+          .from('domains')
+          .update({
+            netlify_verified: false,
+            status: 'error',
+            error_message: 'Domain not found in Netlify site configuration'
+          })
+          .eq('id', domain.id);
+
+        setDomains(prev => prev.map(d =>
+          d.id === domain.id ? {
+            ...d,
+            netlify_verified: false,
+            status: 'error',
+            error_message: 'Domain not found in Netlify site configuration'
+          } : d
+        ));
+
+        toast.error(`❌ ${domain.domain} not found in Netlify site configuration`);
       }
 
     } catch (error: any) {
