@@ -16,6 +16,10 @@ import { Footer } from '@/components/Footer';
 import { useAuthState } from '@/hooks/useAuthState';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { runNetworkDiagnostic, DiagnosticResult } from '@/utils/networkDiagnostic';
+import { testNetlifyDomainFunction } from '@/utils/testNetlifyFunction';
+import { callNetlifyDomainFunction } from '@/services/netlifyDomainMock';
+import { DnsValidationModal } from '@/components/DnsValidationModal';
 
 interface Domain {
   id: string;
@@ -50,6 +54,10 @@ const DomainsPage = () => {
   const [diagnosingDomains, setDiagnosingDomains] = useState<Set<string>>(new Set());
   const [addingToNetlify, setAddingToNetlify] = useState<Set<string>>(new Set());
   const [selectedThemeForDomain, setSelectedThemeForDomain] = useState<{[key: string]: string}>({});
+  const [runningDiagnostic, setRunningDiagnostic] = useState(false);
+  const [diagnosticResults, setDiagnosticResults] = useState<DiagnosticResult[]>([]);
+  const [dnsModalOpen, setDnsModalOpen] = useState(false);
+  const [selectedDomainForDns, setSelectedDomainForDns] = useState<Domain | null>(null);
 
   const BLOG_THEMES = [
     { id: 'minimal', name: 'Minimal Clean', description: 'Clean and simple design' },
@@ -207,109 +215,45 @@ const DomainsPage = () => {
     const domain = domains.find(d => d.id === domainId);
     if (!domain) return;
 
-    setValidatingDomains(prev => new Set(prev).add(domainId));
+    // Open DNS validation modal instead of running validation directly
+    setSelectedDomainForDns(domain);
+    setDnsModalOpen(true);
+  };
+
+  // Handle DNS validation completion from modal
+  const handleDnsValidationComplete = async (success: boolean) => {
+    if (!selectedDomainForDns) return;
 
     try {
-      // Update status to validating
-      await supabase
-        .from('domains')
-        .update({ status: 'validating' })
-        .eq('id', domainId);
-
-      setDomains(prev => prev.map(d => 
-        d.id === domainId ? { ...d, status: 'validating' } : d
-      ));
-
-      toast.info(`Validating ${domain.domain}...`);
-
-      // Call Netlify validation function
-      const response = await fetch('/.netlify/functions/validate-domain', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          domain: domain.domain,
-          domainId: domainId
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`Validation failed: ${response.statusText}`);
-      }
-
-      const result = await response.json();
-
-      // Update domain status based on validation result
       const updateData = {
-        status: result.success ? 'validated' : 'error',
-        netlify_verified: result.netlifyVerified || false,
-        dns_verified: result.dnsVerified || false,
-        error_message: result.success ? null : result.error
+        status: success ? 'validated' : 'error',
+        dns_verified: success,
+        error_message: success ? null : 'DNS validation failed'
       };
 
       await supabase
         .from('domains')
         .update(updateData)
-        .eq('id', domainId)
+        .eq('id', selectedDomainForDns.id)
         .eq('user_id', user?.id);
 
-      setDomains(prev => prev.map(d => 
-        d.id === domainId ? { ...d, ...updateData } : d
+      setDomains(prev => prev.map(d =>
+        d.id === selectedDomainForDns.id ? { ...d, ...updateData } : d
       ));
 
-      if (result.success) {
-        toast.success(`✅ ${domain.domain} validated successfully`);
+      if (success) {
+        toast.success(`✅ ${selectedDomainForDns.domain} DNS validated successfully`);
 
         // If domain is validated and doesn't have a theme yet, trigger theme selection
-        const updatedDomain = domains.find(d => d.id === domainId);
-        if (updatedDomain && !updatedDomain.selected_theme && result.netlifyVerified && result.dnsVerified) {
-          // Update status to theme_selection
-          await supabase
-            .from('domains')
-            .update({ status: 'theme_selection' })
-            .eq('id', domainId)
-            .eq('user_id', user?.id);
-
-          setDomains(prev => prev.map(d =>
-            d.id === domainId ? { ...d, status: 'theme_selection' } : d
-          ));
-
-          // Auto-select default theme (minimal) for seamless workflow
+        if (!selectedDomainForDns.selected_theme) {
           setTimeout(() => {
-            setDomainTheme(domainId, 'minimal');
+            setDomainTheme(selectedDomainForDns.id, 'minimal');
           }, 1000);
         }
-      } else {
-        toast.error(`❌ Validation failed for ${domain.domain}: ${result.error}`);
       }
-
     } catch (error: any) {
-      console.error('Validation error:', error);
-      
-      // Update domain status to error
-      const updateData = {
-        status: 'error' as const,
-        error_message: error.message
-      };
-
-      await supabase
-        .from('domains')
-        .update(updateData)
-        .eq('id', domainId)
-        .eq('user_id', user?.id);
-
-      setDomains(prev => prev.map(d => 
-        d.id === domainId ? { ...d, ...updateData } : d
-      ));
-
-      toast.error(`Validation failed: ${error.message}`);
-    } finally {
-      setValidatingDomains(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(domainId);
-        return newSet;
-      });
+      console.error('Error updating domain after validation:', error);
+      toast.error(`Failed to update domain status: ${error.message}`);
     }
   };
 
@@ -485,21 +429,17 @@ const DomainsPage = () => {
         d.id === domain.id ? { ...d, status: 'validating' } : d
       ));
 
-      // Use the new optimized Netlify API function
-      const netlifyResponse = await fetch('/.netlify/functions/add-domain-to-netlify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          domain: domain.domain,
-          domainId: domain.id
-        })
-      });
+      // Use the smart Netlify function caller (with mock fallback in development)
+      console.log(`🔄 Calling Netlify function for domain: ${domain.domain}`);
 
-      if (!netlifyResponse.ok) {
-        throw new Error(`Failed to add domain: ${netlifyResponse.statusText}`);
+      let result;
+      try {
+        result = await callNetlifyDomainFunction(domain.domain, domain.id);
+        console.log(`📋 Netlify function result:`, result);
+      } catch (functionError: any) {
+        console.error('❌ Error calling Netlify function:', functionError);
+        throw new Error(`Network error: Could not reach Netlify function. ${functionError.message || 'Please check your internet connection and try again.'}`);
       }
-
-      const result = await netlifyResponse.json();
 
       if (result.success) {
         // Update domain with available fields only
@@ -544,9 +484,38 @@ const DomainsPage = () => {
           validateDomain(domain.id);
         }, 3000);
       } else {
-        // Provide more specific error information
-        const detailedError = result.error || 'Failed to add domain to Netlify';
-        const errorContext = `Response status: ${netlifyResponse.status}. ${detailedError}`;
+        // Extract detailed error information from Netlify function response
+        console.error('❌ Netlify function returned error:', result);
+
+        let detailedError = 'Failed to add domain to Netlify';
+
+        // Try to extract specific error message
+        if (result.error) {
+          detailedError = result.error;
+        } else if (result.details?.specificError) {
+          detailedError = result.details.specificError;
+        } else if (result.details?.originalError) {
+          detailedError = result.details.originalError;
+        } else if (result.details?.rawResponse) {
+          detailedError = result.details.rawResponse;
+        } else if (result.message) {
+          detailedError = result.message;
+        }
+
+        // Include additional context if available
+        let errorContext = detailedError;
+        if (result.details?.status) {
+          errorContext = `HTTP ${result.details.status}: ${detailedError}`;
+        }
+
+        // Log full error for debugging
+        console.error('❌ Full error details:', {
+          domain: domain.domain,
+          error: detailedError,
+          status: result.details?.status,
+          response: result
+        });
+
         throw new Error(errorContext);
       }
     } catch (error: any) {
@@ -564,8 +533,10 @@ const DomainsPage = () => {
         errorMessage = 'Domain validation failed. Domain may already be in use.';
       } else if (error.message.includes('429')) {
         errorMessage = 'Rate limit exceeded. Please try again in a few minutes.';
-      } else if (!error.message || error.message === 'Failed to fetch') {
-        errorMessage = 'Network error. Check your internet connection and try again.';
+      } else if (!error.message || error.message === 'Failed to fetch' || error.message.includes('Failed to fetch')) {
+        errorMessage = 'Network error: Could not connect to Netlify services. Please check your internet connection and try again. If the issue persists, the Netlify functions may need to be deployed.';
+      } else if (error.message.includes('TypeError: Failed to fetch')) {
+        errorMessage = 'Network connectivity issue: Unable to reach the domain management service. Please ensure you have an active internet connection.';
       }
 
       // Update domain status to error with detailed message
@@ -645,6 +616,62 @@ const DomainsPage = () => {
     } catch (error: any) {
       console.error('Error setting domain theme:', error);
       toast.error(`Failed to set theme: ${error.message}`);
+    }
+  };
+
+  // Run network diagnostic to troubleshoot connectivity issues
+  const runDiagnostic = async () => {
+    setRunningDiagnostic(true);
+    try {
+      toast.info('🔍 Running network diagnostic...');
+      const results = await runNetworkDiagnostic();
+      setDiagnosticResults(results);
+
+      const errorCount = results.filter(r => r.status === 'error').length;
+      const warningCount = results.filter(r => r.status === 'warning').length;
+
+      if (errorCount > 0) {
+        toast.error(`❌ Diagnostic found ${errorCount} critical issues. Check console for details.`);
+      } else if (warningCount > 0) {
+        toast.warning(`⚠️ Diagnostic found ${warningCount} warnings. Check console for details.`);
+      } else {
+        toast.success('✅ All connectivity tests passed!');
+      }
+
+      // Log detailed results to console
+      console.log('🔍 Network Diagnostic Results:', results);
+      results.forEach(result => {
+        const emoji = result.status === 'success' ? '✅' : result.status === 'warning' ? '⚠️' : '❌';
+        console.log(`${emoji} ${result.service}: ${result.message}`, result.details);
+      });
+
+    } catch (error: any) {
+      console.error('Diagnostic error:', error);
+      toast.error(`Diagnostic failed: ${error.message}`);
+    } finally {
+      setRunningDiagnostic(false);
+    }
+  };
+
+  // Test Netlify function directly for debugging
+  const testNetlifyFunction = async () => {
+    setRunningDiagnostic(true);
+    try {
+      toast.info('🧪 Testing Netlify function directly...');
+      const result = await testNetlifyDomainFunction('leadpages.org');
+
+      if (result.error) {
+        toast.error(`❌ Netlify function test failed: ${result.error}`);
+        console.error('🧪 Function test failed:', result);
+      } else {
+        toast.success('✅ Netlify function test passed!');
+        console.log('🧪 Function test succeeded:', result);
+      }
+    } catch (error: any) {
+      console.error('💥 Test execution failed:', error);
+      toast.error(`Test failed: ${error.message}`);
+    } finally {
+      setRunningDiagnostic(false);
     }
   };
 
@@ -773,9 +800,49 @@ const DomainsPage = () => {
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
               <span>Your Domains ({domains.length})</span>
-              <Button variant="outline" size="sm" onClick={loadDomains}>
-                Refresh
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={testNetlifyFunction}
+                  disabled={runningDiagnostic}
+                  className="text-purple-600 border-purple-300 hover:bg-purple-50"
+                >
+                  {runningDiagnostic ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                      Testing...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="h-4 w-4 mr-1" />
+                      Test Function
+                    </>
+                  )}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={runDiagnostic}
+                  disabled={runningDiagnostic}
+                  className="text-blue-600 border-blue-300 hover:bg-blue-50"
+                >
+                  {runningDiagnostic ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                      Diagnosing...
+                    </>
+                  ) : (
+                    <>
+                      <AlertTriangle className="h-4 w-4 mr-1" />
+                      Debug Network
+                    </>
+                  )}
+                </Button>
+                <Button variant="outline" size="sm" onClick={loadDomains}>
+                  Refresh
+                </Button>
+              </div>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -939,6 +1006,17 @@ const DomainsPage = () => {
       </div>
 
       <Footer />
+
+      {/* DNS Validation Modal */}
+      {selectedDomainForDns && (
+        <DnsValidationModal
+          isOpen={dnsModalOpen}
+          onOpenChange={setDnsModalOpen}
+          domain={selectedDomainForDns.domain}
+          domainId={selectedDomainForDns.id}
+          onValidationComplete={handleDnsValidationComplete}
+        />
+      )}
     </div>
   );
 };
