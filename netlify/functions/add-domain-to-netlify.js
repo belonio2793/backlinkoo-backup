@@ -106,25 +106,18 @@ exports.handler = async (event, context) => {
     // Check if domain is a subdomain (requires TXT verification)
     const isSubdomain = cleanDomain.split('.').length > 2;
 
-    // Prepare the payload following official Netlify API documentation
-    const payload = {
-      custom_domain: cleanDomain
-    };
-
-    // For subdomains, we need to add txt_record_value if provided
-    if (isSubdomain && requestData.txt_record_value) {
-      payload.txt_record_value = requestData.txt_record_value;
-    }
-
-    // Make the PATCH request to update the site with custom domain
-    // Following official documentation: PATCH /api/v1/sites/{site_id}
-    const netlifyResponse = await fetch(`https://api.netlify.com/api/v1/sites/${siteId}`, {
-      method: 'PATCH',
+    // Use the site aliases endpoint to add additional domains without affecting primary domain
+    // This preserves backlinkoo.com as the primary domain and adds new domains as aliases
+    // Following Netlify API documentation: POST /api/v1/sites/{site_id}/aliases
+    const netlifyResponse = await fetch(`https://api.netlify.com/api/v1/sites/${siteId}/aliases`, {
+      method: 'POST',
       headers: {
         'Authorization': `Bearer ${netlifyToken}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({
+        name: cleanDomain
+      }),
     });
 
     if (!netlifyResponse.ok) {
