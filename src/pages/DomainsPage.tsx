@@ -312,6 +312,95 @@ const DomainsPage = () => {
     }
   };
 
+  // Diagnose domain issues for troubleshooting
+  const diagnoseDomainIssue = async (domainId: string) => {
+    const domain = domains.find(d => d.id === domainId);
+    if (!domain) {
+      toast.error('Domain not found');
+      return;
+    }
+
+    setDiagnosingDomains(prev => new Set(prev).add(domainId));
+
+    try {
+      toast.info(`🔍 Running diagnostics for ${domain.domain}...`);
+
+      const diagnosticResponse = await fetch('/.netlify/functions/diagnose-domain-issue', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ domain: domain.domain })
+      });
+
+      if (!diagnosticResponse.ok) {
+        throw new Error(`Diagnostic failed: ${diagnosticResponse.statusText}`);
+      }
+
+      const result = await diagnosticResponse.json();
+
+      if (result.success) {
+        const { diagnostics } = result;
+
+        // Create a detailed diagnostic message
+        let diagnosticMessage = `📊 Diagnostic Results for ${domain.domain}:\n\n`;
+
+        diagnosticMessage += `Status: ${diagnostics.assessment.status.toUpperCase()}\n`;
+        diagnosticMessage += `Can Add Domain: ${diagnostics.assessment.canAddDomain ? 'Yes' : 'No'}\n\n`;
+
+        if (diagnostics.recommendations.length > 0) {
+          diagnosticMessage += 'Recommendations:\n';
+          diagnostics.recommendations.forEach((rec, i) => {
+            diagnosticMessage += `${i + 1}. ${rec.message}\n   Action: ${rec.action}\n`;
+          });
+        }
+
+        // Show detailed diagnostics in console for debugging
+        console.log('🔍 Full diagnostic report:', diagnostics);
+
+        if (diagnostics.assessment.status === 'critical') {
+          toast.error('Critical issues found. Check console for details.');
+        } else if (diagnostics.assessment.status === 'warning') {
+          toast.warning('Some issues detected. Check console for details.');
+        } else {
+          toast.success('✅ Configuration looks good! Ready to retry.');
+        }
+
+        // Update error message with diagnostic info
+        const shortDiagnostic = diagnostics.recommendations
+          .filter(r => r.type === 'critical')
+          .map(r => r.message)
+          .join('; ') || 'Check console for diagnostic details';
+
+        await supabase
+          .from('domains')
+          .update({
+            error_message: `${domain.error_message} | Diagnostic: ${shortDiagnostic}`
+          })
+          .eq('id', domainId)
+          .eq('user_id', user?.id);
+
+        setDomains(prev => prev.map(d =>
+          d.id === domainId ? {
+            ...d,
+            error_message: `${d.error_message} | Diagnostic: ${shortDiagnostic}`
+          } : d
+        ));
+
+      } else {
+        throw new Error(result.error || 'Diagnostic failed');
+      }
+
+    } catch (error: any) {
+      console.error('Diagnostic error:', error);
+      toast.error(`Diagnostic failed: ${error.message}`);
+    } finally {
+      setDiagnosingDomains(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(domainId);
+        return newSet;
+      });
+    }
+  };
+
   // Retry adding domain to Netlify with enhanced error handling
   const retryDomainToNetlify = async (domainId: string) => {
     const domain = domains.find(d => d.id === domainId);
