@@ -313,6 +313,31 @@ const DomainsPage = () => {
     }
   };
 
+  // Manually add domain to Netlify from button click
+  const handleAddToNetlify = async (domainId: string) => {
+    const domain = domains.find(d => d.id === domainId);
+    if (!domain) {
+      toast.error('Domain not found');
+      return;
+    }
+
+    setAddingToNetlify(prev => new Set(prev).add(domainId));
+
+    try {
+      toast.info(`🚀 Adding ${domain.domain} to Netlify...`);
+      await addDomainToNetlify(domain);
+    } catch (error: any) {
+      console.error('Manual Netlify addition error:', error);
+      toast.error(`Failed to add to Netlify: ${error.message}`);
+    } finally {
+      setAddingToNetlify(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(domainId);
+        return newSet;
+      });
+    }
+  };
+
   // Diagnose domain issues for troubleshooting
   const diagnoseDomainIssue = async (domainId: string) => {
     const domain = domains.find(d => d.id === domainId);
