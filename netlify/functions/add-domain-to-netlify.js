@@ -1,9 +1,11 @@
 /**
- * Add Domain to Netlify - Official API Implementation
- * 
- * This function follows the official Netlify API documentation for adding custom domains:
- * https://developers.netlify.com/guides/adding-your-domain-using-netlify-api/
- * 
+ * Add Domain to Netlify as Alias - Official API Implementation
+ *
+ * This function adds domains as ALIASES to your existing Netlify site, preserving
+ * your primary domain (backlinkoo.com). It does NOT replace the primary domain.
+ *
+ * Uses the Netlify Site Aliases API: POST /api/v1/sites/{site_id}/aliases
+ *
  * Integrates with the DomainsPage workflow for seamless domain addition.
  */
 
