@@ -3,6 +3,8 @@
  * Helps debug what's actually happening with the add-domain-to-netlify function
  */
 
+import { safeJsonParse, formatErrorSafely } from './safeJsonParse';
+
 export async function testNetlifyDomainFunction(domain: string = 'test.example.com') {
   console.log('🧪 Testing Netlify domain function directly...');
   
