@@ -303,6 +303,15 @@ const SimpleDomainManager = () => {
       <div className="text-center">
         <h2 className="text-3xl font-bold text-gray-900 mb-2">Domain Manager</h2>
         <p className="text-gray-600">Add and manage your domains with Netlify integration</p>
+        {domains.length === 0 && !loading && (
+          <Alert className="mt-4 border-blue-200 bg-blue-50">
+            <RefreshCw className="h-4 w-4 text-blue-600" />
+            <AlertDescription className="text-blue-700">
+              <strong>First time here?</strong> Click "Sync from Netlify" to automatically import your existing domains:
+              <br /><strong>backlinkoo.com</strong> and <strong>leadpages.org</strong>
+            </AlertDescription>
+          </Alert>
+        )}
       </div>
 
       {/* Add Domains Interface */}
