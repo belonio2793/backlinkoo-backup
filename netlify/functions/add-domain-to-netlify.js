@@ -225,10 +225,10 @@ exports.handler = async (event, context) => {
         success: true,
         domain: cleanDomain,
         netlifyData: {
-          custom_domain: updatedSite.custom_domain,
-          ssl_url: updatedSite.ssl_url,
-          url: updatedSite.url,
-          site_id: siteId
+          alias_name: cleanDomain,
+          site_id: siteId,
+          primary_domain_preserved: true,
+          alias_created: true
         },
         dnsInstructions,
         dbUpdate: dbUpdateResult,
