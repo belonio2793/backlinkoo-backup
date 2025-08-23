@@ -76,14 +76,18 @@ const SimpleDomainManager = () => {
 
       // Now fetch domains from Netlify
       try {
+        console.log('🌐 Fetching domains from Netlify...');
         const netlifyResponse = await fetch('/.netlify/functions/netlify-domain-validation', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'getSiteInfo' })
         });
 
+        console.log('📡 Netlify API response status:', netlifyResponse.status);
+
         if (netlifyResponse.ok) {
           const netlifyResult = await netlifyResponse.json();
+          console.log('📊 Netlify API result:', netlifyResult);
 
           if (netlifyResult.success && netlifyResult.data) {
             console.log('🌐 Found Netlify domains:', netlifyResult.data);
