@@ -530,8 +530,16 @@ const DomainsPage = () => {
         throw new Error(`Failed to add domain: ${errorDetails}`);
       }
 
-      const result = await netlifyResponse.json();
-      console.log(`📋 Netlify function result:`, result);
+      let result;
+      try {
+        result = await netlifyResponse.json();
+        console.log(`📋 Netlify function result:`, result);
+      } catch (jsonError: any) {
+        console.error('❌ Failed to parse Netlify function response as JSON:', jsonError);
+        const responseText = await netlifyResponse.text().catch(() => 'Unable to read response');
+        console.error('❌ Raw response:', responseText);
+        throw new Error(`Invalid response from Netlify function: ${responseText.substring(0, 200)}${responseText.length > 200 ? '...' : ''}`);
+      }
 
       if (result.success) {
         // Update domain with available fields only
