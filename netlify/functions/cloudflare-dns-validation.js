@@ -138,7 +138,7 @@ exports.handler = async (event, context) => {
  */
 async function validateDomainDns(domain, authHeaders) {
   try {
-    console.log(`🔍 Validating DNS for ${domain} via Cloudflare API...`);
+    console.log(`Validating DNS for ${domain} via Cloudflare API...`);
 
     // Step 1: Find the zone for this domain
     const zoneResult = await findZoneForDomain(domain, authHeaders);
@@ -162,7 +162,7 @@ async function validateDomainDns(domain, authHeaders) {
     }
 
     const zone = zoneResult.zone;
-    console.log(`📋 Found zone for ${domain}:`, {
+    console.log(`Found zone for ${domain}:`, {
       zone_id: zone.id,
       zone_name: zone.name,
       status: zone.status
@@ -188,7 +188,7 @@ async function validateDomainDns(domain, authHeaders) {
     const recordsData = await recordsResponse.json();
     const allRecords = recordsData.result || [];
 
-    console.log(`📋 Found ${allRecords.length} DNS records for zone ${zone.name}`);
+    console.log(`Found ${allRecords.length} DNS records for zone ${zone.name}`);
 
     // Step 3: Filter and analyze records for this domain
     const domainRecords = analyzeRecordsForDomain(domain, allRecords, zone.name);
@@ -219,7 +219,7 @@ async function validateDomainDns(domain, authHeaders) {
       timestamp: new Date().toISOString()
     };
 
-    console.log('✅ DNS validation complete:', {
+    console.log('DNS validation complete:', {
       domain: domain,
       isValid: validation.isValid,
       recordCount: domainRecords.length,
@@ -233,7 +233,7 @@ async function validateDomainDns(domain, authHeaders) {
     };
 
   } catch (error) {
-    console.error(`❌ DNS validation failed for ${domain}:`, error);
+    console.error(`DNS validation failed for ${domain}:`, error);
     
     return {
       statusCode: 500,
@@ -277,7 +277,7 @@ async function findZoneForDomain(domain, authHeaders) {
       const domainParts = domain.split('.');
       for (let i = 1; i < domainParts.length - 1; i++) {
         const parentDomain = domainParts.slice(i).join('.');
-        console.log(`🔍 Trying parent domain: ${parentDomain}`);
+        console.log(`Trying parent domain: ${parentDomain}`);
         
         const parentResponse = await fetch(
           `https://api.cloudflare.com/client/v4/zones?name=${parentDomain}`,
