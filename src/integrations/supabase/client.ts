@@ -30,6 +30,12 @@ console.log('🔧 Enhanced Supabase client configuration:', {
 const finalUrl = SUPABASE_URL || 'https://dfhanacsmsvvkpunurnp.supabase.co';
 const finalKey = SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRmaGFuYWNzbXN2dmtwdW51cm5wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI5NTY2NDcsImV4cCI6MjA2ODUzMjY0N30.MZcB4P_TAOOTktXSG7bNK5BsIMAf1bKXVgT87Zqa5RY';
 
+console.log('🔧 Using Supabase credentials:', {
+  url: finalUrl.substring(0, 30) + '...',
+  hasKey: !!finalKey,
+  keyLength: finalKey?.length || 0
+});
+
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
   console.warn('⚠️ Environment variables not loaded properly, using fallback credentials');
   console.log('💡 This suggests a Vite environment variable loading issue');
