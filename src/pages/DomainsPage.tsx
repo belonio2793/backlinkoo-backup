@@ -24,6 +24,7 @@ import { callNetlifyDomainFunction } from '@/services/netlifyDomainMock';
 import NetlifyApiService from '@/services/netlifyApiService';
 import { DnsValidationModal } from '@/components/DnsValidationModal';
 import { BulkDomainManager } from '@/components/BulkDomainManager';
+import { NetlifyApiTester } from '@/components/NetlifyApiTester';
 
 interface Domain {
   id: string;
