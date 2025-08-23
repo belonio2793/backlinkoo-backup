@@ -204,6 +204,10 @@ const DomainsPage = () => {
       // Auto-add to Netlify and fetch DNS records
       setTimeout(async () => {
         await addDomainToNetlify(data);
+        // Verify domain was actually added after a short delay
+        setTimeout(async () => {
+          await verifyDomainInNetlify(data);
+        }, 2000);
       }, 1000);
 
     } catch (error: any) {
@@ -438,7 +442,7 @@ const DomainsPage = () => {
       let result;
       try {
         result = await callNetlifyDomainFunction(domain.domain, domain.id);
-        console.log(`���� Netlify function result:`, result);
+        console.log(`📋 Netlify function result:`, result);
       } catch (functionError: any) {
         console.error('❌ Error calling Netlify function:', functionError);
         throw new Error(`Network error: Could not reach Netlify function. ${functionError.message || 'Please check your internet connection and try again.'}`);
