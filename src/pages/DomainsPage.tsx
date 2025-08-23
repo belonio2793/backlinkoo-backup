@@ -843,15 +843,15 @@ const DomainsPage = () => {
   const testNetlifyFunction = async () => {
     setRunningDiagnostic(true);
     try {
-      toast.info('🧪 Testing Netlify function directly...');
+      toast.info('Testing Netlify function directly...');
       const result = await testNetlifyDomainFunction('leadpages.org');
 
       if (result.error) {
-        toast.error(`❌ Netlify function test failed: ${result.error}`);
-        console.error('🧪 Function test failed:', result);
+        toast.error(`Netlify function test failed: ${result.error}`);
+        console.error('Function test failed:', result);
       } else {
-        toast.success('✅ Netlify function test passed!');
-        console.log('🧪 Function test succeeded:', result);
+        toast.success('Netlify function test passed!');
+        console.log('Function test succeeded:', result);
       }
     } catch (error: any) {
       console.error('💥 Test execution failed:', error);
