@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import NetlifyApiService, { type NetlifyApiResponse, type SiteInfo, type DNSRecord, type SSLStatus } from '@/services/netlifyApiService';
+import { NetlifyDeploymentChecker } from './NetlifyDeploymentChecker';
 
 export function NetlifyApiTester() {
   const [loading, setLoading] = useState<{ [key: string]: boolean }>({});
