@@ -232,7 +232,7 @@ exports.handler = async (event, context) => {
         },
         dnsInstructions,
         dbUpdate: dbUpdateResult,
-        message: `Domain ${cleanDomain} successfully added to Netlify. Please configure DNS records.`
+        message: `Domain ${cleanDomain} successfully added as alias to Netlify site. Primary domain (backlinkoo.com) preserved. Please configure DNS records for the new alias.`
       }),
     };
 
