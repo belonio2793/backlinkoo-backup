@@ -182,7 +182,7 @@ exports.handler = async (event, context) => {
           userFriendlyMessage = 'Netlify site not found. Please verify the site ID is correct.';
           break;
         case 422:
-          userFriendlyMessage = `Domain alias creation failed. ${cleanDomain} may already be added as an alias or be invalid.`;
+          userFriendlyMessage = `Domain alias update failed. ${cleanDomain} may already be added as an alias, be invalid, or conflict with existing configuration.`;
           break;
         case 429:
           userFriendlyMessage = 'Rate limit exceeded. Please wait a few minutes before trying again.';
