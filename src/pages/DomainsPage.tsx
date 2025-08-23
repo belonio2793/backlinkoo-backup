@@ -491,16 +491,22 @@ const DomainsPage = () => {
       // Use the new optimized Netlify API function
       console.log(`🔄 Calling Netlify function for domain: ${domain.domain}`);
 
-      const netlifyResponse = await fetch('/.netlify/functions/add-domain-to-netlify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          domain: domain.domain,
-          domainId: domain.id
-        })
-      });
+      let netlifyResponse;
+      try {
+        netlifyResponse = await fetch('/.netlify/functions/add-domain-to-netlify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            domain: domain.domain,
+            domainId: domain.id
+          })
+        });
 
-      console.log(`📡 Netlify function response status: ${netlifyResponse.status} ${netlifyResponse.statusText}`);
+        console.log(`📡 Netlify function response status: ${netlifyResponse.status} ${netlifyResponse.statusText}`);
+      } catch (fetchError: any) {
+        console.error('❌ Network error calling Netlify function:', fetchError);
+        throw new Error(`Network error: Could not reach Netlify function. ${fetchError.message || 'Please check your internet connection and try again.'}`);
+      }
 
       if (!netlifyResponse.ok) {
         // Get more detailed error information
