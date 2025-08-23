@@ -900,7 +900,27 @@ const DomainsPage = () => {
                           'Validate'
                         )}
                       </Button>
-                      
+
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleAddToNetlify(domain.id)}
+                        disabled={addingToNetlify.has(domain.id) || validatingDomains.has(domain.id)}
+                        className="text-green-600 border-green-300 hover:bg-green-50"
+                      >
+                        {addingToNetlify.has(domain.id) ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                            Adding...
+                          </>
+                        ) : (
+                          <>
+                            <Globe className="h-4 w-4 mr-1" />
+                            Add to Netlify
+                          </>
+                        )}
+                      </Button>
+
                       <Button
                         variant="outline"
                         size="sm"
