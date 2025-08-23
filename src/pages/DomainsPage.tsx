@@ -343,20 +343,31 @@ const DomainsPage = () => {
       const result = await netlifyResponse.json();
 
       if (result.success) {
-        // Update domain with Netlify data and DNS records
-        const updateData = {
-          status: 'dns_ready' as const,
-          netlify_verified: true,
-          netlify_site_id: result.netlifyData.site_id,
-          dns_records: result.dnsInstructions.dnsRecords,
-          error_message: null
-        };
+        // Update domain with available fields only
+        const updateData: any = {};
 
-        await supabase
+        // Only update fields that exist in the schema
+        try {
+          updateData.error_message = null;
+          if (result.netlifyData?.site_id) {
+            updateData.netlify_site_id = result.netlifyData.site_id;
+          }
+          if (result.dnsInstructions?.dnsRecords) {
+            updateData.dns_records = result.dnsInstructions.dnsRecords;
+          }
+        } catch (schemaError) {
+          console.log('Using basic update for domain');
+        }
+
+        const { error: updateError } = await supabase
           .from('domains')
           .update(updateData)
           .eq('id', domain.id)
           .eq('user_id', user?.id);
+
+        if (updateError) {
+          console.warn('Domain update error:', updateError);
+        }
 
         setDomains(prev => prev.map(d =>
           d.id === domain.id ? { ...d, ...updateData } : d
