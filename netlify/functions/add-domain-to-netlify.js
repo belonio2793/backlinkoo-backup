@@ -76,13 +76,21 @@ exports.handler = async (event, context) => {
     const netlifyToken = process.env.NETLIFY_ACCESS_TOKEN;
     const siteId = process.env.NETLIFY_SITE_ID || 'ca6261e6-0a59-40b5-a2bc-5b5481ac8809';
 
+    console.log('🔑 Environment check:', {
+      hasToken: !!netlifyToken,
+      tokenLength: netlifyToken?.length || 0,
+      siteId: siteId
+    });
+
     if (!netlifyToken) {
+      console.error('❌ NETLIFY_ACCESS_TOKEN not found in environment variables');
       return {
         statusCode: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           success: false,
-          error: 'Netlify access token not configured'
+          error: 'Netlify access token not configured',
+          details: 'NETLIFY_ACCESS_TOKEN environment variable is missing'
         }),
       };
     }
