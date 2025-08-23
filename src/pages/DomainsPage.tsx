@@ -312,7 +312,7 @@ const DomainsPage = () => {
     }
   };
 
-  // Add domain to Netlify and fetch DNS records
+  // Add domain to Netlify using the optimized function
   const addDomainToNetlify = async (domain: Domain) => {
     try {
       toast.info(`Adding ${domain.domain} to Netlify...`);
@@ -328,45 +328,69 @@ const DomainsPage = () => {
         d.id === domain.id ? { ...d, status: 'validating' } : d
       ));
 
-      // Step 1: Add domain to Netlify (this happens in the validate function)
-      // Step 2: Fetch DNS records that need to be configured
-      const dnsResponse = await fetch('/.netlify/functions/get-dns-records', {
+      // Use the new optimized Netlify API function
+      const netlifyResponse = await fetch('/.netlify/functions/add-domain-to-netlify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ domain: domain.domain })
+        body: JSON.stringify({
+          domain: domain.domain,
+          domainId: domain.id
+        })
       });
 
-      if (dnsResponse.ok) {
-        const dnsData = await dnsResponse.json();
+      if (!netlifyResponse.ok) {
+        throw new Error(`Failed to add domain: ${netlifyResponse.statusText}`);
+      }
 
-        if (dnsData.success) {
-          // Update domain with DNS records
-          const updateData = {
-            status: 'dns_ready' as const,
-            dns_records: dnsData.records
-          };
+      const result = await netlifyResponse.json();
 
-          await supabase
-            .from('domains')
-            .update(updateData)
-            .eq('id', domain.id)
-            .eq('user_id', user?.id);
+      if (result.success) {
+        // Update domain with Netlify data and DNS records
+        const updateData = {
+          status: 'dns_ready' as const,
+          netlify_verified: true,
+          netlify_site_id: result.netlifyData.site_id,
+          dns_records: result.dnsInstructions.dnsRecords,
+          error_message: null
+        };
 
-          setDomains(prev => prev.map(d =>
-            d.id === domain.id ? { ...d, ...updateData } : d
-          ));
+        await supabase
+          .from('domains')
+          .update(updateData)
+          .eq('id', domain.id)
+          .eq('user_id', user?.id);
 
-          toast.success(`${domain.domain} added to Netlify! DNS records are ready for configuration.`);
+        setDomains(prev => prev.map(d =>
+          d.id === domain.id ? { ...d, ...updateData } : d
+        ));
 
-          // Auto-validate after a short delay
-          setTimeout(() => {
-            validateDomain(domain.id);
-          }, 2000);
-        }
+        toast.success(`✅ ${domain.domain} successfully added to Netlify! Configure DNS records to activate.`);
+
+        // Auto-validate after a short delay to check DNS
+        setTimeout(() => {
+          validateDomain(domain.id);
+        }, 3000);
+      } else {
+        throw new Error(result.error || 'Failed to add domain to Netlify');
       }
     } catch (error: any) {
       console.error('Error adding domain to Netlify:', error);
-      toast.error(`Failed to add ${domain.domain} to Netlify: ${error.message}`);
+
+      // Update domain status to error
+      await supabase
+        .from('domains')
+        .update({
+          status: 'error' as const,
+          error_message: error.message
+        })
+        .eq('id', domain.id)
+        .eq('user_id', user?.id);
+
+      setDomains(prev => prev.map(d =>
+        d.id === domain.id ? { ...d, status: 'error', error_message: error.message } : d
+      ));
+
+      toast.error(`❌ Failed to add ${domain.domain} to Netlify: ${error.message}`);
     }
   };
 
