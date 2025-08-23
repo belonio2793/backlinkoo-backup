@@ -65,6 +65,7 @@ const DomainsPage = () => {
   const [dnsModalOpen, setDnsModalOpen] = useState(false);
   const [selectedDomainForDns, setSelectedDomainForDns] = useState<Domain | null>(null);
   const [verifyingDomains, setVerifyingDomains] = useState<Set<string>>(new Set());
+  const [deletingDomains, setDeletingDomains] = useState<Set<string>>(new Set());
 
   const BLOG_THEMES = [
     { id: 'minimal', name: 'Minimal Clean', description: 'Clean and simple design' },
@@ -845,11 +846,62 @@ const DomainsPage = () => {
   };
 
   const deleteDomain = async (domainId: string, domainName: string) => {
-    if (!confirm(`Are you sure you want to delete ${domainName}?`)) {
+    const confirmed = confirm(
+      `Are you sure you want to delete ${domainName}?\n\n` +
+      `This will:\n` +
+      `• Remove the domain from your database\n` +
+      `• Attempt to remove it from your Netlify site\n` +
+      `• This action cannot be undone\n\n` +
+      `Continue with deletion?`
+    );
+
+    if (!confirmed) {
       return;
     }
 
+    setDeletingDomains(prev => new Set(prev).add(domainId));
+
     try {
+      // Step 1: Try to remove from Netlify first
+      toast.info(`Removing ${domainName} from Netlify...`);
+
+      try {
+        // Check if domain exists in Netlify
+        const netlifyCheck = await NetlifyApiService.quickDomainCheck(domainName);
+
+        if (netlifyCheck.exists) {
+          // Try to remove using a direct API call
+          const removeResponse = await fetch('/.netlify/functions/netlify-domain-validation', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'removeDomainAlias',
+              domain: domainName
+            })
+          });
+
+          if (!removeResponse.ok && removeResponse.status !== 404) {
+            console.warn('Netlify removal failed, but continuing with database deletion');
+            toast.warning(`Could not auto-remove ${domainName} from Netlify. You may need to remove it manually.`);
+          } else if (removeResponse.ok) {
+            const removeResult = await removeResponse.json();
+            if (removeResult.success) {
+              toast.success(`${domainName} removed from Netlify successfully`);
+            } else {
+              toast.warning(`Netlify removal status unclear for ${domainName}`);
+            }
+          }
+        } else {
+          console.log(`Domain ${domainName} not found in Netlify, skipping removal`);
+        }
+      } catch (netlifyError: any) {
+        console.warn('Netlify removal failed:', netlifyError);
+        toast.warning(`Could not remove ${domainName} from Netlify: ${netlifyError.message}`);
+      }
+
+      // Step 2: Remove from database
+      toast.info(`Removing ${domainName} from database...`);
+
       const { error } = await supabase
         .from('domains')
         .delete()
@@ -860,11 +912,24 @@ const DomainsPage = () => {
         throw new Error(error.message);
       }
 
+      // Step 3: Update local state
       setDomains(prev => prev.filter(d => d.id !== domainId));
-      toast.success(`Domain ${domainName} deleted successfully`);
+      toast.success(`${domainName} deleted successfully from database`);
+
+      // Final success message
+      setTimeout(() => {
+        toast.success(`Domain ${domainName} deletion completed`);
+      }, 1000);
+
     } catch (error: any) {
       console.error('Error deleting domain:', error);
       toast.error(`Failed to delete domain: ${error.message}`);
+    } finally {
+      setDeletingDomains(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(domainId);
+        return newSet;
+      });
     }
   };
 
@@ -1033,9 +1098,14 @@ const DomainsPage = () => {
                           variant="ghost"
                           size="sm"
                           onClick={() => deleteDomain(domain.id, domain.domain)}
-                          className="text-gray-400 hover:text-red-600 hover:bg-red-50"
+                          disabled={deletingDomains.has(domain.id)}
+                          className="text-gray-400 hover:text-red-600 hover:bg-red-50 disabled:opacity-50"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          {deletingDomains.has(domain.id) ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="h-4 w-4" />
+                          )}
                         </Button>
                       </div>
 
