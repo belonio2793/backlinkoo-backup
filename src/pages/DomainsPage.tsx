@@ -1113,8 +1113,43 @@ const DomainsPage = () => {
                           <div className="flex items-start gap-3">
                             <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
                             <div className="flex-1">
-                              <p className="font-medium text-sm text-red-900 mb-2">Error Details</p>
+                              <p className="font-medium text-sm text-red-900 mb-2">Domain Sync Issue</p>
                               <p className="text-sm text-red-700 mb-3">{domain.error_message}</p>
+
+                              {domain.error_message.includes('Domain not found in Netlify') && (
+                                <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded text-sm">
+                                  <p className="font-medium text-blue-900 mb-2">💡 What this means:</p>
+                                  <p className="text-blue-800 mb-2">
+                                    Your domain exists in the database but wasn't found in your Netlify site configuration.
+                                    This usually happens when the automatic addition to Netlify failed.
+                                  </p>
+                                  <p className="font-medium text-blue-900 mb-1">🔧 How to fix:</p>
+                                  <ul className="text-blue-800 space-y-1 ml-4 list-disc">
+                                    <li>Use the "Domain Sync Checker" above to automatically fix this</li>
+                                    <li>Or click "Retry" to attempt adding to Netlify again</li>
+                                    <li>Or click "Remove from Netlify" if you no longer need this domain</li>
+                                  </ul>
+                                </div>
+                              )}
+
+                              {domain.error_message.includes('Authentication failed') && (
+                                <div className="mb-3 p-3 bg-yellow-50 border border-yellow-200 rounded text-sm">
+                                  <p className="font-medium text-yellow-900 mb-2">🔑 Authentication Issue:</p>
+                                  <p className="text-yellow-800">
+                                    Your Netlify access token may be missing or invalid. Contact support to configure authentication.
+                                  </p>
+                                </div>
+                              )}
+
+                              {domain.error_message.includes('Network error') && (
+                                <div className="mb-3 p-3 bg-orange-50 border border-orange-200 rounded text-sm">
+                                  <p className="font-medium text-orange-900 mb-2">🌐 Connection Issue:</p>
+                                  <p className="text-orange-800">
+                                    Could not connect to Netlify services. Check your internet connection and try again.
+                                  </p>
+                                </div>
+                              )}
+
                               <div className="flex flex-wrap gap-2">
                                 <Button
                                   variant="outline"
@@ -1131,7 +1166,27 @@ const DomainsPage = () => {
                                   ) : (
                                     <>
                                       <CheckCircle2 className="h-3 w-3 mr-1" />
-                                      Retry
+                                      Retry Addition
+                                    </>
+                                  )}
+                                </Button>
+
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => verifyDomainInNetlify(domain)}
+                                  disabled={verifyingDomains.has(domain.id)}
+                                  className="text-purple-600 border-purple-300 hover:bg-purple-50"
+                                >
+                                  {verifyingDomains.has(domain.id) ? (
+                                    <>
+                                      <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                      Checking...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <RefreshCw className="h-3 w-3 mr-1" />
+                                      Check Status
                                     </>
                                   )}
                                 </Button>
