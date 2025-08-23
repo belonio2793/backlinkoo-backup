@@ -347,9 +347,50 @@ export class NetlifyApiService {
   static async testConnection(): Promise<NetlifyApiResponse> {
     try {
       console.log('🧪 Testing Netlify API connectivity...');
-      
+
+      // First test function availability
+      const isAvailable = await this.testFunctionAvailability();
+
+      if (!isAvailable) {
+        console.warn('⚠️ Main Netlify function not available, testing fallback');
+
+        // Test fallback function
+        try {
+          const fallbackTest = await fetch(this.fallbackUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              domain: 'test-connection.example.com',
+              domainId: 'test'
+            })
+          });
+
+          if (fallbackTest.status === 404) {
+            return {
+              success: false,
+              error: 'Neither main function nor fallback function are available. Please deploy Netlify functions.'
+            };
+          }
+
+          return {
+            success: true,
+            message: 'Netlify API fallback connection successful (main function not deployed)',
+            data: {
+              using_fallback: true,
+              main_function_available: false,
+              fallback_function_available: fallbackTest.status !== 404
+            }
+          };
+        } catch (fallbackError) {
+          return {
+            success: false,
+            error: 'No Netlify functions available for domain management'
+          };
+        }
+      }
+
       const siteInfo = await this.getSiteInfo();
-      
+
       if (siteInfo.success) {
         console.log('✅ Netlify API connection successful');
         return {
@@ -359,7 +400,8 @@ export class NetlifyApiService {
             site_name: siteInfo.data?.name,
             domain_count: siteInfo.data?.domain_aliases?.length || 0,
             has_custom_domain: !!siteInfo.data?.custom_domain,
-            ssl_enabled: !!siteInfo.data?.ssl_url
+            ssl_enabled: !!siteInfo.data?.ssl_url,
+            main_function_available: true
           }
         };
       } else {
