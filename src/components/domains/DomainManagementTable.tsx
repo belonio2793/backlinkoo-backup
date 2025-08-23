@@ -618,7 +618,7 @@ const DomainManagementTable = () => {
           <CardTitle>All Domains ({domains.length})</CardTitle>
         </CardHeader>
         <CardContent>
-          {loading ? (
+          {isLoading ? (
             <div className="text-center py-8">
               <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
               <p>Loading domains...</p>
