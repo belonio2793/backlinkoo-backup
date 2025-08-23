@@ -41,11 +41,17 @@ export function ApiConnectivityStatus() {
 
       // Test 1: Check if Netlify functions are available
       try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
+
         const functionsTest = await fetch('/.netlify/functions/api-status', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({})
+          body: JSON.stringify({}),
+          signal: controller.signal
         });
+
+        clearTimeout(timeoutId);
 
         if (functionsTest.ok) {
           newStatus.netlifyFunctions = 'online';
@@ -54,17 +60,30 @@ export function ApiConnectivityStatus() {
         } else {
           newStatus.netlifyFunctions = 'limited';
         }
-      } catch (error) {
-        newStatus.netlifyFunctions = 'offline';
+      } catch (error: any) {
+        // Handle different types of errors
+        if (error.name === 'AbortError') {
+          newStatus.netlifyFunctions = 'offline';
+        } else if (error.message?.includes('Failed to fetch') || error.message?.includes('NETWORK_ERROR')) {
+          newStatus.netlifyFunctions = 'offline';
+        } else {
+          newStatus.netlifyFunctions = 'offline';
+        }
       }
 
       // Test 2: Check domain management API specifically
       try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
+
         const domainTest = await fetch('/.netlify/functions/netlify-domain-validation', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'getSiteInfo' })
+          body: JSON.stringify({ action: 'getSiteInfo' }),
+          signal: controller.signal
         });
+
+        clearTimeout(timeoutId);
 
         if (domainTest.ok) {
           const result = await domainTest.json();
@@ -82,8 +101,14 @@ export function ApiConnectivityStatus() {
           newStatus.domainManagement = 'error';
           newStatus.environmentConfig = 'unknown';
         }
-      } catch (error) {
-        newStatus.domainManagement = 'error';
+      } catch (error: any) {
+        // Handle gracefully when functions are not available
+        if (error.name === 'AbortError' || error.message?.includes('Failed to fetch')) {
+          newStatus.domainManagement = 'error';
+          newStatus.environmentConfig = 'unknown';
+        } else {
+          newStatus.domainManagement = 'error';
+        }
       }
 
       setStatus(newStatus);
