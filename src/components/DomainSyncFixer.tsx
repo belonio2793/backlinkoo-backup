@@ -388,7 +388,10 @@ const DomainSyncFixer = ({ onSyncComplete }: { onSyncComplete?: () => void }) =>
             <Alert className="border-green-200 bg-green-50">
               <CheckCircle2 className="h-4 w-4 text-green-600" />
               <AlertDescription className="text-green-700">
-                All domains are properly synchronized between your database and Netlify.
+                {functionsAvailable === false
+                  ? 'No database issues found. Deploy Netlify functions for full sync checking with Netlify.'
+                  : 'All domains are properly synchronized between your database and Netlify.'
+                }
               </AlertDescription>
             </Alert>
           )}
