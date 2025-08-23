@@ -33,14 +33,14 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    console.log('🚀 Enhanced Netlify domain validation started...');
+    console.log('Enhanced Netlify domain validation started...');
 
     // Parse request body
     let requestData = {};
     if (event.body) {
       try {
         requestData = JSON.parse(event.body);
-        console.log('📋 Validation request:', { 
+        console.log('Validation request:', { 
           domain: requestData.domain, 
           action: requestData.action || 'validate',
           includeDns: requestData.includeDns || false
@@ -91,7 +91,7 @@ exports.handler = async (event, context) => {
     }
 
   } catch (error) {
-    console.error('❌ Error in enhanced Netlify validation:', error);
+    console.error('Error in enhanced Netlify validation:', error);
     
     return {
       statusCode: 500,
@@ -119,7 +119,7 @@ async function performEnhancedValidation(domain, options = {}) {
       .replace(/^www\./, '')
       .replace(/\/$/, '');
 
-    console.log(`🔍 Enhanced validation for: ${cleanDomain}`);
+    console.log(`Enhanced validation for: ${cleanDomain}`);
 
     // Get Netlify configuration
     const netlifyConfig = await getNetlifyConfiguration();
@@ -176,7 +176,7 @@ async function performEnhancedValidation(domain, options = {}) {
       validation_id: `val_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     };
 
-    console.log('✅ Enhanced validation complete:', {
+    console.log('Enhanced validation complete:', {
       domain: cleanDomain,
       status: overallStatus.status,
       netlify_found: netlifyValidation.domain_found,
@@ -190,7 +190,7 @@ async function performEnhancedValidation(domain, options = {}) {
     };
 
   } catch (error) {
-    console.error(`❌ Enhanced validation failed for ${domain}:`, error);
+    console.error(`Enhanced validation failed for ${domain}:`, error);
     
     return {
       statusCode: 500,
