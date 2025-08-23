@@ -220,10 +220,12 @@ exports.handler = async (event, context) => {
       };
     }
 
-    const aliasResponse = await netlifyResponse.json();
+    const updatedSite = await netlifyResponse.json();
     console.log(`✅ Successfully added ${cleanDomain} as alias to Netlify:`, {
-      alias_name: aliasResponse.name || cleanDomain,
+      alias_name: cleanDomain,
       site_id: siteId,
+      primary_domain: updatedSite.custom_domain,
+      all_aliases: updatedSite.domain_aliases,
       primary_domain_preserved: true
     });
 
