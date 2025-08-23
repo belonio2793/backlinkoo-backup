@@ -1146,6 +1146,23 @@ const DomainsPage = () => {
                         </div>
                       )}
 
+                      {/* Manual Instructions Section */}
+                      {showManualInstructions.has(domain.id) && (
+                        <div className="mb-4">
+                          <ManualDomainInstructions
+                            domain={domain.domain}
+                            isVisible={true}
+                            onClose={() => {
+                              setShowManualInstructions(prev => {
+                                const newSet = new Set(prev);
+                                newSet.delete(domain.id);
+                                return newSet;
+                              });
+                            }}
+                          />
+                        </div>
+                      )}
+
                       {/* Actions Section */}
                       <div className="border-t pt-4">
                         <p className="text-sm font-medium text-gray-900 mb-3">Available Actions</p>
