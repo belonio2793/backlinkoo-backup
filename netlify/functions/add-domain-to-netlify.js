@@ -190,11 +190,11 @@ exports.handler = async (event, context) => {
       };
     }
 
-    const updatedSite = await netlifyResponse.json();
-    console.log(`✅ Successfully added ${cleanDomain} to Netlify:`, {
-      custom_domain: updatedSite.custom_domain,
-      ssl_url: updatedSite.ssl_url,
-      url: updatedSite.url
+    const aliasResponse = await netlifyResponse.json();
+    console.log(`✅ Successfully added ${cleanDomain} as alias to Netlify:`, {
+      alias_name: aliasResponse.name || cleanDomain,
+      site_id: siteId,
+      primary_domain_preserved: true
     });
 
     // Generate DNS setup instructions based on domain type
