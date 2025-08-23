@@ -248,16 +248,12 @@ export const BulkDomainManager: React.FC<BulkDomainManagerProps> = ({
   const domainCount = parseDomains(domainText).length;
 
   return (
-    <Card className="border-green-200 bg-green-50/50">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Upload className="h-5 w-5 text-green-600" />
-          Bulk Domain Addition to Netlify
-          <Badge variant="secondary">{domainCount} domains</Badge>
-        </CardTitle>
-      </CardHeader>
-      
-      <CardContent className="space-y-4">
+    <div className="space-y-4">
+      <div className="flex items-center gap-2 mb-4">
+        <Upload className="h-5 w-5 text-green-600" />
+        <span className="font-medium">Bulk Domain Addition to Netlify</span>
+        <Badge variant="secondary">{domainCount} domains</Badge>
+      </div>
         <Alert>
           <Info className="h-4 w-4" />
           <AlertDescription>
@@ -373,8 +369,7 @@ export const BulkDomainManager: React.FC<BulkDomainManagerProps> = ({
             </ol>
           </AlertDescription>
         </Alert>
-      </CardContent>
-    </Card>
+    </div>
   );
 };
 
