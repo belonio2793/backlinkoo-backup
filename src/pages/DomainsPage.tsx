@@ -881,9 +881,10 @@ const DomainsPage = () => {
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="single" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
+              <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="single">Single Domain</TabsTrigger>
                 <TabsTrigger value="bulk">Bulk Addition</TabsTrigger>
+                <TabsTrigger value="api">API Testing</TabsTrigger>
               </TabsList>
 
               <TabsContent value="single" className="space-y-4 mt-6">
