@@ -751,19 +751,19 @@ const DomainsPage = () => {
           const result = await response.json();
           if (result.success) {
             functionSuccess = true;
-            console.log('✅ Netlify function successfully set theme');
+            console.log('Netlify function successfully set theme');
           } else {
-            console.warn('⚠️ Netlify function returned error:', result.error);
+            console.warn('Netlify function returned error:', result.error);
           }
         } else {
-          console.warn(`⚠️ Netlify function failed with status ${response.status}`);
+          console.warn(`Netlify function failed with status ${response.status}`);
         }
       } catch (functionError) {
-        console.warn('⚠️ Netlify function call failed:', functionError);
+        console.warn('Netlify function call failed:', functionError);
       }
 
       // Fallback: Update directly via Supabase (always do this to ensure consistency)
-      console.log('📊 Updating domain theme via Supabase...');
+      console.log('Updating domain theme via Supabase...');
 
       const updateData = {
         status: 'active' as const,
@@ -809,7 +809,7 @@ const DomainsPage = () => {
   const runDiagnostic = async () => {
     setRunningDiagnostic(true);
     try {
-      toast.info('🔍 Running network diagnostic...');
+      toast.info('Running network diagnostic...');
       const results = await runNetworkDiagnostic();
       setDiagnosticResults(results);
 
