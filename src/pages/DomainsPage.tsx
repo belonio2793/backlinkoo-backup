@@ -701,10 +701,20 @@ const DomainsPage = () => {
 
           toast.success(`${domain.domain} is now ready for blog generation with ${theme.name} theme!`);
         } else {
-          throw new Error(result.error);
+          throw new Error(result.error || 'Theme selection failed - no success returned');
         }
       } else {
-        throw new Error('Theme selection failed');
+        let errorMessage = `Theme selection failed (HTTP ${response.status})`;
+        try {
+          const errorResult = await response.json();
+          if (errorResult.error) {
+            errorMessage = errorResult.error;
+          }
+        } catch (parseError) {
+          // Use status text if JSON parsing fails
+          errorMessage = `Theme selection failed: ${response.statusText}`;
+        }
+        throw new Error(errorMessage);
       }
     } catch (error: any) {
       console.error('Error setting domain theme:', error);
