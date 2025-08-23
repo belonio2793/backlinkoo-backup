@@ -61,11 +61,13 @@ const DomainSyncFixer = ({ onSyncComplete }: { onSyncComplete?: () => void }) =>
         throw new Error(`Database error: ${dbError.message}`);
       }
 
-      // Get domains from Netlify
+      // Get domains from Netlify (handle case where functions aren't deployed)
       const netlifyResult = await NetlifyApiService.getSiteInfo();
-      
+
       if (!netlifyResult.success) {
-        throw new Error(`Netlify error: ${netlifyResult.error}`);
+        // Don't throw error - just use empty data and continue
+        console.warn('Netlify API not available:', netlifyResult.error);
+        toast.warning('Netlify functions not deployed. Using local database only.');
       }
 
       const netlifyDomains = netlifyResult.data?.domain_aliases || [];
