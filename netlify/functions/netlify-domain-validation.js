@@ -105,12 +105,55 @@ exports.handler = async (event, context) => {
 };
 
 /**
+ * Get domains using the specific Netlify domains API endpoint
+ */
+async function getDomains(siteId, headers) {
+  try {
+    console.log('🔍 Getting domains from Netlify domains API...');
+    console.log(`   Site ID: ${siteId}`);
+    console.log(`   Endpoint: https://api.netlify.com/api/v1/sites/${siteId}/domains`);
+
+    const response = await fetch(`https://api.netlify.com/api/v1/sites/${siteId}/domains`, {
+      method: 'GET',
+      headers
+    });
+
+    console.log(`📊 Domains API response status: ${response.status}`);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ Domains API error:', errorText);
+      throw new Error(`Domains API failed: ${response.status} ${response.statusText}`);
+    }
+
+    const domains = await response.json();
+    console.log('✅ Domains fetched successfully:', domains);
+
+    return {
+      statusCode: 200,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        success: true,
+        action: 'getDomains',
+        data: {
+          domains: domains || [],
+          domain_count: domains?.length || 0
+        }
+      }),
+    };
+  } catch (error) {
+    console.error('❌ Get domains failed:', error);
+    throw error;
+  }
+}
+
+/**
  * Get comprehensive site information
  */
 async function getSiteInfo(siteId, headers) {
   try {
     console.log('📋 Getting site information...');
-    
+
     const response = await fetch(`https://api.netlify.com/api/v1/sites/${siteId}`, {
       method: 'GET',
       headers
@@ -374,7 +417,7 @@ async function addDomainAlias(siteId, domain, headers) {
       }),
     };
   } catch (error) {
-    console.error(`�� Add domain alias failed for ${domain}:`, error);
+    console.error(`❌ Add domain alias failed for ${domain}:`, error);
     throw error;
   }
 }
