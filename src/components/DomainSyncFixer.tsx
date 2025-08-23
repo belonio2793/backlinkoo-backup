@@ -65,10 +65,14 @@ const DomainSyncFixer = ({ onSyncComplete }: { onSyncComplete?: () => void }) =>
       // Get domains from Netlify (handle case where functions aren't deployed)
       const netlifyResult = await NetlifyApiService.getSiteInfo();
 
+      setFunctionsAvailable(netlifyResult.success);
+
       if (!netlifyResult.success) {
         // Don't throw error - just use empty data and continue
         console.warn('Netlify API not available:', netlifyResult.error);
-        toast.warning('Netlify functions not deployed. Using local database only.');
+        if (netlifyResult.error?.includes('not deployed')) {
+          toast.warning('Netlify functions not deployed. Limited sync checking available.');
+        }
       }
 
       const netlifyDomains = netlifyResult.success ? (netlifyResult.data?.domain_aliases || []) : [];
