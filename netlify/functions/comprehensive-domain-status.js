@@ -148,7 +148,7 @@ exports.handler = async (event, context) => {
     }
 
     // Wait for all validations to complete
-    console.log(`⏳ Running ${validationPromises.length} validation checks...`);
+    console.log(`Running ${validationPromises.length} validation checks...`);
     const validationResults = await Promise.allSettled(validationPromises);
 
     // Process validation results
@@ -426,7 +426,7 @@ async function performConnectivityCheck(domain) {
     };
 
   } catch (error) {
-    console.error(`❌ Connectivity check failed for ${domain}:`, error);
+    console.error(`Connectivity check failed for ${domain}:`, error);
     return {
       service: 'connectivity',
       success: false,
