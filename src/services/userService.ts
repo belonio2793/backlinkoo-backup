@@ -122,6 +122,26 @@ class UserService {
           };
         }
 
+        // Handle network errors gracefully before logging as unexpected errors
+        if (errorMessage && (
+          errorMessage.includes('Failed to fetch') ||
+          errorMessage.includes('NetworkError') ||
+          errorMessage.includes('ECONNREFUSED') ||
+          errorMessage.includes('fetch is not defined') ||
+          errorMessage.includes('ENOTFOUND')
+        )) {
+          console.warn('⚠️ userService: Network connectivity issue during profile fetch - using fallback profile');
+          return {
+            id: user.id,
+            user_id: user.id,
+            email: user.email || '',
+            role: 'user' as const,
+            subscription_tier: 'free' as const,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          };
+        }
+
         // Only log unexpected errors with proper formatting
         console.error('❌ userService: Unexpected error fetching user profile:', formatErrorForLogging(error, 'getCurrentUserProfile'));
 
