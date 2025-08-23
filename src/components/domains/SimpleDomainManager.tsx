@@ -154,9 +154,10 @@ const SimpleDomainManager = () => {
       }
     };
 
-    // Run detection after domains are loaded
+    // Run detection after domains are loaded and component is ready
     if (domains.length >= 0) {
-      detectCurrentDomain();
+      // Delay to ensure everything is properly loaded
+      setTimeout(detectCurrentDomain, 2000);
     }
   }, [domains, user]);
 
