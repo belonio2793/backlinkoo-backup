@@ -419,7 +419,8 @@ another-site.net`}
                 No domains found
               </h3>
               <p className="text-gray-500 mb-6">
-                Add your first domain to get started
+                No domains found in database or Netlify account.<br />
+                Add your first domain to get started.
               </p>
             </div>
           ) : (
