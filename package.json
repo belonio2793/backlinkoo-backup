@@ -33,6 +33,7 @@
     "verify:deployment": "node scripts/verify-deployment.js",
     "domains:setup": "node scripts/setup-domains.js",
     "domains:test": "node scripts/test-domain-sync.js",
+    "domains:netlify": "node scripts/test-netlify-domains.js",
     "domains:check": "node -e \"console.log('Testing domain system...'); import('./scripts/setup-domains.js').then(m => m.setupDomainsTable()).then(() => console.log('✅ Domain system ready!')).catch(console.error)\""
   },
   "dependencies": {
