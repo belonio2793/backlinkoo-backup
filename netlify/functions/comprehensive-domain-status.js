@@ -38,14 +38,14 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    console.log('🔍 Starting comprehensive domain status check...');
+    console.log('Starting comprehensive domain status check...');
 
     // Parse request body
     let requestData = {};
     if (event.body) {
       try {
         requestData = JSON.parse(event.body);
-        console.log('📋 Status check request:', { 
+        console.log('Status check request:', { 
           domain: requestData.domain,
           checks: requestData.checks || ['all'],
           priority: requestData.priority || 'standard'
@@ -88,11 +88,11 @@ exports.handler = async (event, context) => {
       .replace(/^www\./, '')
       .replace(/\/$/, '');
 
-    console.log(`🔍 Comprehensive status check for: ${cleanDomain}`);
+    console.log(`Comprehensive status check for: ${cleanDomain}`);
 
     // Determine which checks to run
     const checkConfiguration = determineChecksToRun(checks, priority);
-    console.log('📋 Running checks:', checkConfiguration.enabled);
+    console.log('Running checks:', checkConfiguration.enabled);
 
     // Initialize status tracking
     const statusTracker = {
@@ -185,7 +185,7 @@ exports.handler = async (event, context) => {
       }
     };
 
-    console.log('✅ Comprehensive validation complete:', {
+    console.log('Comprehensive validation complete:', {
       domain: cleanDomain,
       overall_status: comprehensiveStatus.overall,
       checks_completed: Object.keys(processedResults).length,
@@ -200,7 +200,7 @@ exports.handler = async (event, context) => {
     };
 
   } catch (error) {
-    console.error('❌ Error in comprehensive domain status check:', error);
+    console.error('Error in comprehensive domain status check:', error);
     
     return {
       statusCode: 500,
