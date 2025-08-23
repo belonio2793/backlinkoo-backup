@@ -51,6 +51,7 @@ const LazyTwitterAdGenerator = lazy(() => import("./pages/TwitterAdGenerator"));
 const LazyAffiliate = lazy(() => import("./pages/Affiliate"));
 const LazyDomainsPage = lazy(() => import("./pages/DomainsPage"));
 const LazyNetlifyTest = lazy(() => import("./pages/NetlifyTest"));
+const LazySupabaseTest = lazy(() => import("./pages/SupabaseTest"));
 const LazyBlogGenerationTest = lazy(() => import("./components/BlogGenerationTest"));
 import BlogGenerationFixTestPage from "./pages/BlogGenerationFixTest";
 
@@ -85,7 +86,7 @@ const SupabaseErrorMonitor = ({ children }: { children: React.ReactNode }) => {
       const error = 'reason' in event ? event.reason : event.error;
 
       if (SupabaseConnectionFixer.isSupabaseNetworkError(error)) {
-        console.error('��� Global Supabase error detected:', error);
+        console.error('🚨 Global Supabase error detected:', error);
         setGlobalSupabaseError(error);
 
         // Auto-clear error after 10 seconds
@@ -267,6 +268,15 @@ const App = () => (
               element={
                 <Suspense fallback={<LoadingSpinner />}>
                   <LazyNetlifyTest />
+                </Suspense>
+              }
+            />
+
+            <Route
+              path="/supabase-test"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazySupabaseTest />
                 </Suspense>
               }
             />
