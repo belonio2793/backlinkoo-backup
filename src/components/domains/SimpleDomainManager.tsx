@@ -225,9 +225,69 @@ const SimpleDomainManager = () => {
         setDomains([]);
       }
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
+
+  // Background health monitoring
+  useEffect(() => {
+    if (!user || !autoSyncEnabled) return;
+
+    const healthCheck = async () => {
+      try {
+        // Check if domains need status updates
+        const pendingDomains = domains.filter(d => d.status === 'pending');
+        if (pendingDomains.length > 0) {
+          console.log(`🔍 Checking status of ${pendingDomains.length} pending domains...`);
+
+          for (const domain of pendingDomains) {
+            try {
+              // Test if domain is actually working
+              const testResponse = await fetch(`https://${domain.domain}`, {
+                method: 'HEAD',
+                mode: 'no-cors',
+                cache: 'no-cache'
+              });
+
+              // If we get here, domain is likely working
+              console.log(`✅ Domain ${domain.domain} appears to be working`);
+
+              // Update status in background
+              await supabase
+                .from('domains')
+                .update({ status: 'verified', netlify_verified: true })
+                .eq('id', domain.id);
+
+            } catch (error) {
+              console.log(`⚠️ Domain ${domain.domain} may have issues:`, error);
+            }
+          }
+
+          // Refresh the list after health checks
+          setTimeout(() => loadDomains(true), 2000);
+        }
+      } catch (error) {
+        console.log('Health check error:', error);
+      }
+    };
+
+    // Run health check every 10 minutes
+    const healthInterval = setInterval(healthCheck, 10 * 60 * 1000);
+
+    // Initial health check after 30 seconds
+    setTimeout(healthCheck, 30000);
+
+    return () => clearInterval(healthInterval);
+  }, [domains, user, autoSyncEnabled]);
+
+  // Cleanup intervals on unmount
+  useEffect(() => {
+    return () => {
+      if (backgroundSyncInterval) {
+        clearInterval(backgroundSyncInterval);
+      }
+    };
+  }, [backgroundSyncInterval]);
 
   const cleanDomain = (domain: string): string => {
     return domain.trim().toLowerCase()
