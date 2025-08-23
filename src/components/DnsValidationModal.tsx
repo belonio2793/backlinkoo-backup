@@ -315,6 +315,56 @@ export function DnsValidationModal({
               </CardHeader>
             </Card>
 
+            {/* Nameserver Configuration (for root domains) */}
+            {nameservers.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Globe className="h-5 w-5 text-blue-600" />
+                    Nameserver Configuration
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Alert className="mb-4">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      <strong>Step 1:</strong> Configure your domain to use these nameservers at your domain registrar.
+                      This will handle all DNS routing for your domain.
+                    </AlertDescription>
+                  </Alert>
+
+                  <div className="space-y-3">
+                    <p className="text-sm font-medium text-gray-700">Set these nameservers at your registrar:</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {nameservers.map((nameserver, index) => (
+                        <div key={index} className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg">
+                          <code className="font-mono text-sm font-medium text-blue-900 flex-1">
+                            {nameserver}
+                          </code>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => copyToClipboard(nameserver, `Nameserver ${index + 1}`)}
+                            className="text-blue-600 hover:text-blue-800 hover:bg-blue-100"
+                          >
+                            <Copy className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+
+                    <Alert>
+                      <Clock className="h-4 w-4" />
+                      <AlertDescription>
+                        Nameserver changes can take up to 48 hours to propagate globally.
+                        After updating nameservers, proceed with the DNS record configuration below.
+                      </AlertDescription>
+                    </Alert>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* DNS Records Table */}
             <Card>
               <CardHeader>
