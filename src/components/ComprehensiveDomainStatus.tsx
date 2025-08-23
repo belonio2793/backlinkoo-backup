@@ -85,7 +85,7 @@ const ComprehensiveDomainStatus: React.FC<DomainStatusProps> = ({
 
     setIsValidating(true);
     try {
-      toast.info(`🔍 Running comprehensive validation for ${domain}...`);
+      toast.info(`Running comprehensive validation for ${domain}...`);
 
       const checks = priority === 'fast' ? ['netlify', 'dns'] : 
                    priority === 'standard' ? ['netlify', 'dns', 'ssl'] :
@@ -118,11 +118,11 @@ const ComprehensiveDomainStatus: React.FC<DomainStatusProps> = ({
 
         // Show appropriate toast based on status
         if (result.status.overall === 'healthy') {
-          toast.success(`✅ ${domain} is fully configured and healthy!`);
+          toast.success(`${domain} is fully configured and healthy!`);
         } else if (result.status.overall === 'warning') {
-          toast.warning(`⚠️ ${domain} has ${result.status.warnings.length} warnings to address`);
+          toast.warning(`${domain} has ${result.status.warnings.length} warnings to address`);
         } else {
-          toast.error(`❌ ${domain} has ${result.status.issues.length} critical issues`);
+          toast.error(`${domain} has ${result.status.issues.length} critical issues`);
         }
       } else {
         throw new Error(result.error || 'Validation failed');
