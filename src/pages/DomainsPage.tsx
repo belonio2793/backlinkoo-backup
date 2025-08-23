@@ -639,7 +639,7 @@ const DomainsPage = () => {
           } : d
         ));
 
-        toast.success(`�� ${domain.domain} successfully added to Netlify via fallback method! Configure DNS records to activate.`);
+        toast.success(`${domain.domain} successfully added to Netlify via fallback method! Configure DNS records to activate.`);
 
         // Auto-validate after a short delay to check DNS
         setTimeout(() => {
