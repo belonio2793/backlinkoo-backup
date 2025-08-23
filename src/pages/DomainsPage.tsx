@@ -544,7 +544,7 @@ const DomainsPage = () => {
       const apiResult = await NetlifyApiService.addDomainAlias(domain.domain);
 
       if (apiResult.success) {
-        console.log('✅ Domain addition succeeded:', apiResult);
+        console.log('Domain addition succeeded:', apiResult);
 
         // Determine the method used and update status accordingly
         const method = apiResult.data?.method || 'function';
@@ -601,14 +601,14 @@ const DomainsPage = () => {
       }
 
       // Fallback: Try the previous implementation
-      console.warn('⚠️ Official API failed, trying fallback method:', apiResult.error);
+      console.warn('Official API failed, trying fallback method:', apiResult.error);
 
       let result;
       try {
         result = await callNetlifyDomainFunction(domain.domain, domain.id);
-        console.log(`📋 Fallback function result:`, result);
+        console.log(`Fallback function result:`, result);
       } catch (functionError: any) {
-        console.error('❌ Error calling fallback function:', functionError);
+        console.error('Error calling fallback function:', functionError);
         throw new Error(`Both official API and fallback failed. Official API: ${apiResult.error}. Fallback: ${functionError.message}`);
       }
 
@@ -667,8 +667,8 @@ const DomainsPage = () => {
           ));
 
           // Show detailed instructions to user
-          console.log('📋 Manual addition instructions:', instructions);
-          toast.error(`❌ Automated addition failed. Manual addition required.`);
+          console.log('Manual addition instructions:', instructions);
+          toast.error(`Automated addition failed. Manual addition required.`);
 
           // Show manual instructions for this domain
           setShowManualInstructions(prev => new Set(prev).add(domain.id));
