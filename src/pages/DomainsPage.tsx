@@ -496,7 +496,25 @@ const DomainsPage = () => {
       });
 
       if (!netlifyResponse.ok) {
-        throw new Error(`Failed to add domain: ${netlifyResponse.statusText}`);
+        // Get more detailed error information
+        let errorDetails = netlifyResponse.statusText || 'Unknown error';
+
+        try {
+          const errorData = await netlifyResponse.text();
+          if (errorData) {
+            try {
+              const parsedError = JSON.parse(errorData);
+              errorDetails = parsedError.error || parsedError.message || errorData;
+            } catch {
+              errorDetails = errorData;
+            }
+          }
+        } catch {
+          // If we can't read the response, use the status
+          errorDetails = `HTTP ${netlifyResponse.status}: ${netlifyResponse.statusText || 'Network error'}`;
+        }
+
+        throw new Error(`Failed to add domain: ${errorDetails}`);
       }
 
       const result = await netlifyResponse.json();
