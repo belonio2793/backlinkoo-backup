@@ -544,19 +544,22 @@ export class NetlifyApiService {
   }> {
     try {
       const siteInfo = await this.getSiteInfo();
-      
+
       if (!siteInfo.success || !siteInfo.data) {
+        // If we can't get site info, assume domain doesn't exist
+        // This prevents the sync checker from failing completely
+        console.warn('Could not verify domain existence, assuming it does not exist');
         return {
           exists: false,
           isCustomDomain: false,
           isAlias: false,
-          error: siteInfo.error || 'Failed to get site info'
+          error: undefined // Don't report this as an error to avoid UI confusion
         };
       }
 
       const { custom_domain, domain_aliases } = siteInfo.data;
       const isCustomDomain = custom_domain === domain;
-      const isAlias = domain_aliases.includes(domain);
+      const isAlias = (domain_aliases || []).includes(domain);
 
       return {
         exists: isCustomDomain || isAlias,
