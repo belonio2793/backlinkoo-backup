@@ -46,12 +46,12 @@ const DomainsPage = () => {
             Domain Manager
           </h1>
           <p className="text-xl text-gray-600">
-            View and manage domains from your Netlify account
+            Automatic two-way sync between your database and Netlify account
           </p>
         </div>
 
-        {/* Netlify Domain Manager - Simple and Direct */}
-        <NetlifyDomainManager />
+        {/* Enhanced Domain Manager with Netlify API Integration */}
+        <EnhancedDomainManager />
       </div>
 
       <Footer />
