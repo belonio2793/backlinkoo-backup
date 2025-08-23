@@ -25,11 +25,8 @@ import NetlifyApiService from '@/services/netlifyApiService';
 import NetlifyFunctionDiagnostic from '@/utils/netlifyFunctionDiagnostic';
 import { DnsValidationModal } from '@/components/DnsValidationModal';
 import { BulkDomainManager } from '@/components/BulkDomainManager';
-import { NetlifyApiTester } from '@/components/NetlifyApiTester';
 import { NetlifyDeploymentChecker } from '@/components/NetlifyDeploymentChecker';
-import { ManualDomainInstructions } from '@/components/ManualDomainInstructions';
 import { FunctionStatusIndicator } from '@/components/FunctionStatusIndicator';
-import ComprehensiveDomainStatus from '@/components/ComprehensiveDomainStatus';
 
 interface Domain {
   id: string;
@@ -69,9 +66,6 @@ const DomainsPage = () => {
   const [dnsModalOpen, setDnsModalOpen] = useState(false);
   const [selectedDomainForDns, setSelectedDomainForDns] = useState<Domain | null>(null);
   const [verifyingDomains, setVerifyingDomains] = useState<Set<string>>(new Set());
-  const [showManualInstructions, setShowManualInstructions] = useState<Set<string>>(new Set());
-  const [selectedDomainForComprehensive, setSelectedDomainForComprehensive] = useState<Domain | null>(null);
-  const [showComprehensiveValidation, setShowComprehensiveValidation] = useState(false);
 
   const BLOG_THEMES = [
     { id: 'minimal', name: 'Minimal Clean', description: 'Clean and simple design' },
@@ -670,9 +664,6 @@ const DomainsPage = () => {
           console.log('Manual addition instructions:', instructions);
           toast.error(`Automated addition failed. Manual addition required.`);
 
-          // Show manual instructions for this domain
-          setShowManualInstructions(prev => new Set(prev).add(domain.id));
-
           return;
         }
 
@@ -711,14 +702,7 @@ const DomainsPage = () => {
         d.id === domain.id ? { ...d, status: 'error', error_message: errorMessage } : d
       ));
 
-      // Show manual instructions for function deployment issues
-      if (errorMessage.includes('Network error') || errorMessage.includes('Failed to fetch') ||
-          errorMessage.includes('404') || errorMessage.includes('function')) {
-        setShowManualInstructions(prev => new Set(prev).add(domain.id));
-        toast.error(`Functions not deployed. Manual addition required for ${domain.domain}.`);
-      } else {
-        toast.error(`Failed to add ${domain.domain} to Netlify: ${errorMessage}`);
-      }
+      toast.error(`Failed to add ${domain.domain} to Netlify: ${errorMessage}`);
     }
   };
 
