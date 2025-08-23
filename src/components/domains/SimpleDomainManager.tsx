@@ -513,6 +513,13 @@ const SimpleDomainManager = () => {
               </TabsTrigger>
             </TabsList>
 
+            {/* Hidden background sync status - only visible in console */}
+            {autoSyncEnabled && lastSyncTime && (
+              <div className="hidden">
+                {/* Background sync active: {lastSyncTime.toLocaleTimeString()} */}
+              </div>
+            )}
+
             {/* Single Domain Add */}
             <TabsContent value="single" className="space-y-4">
               <div className="flex gap-3">
