@@ -240,7 +240,7 @@ export function NetlifyApiTester() {
       </Card>
 
       {/* Main Content Tabs */}
-      <Tabs defaultValue="site" className="w-full">
+      <Tabs defaultValue="deployment" className="w-full">
         <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="deployment">Deployment</TabsTrigger>
           <TabsTrigger value="site">Site Info</TabsTrigger>
@@ -249,6 +249,11 @@ export function NetlifyApiTester() {
           <TabsTrigger value="validation">Domain Validation</TabsTrigger>
           <TabsTrigger value="management">Domain Management</TabsTrigger>
         </TabsList>
+
+        {/* Deployment Status */}
+        <TabsContent value="deployment">
+          <NetlifyDeploymentChecker />
+        </TabsContent>
 
         {/* Site Information */}
         <TabsContent value="site">
