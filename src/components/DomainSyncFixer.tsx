@@ -245,13 +245,10 @@ const DomainSyncFixer = ({ onSyncComplete }: { onSyncComplete?: () => void }) =>
       if (mismatch.inNetlify) {
         toast.info(`Removing ${mismatch.domain} from Netlify...`);
 
-        const removeResult = await fetch('/.netlify/functions/netlify-domain-validation', {
-          method: 'POST',
+        const removeResult = await fetch('https://dfhanacsmsvvkpunurnp.functions.supabase.co/netlify-domains', {
+          method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            action: 'removeDomainAlias',
-            domain: mismatch.domain
-          })
+          body: JSON.stringify({ domain: mismatch.domain })
         });
 
         if (removeResult.ok) {

@@ -76,10 +76,9 @@ export function ApiConnectivityStatus() {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
 
-        const domainTest = await fetch('/.netlify/functions/netlify-domain-validation', {
-          method: 'POST',
+        const domainTest = await fetch('https://dfhanacsmsvvkpunurnp.functions.supabase.co/netlify-domains', {
+          method: 'GET',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'getSiteInfo' }),
           signal: controller.signal
         });
 

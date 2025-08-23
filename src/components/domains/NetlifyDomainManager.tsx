@@ -65,10 +65,9 @@ const NetlifyDomainManager = () => {
       console.log('🔍 Fetching domains from Netlify...');
 
       // Fetch site info from Netlify API
-      const siteResponse = await fetch('/.netlify/functions/netlify-domain-validation', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'getSiteInfo' })
+      const siteResponse = await fetch('https://dfhanacsmsvvkpunurnp.functions.supabase.co/netlify-domains', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
       });
 
       if (!siteResponse.ok) {
