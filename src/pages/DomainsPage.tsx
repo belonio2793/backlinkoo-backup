@@ -1000,7 +1000,7 @@ const DomainsPage = () => {
                         variant="outline"
                         size="sm"
                         onClick={() => handleAddToNetlify(domain.id)}
-                        disabled={addingToNetlify.has(domain.id) || validatingDomains.has(domain.id)}
+                        disabled={addingToNetlify.has(domain.id) || validatingDomains.has(domain.id) || debuggingNetlify.has(domain.id)}
                         className="text-green-600 border-green-300 hover:bg-green-50"
                       >
                         {addingToNetlify.has(domain.id) ? (
@@ -1012,6 +1012,26 @@ const DomainsPage = () => {
                           <>
                             <Globe className="h-4 w-4 mr-1" />
                             Add to Netlify
+                          </>
+                        )}
+                      </Button>
+
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => debugNetlifyAPI(domain.id)}
+                        disabled={debuggingNetlify.has(domain.id) || addingToNetlify.has(domain.id) || validatingDomains.has(domain.id)}
+                        className="text-purple-600 border-purple-300 hover:bg-purple-50"
+                      >
+                        {debuggingNetlify.has(domain.id) ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                            Debugging...
+                          </>
+                        ) : (
+                          <>
+                            <AlertTriangle className="h-4 w-4 mr-1" />
+                            Debug API
                           </>
                         )}
                       </Button>
