@@ -162,14 +162,17 @@ const SimpleDomainManager = () => {
             }
           } else {
             console.warn('⚠️ Could not fetch Netlify domains:', netlifyResult.error);
+            toast.warning('Could not sync from Netlify: ' + (netlifyResult.error || 'Unknown error'));
             setDomains(dbDomains || []);
           }
         } else {
-          console.warn('⚠️ Netlify API not available, showing database domains only');
+          console.warn('⚠️ Netlify API not available, response:', netlifyResponse.status, netlifyResponse.statusText);
+          toast.warning(`Netlify API unavailable (${netlifyResponse.status}). Showing database domains only.`);
           setDomains(dbDomains || []);
         }
       } catch (netlifyError) {
         console.warn('⚠️ Netlify sync failed:', netlifyError);
+        toast.warning('Netlify sync failed: ' + netlifyError.message);
         setDomains(dbDomains || []);
       }
 
