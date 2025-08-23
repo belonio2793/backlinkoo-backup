@@ -51,6 +51,8 @@ const DomainsPage = () => {
   const [diagnosingDomains, setDiagnosingDomains] = useState<Set<string>>(new Set());
   const [addingToNetlify, setAddingToNetlify] = useState<Set<string>>(new Set());
   const [selectedThemeForDomain, setSelectedThemeForDomain] = useState<{[key: string]: string}>({});
+  const [runningDiagnostic, setRunningDiagnostic] = useState(false);
+  const [diagnosticResults, setDiagnosticResults] = useState<DiagnosticResult[]>([]);
 
   const BLOG_THEMES = [
     { id: 'minimal', name: 'Minimal Clean', description: 'Clean and simple design' },
