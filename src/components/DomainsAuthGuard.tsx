@@ -17,20 +17,7 @@ export const DomainsAuthGuard = ({ children }: DomainsAuthGuardProps) => {
   const [userEmail, setUserEmail] = useState<string>('');
   const [connectionError, setConnectionError] = useState<Error | null>(null);
 
-  // Get authorized emails from environment variables for development flexibility
-  const getAuthorizedEmails = (): string[] => {
-    const envAuthorizedEmails = import.meta.env.VITE_AUTHORIZED_EMAILS;
-    const defaultEmails = ['support@backlinkoo.com'];
-
-    if (envAuthorizedEmails) {
-      const additionalEmails = envAuthorizedEmails.split(',').map(email => email.trim());
-      return [...defaultEmails, ...additionalEmails];
-    }
-
-    return defaultEmails;
-  };
-
-  const AUTHORIZED_EMAILS = getAuthorizedEmails();
+  const AUTHORIZED_EMAIL = 'support@backlinkoo.com';
 
   useEffect(() => {
     checkAuthStatus();
@@ -66,14 +53,14 @@ export const DomainsAuthGuard = ({ children }: DomainsAuthGuardProps) => {
       setIsAuthenticated(true);
       setUserEmail(user.email || '');
 
-      // Check if user email is in authorized list
-      const authorized = user.email ? AUTHORIZED_EMAILS.includes(user.email) : false;
+      // Require support@backlinkoo.com for domain management
+      const authorized = user.email === AUTHORIZED_EMAIL;
       setIsAuthorized(authorized);
 
       console.log(`🔐 Domains access check: ${user.email} -> ${authorized ? 'AUTHORIZED' : 'DENIED'}`);
 
     } catch (error: any) {
-      console.error('�� Domains auth check failed:', error);
+      console.error('❌ Domains auth check failed:', error);
 
       // Check if this is a network error
       if (SupabaseConnectionFixer.isSupabaseNetworkError(error)) {
@@ -176,7 +163,7 @@ export const DomainsAuthGuard = ({ children }: DomainsAuthGuardProps) => {
                 <div className="space-y-2">
                   <p><strong>Current user:</strong> {userEmail}</p>
                   <p><strong>Required access level:</strong> Support Team</p>
-                  <p><strong>Authorized emails:</strong> {AUTHORIZED_EMAILS.join(', ')}</p>
+                  <p><strong>Authorized email:</strong> {AUTHORIZED_EMAIL}</p>
                 </div>
               </AlertDescription>
             </Alert>
