@@ -5,13 +5,14 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
+import {
   Globe,
   Plus,
   CheckCircle2,
   AlertTriangle,
   Loader2,
-  Trash2
+  Trash2,
+  Minus
 } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -60,6 +61,7 @@ const DomainsPage = () => {
   const [selectedDomainForDns, setSelectedDomainForDns] = useState<Domain | null>(null);
   const [verifyingDomains, setVerifyingDomains] = useState<Set<string>>(new Set());
   const [deletingDomains, setDeletingDomains] = useState<Set<string>>(new Set());
+  const [removingFromNetlify, setRemovingFromNetlify] = useState<Set<string>>(new Set());
 
   const BLOG_THEMES = [
     { id: 'minimal', name: 'Minimal Clean', description: 'Clean and simple design' },
@@ -285,6 +287,125 @@ const DomainsPage = () => {
     }
   };
 
+  // Remove domain from Netlify
+  const handleRemoveFromNetlify = async (domainId: string) => {
+    const domain = domains.find(d => d.id === domainId);
+    if (!domain) {
+      toast.error('Domain not found');
+      return;
+    }
+
+    const confirmed = confirm(
+      `Are you sure you want to remove ${domain.domain} from Netlify?\n\n` +
+      `This will:\n` +
+      `• Remove the domain alias from your Netlify site\n` +
+      `• Keep the domain in your database\n` +
+      `• You can add it back to Netlify later\n\n` +
+      `Continue with removal?`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setRemovingFromNetlify(prev => new Set(prev).add(domainId));
+
+    try {
+      toast.info(`Removing ${domain.domain} from Netlify...`);
+
+      // Check if domain exists in Netlify first
+      const netlifyCheck = await NetlifyApiService.quickDomainCheck(domain.domain);
+
+      if (!netlifyCheck.exists) {
+        toast.warning(`${domain.domain} is not currently in Netlify`);
+
+        // Update database to reflect current state
+        await supabase
+          .from('domains')
+          .update({
+            netlify_verified: false,
+            status: 'pending',
+            error_message: 'Domain not found in Netlify'
+          })
+          .eq('id', domainId)
+          .eq('user_id', user?.id);
+
+        setDomains(prev => prev.map(d =>
+          d.id === domainId ? {
+            ...d,
+            netlify_verified: false,
+            status: 'pending' as const,
+            error_message: 'Domain not found in Netlify'
+          } : d
+        ));
+
+        return;
+      }
+
+      // Remove domain from Netlify using the API
+      const removeResponse = await fetch('/.netlify/functions/netlify-domain-validation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'removeDomainAlias',
+          domain: domain.domain
+        })
+      });
+
+      if (!removeResponse.ok) {
+        throw new Error(`Failed to remove from Netlify: HTTP ${removeResponse.status}`);
+      }
+
+      const removeResult = await removeResponse.json();
+
+      if (removeResult.success) {
+        // Update domain status in database
+        await supabase
+          .from('domains')
+          .update({
+            netlify_verified: false,
+            status: 'pending',
+            error_message: null
+          })
+          .eq('id', domainId)
+          .eq('user_id', user?.id);
+
+        // Update local state
+        setDomains(prev => prev.map(d =>
+          d.id === domainId ? {
+            ...d,
+            netlify_verified: false,
+            status: 'pending' as const,
+            error_message: null
+          } : d
+        ));
+
+        toast.success(`${domain.domain} removed from Netlify successfully`);
+      } else {
+        throw new Error(removeResult.error || 'Failed to remove domain from Netlify');
+      }
+
+    } catch (error: any) {
+      console.error('Error removing domain from Netlify:', error);
+
+      let errorMessage = error.message;
+      if (error.message.includes('404')) {
+        errorMessage = 'Domain not found in Netlify (may already be removed)';
+      } else if (error.message.includes('401')) {
+        errorMessage = 'Authentication failed. Check Netlify access token.';
+      } else if (error.message.includes('403')) {
+        errorMessage = 'Permission denied. Check Netlify account permissions.';
+      }
+
+      toast.error(`Failed to remove ${domain.domain} from Netlify: ${errorMessage}`);
+    } finally {
+      setRemovingFromNetlify(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(domainId);
+        return newSet;
+      });
+    }
+  };
 
   // Retry adding domain to Netlify with enhanced error handling
   const retryDomainToNetlify = async (domainId: string) => {
@@ -1027,7 +1148,7 @@ const DomainsPage = () => {
                             variant="default"
                             size="sm"
                             onClick={() => validateDomain(domain.id)}
-                            disabled={validatingDomains.has(domain.id)}
+                            disabled={validatingDomains.has(domain.id) || removingFromNetlify.has(domain.id)}
                             className="bg-blue-600 hover:bg-blue-700"
                           >
                             {validatingDomains.has(domain.id) ? (
@@ -1047,7 +1168,7 @@ const DomainsPage = () => {
                             variant="outline"
                             size="sm"
                             onClick={() => handleAddToNetlify(domain.id)}
-                            disabled={addingToNetlify.has(domain.id) || validatingDomains.has(domain.id)}
+                            disabled={addingToNetlify.has(domain.id) || validatingDomains.has(domain.id) || removingFromNetlify.has(domain.id)}
                             className="text-green-600 border-green-300 hover:bg-green-50"
                           >
                             {addingToNetlify.has(domain.id) ? (
@@ -1063,12 +1184,32 @@ const DomainsPage = () => {
                             )}
                           </Button>
 
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleRemoveFromNetlify(domain.id)}
+                            disabled={removingFromNetlify.has(domain.id) || validatingDomains.has(domain.id) || addingToNetlify.has(domain.id)}
+                            className="text-red-600 border-red-300 hover:bg-red-50"
+                          >
+                            {removingFromNetlify.has(domain.id) ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Removing...
+                              </>
+                            ) : (
+                              <>
+                                <Minus className="h-4 w-4 mr-2" />
+                                Remove from Netlify
+                              </>
+                            )}
+                          </Button>
+
                           {/* Secondary Actions */}
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => verifyDomainInNetlify(domain)}
-                            disabled={verifyingDomains.has(domain.id)}
+                            disabled={verifyingDomains.has(domain.id) || removingFromNetlify.has(domain.id)}
                             className="text-purple-600 border-purple-300 hover:bg-purple-50"
                           >
                             {verifyingDomains.has(domain.id) ? (

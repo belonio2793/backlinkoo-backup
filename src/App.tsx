@@ -261,6 +261,24 @@ const App = () => (
               }
             />
 
+            <Route
+              path="/domains-test"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  {React.createElement(React.lazy(() => import('./pages/DomainsTestPage')))}
+                </Suspense>
+              }
+            />
+
+            <Route
+              path="/test"
+              element={
+                <Suspense fallback={<div>Loading...</div>}>
+                  {React.createElement(React.lazy(() => import('./pages/TestPage')))}
+                </Suspense>
+              }
+            />
+
             {/* Authentication routes */}
             <Route
               path="/auth/callback"

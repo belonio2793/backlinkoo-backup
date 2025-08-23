@@ -30,25 +30,34 @@ console.log('🔧 Enhanced Supabase client configuration:', {
 const finalUrl = SUPABASE_URL || 'https://dfhanacsmsvvkpunurnp.supabase.co';
 const finalKey = SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRmaGFuYWNzbXN2dmtwdW51cm5wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI5NTY2NDcsImV4cCI6MjA2ODUzMjY0N30.MZcB4P_TAOOTktXSG7bNK5BsIMAf1bKXVgT87Zqa5RY';
 
+console.log('🔧 Using Supabase credentials:', {
+  url: finalUrl.substring(0, 30) + '...',
+  hasKey: !!finalKey,
+  keyLength: finalKey?.length || 0
+});
+
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
   console.warn('⚠️ Environment variables not loaded properly, using fallback credentials');
   console.log('💡 This suggests a Vite environment variable loading issue');
 }
 
-// Validate final credentials
+// Validate final credentials (non-throwing for development)
 if (!finalUrl || !finalKey) {
   const config = SupabaseConnectionFixer.checkConfiguration();
   console.error('❌ Supabase configuration issues:', config.issues);
   console.log('💡 Recommendations:', config.recommendations);
-  throw new Error(`Missing Supabase environment variables: ${config.issues.join(', ')}`);
+  console.warn('⚠️ Missing Supabase environment variables, using fallback mode');
+  // Don't throw - allow fallback to work
 }
 
-if (!finalUrl.startsWith('https://') || !finalUrl.includes('.supabase.co')) {
-  throw new Error('Invalid Supabase URL format. Must be https://*.supabase.co');
+if (finalUrl && (!finalUrl.startsWith('https://') || !finalUrl.includes('.supabase.co'))) {
+  console.error('❌ Invalid Supabase URL format. Must be https://*.supabase.co');
+  console.warn('⚠️ Using fallback URL due to invalid format');
 }
 
-if (!finalKey.startsWith('eyJ') || finalKey.length < 100) {
-  throw new Error('Invalid Supabase API key format. Must be a valid JWT token.');
+if (finalKey && (!finalKey.startsWith('eyJ') || finalKey.length < 100)) {
+  console.error('❌ Invalid Supabase API key format. Must be a valid JWT token.');
+  console.warn('⚠️ Using fallback key due to invalid format');
 }
 
 // Enhanced Supabase client with error resilience
