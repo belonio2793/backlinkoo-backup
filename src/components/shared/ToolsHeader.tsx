@@ -106,7 +106,7 @@ const ToolsHeader = ({ user, currentTool }: ToolsHeaderProps) => {
               <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground">Backlink</h1>
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold tracking-tight text-foreground">Backlink</h1>
               <span className="text-xs text-muted-foreground font-medium">SEO Tools Suite</span>
             </div>
           </div>
