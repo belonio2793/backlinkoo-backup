@@ -87,6 +87,8 @@ const EnhancedDomainManager = () => {
   const loadDomains = async () => {
     setLoading(true);
     try {
+      console.log('🔍 Loading domains from database...');
+
       const { data: domainData, error } = await supabase
         .from('domains')
         .select('*')
@@ -94,6 +96,7 @@ const EnhancedDomainManager = () => {
 
       if (error) {
         if (error.code === 'PGRST116') {
+          console.warn('⚠️ Domains table not found');
           toast.error('Domains table not found. Please contact support.');
           setDomains([]);
           return;
@@ -101,33 +104,90 @@ const EnhancedDomainManager = () => {
         throw error;
       }
 
+      console.log(`✅ Loaded ${domainData?.length || 0} domains from database`);
       setDomains(domainData || []);
 
-      // Try to sync with Netlify
+      // Try to sync with Netlify via edge function
       try {
-        const { data: netlifyResult } = await supabase.functions.invoke('domains', {
+        console.log('🔄 Attempting Netlify sync via edge function...');
+        const { data: netlifyResult, error: netlifyError } = await supabase.functions.invoke('domains', {
           body: { action: 'sync' }
         });
 
+        if (netlifyError) {
+          console.warn('⚠️ Edge function error:', netlifyError);
+          throw netlifyError;
+        }
+
         if (netlifyResult?.success && netlifyResult.synced > 0) {
+          console.log(`✅ Edge function synced ${netlifyResult.synced} domains`);
           toast.success(`✅ Synced ${netlifyResult.synced} domains from Netlify!`);
+
           // Reload after sync
           const { data: updatedData } = await supabase
             .from('domains')
             .select('*')
             .order('created_at', { ascending: false });
           setDomains(updatedData || []);
+        } else {
+          console.log('ℹ️ No new domains to sync from Netlify');
         }
-      } catch (netlifyError) {
-        console.warn('Netlify sync unavailable:', netlifyError);
+      } catch (netlifyError: any) {
+        console.warn('⚠️ Netlify edge function failed:', netlifyError.message);
+
+        // Check if it's an API key issue
+        if (netlifyError.message?.includes('API key') || netlifyError.message?.includes('NETLIFY_ACCESS_TOKEN')) {
+          toast.warning('⚙️ Netlify secrets not configured. Please set NETLIFY_ACCESS_TOKEN and NETLIFY_SITE_ID in Supabase secrets.');
+          console.error('❌ Missing Netlify secrets in Supabase. Please configure:');
+          console.error('1. Go to https://supabase.com/dashboard/project/dfhanacsmsvvkpunurnp/functions/secrets');
+          console.error('2. Add NETLIFY_ACCESS_TOKEN');
+          console.error('3. Add NETLIFY_SITE_ID');
+        } else {
+          // Try direct Netlify API as fallback
+          console.log('🔄 Attempting direct Netlify API fallback...');
+          try {
+            await syncDirectFromNetlify();
+          } catch (directError: any) {
+            console.warn('⚠️ Direct Netlify sync also failed:', directError.message);
+            toast.warning('Netlify sync unavailable. Using database domains only.');
+          }
+        }
       }
 
     } catch (error: any) {
-      console.error('Failed to load domains:', error);
+      console.error('❌ Failed to load domains:', error);
       toast.error(`Failed to load domains: ${error.message}`);
       setDomains([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const syncDirectFromNetlify = async () => {
+    console.log('🔄 Direct Netlify API sync...');
+
+    // Try to use the existing Netlify function
+    try {
+      const response = await fetch('/netlify/functions/add-domain-to-netlify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'get_site_info' }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('✅ Direct Netlify sync successful:', result);
+
+        if (result.domains && result.domains.length > 0) {
+          toast.success(`📡 Found ${result.domains.length} domains via direct Netlify API`);
+          // Could update database here if needed
+        }
+      } else {
+        throw new Error(`Netlify API responded with ${response.status}`);
+      }
+    } catch (directError) {
+      console.warn('⚠️ Direct Netlify API failed:', directError);
+      throw directError;
     }
   };
 
