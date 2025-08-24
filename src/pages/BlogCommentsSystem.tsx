@@ -980,10 +980,10 @@ CREATE INDEX IF NOT EXISTS idx_automation_jobs_campaign_id ON automation_jobs(ca
 CREATE INDEX IF NOT EXISTS idx_automation_jobs_status ON automation_jobs(status);
 CREATE INDEX IF NOT EXISTS idx_automation_jobs_type ON automation_jobs(job_type);
 
-CREATE INDEX IF NOT EXISTS idx_blog_posts_campaign_id ON blog_posts(campaign_id);
-CREATE INDEX IF NOT EXISTS idx_blog_posts_form_id ON blog_posts(form_id);
-CREATE INDEX IF NOT EXISTS idx_blog_posts_status ON blog_posts(status);
-CREATE INDEX IF NOT EXISTS idx_blog_posts_created_at ON blog_posts(created_at);
+CREATE INDEX IF NOT EXISTS idx_automation_blog_posts_campaign_id ON automation_blog_posts(campaign_id);
+CREATE INDEX IF NOT EXISTS idx_automation_blog_posts_form_id ON automation_blog_posts(form_id);
+CREATE INDEX IF NOT EXISTS idx_automation_blog_posts_status ON automation_blog_posts(status);
+CREATE INDEX IF NOT EXISTS idx_automation_blog_posts_created_at ON automation_blog_posts(created_at);
 
 CREATE INDEX IF NOT EXISTS idx_crawler_queue_status ON crawler_queue(status);
 CREATE INDEX IF NOT EXISTS idx_crawler_queue_priority ON crawler_queue(priority);
@@ -1001,7 +1001,7 @@ BEGIN
   UPDATE blog_campaigns
   SET
     links_posted = (
-      SELECT COUNT(*) FROM blog_posts
+      SELECT COUNT(*) FROM automation_blog_posts
       WHERE campaign_id = NEW.campaign_id AND status = 'posted'
     ),
     updated_at = now()
@@ -1012,7 +1012,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER update_campaign_stats_trigger
-  AFTER UPDATE ON blog_posts
+  AFTER UPDATE ON automation_blog_posts
   FOR EACH ROW
   EXECUTE FUNCTION update_campaign_stats();
 
