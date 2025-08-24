@@ -32,6 +32,7 @@ import {
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthState } from '@/hooks/useAuthState';
+import NetlifyConfigHelper from './NetlifyConfigHelper';
 
 interface Domain {
   id: string;
@@ -473,6 +474,9 @@ const EnhancedDomainManager = () => {
         <h2 className="text-3xl font-bold text-gray-900 mb-2">Enhanced Domain Manager</h2>
         <p className="text-gray-600">Add domains to Netlify with DNS setup instructions and validation</p>
       </div>
+
+      {/* Configuration Helper */}
+      <NetlifyConfigHelper onConfigurationComplete={loadDomains} />
 
       {/* Add Domain */}
       <Card>
