@@ -114,22 +114,24 @@ const SimpleDomainManager = () => {
   };
 
   const addSingleDomain = async () => {
-    if (!newDomain.trim() || !user) return;
+    if (!newDomain.trim()) return;
 
     const cleanedDomain = cleanDomain(newDomain);
     setAddingDomain(true);
 
     try {
-      console.log(`➕ Adding domain: ${cleanedDomain}`);
+      console.log(`➕ Adding domain to global system: ${cleanedDomain}`);
 
-      // First add to database directly
+      // Add to global domain system - no user_id required
       const { data: dbDomain, error: dbError } = await supabase
         .from('domains')
         .insert({
           domain: cleanedDomain,
-          user_id: user.id,
+          user_id: '00000000-0000-0000-0000-000000000000', // Global system identifier
           status: 'pending',
-          netlify_verified: false
+          netlify_verified: false,
+          is_global: true, // Mark as global system domain
+          created_by: 'system' // System created
         })
         .select()
         .single();
