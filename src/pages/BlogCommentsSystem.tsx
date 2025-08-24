@@ -227,7 +227,7 @@ export default function BlogCommentsSystem() {
   const checkTablesExist = async () => {
     try {
       // Check for core tables
-      const tables = ['blog_campaigns', 'crawler_targets', 'form_maps', 'blog_accounts', 'automation_jobs', 'blog_posts'];
+      const tables = ['blog_campaigns', 'crawler_targets', 'form_maps', 'blog_accounts', 'automation_jobs', 'automation_blog_posts'];
       
       for (const table of tables) {
         const { error } = await supabase
@@ -364,7 +364,7 @@ export default function BlogCommentsSystem() {
   const loadBlogPosts = async () => {
     try {
       const { data, error } = await supabase
-        .from('blog_posts')
+        .from('automation_blog_posts')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(100);
@@ -711,7 +711,7 @@ export default function BlogCommentsSystem() {
     const channels = [];
 
     // Subscribe to key table changes
-    const tables = ['blog_campaigns', 'crawler_targets', 'form_maps', 'automation_jobs', 'blog_posts'];
+    const tables = ['blog_campaigns', 'crawler_targets', 'form_maps', 'automation_jobs', 'automation_blog_posts'];
     
     tables.forEach(table => {
       const channel = supabase
@@ -828,7 +828,7 @@ CREATE TABLE IF NOT EXISTS automation_jobs (
 );
 
 -- Blog posts table (posting attempts)
-CREATE TABLE IF NOT EXISTS blog_posts (
+CREATE TABLE IF NOT EXISTS automation_blog_posts (
   id uuid default gen_random_uuid() primary key,
   campaign_id uuid references blog_campaigns(id) on delete cascade,
   form_id uuid references form_maps(id) on delete cascade,
