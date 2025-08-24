@@ -71,8 +71,8 @@ export class SafeAuth {
 
       // Even if auth fails, still try email check as last resort
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user?.email === 'support@backlinkoo.com') {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user?.email === 'support@backlinkoo.com') {
           console.log('✅ Admin verified via fallback email check');
           return { isAdmin: true, needsAuth: false };
         }
