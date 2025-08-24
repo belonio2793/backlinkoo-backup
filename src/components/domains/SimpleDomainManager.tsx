@@ -214,16 +214,18 @@ const SimpleDomainManager = () => {
 
       console.log(`➕ Adding ${domainList.length} domains in bulk...`);
 
-      // Add domains one by one to the database
+      // Add domains one by one to the global system
       for (const domain of domainList) {
         try {
           const { error: dbError } = await supabase
             .from('domains')
             .insert({
               domain,
-              user_id: user.id,
+              user_id: '00000000-0000-0000-0000-000000000000', // Global system identifier
               status: 'pending',
-              netlify_verified: false
+              netlify_verified: false,
+              is_global: true, // Mark as global system domain
+              created_by: 'system' // System created
             });
 
           if (dbError) {
@@ -249,7 +251,7 @@ const SimpleDomainManager = () => {
       setBulkDomains('');
 
       if (successCount > 0) {
-        toast.success(`��� Successfully added ${successCount} domains`);
+        toast.success(`✅ Successfully added ${successCount} domains`);
       }
 
       if (errorCount > 0) {
