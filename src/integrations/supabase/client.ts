@@ -3,7 +3,7 @@ import type { Database } from './types';
 
 // Supabase API: Initializing
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://dfhanacsmsvvkpunurnp.supabase.co';
-const supabaseKey = import.meta.env.VITE_SUPABASE_KEY;
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_KEY;
 
 console.log('🔧 Supabase configuration:', {
   url: supabaseUrl,
