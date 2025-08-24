@@ -50,140 +50,12 @@ const SimpleDomainManager = () => {
   // Bulk domain add
   const [bulkDomains, setBulkDomains] = useState('');
 
-  // Auto-sync on page load and setup background functionality
+  // Load domains on component mount
   useEffect(() => {
     if (user) {
-      console.log('🚀 Domains page: Activating all background functionality...');
-      console.log('✅ Auto-sync: ON');
-      console.log('✅ Periodic sync: Every 5 minutes');
-      console.log('✅ Real-time monitoring: ON');
-      console.log('✅ Dev server integration: ON');
-      console.log('✅ Domain auto-detection: ON');
-      console.log('✅ Health monitoring: Every 10 minutes');
-
-      // Immediate sync on page load
-      loadDomains(true); // true = silent sync
-
-      // Setup periodic background sync every 5 minutes
-      if (autoSyncEnabled) {
-        const interval = setInterval(() => {
-          // Check network connectivity before syncing
-          if (navigator.onLine) {
-            console.log('🔄 Background sync triggered...');
-            loadDomains(true); // Silent background sync
-          } else {
-            console.log('📡 Background sync skipped - no network connection');
-          }
-        }, 5 * 60 * 1000); // 5 minutes
-
-        setBackgroundSyncInterval(interval);
-
-        // Cleanup interval on unmount
-        return () => {
-          if (interval) clearInterval(interval);
-        };
-      }
-    }
-  }, [user, autoSyncEnabled]);
-
-  // Real-time domain monitoring via page visibility API
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (!document.hidden && user && autoSyncEnabled) {
-        console.log('👁️ Page became visible, syncing domains...');
-        loadDomains(true);
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [user, autoSyncEnabled]);
-
-  // Network connectivity monitoring
-  useEffect(() => {
-    const handleOnline = () => {
-      if (user && autoSyncEnabled) {
-        console.log('🌐 Network connection restored, syncing domains...');
-        loadDomains(true);
-      }
-    };
-
-    const handleOffline = () => {
-      console.log('📡 Network connection lost, background sync paused');
-    };
-
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, [user, autoSyncEnabled]);
-
-  // Dev server integration - listen for file changes
-  useEffect(() => {
-    if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-      // Dev environment auto-detection
-      const checkDevServerChanges = () => {
-        console.log('🔧 Dev server detected, enabling enhanced monitoring...');
-        // Enhanced sync for development
-        if (user) loadDomains(true);
-      };
-
-      // Listen for hot reload events
-      if ('EventSource' in window) {
-        const eventSource = new EventSource('/dev-server-events');
-        eventSource.onmessage = checkDevServerChanges;
-        return () => eventSource.close();
-      }
+      loadDomains();
     }
   }, [user]);
-
-  // Background domain detection from current URL
-  useEffect(() => {
-    const detectCurrentDomain = async () => {
-      if (!user) return;
-
-      const currentDomain = window.location.hostname;
-      if (currentDomain && currentDomain !== 'localhost' && currentDomain.includes('.')) {
-        console.log(`🔍 Auto-detected current domain: ${currentDomain}`);
-
-        // Check if current domain is already in our list
-        const exists = domains.some(d => d.domain === currentDomain);
-        if (!exists) {
-          console.log(`➕ Auto-adding detected domain: ${currentDomain}`);
-          try {
-            const response = await fetch('https://dfhanacsmsvvkpunurnp.functions.supabase.co/netlify-domains', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
-              },
-              body: JSON.stringify({ domain: currentDomain })
-            });
-
-            if (response.ok) {
-              const result = await response.json();
-              if (result.success) {
-                console.log(`✅ Auto-added current domain: ${currentDomain}`);
-                // Silent reload to update the list
-                setTimeout(() => loadDomains(true), 1000);
-              }
-            }
-          } catch (error) {
-            console.log('Auto-add failed:', error);
-          }
-        }
-      }
-    };
-
-    // Run detection after domains are loaded and component is ready
-    if (domains.length >= 0) {
-      // Delay to ensure everything is properly loaded
-      setTimeout(detectCurrentDomain, 2000);
-    }
-  }, [domains, user]);
 
   const loadDomains = async (silent = false) => {
     if (!user) return;
@@ -379,7 +251,7 @@ const SimpleDomainManager = () => {
       }
 
       const result = await response.json();
-      console.log('📊 Add domain result:', result);
+      console.log('�� Add domain result:', result);
 
       if (result.success) {
         setNewDomain('');
