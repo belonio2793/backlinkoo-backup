@@ -237,7 +237,7 @@ For fellow marketers looking to scale their SEO efforts, I recommend checking ou
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b sticky top-0 z-50 bg-background">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-4 py-4 max-w-6xl">
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center gap-4">
               <Button
@@ -248,9 +248,9 @@ For fellow marketers looking to scale their SEO efforts, I recommend checking ou
                 <ArrowLeft className="h-4 w-4" />
                 Back to Dashboard
               </Button>
-              <div className="flex items-center gap-2">
-                <Infinity className="h-6 w-6 text-primary" />
-                <span className="text-xl font-semibold">Promotion Materials</span>
+              <div className="flex items-center gap-4">
+                <Infinity className="h-8 w-8 text-primary" />
+                <span className="text-xl sm:text-2xl md:text-3xl font-semibold">Promotion Materials</span>
               </div>
             </div>
             <div className="flex items-center gap-4">

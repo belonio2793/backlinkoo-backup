@@ -97,16 +97,16 @@ const ToolsHeader = ({ user, currentTool }: ToolsHeaderProps) => {
 
   return (
     <header className="border-b border-gray-200 bg-white/80 backdrop-blur-sm shadow-sm sticky top-0 z-50">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4">
+      <div className="container mx-auto px-4 py-4 max-w-6xl">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
+          <div className="flex items-center gap-4 cursor-pointer" onClick={() => navigate('/')}>
             <div className="relative">
-              <Infinity className="h-7 w-7 text-primary" />
+              <Infinity className="h-8 w-8 text-primary" />
               <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground">Backlink</h1>
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold tracking-tight text-foreground">Backlink</h1>
               <span className="text-xs text-muted-foreground font-medium">SEO Tools Suite</span>
             </div>
           </div>

@@ -53,6 +53,7 @@ const LazyDomainsPage = lazy(() => import("./pages/DomainsPage"));
 const LazyNetlifyTest = lazy(() => import("./pages/NetlifyTest"));
 const LazySupabaseTest = lazy(() => import("./pages/SupabaseTest"));
 const LazyBlogGenerationTest = lazy(() => import("./components/BlogGenerationTest"));
+const LazyAuthFix = lazy(() => import("./pages/AuthFix"));
 import BlogGenerationFixTestPage from "./pages/BlogGenerationFixTest";
 
 const queryClient = new QueryClient({
@@ -378,6 +379,14 @@ const App = () => (
             />
 
             {/* Debug and test routes */}
+            <Route
+              path="/auth-fix"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyAuthFix />
+                </Suspense>
+              }
+            />
             <Route
               path="/debug/blog-fix"
               element={

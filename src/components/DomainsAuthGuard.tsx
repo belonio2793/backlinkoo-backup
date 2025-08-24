@@ -25,7 +25,10 @@ export const DomainsAuthGuard = ({ children }: DomainsAuthGuardProps) => {
     setDefaultAuthTab
   } = useUserFlow();
 
-  const AUTHORIZED_EMAIL = 'support@backlinkoo.com';
+  const AUTHORIZED_EMAILS = [
+    'support@backlinkoo.com',
+    '3925029350n@backlinkoo.com' // Admin user
+  ];
 
   useEffect(() => {
     checkAuthStatus();
@@ -115,7 +118,7 @@ export const DomainsAuthGuard = ({ children }: DomainsAuthGuardProps) => {
       setUserEmail(user.email || '');
 
       // Check authorization
-      const authorized = user.email === AUTHORIZED_EMAIL;
+      const authorized = AUTHORIZED_EMAILS.includes(user.email || '');
       setIsAuthorized(authorized);
 
       console.log(`🔐 Domains access check: ${user.email} -> ${authorized ? 'AUTHORIZED' : 'DENIED'}`);
@@ -139,7 +142,7 @@ export const DomainsAuthGuard = ({ children }: DomainsAuthGuardProps) => {
         setIsAuthorized(false);
         setUserEmail('');
       } else {
-        console.error('❌ Unknown auth error:', error);
+        console.error('�� Unknown auth error:', error);
         setIsAuthenticated(false);
         setIsAuthorized(false);
         setUserEmail('');
@@ -225,6 +228,15 @@ export const DomainsAuthGuard = ({ children }: DomainsAuthGuardProps) => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Login Modal for unauthenticated users */}
+        <LoginModal
+          isOpen={showSignInModal}
+          onClose={() => setShowSignInModal(false)}
+          onAuthSuccess={handleAuthSuccess}
+          defaultTab="login"
+          pendingAction="domain management features"
+        />
       </div>
     );
   }
@@ -251,21 +263,24 @@ export const DomainsAuthGuard = ({ children }: DomainsAuthGuardProps) => {
                 <div className="space-y-2">
                   <p><strong>Current user:</strong> {userEmail}</p>
                   <p><strong>Required access level:</strong> Support Team</p>
-                  <p><strong>Authorized email:</strong> {AUTHORIZED_EMAIL}</p>
+                  <p><strong>Authorized emails:</strong> {AUTHORIZED_EMAILS.join(', ')}</p>
                 </div>
               </AlertDescription>
             </Alert>
             
             <div className="space-y-3">
-              <Button 
-                onClick={handleSignOut}
+              <Button
+                onClick={() => {
+                  handleSignOut();
+                  setShowSignInModal(true);
+                }}
                 variant="outline"
                 className="w-full"
               >
                 Sign Out & Switch Account
               </Button>
-              
-              <Button 
+
+              <Button
                 onClick={() => window.location.href = '/dashboard'}
                 className="w-full"
               >
@@ -280,6 +295,15 @@ export const DomainsAuthGuard = ({ children }: DomainsAuthGuardProps) => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Login Modal for switching accounts */}
+        <LoginModal
+          isOpen={showSignInModal}
+          onClose={() => setShowSignInModal(false)}
+          onAuthSuccess={handleAuthSuccess}
+          defaultTab="login"
+          pendingAction="domain management features"
+        />
       </div>
     );
   }
@@ -287,15 +311,6 @@ export const DomainsAuthGuard = ({ children }: DomainsAuthGuardProps) => {
   return (
     <>
       {children}
-
-      {/* Login Modal for unauthenticated users */}
-      <LoginModal
-        isOpen={showSignInModal}
-        onClose={() => setShowSignInModal(false)}
-        onAuthSuccess={handleAuthSuccess}
-        defaultTab="login"
-        pendingAction="domain management features"
-      />
     </>
   );
 };

@@ -43,9 +43,6 @@ const SimpleDomainManager = () => {
   const [addingDomain, setAddingDomain] = useState(false);
   const [addingBulk, setAddingBulk] = useState(false);
   const [removingDomain, setRemovingDomain] = useState<string | null>(null);
-  const [autoSyncEnabled, setAutoSyncEnabled] = useState(true);
-  const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
-  const [backgroundSyncInterval, setBackgroundSyncInterval] = useState<NodeJS.Timeout | null>(null);
 
   // Single domain add
   const [newDomain, setNewDomain] = useState('');
@@ -53,153 +50,19 @@ const SimpleDomainManager = () => {
   // Bulk domain add
   const [bulkDomains, setBulkDomains] = useState('');
 
-  // Auto-sync on page load and setup background functionality
+  // Load domains on component mount
   useEffect(() => {
     if (user) {
-      console.log('🚀 Domains page: Activating all background functionality...');
-      console.log('✅ Auto-sync: ON');
-      console.log('✅ Periodic sync: Every 5 minutes');
-      console.log('✅ Real-time monitoring: ON');
-      console.log('✅ Dev server integration: ON');
-      console.log('✅ Domain auto-detection: ON');
-      console.log('✅ Health monitoring: Every 10 minutes');
-
-      // Immediate sync on page load
-      loadDomains(true); // true = silent sync
-
-      // Setup periodic background sync every 5 minutes
-      if (autoSyncEnabled) {
-        const interval = setInterval(() => {
-          // Check network connectivity before syncing
-          if (navigator.onLine) {
-            console.log('🔄 Background sync triggered...');
-            loadDomains(true); // Silent background sync
-          } else {
-            console.log('📡 Background sync skipped - no network connection');
-          }
-        }, 5 * 60 * 1000); // 5 minutes
-
-        setBackgroundSyncInterval(interval);
-
-        // Cleanup interval on unmount
-        return () => {
-          if (interval) clearInterval(interval);
-        };
-      }
-    }
-  }, [user, autoSyncEnabled]);
-
-  // Real-time domain monitoring via page visibility API
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (!document.hidden && user && autoSyncEnabled) {
-        console.log('👁️ Page became visible, syncing domains...');
-        loadDomains(true);
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [user, autoSyncEnabled]);
-
-  // Network connectivity monitoring
-  useEffect(() => {
-    const handleOnline = () => {
-      if (user && autoSyncEnabled) {
-        console.log('🌐 Network connection restored, syncing domains...');
-        loadDomains(true);
-      }
-    };
-
-    const handleOffline = () => {
-      console.log('📡 Network connection lost, background sync paused');
-    };
-
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, [user, autoSyncEnabled]);
-
-  // Dev server integration - listen for file changes
-  useEffect(() => {
-    if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-      // Dev environment auto-detection
-      const checkDevServerChanges = () => {
-        console.log('🔧 Dev server detected, enabling enhanced monitoring...');
-        // Enhanced sync for development
-        if (user) loadDomains(true);
-      };
-
-      // Listen for hot reload events
-      if ('EventSource' in window) {
-        const eventSource = new EventSource('/dev-server-events');
-        eventSource.onmessage = checkDevServerChanges;
-        return () => eventSource.close();
-      }
+      loadDomains();
     }
   }, [user]);
 
-  // Background domain detection from current URL
-  useEffect(() => {
-    const detectCurrentDomain = async () => {
-      if (!user) return;
-
-      const currentDomain = window.location.hostname;
-      if (currentDomain && currentDomain !== 'localhost' && currentDomain.includes('.')) {
-        console.log(`🔍 Auto-detected current domain: ${currentDomain}`);
-
-        // Check if current domain is already in our list
-        const exists = domains.some(d => d.domain === currentDomain);
-        if (!exists) {
-          console.log(`➕ Auto-adding detected domain: ${currentDomain}`);
-          try {
-            const response = await fetch('https://dfhanacsmsvvkpunurnp.functions.supabase.co/netlify-domains', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
-              },
-              body: JSON.stringify({ domain: currentDomain })
-            });
-
-            if (response.ok) {
-              const result = await response.json();
-              if (result.success) {
-                console.log(`✅ Auto-added current domain: ${currentDomain}`);
-                // Silent reload to update the list
-                setTimeout(() => loadDomains(true), 1000);
-              }
-            }
-          } catch (error) {
-            console.log('Auto-add failed:', error);
-          }
-        }
-      }
-    };
-
-    // Run detection after domains are loaded and component is ready
-    if (domains.length >= 0) {
-      // Delay to ensure everything is properly loaded
-      setTimeout(detectCurrentDomain, 2000);
-    }
-  }, [domains, user]);
-
-  const loadDomains = async (silent = false) => {
+  const loadDomains = async () => {
     if (!user) return;
 
-    if (!silent) setLoading(true);
-
-    // Update last sync time
-    setLastSyncTime(new Date());
+    setLoading(true);
     try {
-      console.log('🔍 Loading domains from Supabase edge function...');
-      console.log('👤 Current user:', user.email);
-
-      // Use the new Supabase edge function to list and sync domains
+      // Use the Supabase edge function to list and sync domains
       const response = await fetch('https://dfhanacsmsvvkpunurnp.functions.supabase.co/netlify-domains', {
         method: 'GET',
         headers: {
@@ -213,40 +76,31 @@ const SimpleDomainManager = () => {
       }
 
       const result = await response.json();
-      console.log('📊 Edge function result:', result);
 
       if (result.success) {
         const syncedDomains = result.domains || [];
-        console.log(`✅ Successfully loaded ${syncedDomains.length} domains`);
 
-        if (result.synced > 0 && !silent) {
+        if (result.synced > 0) {
           toast.success(`✅ Synced ${result.synced} new domains from Netlify!`);
-        } else if (result.synced > 0 && silent) {
-          console.log(`🔄 Background sync: ${result.synced} new domains synced`);
         }
 
         // Filter domains based on user permissions
-        const isAdminUser = user.email === 'support@backlinkoo.com';
+        const isAdminUser = user.email === 'support@backlinkoo.com' || user.email === '3925029350n@backlinkoo.com';
         const filteredDomains = isAdminUser
           ? syncedDomains
           : syncedDomains.filter(d => d.user_id === user.id);
 
         setDomains(filteredDomains);
-        console.log(`📊 Showing ${filteredDomains.length} domains for user`);
       } else {
         throw new Error(result.error || 'Unknown error from edge function');
       }
 
     } catch (error: any) {
-      console.error('❌ Failed to load domains:', error);
-      if (!silent) {
-        toast.error(`Failed to load domains: ${error.message}`);
-      }
+      toast.error(`Failed to load domains: ${error.message}`);
 
       // Fallback to direct database query
       try {
-        console.log('🔄 Falling back to direct database query...');
-        const isAdminUser = user.email === 'support@backlinkoo.com';
+        const isAdminUser = user.email === 'support@backlinkoo.com' || user.email === '3925029350n@backlinkoo.com';
         let query = supabase.from('domains').select('*');
 
         if (!isAdminUser) {
@@ -255,101 +109,14 @@ const SimpleDomainManager = () => {
 
         const { data: fallbackDomains } = await query.order('created_at', { ascending: false });
         setDomains(fallbackDomains || []);
-        console.log(`📊 Fallback: loaded ${fallbackDomains?.length || 0} domains from database`);
       } catch (fallbackError) {
-        console.error('❌ Fallback also failed:', fallbackError);
         setDomains([]);
       }
     } finally {
-      if (!silent) setLoading(false);
+      setLoading(false);
     }
   };
 
-  // Background health monitoring
-  useEffect(() => {
-    if (!user || !autoSyncEnabled) return;
-
-    const healthCheck = async () => {
-      try {
-        // Check if domains need status updates
-        const pendingDomains = domains.filter(d => d.status === 'pending');
-        if (pendingDomains.length > 0) {
-          console.log(`🔍 Checking status of ${pendingDomains.length} pending domains...`);
-
-          for (const domain of pendingDomains) {
-            try {
-              // Test if domain is actually working
-              const testResponse = await fetch(`https://${domain.domain}`, {
-                method: 'HEAD',
-                mode: 'no-cors',
-                cache: 'no-cache'
-              });
-
-              // If we get here, domain is likely working
-              console.log(`✅ Domain ${domain.domain} appears to be working`);
-
-              // Update status in background
-              await supabase
-                .from('domains')
-                .update({ status: 'verified', netlify_verified: true })
-                .eq('id', domain.id);
-
-            } catch (error) {
-              console.log(`⚠️ Domain ${domain.domain} may have issues:`, error);
-            }
-          }
-
-          // Refresh the list after health checks
-          setTimeout(() => loadDomains(true), 2000);
-        }
-      } catch (error) {
-        console.log('Health check error:', error);
-      }
-    };
-
-    // Run health check every 10 minutes
-    const healthInterval = setInterval(healthCheck, 10 * 60 * 1000);
-
-    // Initial health check after 30 seconds
-    setTimeout(healthCheck, 30000);
-
-    return () => clearInterval(healthInterval);
-  }, [domains, user, autoSyncEnabled]);
-
-  // Cleanup intervals on unmount
-  useEffect(() => {
-    return () => {
-      if (backgroundSyncInterval) {
-        clearInterval(backgroundSyncInterval);
-      }
-    };
-  }, [backgroundSyncInterval]);
-
-  // Comprehensive status logging every 2 minutes
-  useEffect(() => {
-    if (!user || !autoSyncEnabled) return;
-
-    const statusLogger = () => {
-      console.log('📊 ===== DOMAINS PAGE BACKGROUND STATUS =====');
-      console.log(`🌐 Online: ${navigator.onLine ? 'YES' : 'NO'}`);
-      console.log(`👤 User: ${user.email}`);
-      console.log(`📝 Domains loaded: ${domains.length}`);
-      console.log(`⏰ Last sync: ${lastSyncTime ? lastSyncTime.toLocaleTimeString() : 'Never'}`);
-      console.log(`🔄 Auto-sync: ${autoSyncEnabled ? 'ACTIVE' : 'INACTIVE'}`);
-      console.log(`📡 Background monitoring: ACTIVE`);
-      console.log(`🔧 Dev mode: ${window.location.hostname === 'localhost' ? 'YES' : 'NO'}`);
-      console.log(`🏥 Health checks: ${domains.filter(d => d.status === 'pending').length} pending domains`);
-      console.log('============================================');
-    };
-
-    // Initial status log
-    setTimeout(statusLogger, 5000);
-
-    // Periodic status logging every 2 minutes
-    const statusInterval = setInterval(statusLogger, 2 * 60 * 1000);
-
-    return () => clearInterval(statusInterval);
-  }, [user, autoSyncEnabled, domains, lastSyncTime]);
 
   const cleanDomain = (domain: string): string => {
     return domain.trim().toLowerCase()
@@ -365,9 +132,7 @@ const SimpleDomainManager = () => {
     setAddingDomain(true);
 
     try {
-      console.log(`➕ Adding domain: ${cleanedDomain}`);
-
-      // Use the new Supabase edge function to add domain
+      // Use the Supabase edge function to add domain
       const response = await fetch('https://dfhanacsmsvvkpunurnp.functions.supabase.co/netlify-domains', {
         method: 'POST',
         headers: {
@@ -382,7 +147,6 @@ const SimpleDomainManager = () => {
       }
 
       const result = await response.json();
-      console.log('📊 Add domain result:', result);
 
       if (result.success) {
         setNewDomain('');
@@ -393,8 +157,6 @@ const SimpleDomainManager = () => {
       }
 
     } catch (error: any) {
-      console.error('❌ Failed to add domain:', error);
-
       if (error.message.includes('23505') || error.message.includes('already exists')) {
         toast.error(`Domain ${cleanedDomain} already exists`);
       } else {
@@ -421,11 +183,8 @@ const SimpleDomainManager = () => {
     setAddingBulk(true);
 
     try {
-      console.log(`➕ Adding ${domainList.length} domains in bulk:`, domainList);
-
       let successCount = 0;
       let errorCount = 0;
-      const errors = [];
 
       // Add domains one by one using the edge function
       for (const domain of domainList) {
@@ -445,15 +204,12 @@ const SimpleDomainManager = () => {
               successCount++;
             } else {
               errorCount++;
-              errors.push(`${domain}: ${result.error}`);
             }
           } else {
             errorCount++;
-            errors.push(`${domain}: HTTP ${response.status}`);
           }
         } catch (domainError) {
           errorCount++;
-          errors.push(`${domain}: ${domainError.message}`);
         }
       }
 
@@ -464,14 +220,12 @@ const SimpleDomainManager = () => {
       }
 
       if (errorCount > 0) {
-        console.warn('⚠️ Some domains failed:', errors);
-        toast.warning(`⚠️ ${errorCount} domains failed to add. Check console for details.`);
+        toast.warning(`⚠️ ${errorCount} domains failed to add`);
       }
 
       await loadDomains();
 
     } catch (error: any) {
-      console.error('❌ Failed to add bulk domains:', error);
       toast.error(`Failed to add domains: ${error.message}`);
     } finally {
       setAddingBulk(false);
@@ -484,9 +238,7 @@ const SimpleDomainManager = () => {
     setRemovingDomain(domainName);
 
     try {
-      console.log(`🗑️ Removing domain: ${domainName}`);
-
-      // Use the new Supabase edge function to remove domain
+      // Use the Supabase edge function to remove domain
       const response = await fetch('https://dfhanacsmsvvkpunurnp.functions.supabase.co/netlify-domains', {
         method: 'DELETE',
         headers: {
@@ -501,7 +253,6 @@ const SimpleDomainManager = () => {
       }
 
       const result = await response.json();
-      console.log('📊 Remove domain result:', result);
 
       if (result.success) {
         toast.success(`✅ Domain ${domainName} removed successfully`);
@@ -511,7 +262,6 @@ const SimpleDomainManager = () => {
       }
 
     } catch (error: any) {
-      console.error('❌ Failed to remove domain:', error);
       toast.error(`Failed to remove domain: ${error.message}`);
     } finally {
       setRemovingDomain(null);
@@ -566,12 +316,6 @@ const SimpleDomainManager = () => {
               </TabsTrigger>
             </TabsList>
 
-            {/* Hidden background sync status - only visible in console */}
-            {autoSyncEnabled && lastSyncTime && (
-              <div className="hidden">
-                {/* Background sync active: {lastSyncTime.toLocaleTimeString()} */}
-              </div>
-            )}
 
             {/* Single Domain Add */}
             <TabsContent value="single" className="space-y-4">
