@@ -118,7 +118,7 @@ export const DomainsAuthGuard = ({ children }: DomainsAuthGuardProps) => {
       setUserEmail(user.email || '');
 
       // Check authorization
-      const authorized = user.email === AUTHORIZED_EMAIL;
+      const authorized = AUTHORIZED_EMAILS.includes(user.email || '');
       setIsAuthorized(authorized);
 
       console.log(`🔐 Domains access check: ${user.email} -> ${authorized ? 'AUTHORIZED' : 'DENIED'}`);
