@@ -33,8 +33,8 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthState } from '@/hooks/useAuthState';
 import NetlifyConfigHelper from './NetlifyConfigHelper';
-import AutoDomainSync from './AutoDomainSync';
-import { syncDomainsFromNetlify, testNetlifyConnection } from '@/services/netlifyDomainSync';
+import ManualDomainSync from './ManualDomainSync';
+import { syncAllDomainsFromNetlify, testNetlifyConnection } from '@/services/enhancedNetlifySync';
 
 interface Domain {
   id: string;
@@ -95,24 +95,8 @@ const EnhancedDomainManager = () => {
     try {
       console.log('🔍 Loading domains from database...');
 
-      // First try direct Netlify sync using provided credentials
-      try {
-        console.log('🚀 Syncing domains directly from Netlify...');
-        const syncResult = await syncDomainsFromNetlify();
-
-        if (syncResult.success && syncResult.synced > 0) {
-          toast.success(`✅ Synced ${syncResult.synced} domains from Netlify!`);
-          console.log(`✅ Direct sync successful: ${syncResult.message}`);
-        } else if (syncResult.errors.length > 0) {
-          console.warn('⚠️ Sync completed with errors:', syncResult.errors);
-          toast.warning(`Sync completed with ${syncResult.errors.length} errors. Check console for details.`);
-        } else {
-          console.log('ℹ️ No new domains to sync from Netlify');
-        }
-      } catch (syncError: any) {
-        console.warn('⚠️ Direct Netlify sync failed:', syncError.message);
-        toast.warning(`Netlify sync failed: ${syncError.message}. Showing database domains only.`);
-      }
+      // Load domains from database first - manual sync will handle Netlify sync
+      console.log('📋 Loading domains from database...');
 
       // Load domains from database (after sync)
       const { data: domainData, error } = await supabase
@@ -148,10 +132,10 @@ const EnhancedDomainManager = () => {
       console.log('🔄 Force syncing from Netlify...');
       toast.loading('Syncing domains from Netlify...', { id: 'netlify-sync' });
 
-      const syncResult = await syncDomainsFromNetlify();
+      const syncResult = await syncAllDomainsFromNetlify();
 
       if (syncResult.success) {
-        toast.success(`✅ Synced ${syncResult.synced} domains from Netlify!`, { id: 'netlify-sync' });
+        toast.success(`✅ ${syncResult.message}`, { id: 'netlify-sync' });
         console.log(`✅ Force sync successful: ${syncResult.message}`);
 
         // Reload domains from database
@@ -183,7 +167,7 @@ const EnhancedDomainManager = () => {
         toast.success(`✅ Connection successful: ${testResult.message}`, { id: 'test-connection' });
         console.log('✅ Netlify connection test passed:', testResult.details);
       } else {
-        toast.error(`❌ Connection failed: ${testResult.message}`, { id: 'test-connection' });
+        toast.error(`�� Connection failed: ${testResult.message}`, { id: 'test-connection' });
         console.error('❌ Netlify connection test failed:', testResult.message);
       }
     } catch (error: any) {
@@ -475,8 +459,8 @@ const EnhancedDomainManager = () => {
         <p className="text-gray-600">Add domains to Netlify with DNS setup instructions and validation</p>
       </div>
 
-      {/* Auto Domain Sync */}
-      <AutoDomainSync
+      {/* Manual Domain Sync */}
+      <ManualDomainSync
         onSyncComplete={(syncedDomains) => {
           setDomains(syncedDomains);
           setAutoSyncComplete(true);
