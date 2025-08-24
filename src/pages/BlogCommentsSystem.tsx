@@ -879,7 +879,7 @@ ALTER TABLE crawler_targets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE form_maps ENABLE ROW LEVEL SECURITY;
 ALTER TABLE blog_accounts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE automation_jobs ENABLE ROW LEVEL SECURITY;
-ALTER TABLE blog_posts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE automation_blog_posts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE crawler_queue ENABLE ROW LEVEL SECURITY;
 ALTER TABLE domain_health ENABLE ROW LEVEL SECURITY;
 
@@ -934,15 +934,15 @@ CREATE POLICY "Users can view jobs for their campaigns" ON automation_jobs
 CREATE POLICY "System can manage automation jobs" ON automation_jobs
   FOR ALL USING (true);
 
--- RLS Policies for blog_posts
-CREATE POLICY "Users can view posts for their campaigns" ON blog_posts
+-- RLS Policies for automation_blog_posts
+CREATE POLICY "Users can view posts for their campaigns" ON automation_blog_posts
   FOR SELECT USING (EXISTS (
     SELECT 1 FROM blog_campaigns
-    WHERE blog_campaigns.id = blog_posts.campaign_id
+    WHERE blog_campaigns.id = automation_blog_posts.campaign_id
     AND blog_campaigns.user_id = auth.uid()
   ));
 
-CREATE POLICY "System can manage blog posts" ON blog_posts
+CREATE POLICY "System can manage blog posts" ON automation_blog_posts
   FOR ALL USING (true);
 
 -- RLS Policies for crawler_queue (system managed)
