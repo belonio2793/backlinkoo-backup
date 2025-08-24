@@ -1,8 +1,9 @@
 import { serve } from "https://deno.land/std/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.52.0';
 
-const NETLIFY_SITE_ID = Deno.env.get("NETLIFY_SITE_ID")!;
-const NETLIFY_ACCESS_TOKEN = Deno.env.get("NETLIFY_ACCESS_TOKEN")!;
+// Use provided credentials as fallback if environment variables aren't set
+const NETLIFY_SITE_ID = Deno.env.get("NETLIFY_SITE_ID") || 'ca6261e6-0a59-40b5-a2bc-5b5481ac8809';
+const NETLIFY_ACCESS_TOKEN = Deno.env.get("NETLIFY_ACCESS_TOKEN") || 'nfp_Xngqzk9sydkiKUvfdrqHLSnBCZiH33U8b967';
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
@@ -40,6 +41,38 @@ serve(async (req) => {
   }
 
   try {
+    // Log environment status
+    console.log('🔧 Environment check:', {
+      hasNetlifyToken: !!NETLIFY_ACCESS_TOKEN,
+      hasNetlifySiteId: !!NETLIFY_SITE_ID,
+      tokenLength: NETLIFY_ACCESS_TOKEN?.length || 0,
+      siteId: NETLIFY_SITE_ID?.substring(0, 8) + '...',
+      hasSupabaseUrl: !!SUPABASE_URL,
+      hasSupabaseKey: !!SUPABASE_SERVICE_ROLE_KEY
+    });
+
+    // Check required environment variables
+    if (!NETLIFY_ACCESS_TOKEN || !NETLIFY_SITE_ID) {
+      console.error('❌ Missing required environment variables');
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Missing NETLIFY_ACCESS_TOKEN or NETLIFY_SITE_ID environment variables",
+          details: {
+            hasToken: !!NETLIFY_ACCESS_TOKEN,
+            hasSiteId: !!NETLIFY_SITE_ID,
+            message: "Please configure these in Supabase Functions secrets"
+          }
+        }), {
+          status: 500,
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
+        }
+      );
+    }
+
     const { action, domain, txt_record_value, record_id, zone_id }: DomainRequest = await req.json();
 
     console.log(`🚀 Domain action: ${action} for domain: ${domain}`);
