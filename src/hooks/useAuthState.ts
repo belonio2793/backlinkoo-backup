@@ -137,10 +137,17 @@ export const useAuthState = () => {
       setIsLoading(true);
       console.log('🔄 Refreshing auth state...');
 
-      const result = await SafeAuth.getCurrentUser();
+      const { data: { session }, error } = await supabase.auth.getSession();
 
-      if (result.errorType === 'no_session') {
-        // This is normal - user is not signed in
+      if (error) {
+        console.error('❌ Error refreshing auth:', error.message);
+        setUser(null);
+        setIsAuthenticated(false);
+        setConnectionError('Authentication verification failed');
+        return null;
+      }
+
+      if (!session?.user) {
         console.log('👤 No authenticated user during refresh');
         setUser(null);
         setIsAuthenticated(false);
@@ -148,36 +155,13 @@ export const useAuthState = () => {
         return null;
       }
 
-      if (result.errorType === 'network_error') {
-        setConnectionError('Unable to verify authentication due to connection issues');
-        console.warn('⚠️ Auth refresh failed due to network issues');
-        return null;
-      }
-
-      if (result.errorType === 'invalid_token') {
-        console.warn('⚠️ Invalid token during refresh - clearing session');
-        setUser(null);
-        setIsAuthenticated(false);
-        setConnectionError(null);
-        localStorage.removeItem('supabase.auth.token');
-        return null;
-      }
-
-      if (result.error) {
-        console.error('❌ Error refreshing auth:', result.error);
-        setUser(null);
-        setIsAuthenticated(false);
-        setConnectionError('Authentication verification failed');
-        return null;
-      }
-
       // Successful refresh
-      setUser(result.user);
-      setIsAuthenticated(!!result.user);
+      setUser(session.user);
+      setIsAuthenticated(true);
       setConnectionError(null);
 
       console.log('✅ Auth refresh successful');
-      return result.user;
+      return session.user;
 
     } catch (error: any) {
       console.error('❌ Unexpected error refreshing auth:', error);
