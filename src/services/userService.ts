@@ -31,168 +31,42 @@ class UserService {
 
   /**
    * Get current user profile with role information
+   * Simplified implementation based on best practices
    */
   async getCurrentUserProfile(): Promise<UserProfile | null> {
     try {
-      console.log('🔄 userService: Getting current user...');
+      // 1️⃣ Check if there's a session
+      const {
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
 
-      // Validate client first
-      if (!this.validateSupabaseClient()) {
-        console.warn('⚠️ userService: Supabase not properly configured, returning null profile');
+      if (sessionError) {
+        console.error("Session fetch error:", sessionError.message);
+        return null; // fail gracefully
+      }
+
+      // 2️⃣ If no logged-in user, return null (no crash)
+      if (!session?.user) {
         return null;
       }
 
-      let user;
-      try {
-        const { data: { user: authUser } } = await supabase.auth.getUser();
-        user = authUser;
-      } catch (authError: any) {
-        // Handle network errors during authentication
-        if (authError.message && (
-          authError.message.includes('Failed to fetch') ||
-          authError.message.includes('NetworkError') ||
-          authError.message.includes('fetch is not defined') ||
-          authError.message.includes('ENOTFOUND') ||
-          authError.message.includes('ECONNREFUSED')
-        )) {
-          console.warn('⚠️ userService: Network error during authentication, working offline');
-          return null;
-        }
-        throw authError; // Re-throw if it's not a network error
-      }
-      if (!user) {
-        console.log('❌ userService: No authenticated user');
-        return null;
-      }
+      // 3️⃣ Fetch the profile from Supabase
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("user_id", session.user.id)
+        .single();
 
-      console.log('🔄 userService: Fetching profile for user:', user.email);
-
-      let profile, error;
-      try {
-        const result = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('user_id', user.id)
-          .single();
-        profile = result.data;
-        error = result.error;
-      } catch (profileError: any) {
-        // Handle network errors during profile fetch
-        if (profileError.message && (
-          profileError.message.includes('Failed to fetch') ||
-          profileError.message.includes('NetworkError') ||
-          profileError.message.includes('fetch is not defined') ||
-          profileError.message.includes('ENOTFOUND') ||
-          profileError.message.includes('ECONNREFUSED')
-        )) {
-          console.warn('⚠️ userService: Network error during profile fetch, using fallback profile');
-          return {
-            id: user.id,
-            user_id: user.id,
-            email: user.email || '',
-            role: 'user' as const,
-            subscription_tier: 'free' as const,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          };
-        }
-        throw profileError; // Re-throw if it's not a network error
-      }
-
-      if (error) {
-        const errorMessage = formatErrorForUI(error);
-
-        // Handle permission denied errors or table not found (silently for these common issues)
-        if (errorMessage && (
-          errorMessage.includes('permission denied') ||
-          errorMessage.includes('relation') ||
-          errorMessage.includes('does not exist') ||
-          errorMessage.includes('JWT expired') ||
-          errorMessage.includes('row-level security')
-        )) {
-          console.log('ℹ️ Database access limited - using fallback profile for:', user.email);
-          return {
-            id: user.id,
-            user_id: user.id,
-            email: user.email || '',
-            role: 'user' as const,
-            subscription_tier: 'free' as const,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          };
-        }
-
-        // Handle network errors gracefully before logging as unexpected errors
-        if (errorMessage && (
-          errorMessage.includes('Failed to fetch') ||
-          errorMessage.includes('NetworkError') ||
-          errorMessage.includes('ECONNREFUSED') ||
-          errorMessage.includes('fetch is not defined') ||
-          errorMessage.includes('ENOTFOUND')
-        )) {
-          console.warn('⚠️ userService: Network connectivity issue during profile fetch - using fallback profile');
-          return {
-            id: user.id,
-            user_id: user.id,
-            email: user.email || '',
-            role: 'user' as const,
-            subscription_tier: 'free' as const,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          };
-        }
-
-        // Only log unexpected errors with proper formatting
-        console.error('❌ userService: Unexpected error fetching user profile:', formatErrorForLogging(error, 'getCurrentUserProfile'));
-
-        // Handle infinite recursion in RLS policies
-        if (errorMessage && errorMessage.includes('infinite recursion detected in policy')) {
-          console.warn('⚠️ Infinite recursion detected in RLS policy - returning minimal profile');
-          return {
-            id: user.id,
-            user_id: user.id,
-            email: user.email || '',
-            role: 'user' as const,
-            subscription_tier: 'free' as const,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          };
-        }
-
-        // Handle specific permission denied errors
-        if (errorMessage && errorMessage.includes('permission denied for table users')) {
-          console.warn('⚠️ Permission denied for "users" table - this indicates a database configuration issue');
-          console.warn('The application should only access the "profiles" table, not "users"');
-          console.warn('This may be caused by a database trigger or RLS policy trying to access a non-existent table');
-        }
-
+      if (profileError) {
+        console.error("Profile fetch error:", profileError.message);
         return null;
       }
 
       console.log('✅ userService: Profile loaded successfully:', profile);
       return profile;
-    } catch (error: any) {
-      const errorMessage = formatErrorForUI(error);
-      console.error('❌ userService: Error getting current user profile:', formatErrorForLogging(error, 'getCurrentUserProfile'));
-
-      // Check for specific client issues
-      if (error.message?.includes('supabase.from is not a function')) {
-        console.error('🔧 userService: Supabase client not properly initialized');
-        console.info('💡 This usually indicates the client is using mock mode or has initialization issues');
-        return null;
-      }
-
-      // Handle infinite recursion gracefully
-      if (errorMessage && errorMessage.includes('infinite recursion detected in policy')) {
-        console.warn('⚠️ Infinite recursion detected in RLS policy - returning null profile');
-      }
-
-      // Handle network errors
-      if (error.message?.includes('Failed to fetch') || error.message?.includes('NetworkError')) {
-        console.warn('🌐 userService: Network error - returning null profile');
-        return null;
-      }
-
+    } catch (err) {
+      console.error("Unexpected error in getCurrentUserProfile:", err);
       return null;
     }
   }
