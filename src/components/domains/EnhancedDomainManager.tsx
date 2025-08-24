@@ -33,6 +33,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthState } from '@/hooks/useAuthState';
 import NetlifyConfigHelper from './NetlifyConfigHelper';
+import AutoDomainSync from './AutoDomainSync';
 import { syncDomainsFromNetlify, testNetlifyConnection } from '@/services/netlifyDomainSync';
 
 interface Domain {
@@ -79,6 +80,9 @@ const EnhancedDomainManager = () => {
   const [showDNSModal, setShowDNSModal] = useState(false);
   const [selectedDomain, setSelectedDomain] = useState<Domain | null>(null);
   const [dnsInstructions, setDnsInstructions] = useState<DNSSetupInstructions | null>(null);
+
+  // Auto-sync state
+  const [autoSyncComplete, setAutoSyncComplete] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -471,8 +475,18 @@ const EnhancedDomainManager = () => {
         <p className="text-gray-600">Add domains to Netlify with DNS setup instructions and validation</p>
       </div>
 
-      {/* Configuration Helper */}
-      <NetlifyConfigHelper onConfigurationComplete={loadDomains} />
+      {/* Auto Domain Sync */}
+      <AutoDomainSync
+        onSyncComplete={(syncedDomains) => {
+          setDomains(syncedDomains);
+          setAutoSyncComplete(true);
+        }}
+      />
+
+      {/* Configuration Helper (fallback) */}
+      {!autoSyncComplete && (
+        <NetlifyConfigHelper onConfigurationComplete={loadDomains} />
+      )}
 
       {/* Add Domain */}
       <Card>
