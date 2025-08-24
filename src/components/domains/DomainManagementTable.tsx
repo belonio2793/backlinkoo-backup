@@ -334,11 +334,10 @@ const DomainManagementTable = () => {
       const domain = domains.find(d => d.id === domainId);
       if (domain?.netlify_verified) {
         try {
-          // Remove old domain from Netlify
-          await fetch('https://dfhanacsmsvvkpunurnp.functions.supabase.co/netlify-domains', {
-            method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ domain: oldDomain })
+          // Note: Domain removal from Netlify requires manual action in dashboard
+          console.log(`⚠️ Manual removal required: ${oldDomain} from Netlify site`);
+          toast.warning(`Please manually remove ${oldDomain} from Netlify dashboard`, {
+            duration: 5000
           });
 
           // Add new domain to Netlify
@@ -387,16 +386,11 @@ const DomainManagementTable = () => {
 
       // Remove from Netlify if it exists there
       if (domain?.netlify_verified) {
-        try {
-          await fetch('https://dfhanacsmsvvkpunurnp.functions.supabase.co/netlify-domains', {
-            method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ domain: domainName })
-          });
-          toast.success(`Removed ${domainName} from Netlify`);
-        } catch (netlifyError: any) {
-          toast.warning(`Database deletion will proceed, but Netlify removal failed: ${netlifyError.message}`);
-        }
+        // Note: Domain removal from Netlify requires manual action in dashboard
+        console.log(`⚠️ Manual removal required: ${domainName} from Netlify site`);
+        toast.info(`Domain will be removed from database. Please also remove ${domainName} from Netlify dashboard if needed.`, {
+          duration: 5000
+        });
       }
 
       // Remove from database
