@@ -132,9 +132,7 @@ const SimpleDomainManager = () => {
     setAddingDomain(true);
 
     try {
-      console.log(`➕ Adding domain: ${cleanedDomain}`);
-
-      // Use the new Supabase edge function to add domain
+      // Use the Supabase edge function to add domain
       const response = await fetch('https://dfhanacsmsvvkpunurnp.functions.supabase.co/netlify-domains', {
         method: 'POST',
         headers: {
@@ -149,7 +147,6 @@ const SimpleDomainManager = () => {
       }
 
       const result = await response.json();
-      console.log('📊 Add domain result:', result);
 
       if (result.success) {
         setNewDomain('');
@@ -160,8 +157,6 @@ const SimpleDomainManager = () => {
       }
 
     } catch (error: any) {
-      console.error('❌ Failed to add domain:', error);
-
       if (error.message.includes('23505') || error.message.includes('already exists')) {
         toast.error(`Domain ${cleanedDomain} already exists`);
       } else {
@@ -268,7 +263,7 @@ const SimpleDomainManager = () => {
       }
 
       const result = await response.json();
-      console.log('📊 Remove domain result:', result);
+      console.log('���� Remove domain result:', result);
 
       if (result.success) {
         toast.success(`✅ Domain ${domainName} removed successfully`);
