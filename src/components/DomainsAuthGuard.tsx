@@ -142,7 +142,7 @@ export const DomainsAuthGuard = ({ children }: DomainsAuthGuardProps) => {
         setIsAuthorized(false);
         setUserEmail('');
       } else {
-        console.error('❌ Unknown auth error:', error);
+        console.error('�� Unknown auth error:', error);
         setIsAuthenticated(false);
         setIsAuthorized(false);
         setUserEmail('');
@@ -295,6 +295,15 @@ export const DomainsAuthGuard = ({ children }: DomainsAuthGuardProps) => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Login Modal for switching accounts */}
+        <LoginModal
+          isOpen={showSignInModal}
+          onClose={() => setShowSignInModal(false)}
+          onAuthSuccess={handleAuthSuccess}
+          defaultTab="login"
+          pendingAction="domain management features"
+        />
       </div>
     );
   }
