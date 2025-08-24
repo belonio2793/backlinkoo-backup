@@ -204,7 +204,7 @@ const EnhancedDomainManager = () => {
       }
 
       // Then try to add to Netlify
-      const response = await fetch('/netlify/functions/add-domain-to-netlify', {
+      const response = await fetch('/.netlify/functions/add-domain-to-netlify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -308,7 +308,7 @@ const EnhancedDomainManager = () => {
     try {
       // Try to remove from Netlify first
       if (domain.netlify_verified) {
-        const response = await fetch('/netlify/functions/add-domain-to-netlify', {
+        const response = await fetch('/.netlify/functions/add-domain-to-netlify', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
