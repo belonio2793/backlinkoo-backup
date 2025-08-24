@@ -154,6 +154,18 @@ export const DomainsAuthGuard = ({ children }: DomainsAuthGuardProps) => {
     await supabase.auth.signOut();
   };
 
+  const handleAuthSuccess = (user: any) => {
+    console.log('🎯 DomainsAuthGuard: Auth success, staying on domains page');
+    setShowSignInModal(false);
+    // Force re-check auth status to update the guard state
+    checkAuthStatus();
+  };
+
+  const handleSignInClick = () => {
+    setDefaultAuthTab('login');
+    setShowSignInModal(true);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center p-4">
