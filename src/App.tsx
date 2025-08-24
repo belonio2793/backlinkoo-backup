@@ -380,6 +380,14 @@ const App = () => (
 
             {/* Debug and test routes */}
             <Route
+              path="/auth-fix"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyAuthFix />
+                </Suspense>
+              }
+            />
+            <Route
               path="/debug/blog-fix"
               element={
                 <Suspense fallback={<LoadingSpinner />}>
