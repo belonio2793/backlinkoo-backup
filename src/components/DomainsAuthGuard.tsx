@@ -214,8 +214,8 @@ export const DomainsAuthGuard = ({ children }: DomainsAuthGuardProps) => {
               </AlertDescription>
             </Alert>
             <div className="mt-6 text-center">
-              <Button 
-                onClick={() => window.location.href = '/login'}
+              <Button
+                onClick={handleSignInClick}
                 className="w-full"
               >
                 Sign In
