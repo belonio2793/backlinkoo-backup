@@ -183,11 +183,8 @@ const SimpleDomainManager = () => {
     setAddingBulk(true);
 
     try {
-      console.log(`➕ Adding ${domainList.length} domains in bulk:`, domainList);
-
       let successCount = 0;
       let errorCount = 0;
-      const errors = [];
 
       // Add domains one by one using the edge function
       for (const domain of domainList) {
@@ -207,15 +204,12 @@ const SimpleDomainManager = () => {
               successCount++;
             } else {
               errorCount++;
-              errors.push(`${domain}: ${result.error}`);
             }
           } else {
             errorCount++;
-            errors.push(`${domain}: HTTP ${response.status}`);
           }
         } catch (domainError) {
           errorCount++;
-          errors.push(`${domain}: ${domainError.message}`);
         }
       }
 
@@ -226,14 +220,12 @@ const SimpleDomainManager = () => {
       }
 
       if (errorCount > 0) {
-        console.warn('⚠️ Some domains failed:', errors);
-        toast.warning(`⚠️ ${errorCount} domains failed to add. Check console for details.`);
+        toast.warning(`⚠️ ${errorCount} domains failed to add`);
       }
 
       await loadDomains();
 
     } catch (error: any) {
-      console.error('❌ Failed to add bulk domains:', error);
       toast.error(`Failed to add domains: ${error.message}`);
     } finally {
       setAddingBulk(false);
@@ -263,7 +255,7 @@ const SimpleDomainManager = () => {
       }
 
       const result = await response.json();
-      console.log('���� Remove domain result:', result);
+      console.log('📊 Remove domain result:', result);
 
       if (result.success) {
         toast.success(`✅ Domain ${domainName} removed successfully`);
