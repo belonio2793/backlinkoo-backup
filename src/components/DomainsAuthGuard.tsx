@@ -254,7 +254,7 @@ export const DomainsAuthGuard = ({ children }: DomainsAuthGuardProps) => {
                 <div className="space-y-2">
                   <p><strong>Current user:</strong> {userEmail}</p>
                   <p><strong>Required access level:</strong> Support Team</p>
-                  <p><strong>Authorized email:</strong> {AUTHORIZED_EMAIL}</p>
+                  <p><strong>Authorized emails:</strong> {AUTHORIZED_EMAILS.join(', ')}</p>
                 </div>
               </AlertDescription>
             </Alert>
