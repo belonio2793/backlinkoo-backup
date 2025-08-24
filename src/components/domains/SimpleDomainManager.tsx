@@ -58,20 +58,12 @@ const SimpleDomainManager = () => {
   }, [user]);
 
   const loadDomains = async () => {
-    if (!user) return;
-
     setLoading(true);
     try {
-      console.log('🔍 Loading domains from database...');
+      console.log('🔍 Loading all domains from global system...');
 
-      // First check if domains table exists
-      const isAdminUser = user.email === 'support@backlinkoo.com' || user.email === '3925029350n@backlinkoo.com';
-      let query = supabase.from('domains').select('*');
-
-      if (!isAdminUser) {
-        query = query.eq('user_id', user.id);
-      }
-
+      // Global domain management - load all domains regardless of user
+      const query = supabase.from('domains').select('*');
       const { data: domainData, error } = await query.order('created_at', { ascending: false });
 
       if (error) {
