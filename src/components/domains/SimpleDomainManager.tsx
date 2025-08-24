@@ -62,56 +62,52 @@ const SimpleDomainManager = () => {
 
     setLoading(true);
     try {
-      // Use the Supabase edge function to list and sync domains
-      const response = await fetch('https://dfhanacsmsvvkpunurnp.functions.supabase.co/netlify-domains', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
-        }
-      });
+      console.log('🔍 Loading domains from database...');
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      // First check if domains table exists
+      const isAdminUser = user.email === 'support@backlinkoo.com' || user.email === '3925029350n@backlinkoo.com';
+      let query = supabase.from('domains').select('*');
+
+      if (!isAdminUser) {
+        query = query.eq('user_id', user.id);
       }
 
-      const result = await response.json();
+      const { data: domainData, error } = await query.order('created_at', { ascending: false });
 
-      if (result.success) {
-        const syncedDomains = result.domains || [];
-
-        if (result.synced > 0) {
-          toast.success(`✅ Synced ${result.synced} new domains from Netlify!`);
+      if (error) {
+        if (error.code === 'PGRST116' || error.message?.includes('does not exist')) {
+          console.warn('⚠️ Domains table does not exist');
+          toast.error('Domains table not found. Please contact support to set up domain management.');
+          setDomains([]);
+          return;
         }
+        throw error;
+      }
 
-        // Filter domains based on user permissions
-        const isAdminUser = user.email === 'support@backlinkoo.com' || user.email === '3925029350n@backlinkoo.com';
-        const filteredDomains = isAdminUser
-          ? syncedDomains
-          : syncedDomains.filter(d => d.user_id === user.id);
+      console.log(`✅ Loaded ${domainData?.length || 0} domains from database`);
+      setDomains(domainData || []);
 
-        setDomains(filteredDomains);
-      } else {
-        throw new Error(result.error || 'Unknown error from edge function');
+      // Try to sync with Netlify if we have domains function available
+      try {
+        const { data: netlifyResult, error: netlifyError } = await supabase.functions.invoke('domains', {
+          body: { action: 'sync' }
+        });
+
+        if (netlifyResult?.success && netlifyResult.synced > 0) {
+          toast.success(`✅ Synced ${netlifyResult.synced} domains from Netlify!`);
+          // Reload domains after sync
+          const { data: updatedData } = await query.order('created_at', { ascending: false });
+          setDomains(updatedData || []);
+        }
+      } catch (netlifyError: any) {
+        console.warn('⚠️ Netlify sync unavailable:', netlifyError.message);
+        // Don't show error to user - sync is optional
       }
 
     } catch (error: any) {
+      console.error('❌ Failed to load domains:', error);
       toast.error(`Failed to load domains: ${error.message}`);
-
-      // Fallback to direct database query
-      try {
-        const isAdminUser = user.email === 'support@backlinkoo.com' || user.email === '3925029350n@backlinkoo.com';
-        let query = supabase.from('domains').select('*');
-
-        if (!isAdminUser) {
-          query = query.eq('user_id', user.id);
-        }
-
-        const { data: fallbackDomains } = await query.order('created_at', { ascending: false });
-        setDomains(fallbackDomains || []);
-      } catch (fallbackError) {
-        setDomains([]);
-      }
+      setDomains([]);
     } finally {
       setLoading(false);
     }
