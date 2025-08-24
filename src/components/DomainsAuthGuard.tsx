@@ -86,25 +86,14 @@ export const DomainsAuthGuard = ({ children }: DomainsAuthGuardProps) => {
         throw new Error('Failed to get auth result after all attempts');
       }
 
-      const { data: { user }, error } = authResult;
+      const { data: { session }, error } = authResult;
 
       if (error) {
         console.error('❌ Auth error from Supabase:', error);
-
-        // Handle specific auth errors gracefully
-        if (error.message?.includes('Auth session missing')) {
-          console.log('ℹ️ No active session (user not logged in)');
-          setIsAuthenticated(false);
-          setIsAuthorized(false);
-          setUserEmail('');
-          setIsLoading(false);
-          return;
-        }
-
         throw error;
       }
 
-      if (!user) {
+      if (!session?.user) {
         console.log('ℹ️ No user found (not logged in)');
         setIsAuthenticated(false);
         setIsAuthorized(false);
@@ -113,6 +102,7 @@ export const DomainsAuthGuard = ({ children }: DomainsAuthGuardProps) => {
         return;
       }
 
+      const user = session.user;
       console.log('✅ User authenticated:', user.email);
       setIsAuthenticated(true);
       setUserEmail(user.email || '');
