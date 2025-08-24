@@ -25,18 +25,12 @@ export class SafeAuth {
       return { user: session.user, error: null, needsAuth: false, errorType: null };
       
     } catch (error: any) {
-      // Handle different types of errors in catch block
-      if (error.message?.includes('Auth session missing')) {
-        console.log('ℹ️ No auth session in catch block (normal for unauthenticated requests)');
-        return { user: null, error: null, needsAuth: true, errorType: 'no_session' };
-      }
-
       if (error.message?.includes('Network') || error.message?.includes('Failed to fetch')) {
-        console.error('❌ Network error in auth check:', error);
+        console.error('❌ Network error in session check:', error);
         return { user: null, error: error.message, needsAuth: false, errorType: 'network_error' };
       }
 
-      console.error('❌ Auth check failed:', error);
+      console.error('❌ Session check failed:', error);
       return { user: null, error: error.message, needsAuth: true, errorType: 'unknown_error' };
     }
   }
