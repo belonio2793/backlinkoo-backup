@@ -62,7 +62,7 @@ const NetlifyConfigHelper: React.FC<NetlifyConfigHelperProps> = ({
       // Test direct Netlify API (if available)
       let netlifyApiWorking = false;
       try {
-        const netlifyResponse = await fetch('/netlify/functions/add-domain-to-netlify', {
+        const netlifyResponse = await fetch('/.netlify/functions/add-domain-to-netlify', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'test_config' }),
