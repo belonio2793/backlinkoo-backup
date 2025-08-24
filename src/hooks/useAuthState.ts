@@ -16,11 +16,19 @@ export const useAuthState = () => {
       try {
         console.log('🔐 Getting initial auth state...');
 
-        // Use SafeAuth to handle auth session missing errors gracefully
-        const result = await SafeAuth.getCurrentUser();
+        // Use getSession instead of getUser to avoid API key issues
+        const { data: { session }, error } = await supabase.auth.getSession();
 
-        if (result.errorType === 'no_session') {
-          // This is normal - user is not signed in
+        if (error) {
+          console.error("Session fetch error:", error.message);
+          setConnectionError('Authentication error occurred.');
+          setUser(null);
+          setIsAuthenticated(false);
+          return;
+        }
+
+        // Handle session result
+        if (!session?.user) {
           console.log('👤 No authenticated user (no session)');
           setUser(null);
           setIsAuthenticated(false);
@@ -28,55 +36,11 @@ export const useAuthState = () => {
           return;
         }
 
-        if (result.errorType === 'network_error') {
-          console.warn('⚠️ Network error during auth check, working offline mode');
-          setConnectionError('Connection issues detected. Some features may be limited.');
-          setUser(null);
-          setIsAuthenticated(false);
-
-          // Don't show toast immediately - wait to see if connection recovers
-          setTimeout(() => {
-            if (connectionError) {
-              toast.warning('Connection issues detected. Retrying...', {
-                duration: 3000
-              });
-            }
-          }, 2000);
-          return;
-        }
-
-        if (result.errorType === 'invalid_token') {
-          console.warn('⚠️ Invalid token - clearing session');
-          setUser(null);
-          setIsAuthenticated(false);
-          setConnectionError(null);
-          // Clear invalid token
-          localStorage.removeItem('supabase.auth.token');
-          return;
-        }
-
-        if (result.error && result.errorType !== 'no_session') {
-          console.error('❌ Auth error:', result.error);
-          setConnectionError('Authentication error occurred.');
-          setUser(null);
-          setIsAuthenticated(false);
-
-          toast.error('Authentication error. Please refresh and try again.', {
-            duration: 5000
-          });
-          return;
-        }
-
         // Successful auth check
-        setUser(result.user);
-        setIsAuthenticated(!!result.user);
+        setUser(session.user);
+        setIsAuthenticated(true);
         setConnectionError(null);
-
-        if (result.user) {
-          console.log('✅ User authenticated:', result.user.email);
-        } else {
-          console.log('👤 No authenticated user');
-        }
+        console.log('✅ User authenticated:', session.user.email);
 
       } catch (error: any) {
         // This shouldn't happen with SafeAuth, but just in case
@@ -173,10 +137,17 @@ export const useAuthState = () => {
       setIsLoading(true);
       console.log('🔄 Refreshing auth state...');
 
-      const result = await SafeAuth.getCurrentUser();
+      const { data: { session }, error } = await supabase.auth.getSession();
 
-      if (result.errorType === 'no_session') {
-        // This is normal - user is not signed in
+      if (error) {
+        console.error('❌ Error refreshing auth:', error.message);
+        setUser(null);
+        setIsAuthenticated(false);
+        setConnectionError('Authentication verification failed');
+        return null;
+      }
+
+      if (!session?.user) {
         console.log('👤 No authenticated user during refresh');
         setUser(null);
         setIsAuthenticated(false);
@@ -184,36 +155,13 @@ export const useAuthState = () => {
         return null;
       }
 
-      if (result.errorType === 'network_error') {
-        setConnectionError('Unable to verify authentication due to connection issues');
-        console.warn('⚠️ Auth refresh failed due to network issues');
-        return null;
-      }
-
-      if (result.errorType === 'invalid_token') {
-        console.warn('⚠️ Invalid token during refresh - clearing session');
-        setUser(null);
-        setIsAuthenticated(false);
-        setConnectionError(null);
-        localStorage.removeItem('supabase.auth.token');
-        return null;
-      }
-
-      if (result.error) {
-        console.error('❌ Error refreshing auth:', result.error);
-        setUser(null);
-        setIsAuthenticated(false);
-        setConnectionError('Authentication verification failed');
-        return null;
-      }
-
       // Successful refresh
-      setUser(result.user);
-      setIsAuthenticated(!!result.user);
+      setUser(session.user);
+      setIsAuthenticated(true);
       setConnectionError(null);
 
       console.log('✅ Auth refresh successful');
-      return result.user;
+      return session.user;
 
     } catch (error: any) {
       console.error('❌ Unexpected error refreshing auth:', error);

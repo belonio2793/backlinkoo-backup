@@ -25,10 +25,8 @@ export const DomainsAuthGuard = ({ children }: DomainsAuthGuardProps) => {
     setDefaultAuthTab
   } = useUserFlow();
 
-  const AUTHORIZED_EMAILS = [
-    'support@backlinkoo.com',
-    '3925029350n@backlinkoo.com' // Admin user
-  ];
+  // Only the default admin account can access domains
+  const AUTHORIZED_EMAIL = 'support@backlinkoo.com';
 
   useEffect(() => {
     checkAuthStatus();
@@ -64,7 +62,7 @@ export const DomainsAuthGuard = ({ children }: DomainsAuthGuardProps) => {
           attempts++;
           console.log(`🔍 Auth attempt ${attempts}/${maxAttempts}...`);
 
-          authResult = await supabase.auth.getUser();
+          authResult = await supabase.auth.getSession();
           console.log('✅ Auth request successful');
           break;
 
@@ -86,25 +84,14 @@ export const DomainsAuthGuard = ({ children }: DomainsAuthGuardProps) => {
         throw new Error('Failed to get auth result after all attempts');
       }
 
-      const { data: { user }, error } = authResult;
+      const { data: { session }, error } = authResult;
 
       if (error) {
         console.error('❌ Auth error from Supabase:', error);
-
-        // Handle specific auth errors gracefully
-        if (error.message?.includes('Auth session missing')) {
-          console.log('ℹ️ No active session (user not logged in)');
-          setIsAuthenticated(false);
-          setIsAuthorized(false);
-          setUserEmail('');
-          setIsLoading(false);
-          return;
-        }
-
         throw error;
       }
 
-      if (!user) {
+      if (!session?.user) {
         console.log('ℹ️ No user found (not logged in)');
         setIsAuthenticated(false);
         setIsAuthorized(false);
@@ -113,12 +100,13 @@ export const DomainsAuthGuard = ({ children }: DomainsAuthGuardProps) => {
         return;
       }
 
+      const user = session.user;
       console.log('✅ User authenticated:', user.email);
       setIsAuthenticated(true);
       setUserEmail(user.email || '');
 
-      // Check authorization
-      const authorized = AUTHORIZED_EMAILS.includes(user.email || '');
+      // Check authorization - only allow the default admin account
+      const authorized = user.email === AUTHORIZED_EMAIL;
       setIsAuthorized(authorized);
 
       console.log(`🔐 Domains access check: ${user.email} -> ${authorized ? 'AUTHORIZED' : 'DENIED'}`);
@@ -262,8 +250,9 @@ export const DomainsAuthGuard = ({ children }: DomainsAuthGuardProps) => {
               <AlertDescription className="text-red-800">
                 <div className="space-y-2">
                   <p><strong>Current user:</strong> {userEmail}</p>
-                  <p><strong>Required access level:</strong> Support Team</p>
-                  <p><strong>Authorized emails:</strong> {AUTHORIZED_EMAILS.join(', ')}</p>
+                  <p><strong>Required access:</strong> Global Domain Administrator</p>
+                  <p><strong>Authorized account:</strong> {AUTHORIZED_EMAIL}</p>
+                  <p className="text-sm">This is a global system accessible only by the default admin account.</p>
                 </div>
               </AlertDescription>
             </Alert>

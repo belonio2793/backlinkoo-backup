@@ -2,11 +2,10 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 import { SupabaseConnectionFixer } from '@/utils/supabaseConnectionFixer';
-import { supabaseDirect } from './client-direct';
 
-// Get Supabase configuration
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// ✅ Use Vite environment variables (equivalent to NEXT_PUBLIC_* in Next.js)
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL!;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY!;
 
 // Debug logging for environment variables
 console.log('🔍 Environment variable debugging:', {

@@ -5,6 +5,7 @@ import { Footer } from '@/components/Footer';
 import { useAuthState } from '@/hooks/useAuthState';
 import SimpleDomainManager from '@/components/domains/SimpleDomainManager';
 import DomainsAuthGuard from '@/components/DomainsAuthGuard';
+import '@/utils/testSupabaseConfig'; // Import to run tests in development
 
 const DomainsPage = () => {
   return (

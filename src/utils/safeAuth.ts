@@ -10,45 +10,27 @@ export class SafeAuth {
    */
   static async getCurrentUser() {
     try {
-      const { data: { user }, error } = await supabase.auth.getUser();
+      const { data: { session }, error } = await supabase.auth.getSession();
       
       if (error) {
-        // Handle auth session missing error gracefully
-        if (error.message.includes('Auth session missing')) {
-          console.log('ℹ️ No auth session - user not signed in (this is normal for unauthenticated requests)');
-          return { user: null, error: null, needsAuth: true, errorType: 'no_session' };
-        }
-
-        // Check for other common auth errors
-        if (error.message.includes('Invalid token') || error.message.includes('JWT expired')) {
-          console.warn('⚠️ Invalid or expired token - user needs to re-authenticate');
-          return { user: null, error: error.message, needsAuth: true, errorType: 'invalid_token' };
-        }
-
-        if (error.message.includes('Network') || error.message.includes('Failed to fetch')) {
-          console.error('❌ Network error during auth check:', error);
-          return { user: null, error: error.message, needsAuth: false, errorType: 'network_error' };
-        }
-
-        console.error('❌ Auth error:', error);
-        return { user: null, error: error.message, needsAuth: true, errorType: 'auth_error' };
+        console.error('❌ Session error:', error);
+        return { user: null, error: error.message, needsAuth: true, errorType: 'session_error' };
       }
-      
-      return { user, error: null, needsAuth: false, errorType: null };
-      
-    } catch (error: any) {
-      // Handle different types of errors in catch block
-      if (error.message?.includes('Auth session missing')) {
-        console.log('ℹ️ No auth session in catch block (normal for unauthenticated requests)');
+
+      if (!session?.user) {
+        console.log('ℹ️ No auth session - user not signed in (this is normal for unauthenticated requests)');
         return { user: null, error: null, needsAuth: true, errorType: 'no_session' };
       }
 
+      return { user: session.user, error: null, needsAuth: false, errorType: null };
+      
+    } catch (error: any) {
       if (error.message?.includes('Network') || error.message?.includes('Failed to fetch')) {
-        console.error('❌ Network error in auth check:', error);
+        console.error('❌ Network error in session check:', error);
         return { user: null, error: error.message, needsAuth: false, errorType: 'network_error' };
       }
 
-      console.error('❌ Auth check failed:', error);
+      console.error('❌ Session check failed:', error);
       return { user: null, error: error.message, needsAuth: true, errorType: 'unknown_error' };
     }
   }
@@ -89,8 +71,8 @@ export class SafeAuth {
 
       // Even if auth fails, still try email check as last resort
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user?.email === 'support@backlinkoo.com') {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user?.email === 'support@backlinkoo.com') {
           console.log('✅ Admin verified via fallback email check');
           return { isAdmin: true, needsAuth: false };
         }

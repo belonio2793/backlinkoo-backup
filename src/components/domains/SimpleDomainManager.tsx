@@ -58,60 +58,48 @@ const SimpleDomainManager = () => {
   }, [user]);
 
   const loadDomains = async () => {
-    if (!user) return;
-
     setLoading(true);
     try {
-      // Use the Supabase edge function to list and sync domains
-      const response = await fetch('https://dfhanacsmsvvkpunurnp.functions.supabase.co/netlify-domains', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
-        }
-      });
+      console.log('🔍 Loading all domains from global system...');
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      // Global domain management - load all domains regardless of user
+      const query = supabase.from('domains').select('*');
+      const { data: domainData, error } = await query.order('created_at', { ascending: false });
+
+      if (error) {
+        if (error.code === 'PGRST116' || error.message?.includes('does not exist')) {
+          console.warn('⚠️ Domains table does not exist');
+          toast.error('Domains table not found. Please contact support to set up domain management.');
+          setDomains([]);
+          return;
+        }
+        throw error;
       }
 
-      const result = await response.json();
+      console.log(`✅ Loaded ${domainData?.length || 0} domains from database`);
+      setDomains(domainData || []);
 
-      if (result.success) {
-        const syncedDomains = result.domains || [];
+      // Try to sync with Netlify if we have domains function available
+      try {
+        const { data: netlifyResult, error: netlifyError } = await supabase.functions.invoke('domains', {
+          body: { action: 'sync' }
+        });
 
-        if (result.synced > 0) {
-          toast.success(`✅ Synced ${result.synced} new domains from Netlify!`);
+        if (netlifyResult?.success && netlifyResult.synced > 0) {
+          toast.success(`✅ Synced ${netlifyResult.synced} domains from Netlify!`);
+          // Reload domains after sync
+          const { data: updatedData } = await query.order('created_at', { ascending: false });
+          setDomains(updatedData || []);
         }
-
-        // Filter domains based on user permissions
-        const isAdminUser = user.email === 'support@backlinkoo.com' || user.email === '3925029350n@backlinkoo.com';
-        const filteredDomains = isAdminUser
-          ? syncedDomains
-          : syncedDomains.filter(d => d.user_id === user.id);
-
-        setDomains(filteredDomains);
-      } else {
-        throw new Error(result.error || 'Unknown error from edge function');
+      } catch (netlifyError: any) {
+        console.warn('⚠️ Netlify sync unavailable:', netlifyError.message);
+        // Don't show error to user - sync is optional
       }
 
     } catch (error: any) {
+      console.error('❌ Failed to load domains:', error);
       toast.error(`Failed to load domains: ${error.message}`);
-
-      // Fallback to direct database query
-      try {
-        const isAdminUser = user.email === 'support@backlinkoo.com' || user.email === '3925029350n@backlinkoo.com';
-        let query = supabase.from('domains').select('*');
-
-        if (!isAdminUser) {
-          query = query.eq('user_id', user.id);
-        }
-
-        const { data: fallbackDomains } = await query.order('created_at', { ascending: false });
-        setDomains(fallbackDomains || []);
-      } catch (fallbackError) {
-        setDomains([]);
-      }
+      setDomains([]);
     } finally {
       setLoading(false);
     }
@@ -126,37 +114,75 @@ const SimpleDomainManager = () => {
   };
 
   const addSingleDomain = async () => {
-    if (!newDomain.trim() || !user) return;
+    if (!newDomain.trim()) return;
 
     const cleanedDomain = cleanDomain(newDomain);
     setAddingDomain(true);
 
     try {
-      // Use the Supabase edge function to add domain
-      const response = await fetch('https://dfhanacsmsvvkpunurnp.functions.supabase.co/netlify-domains', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
-        },
-        body: JSON.stringify({ domain: cleanedDomain })
-      });
+      console.log(`➕ Adding domain to global system: ${cleanedDomain}`);
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      // Add to global domain system - no user_id required
+      const { data: dbDomain, error: dbError } = await supabase
+        .from('domains')
+        .insert({
+          domain: cleanedDomain,
+          user_id: '00000000-0000-0000-0000-000000000000', // Global system identifier
+          status: 'pending',
+          netlify_verified: false,
+          is_global: true, // Mark as global system domain
+          created_by: 'system' // System created
+        })
+        .select()
+        .single();
+
+      if (dbError) {
+        if (dbError.code === '23505') {
+          throw new Error('Domain already exists');
+        }
+        if (dbError.code === 'PGRST116' || dbError.message?.includes('does not exist')) {
+          throw new Error('Domains table not found. Please contact support to set up domain management.');
+        }
+        throw new Error(`Database error: ${dbError.message}`);
       }
 
-      const result = await response.json();
+      console.log('✅ Domain added to database');
+      toast.success(`✅ Domain ${cleanedDomain} added successfully`);
 
-      if (result.success) {
-        setNewDomain('');
-        toast.success(`✅ Domain ${cleanedDomain} added successfully`);
-        await loadDomains();
-      } else {
-        throw new Error(result.error || 'Failed to add domain');
+      // Try to sync with Netlify if function is available
+      try {
+        const { data: netlifyResult, error: netlifyError } = await supabase.functions.invoke('domains', {
+          body: {
+            action: 'add',
+            domain: cleanedDomain
+          }
+        });
+
+        if (netlifyResult?.success) {
+          // Update database to reflect Netlify success
+          await supabase
+            .from('domains')
+            .update({
+              netlify_verified: true,
+              status: 'verified'
+            })
+            .eq('id', dbDomain.id);
+
+          toast.success(`🚀 Domain also added to Netlify!`);
+        } else {
+          console.warn('⚠️ Netlify sync failed:', netlifyResult?.error || netlifyError?.message);
+          toast.warning('Domain added locally. Netlify sync will retry automatically.');
+        }
+      } catch (netlifyError: any) {
+        console.warn('⚠️ Netlify function unavailable:', netlifyError.message);
+        toast.warning('Domain added locally. Netlify sync unavailable.');
       }
+
+      setNewDomain('');
+      await loadDomains();
 
     } catch (error: any) {
+      console.error('❌ Add domain error:', error);
       if (error.message.includes('23505') || error.message.includes('already exists')) {
         toast.error(`Domain ${cleanedDomain} already exists`);
       } else {
@@ -168,7 +194,7 @@ const SimpleDomainManager = () => {
   };
 
   const addBulkDomains = async () => {
-    if (!bulkDomains.trim() || !user) return;
+    if (!bulkDomains.trim()) return;
 
     const domainList = bulkDomains
       .split('\n')
@@ -186,29 +212,38 @@ const SimpleDomainManager = () => {
       let successCount = 0;
       let errorCount = 0;
 
-      // Add domains one by one using the edge function
+      console.log(`➕ Adding ${domainList.length} domains in bulk...`);
+
+      // Add domains one by one to the global system
       for (const domain of domainList) {
         try {
-          const response = await fetch('https://dfhanacsmsvvkpunurnp.functions.supabase.co/netlify-domains', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
-            },
-            body: JSON.stringify({ domain })
-          });
+          const { error: dbError } = await supabase
+            .from('domains')
+            .insert({
+              domain,
+              user_id: '00000000-0000-0000-0000-000000000000', // Global system identifier
+              status: 'pending',
+              netlify_verified: false,
+              is_global: true, // Mark as global system domain
+              created_by: 'system' // System created
+            });
 
-          if (response.ok) {
-            const result = await response.json();
-            if (result.success) {
-              successCount++;
+          if (dbError) {
+            if (dbError.code === '23505') {
+              console.warn(`⚠️ Domain ${domain} already exists`);
+              errorCount++; // Count duplicates as errors
+            } else if (dbError.code === 'PGRST116' || dbError.message?.includes('does not exist')) {
+              throw new Error('Domains table not found. Please contact support.');
             } else {
+              console.error(`❌ Failed to add ${domain}:`, dbError.message);
               errorCount++;
             }
           } else {
-            errorCount++;
+            successCount++;
+            console.log(`✅ Added ${domain} to database`);
           }
-        } catch (domainError) {
+        } catch (domainError: any) {
+          console.error(`❌ Error adding ${domain}:`, domainError.message);
           errorCount++;
         }
       }
@@ -220,12 +255,28 @@ const SimpleDomainManager = () => {
       }
 
       if (errorCount > 0) {
-        toast.warning(`⚠️ ${errorCount} domains failed to add`);
+        toast.warning(`⚠️ ${errorCount} domains failed to add (duplicates or errors)`);
+      }
+
+      // Try bulk Netlify sync if function is available
+      if (successCount > 0) {
+        try {
+          const { data: netlifyResult } = await supabase.functions.invoke('domains', {
+            body: { action: 'sync_all' }
+          });
+
+          if (netlifyResult?.success && netlifyResult.synced > 0) {
+            toast.success(`🚀 Also synced ${netlifyResult.synced} domains to Netlify!`);
+          }
+        } catch (netlifyError: any) {
+          console.warn('⚠️ Netlify bulk sync unavailable:', netlifyError.message);
+        }
       }
 
       await loadDomains();
 
     } catch (error: any) {
+      console.error('❌ Bulk add error:', error);
       toast.error(`Failed to add domains: ${error.message}`);
     } finally {
       setAddingBulk(false);
@@ -233,35 +284,62 @@ const SimpleDomainManager = () => {
   };
 
   const removeDomain = async (domainName: string) => {
-    if (!user) return;
-
     setRemovingDomain(domainName);
 
     try {
-      // Use the Supabase edge function to remove domain
-      const response = await fetch('https://dfhanacsmsvvkpunurnp.functions.supabase.co/netlify-domains', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
-        },
-        body: JSON.stringify({ domain: domainName })
-      });
+      console.log(`🗑️ Removing domain from global system: ${domainName}`);
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      // Find the domain in global system
+      const { data: existingDomain, error: findError } = await supabase
+        .from('domains')
+        .select('*')
+        .eq('domain', domainName)
+        .single();
+
+      if (findError) {
+        if (findError.code === 'PGRST116') {
+          throw new Error('Domain not found or access denied');
+        }
+        throw new Error(`Find error: ${findError.message}`);
       }
 
-      const result = await response.json();
+      // Try to remove from Netlify first (if verified there)
+      if (existingDomain.netlify_verified) {
+        try {
+          const { data: netlifyResult, error: netlifyError } = await supabase.functions.invoke('domains', {
+            body: {
+              action: 'remove',
+              domain: domainName
+            }
+          });
 
-      if (result.success) {
-        toast.success(`✅ Domain ${domainName} removed successfully`);
-        await loadDomains();
-      } else {
-        throw new Error(result.error || 'Failed to remove domain');
+          if (netlifyResult?.success) {
+            console.log('✅ Removed from Netlify');
+            toast.success(`Removed ${domainName} from Netlify`);
+          } else {
+            console.warn('⚠️ Netlify removal failed:', netlifyResult?.error || netlifyError?.message);
+          }
+        } catch (netlifyError: any) {
+          console.warn('⚠️ Netlify function unavailable:', netlifyError.message);
+        }
       }
+
+      // Remove from global system database
+      const { error: deleteError } = await supabase
+        .from('domains')
+        .delete()
+        .eq('domain', domainName);
+
+      if (deleteError) {
+        throw new Error(`Database deletion error: ${deleteError.message}`);
+      }
+
+      console.log('✅ Removed from database');
+      toast.success(`✅ Domain ${domainName} removed successfully`);
+      await loadDomains();
 
     } catch (error: any) {
+      console.error('❌ Remove domain error:', error);
       toast.error(`Failed to remove domain: ${error.message}`);
     } finally {
       setRemovingDomain(null);
@@ -282,16 +360,7 @@ const SimpleDomainManager = () => {
     }
   };
 
-  if (!user) {
-    return (
-      <Alert className="border-gray-200">
-        <Globe className="h-4 w-4" />
-        <AlertDescription>
-          Please sign in to manage your domains.
-        </AlertDescription>
-      </Alert>
-    );
-  }
+  // This component is protected by DomainsAuthGuard, so user access is already verified
 
   return (
     <div className="space-y-6">
