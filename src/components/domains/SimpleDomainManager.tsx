@@ -194,7 +194,7 @@ const SimpleDomainManager = () => {
   };
 
   const addBulkDomains = async () => {
-    if (!bulkDomains.trim() || !user) return;
+    if (!bulkDomains.trim()) return;
 
     const domainList = bulkDomains
       .split('\n')
@@ -249,7 +249,7 @@ const SimpleDomainManager = () => {
       setBulkDomains('');
 
       if (successCount > 0) {
-        toast.success(`✅ Successfully added ${successCount} domains`);
+        toast.success(`��� Successfully added ${successCount} domains`);
       }
 
       if (errorCount > 0) {
