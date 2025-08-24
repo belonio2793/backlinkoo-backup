@@ -190,10 +190,11 @@ class UserService {
    */
   async downgradeFromPremium(): Promise<{ success: boolean; message: string }> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) {
         return { success: false, message: 'User not authenticated' };
       }
+      const user = session.user;
 
       // Update user profile to regular user role
       const { error: updateError } = await supabase
