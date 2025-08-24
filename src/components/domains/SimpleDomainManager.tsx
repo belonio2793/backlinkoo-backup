@@ -218,29 +218,36 @@ const SimpleDomainManager = () => {
       let successCount = 0;
       let errorCount = 0;
 
-      // Add domains one by one using the edge function
+      console.log(`➕ Adding ${domainList.length} domains in bulk...`);
+
+      // Add domains one by one to the database
       for (const domain of domainList) {
         try {
-          const response = await fetch('https://dfhanacsmsvvkpunurnp.functions.supabase.co/netlify-domains', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
-            },
-            body: JSON.stringify({ domain })
-          });
+          const { error: dbError } = await supabase
+            .from('domains')
+            .insert({
+              domain,
+              user_id: user.id,
+              status: 'pending',
+              netlify_verified: false
+            });
 
-          if (response.ok) {
-            const result = await response.json();
-            if (result.success) {
-              successCount++;
+          if (dbError) {
+            if (dbError.code === '23505') {
+              console.warn(`⚠️ Domain ${domain} already exists`);
+              errorCount++; // Count duplicates as errors
+            } else if (dbError.code === 'PGRST116' || dbError.message?.includes('does not exist')) {
+              throw new Error('Domains table not found. Please contact support.');
             } else {
+              console.error(`❌ Failed to add ${domain}:`, dbError.message);
               errorCount++;
             }
           } else {
-            errorCount++;
+            successCount++;
+            console.log(`✅ Added ${domain} to database`);
           }
-        } catch (domainError) {
+        } catch (domainError: any) {
+          console.error(`❌ Error adding ${domain}:`, domainError.message);
           errorCount++;
         }
       }
@@ -252,12 +259,28 @@ const SimpleDomainManager = () => {
       }
 
       if (errorCount > 0) {
-        toast.warning(`⚠️ ${errorCount} domains failed to add`);
+        toast.warning(`⚠️ ${errorCount} domains failed to add (duplicates or errors)`);
+      }
+
+      // Try bulk Netlify sync if function is available
+      if (successCount > 0) {
+        try {
+          const { data: netlifyResult } = await supabase.functions.invoke('domains', {
+            body: { action: 'sync_all' }
+          });
+
+          if (netlifyResult?.success && netlifyResult.synced > 0) {
+            toast.success(`🚀 Also synced ${netlifyResult.synced} domains to Netlify!`);
+          }
+        } catch (netlifyError: any) {
+          console.warn('⚠️ Netlify bulk sync unavailable:', netlifyError.message);
+        }
       }
 
       await loadDomains();
 
     } catch (error: any) {
+      console.error('❌ Bulk add error:', error);
       toast.error(`Failed to add domains: ${error.message}`);
     } finally {
       setAddingBulk(false);
