@@ -64,7 +64,7 @@ export const DomainsAuthGuard = ({ children }: DomainsAuthGuardProps) => {
           attempts++;
           console.log(`🔍 Auth attempt ${attempts}/${maxAttempts}...`);
 
-          authResult = await supabase.auth.getUser();
+          authResult = await supabase.auth.getSession();
           console.log('✅ Auth request successful');
           break;
 
