@@ -44,7 +44,11 @@ exports.handler = async (event, context) => {
     if (event.body) {
       try {
         requestData = JSON.parse(event.body);
-        console.log('📋 Request data:', { domain: requestData.domain, domainId: requestData.domainId });
+        console.log('📋 Request data:', {
+          domain: requestData.domain,
+          domainId: requestData.domainId,
+          action: requestData.action
+        });
       } catch (error) {
         console.error('❌ Invalid JSON in request body:', error);
         return {
@@ -58,7 +62,17 @@ exports.handler = async (event, context) => {
       }
     }
 
-    const { domain, domainId } = requestData;
+    const { domain, domainId, action } = requestData;
+
+    // Handle configuration testing
+    if (action === 'test_config') {
+      return await testNetlifyConfiguration();
+    }
+
+    // Handle site info request
+    if (action === 'get_site_info') {
+      return await getSiteInfo();
+    }
 
     if (!domain) {
       return {
@@ -446,6 +460,181 @@ function generateDNSInstructions(domain) {
           description: 'Points www subdomain to Netlify (required for verification)'
         }
       ]
+    };
+  }
+}
+
+/**
+ * Test Netlify configuration
+ */
+async function testNetlifyConfiguration() {
+  console.log('🧪 Testing Netlify configuration...');
+
+  const netlifyToken = process.env.NETLIFY_ACCESS_TOKEN;
+  const siteId = process.env.NETLIFY_SITE_ID || 'ca6261e6-0a59-40b5-a2bc-5b5481ac8809';
+
+  const configStatus = {
+    hasAccessToken: !!netlifyToken,
+    hasSiteId: !!siteId,
+    tokenValid: false,
+    siteAccessible: false,
+    tokenLength: netlifyToken?.length || 0,
+  };
+
+  if (!netlifyToken) {
+    return {
+      statusCode: 200,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        success: false,
+        action: 'test_config',
+        error: 'NETLIFY_ACCESS_TOKEN not configured',
+        config: configStatus,
+        message: 'Please configure NETLIFY_ACCESS_TOKEN in Netlify environment variables'
+      }),
+    };
+  }
+
+  try {
+    // Test token validity by fetching site info
+    const response = await fetch(`https://api.netlify.com/api/v1/sites/${siteId}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${netlifyToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    configStatus.tokenValid = response.ok;
+    configStatus.siteAccessible = response.ok;
+
+    if (response.ok) {
+      const siteData = await response.json();
+
+      return {
+        statusCode: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          success: true,
+          action: 'test_config',
+          config: configStatus,
+          siteInfo: {
+            id: siteData.id,
+            name: siteData.name,
+            url: siteData.url,
+            custom_domain: siteData.custom_domain,
+            domain_aliases: siteData.domain_aliases || [],
+            ssl_url: siteData.ssl_url,
+          },
+          message: 'Netlify configuration is working correctly'
+        }),
+      };
+    } else {
+      const errorText = await response.text();
+
+      return {
+        statusCode: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          success: false,
+          action: 'test_config',
+          error: `Netlify API error: ${response.status} - ${errorText}`,
+          config: configStatus,
+          message: 'Token or site ID may be invalid'
+        }),
+      };
+    }
+
+  } catch (error) {
+    return {
+      statusCode: 200,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        success: false,
+        action: 'test_config',
+        error: error.message,
+        config: configStatus,
+        message: 'Failed to test Netlify connection'
+      }),
+    };
+  }
+}
+
+/**
+ * Get site information and domains
+ */
+async function getSiteInfo() {
+  console.log('📋 Getting Netlify site information...');
+
+  const netlifyToken = process.env.NETLIFY_ACCESS_TOKEN;
+  const siteId = process.env.NETLIFY_SITE_ID || 'ca6261e6-0a59-40b5-a2bc-5b5481ac8809';
+
+  if (!netlifyToken) {
+    return {
+      statusCode: 200,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        success: false,
+        action: 'get_site_info',
+        error: 'NETLIFY_ACCESS_TOKEN not configured'
+      }),
+    };
+  }
+
+  try {
+    const response = await fetch(`https://api.netlify.com/api/v1/sites/${siteId}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${netlifyToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Netlify API error: ${response.status} - ${errorText}`);
+    }
+
+    const siteData = await response.json();
+    const domains = [];
+
+    // Collect all domains
+    if (siteData.custom_domain) {
+      domains.push(siteData.custom_domain);
+    }
+    if (siteData.domain_aliases && Array.isArray(siteData.domain_aliases)) {
+      domains.push(...siteData.domain_aliases);
+    }
+
+    return {
+      statusCode: 200,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        success: true,
+        action: 'get_site_info',
+        siteInfo: {
+          id: siteData.id,
+          name: siteData.name,
+          url: siteData.url,
+          custom_domain: siteData.custom_domain,
+          domain_aliases: siteData.domain_aliases || [],
+          ssl_url: siteData.ssl_url,
+        },
+        domains: domains,
+        domainCount: domains.length,
+        message: `Found ${domains.length} domains configured in Netlify`
+      }),
+    };
+
+  } catch (error) {
+    return {
+      statusCode: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        success: false,
+        action: 'get_site_info',
+        error: error.message
+      }),
     };
   }
 }
