@@ -57,18 +57,12 @@ const SimpleDomainManager = () => {
     }
   }, [user]);
 
-  const loadDomains = async (silent = false) => {
+  const loadDomains = async () => {
     if (!user) return;
 
-    if (!silent) setLoading(true);
-
-    // Update last sync time
-    setLastSyncTime(new Date());
+    setLoading(true);
     try {
-      console.log('🔍 Loading domains from Supabase edge function...');
-      console.log('👤 Current user:', user.email);
-
-      // Use the new Supabase edge function to list and sync domains
+      // Use the Supabase edge function to list and sync domains
       const response = await fetch('https://dfhanacsmsvvkpunurnp.functions.supabase.co/netlify-domains', {
         method: 'GET',
         headers: {
@@ -82,40 +76,31 @@ const SimpleDomainManager = () => {
       }
 
       const result = await response.json();
-      console.log('📊 Edge function result:', result);
 
       if (result.success) {
         const syncedDomains = result.domains || [];
-        console.log(`✅ Successfully loaded ${syncedDomains.length} domains`);
 
-        if (result.synced > 0 && !silent) {
+        if (result.synced > 0) {
           toast.success(`✅ Synced ${result.synced} new domains from Netlify!`);
-        } else if (result.synced > 0 && silent) {
-          console.log(`🔄 Background sync: ${result.synced} new domains synced`);
         }
 
         // Filter domains based on user permissions
-        const isAdminUser = user.email === 'support@backlinkoo.com';
+        const isAdminUser = user.email === 'support@backlinkoo.com' || user.email === '3925029350n@backlinkoo.com';
         const filteredDomains = isAdminUser
           ? syncedDomains
           : syncedDomains.filter(d => d.user_id === user.id);
 
         setDomains(filteredDomains);
-        console.log(`📊 Showing ${filteredDomains.length} domains for user`);
       } else {
         throw new Error(result.error || 'Unknown error from edge function');
       }
 
     } catch (error: any) {
-      console.error('❌ Failed to load domains:', error);
-      if (!silent) {
-        toast.error(`Failed to load domains: ${error.message}`);
-      }
+      toast.error(`Failed to load domains: ${error.message}`);
 
       // Fallback to direct database query
       try {
-        console.log('🔄 Falling back to direct database query...');
-        const isAdminUser = user.email === 'support@backlinkoo.com';
+        const isAdminUser = user.email === 'support@backlinkoo.com' || user.email === '3925029350n@backlinkoo.com';
         let query = supabase.from('domains').select('*');
 
         if (!isAdminUser) {
@@ -124,13 +109,11 @@ const SimpleDomainManager = () => {
 
         const { data: fallbackDomains } = await query.order('created_at', { ascending: false });
         setDomains(fallbackDomains || []);
-        console.log(`📊 Fallback: loaded ${fallbackDomains?.length || 0} domains from database`);
       } catch (fallbackError) {
-        console.error('❌ Fallback also failed:', fallbackError);
         setDomains([]);
       }
     } finally {
-      if (!silent) setLoading(false);
+      setLoading(false);
     }
   };
 
@@ -251,7 +234,7 @@ const SimpleDomainManager = () => {
       }
 
       const result = await response.json();
-      console.log('�� Add domain result:', result);
+      console.log('📊 Add domain result:', result);
 
       if (result.success) {
         setNewDomain('');
