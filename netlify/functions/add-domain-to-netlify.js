@@ -44,7 +44,11 @@ exports.handler = async (event, context) => {
     if (event.body) {
       try {
         requestData = JSON.parse(event.body);
-        console.log('📋 Request data:', { domain: requestData.domain, domainId: requestData.domainId });
+        console.log('📋 Request data:', {
+          domain: requestData.domain,
+          domainId: requestData.domainId,
+          action: requestData.action
+        });
       } catch (error) {
         console.error('❌ Invalid JSON in request body:', error);
         return {
@@ -58,7 +62,17 @@ exports.handler = async (event, context) => {
       }
     }
 
-    const { domain, domainId } = requestData;
+    const { domain, domainId, action } = requestData;
+
+    // Handle configuration testing
+    if (action === 'test_config') {
+      return await testNetlifyConfiguration();
+    }
+
+    // Handle site info request
+    if (action === 'get_site_info') {
+      return await getSiteInfo();
+    }
 
     if (!domain) {
       return {
