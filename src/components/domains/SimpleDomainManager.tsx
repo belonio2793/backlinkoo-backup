@@ -293,30 +293,61 @@ const SimpleDomainManager = () => {
     setRemovingDomain(domainName);
 
     try {
-      // Use the Supabase edge function to remove domain
-      const response = await fetch('https://dfhanacsmsvvkpunurnp.functions.supabase.co/netlify-domains', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
-        },
-        body: JSON.stringify({ domain: domainName })
-      });
+      console.log(`🗑️ Removing domain: ${domainName}`);
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      // Find the domain first
+      const { data: existingDomain, error: findError } = await supabase
+        .from('domains')
+        .select('*')
+        .eq('domain', domainName)
+        .eq('user_id', user.id)
+        .single();
+
+      if (findError) {
+        if (findError.code === 'PGRST116') {
+          throw new Error('Domain not found or access denied');
+        }
+        throw new Error(`Find error: ${findError.message}`);
       }
 
-      const result = await response.json();
+      // Try to remove from Netlify first (if verified there)
+      if (existingDomain.netlify_verified) {
+        try {
+          const { data: netlifyResult, error: netlifyError } = await supabase.functions.invoke('domains', {
+            body: {
+              action: 'remove',
+              domain: domainName
+            }
+          });
 
-      if (result.success) {
-        toast.success(`✅ Domain ${domainName} removed successfully`);
-        await loadDomains();
-      } else {
-        throw new Error(result.error || 'Failed to remove domain');
+          if (netlifyResult?.success) {
+            console.log('✅ Removed from Netlify');
+            toast.success(`Removed ${domainName} from Netlify`);
+          } else {
+            console.warn('⚠️ Netlify removal failed:', netlifyResult?.error || netlifyError?.message);
+          }
+        } catch (netlifyError: any) {
+          console.warn('⚠️ Netlify function unavailable:', netlifyError.message);
+        }
       }
+
+      // Remove from database
+      const { error: deleteError } = await supabase
+        .from('domains')
+        .delete()
+        .eq('domain', domainName)
+        .eq('user_id', user.id);
+
+      if (deleteError) {
+        throw new Error(`Database deletion error: ${deleteError.message}`);
+      }
+
+      console.log('✅ Removed from database');
+      toast.success(`✅ Domain ${domainName} removed successfully`);
+      await loadDomains();
 
     } catch (error: any) {
+      console.error('❌ Remove domain error:', error);
       toast.error(`Failed to remove domain: ${error.message}`);
     } finally {
       setRemovingDomain(null);
