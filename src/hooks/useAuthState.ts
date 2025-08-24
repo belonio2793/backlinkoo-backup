@@ -16,8 +16,8 @@ export const useAuthState = () => {
       try {
         console.log('🔐 Getting initial auth state...');
 
-        // Use SafeAuth to handle auth session missing errors gracefully
-        const result = await SafeAuth.getCurrentUser();
+        // Use getSession instead of getUser to avoid API key issues
+        const { data: { session }, error } = await supabase.auth.getSession();
 
         if (result.errorType === 'no_session') {
           // This is normal - user is not signed in
