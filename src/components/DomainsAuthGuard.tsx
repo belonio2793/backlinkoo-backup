@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Shield, Lock, Globe } from 'lucide-react';
 import SupabaseErrorRecovery from '@/components/SupabaseErrorRecovery';
+import { useUserFlow } from '@/contexts/UserFlowContext';
+import { LoginModal } from '@/components/LoginModal';
 
 interface DomainsAuthGuardProps {
   children: React.ReactNode;
@@ -16,6 +18,12 @@ export const DomainsAuthGuard = ({ children }: DomainsAuthGuardProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [userEmail, setUserEmail] = useState<string>('');
   const [connectionError, setConnectionError] = useState<Error | null>(null);
+
+  const {
+    showSignInModal,
+    setShowSignInModal,
+    setDefaultAuthTab
+  } = useUserFlow();
 
   const AUTHORIZED_EMAIL = 'support@backlinkoo.com';
 
@@ -146,6 +154,20 @@ export const DomainsAuthGuard = ({ children }: DomainsAuthGuardProps) => {
     await supabase.auth.signOut();
   };
 
+  const handleAuthSuccess = (user: any) => {
+    console.log('🎯 DomainsAuthGuard: Auth success, staying on domains page');
+    setShowSignInModal(false);
+    // Force re-check auth status to update the guard state
+    checkAuthStatus();
+  };
+
+  const handleSignInClick = () => {
+    // Set intended route as backup in case user somehow gets to login page
+    localStorage.setItem('intended_route', '/domains');
+    setDefaultAuthTab('login');
+    setShowSignInModal(true);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center p-4">
@@ -194,8 +216,8 @@ export const DomainsAuthGuard = ({ children }: DomainsAuthGuardProps) => {
               </AlertDescription>
             </Alert>
             <div className="mt-6 text-center">
-              <Button 
-                onClick={() => window.location.href = '/login'}
+              <Button
+                onClick={handleSignInClick}
                 className="w-full"
               >
                 Sign In
@@ -262,7 +284,20 @@ export const DomainsAuthGuard = ({ children }: DomainsAuthGuardProps) => {
     );
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      {children}
+
+      {/* Login Modal for unauthenticated users */}
+      <LoginModal
+        isOpen={showSignInModal}
+        onClose={() => setShowSignInModal(false)}
+        onAuthSuccess={handleAuthSuccess}
+        defaultTab="login"
+        pendingAction="domain management features"
+      />
+    </>
+  );
 };
 
 export default DomainsAuthGuard;
