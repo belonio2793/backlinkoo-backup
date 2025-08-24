@@ -324,12 +324,11 @@ const SimpleDomainManager = () => {
         }
       }
 
-      // Remove from database
+      // Remove from global system database
       const { error: deleteError } = await supabase
         .from('domains')
         .delete()
-        .eq('domain', domainName)
-        .eq('user_id', user.id);
+        .eq('domain', domainName);
 
       if (deleteError) {
         throw new Error(`Database deletion error: ${deleteError.message}`);
