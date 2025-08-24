@@ -269,15 +269,18 @@ export const DomainsAuthGuard = ({ children }: DomainsAuthGuardProps) => {
             </Alert>
             
             <div className="space-y-3">
-              <Button 
-                onClick={handleSignOut}
+              <Button
+                onClick={() => {
+                  handleSignOut();
+                  setShowSignInModal(true);
+                }}
                 variant="outline"
                 className="w-full"
               >
                 Sign Out & Switch Account
               </Button>
-              
-              <Button 
+
+              <Button
                 onClick={() => window.location.href = '/dashboard'}
                 className="w-full"
               >
