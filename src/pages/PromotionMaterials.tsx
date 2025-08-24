@@ -237,7 +237,7 @@ For fellow marketers looking to scale their SEO efforts, I recommend checking ou
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b sticky top-0 z-50 bg-background">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-4 py-4 max-w-6xl">
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center gap-4">
               <Button
