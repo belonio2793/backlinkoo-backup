@@ -43,9 +43,6 @@ const SimpleDomainManager = () => {
   const [addingDomain, setAddingDomain] = useState(false);
   const [addingBulk, setAddingBulk] = useState(false);
   const [removingDomain, setRemovingDomain] = useState<string | null>(null);
-  const [autoSyncEnabled, setAutoSyncEnabled] = useState(true);
-  const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
-  const [backgroundSyncInterval, setBackgroundSyncInterval] = useState<NodeJS.Timeout | null>(null);
 
   // Single domain add
   const [newDomain, setNewDomain] = useState('');
