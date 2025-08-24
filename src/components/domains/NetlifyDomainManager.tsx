@@ -64,10 +64,11 @@ const NetlifyDomainManager = () => {
     try {
       console.log('🔍 Fetching domains from Netlify...');
 
-      // Fetch site info from Netlify API
-      const siteResponse = await fetch('https://dfhanacsmsvvkpunurnp.functions.supabase.co/netlify-domains', {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
+      // Fetch site info from Netlify function
+      const siteResponse = await fetch('/.netlify/functions/add-domain-to-netlify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'get_site_info' })
       });
 
       if (!siteResponse.ok) {
@@ -80,7 +81,7 @@ const NetlifyDomainManager = () => {
         throw new Error(siteResult.error || 'Failed to fetch from Netlify');
       }
 
-      const siteData = siteResult.data;
+      const siteData = siteResult.siteInfo;
       setSiteInfo(siteData);
       setNetlifyConnected(true);
 

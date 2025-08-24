@@ -227,7 +227,7 @@ export default function BlogCommentsSystem() {
   const checkTablesExist = async () => {
     try {
       // Check for core tables
-      const tables = ['blog_campaigns', 'crawler_targets', 'form_maps', 'blog_accounts', 'automation_jobs', 'blog_posts'];
+      const tables = ['blog_campaigns', 'crawler_targets', 'form_maps', 'blog_accounts', 'automation_jobs', 'automation_blog_posts'];
       
       for (const table of tables) {
         const { error } = await supabase
@@ -364,7 +364,7 @@ export default function BlogCommentsSystem() {
   const loadBlogPosts = async () => {
     try {
       const { data, error } = await supabase
-        .from('blog_posts')
+        .from('automation_blog_posts')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(100);
@@ -711,7 +711,7 @@ export default function BlogCommentsSystem() {
     const channels = [];
 
     // Subscribe to key table changes
-    const tables = ['blog_campaigns', 'crawler_targets', 'form_maps', 'automation_jobs', 'blog_posts'];
+    const tables = ['blog_campaigns', 'crawler_targets', 'form_maps', 'automation_jobs', 'automation_blog_posts'];
     
     tables.forEach(table => {
       const channel = supabase
@@ -828,7 +828,7 @@ CREATE TABLE IF NOT EXISTS automation_jobs (
 );
 
 -- Blog posts table (posting attempts)
-CREATE TABLE IF NOT EXISTS blog_posts (
+CREATE TABLE IF NOT EXISTS automation_blog_posts (
   id uuid default gen_random_uuid() primary key,
   campaign_id uuid references blog_campaigns(id) on delete cascade,
   form_id uuid references form_maps(id) on delete cascade,
@@ -879,7 +879,7 @@ ALTER TABLE crawler_targets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE form_maps ENABLE ROW LEVEL SECURITY;
 ALTER TABLE blog_accounts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE automation_jobs ENABLE ROW LEVEL SECURITY;
-ALTER TABLE blog_posts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE automation_blog_posts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE crawler_queue ENABLE ROW LEVEL SECURITY;
 ALTER TABLE domain_health ENABLE ROW LEVEL SECURITY;
 
@@ -934,15 +934,15 @@ CREATE POLICY "Users can view jobs for their campaigns" ON automation_jobs
 CREATE POLICY "System can manage automation jobs" ON automation_jobs
   FOR ALL USING (true);
 
--- RLS Policies for blog_posts
-CREATE POLICY "Users can view posts for their campaigns" ON blog_posts
+-- RLS Policies for automation_blog_posts
+CREATE POLICY "Users can view posts for their campaigns" ON automation_blog_posts
   FOR SELECT USING (EXISTS (
     SELECT 1 FROM blog_campaigns
-    WHERE blog_campaigns.id = blog_posts.campaign_id
+    WHERE blog_campaigns.id = automation_blog_posts.campaign_id
     AND blog_campaigns.user_id = auth.uid()
   ));
 
-CREATE POLICY "System can manage blog posts" ON blog_posts
+CREATE POLICY "System can manage blog posts" ON automation_blog_posts
   FOR ALL USING (true);
 
 -- RLS Policies for crawler_queue (system managed)
@@ -980,10 +980,10 @@ CREATE INDEX IF NOT EXISTS idx_automation_jobs_campaign_id ON automation_jobs(ca
 CREATE INDEX IF NOT EXISTS idx_automation_jobs_status ON automation_jobs(status);
 CREATE INDEX IF NOT EXISTS idx_automation_jobs_type ON automation_jobs(job_type);
 
-CREATE INDEX IF NOT EXISTS idx_blog_posts_campaign_id ON blog_posts(campaign_id);
-CREATE INDEX IF NOT EXISTS idx_blog_posts_form_id ON blog_posts(form_id);
-CREATE INDEX IF NOT EXISTS idx_blog_posts_status ON blog_posts(status);
-CREATE INDEX IF NOT EXISTS idx_blog_posts_created_at ON blog_posts(created_at);
+CREATE INDEX IF NOT EXISTS idx_automation_blog_posts_campaign_id ON automation_blog_posts(campaign_id);
+CREATE INDEX IF NOT EXISTS idx_automation_blog_posts_form_id ON automation_blog_posts(form_id);
+CREATE INDEX IF NOT EXISTS idx_automation_blog_posts_status ON automation_blog_posts(status);
+CREATE INDEX IF NOT EXISTS idx_automation_blog_posts_created_at ON automation_blog_posts(created_at);
 
 CREATE INDEX IF NOT EXISTS idx_crawler_queue_status ON crawler_queue(status);
 CREATE INDEX IF NOT EXISTS idx_crawler_queue_priority ON crawler_queue(priority);
@@ -1001,7 +1001,7 @@ BEGIN
   UPDATE blog_campaigns
   SET
     links_posted = (
-      SELECT COUNT(*) FROM blog_posts
+      SELECT COUNT(*) FROM automation_blog_posts
       WHERE campaign_id = NEW.campaign_id AND status = 'posted'
     ),
     updated_at = now()
@@ -1012,7 +1012,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER update_campaign_stats_trigger
-  AFTER UPDATE ON blog_posts
+  AFTER UPDATE ON automation_blog_posts
   FOR EACH ROW
   EXECUTE FUNCTION update_campaign_stats();
 

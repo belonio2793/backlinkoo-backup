@@ -243,20 +243,15 @@ const DomainSyncFixer = ({ onSyncComplete }: { onSyncComplete?: () => void }) =>
     try {
       // Remove from Netlify if it exists there
       if (mismatch.inNetlify) {
-        toast.info(`Removing ${mismatch.domain} from Netlify...`);
+        toast.info(`Marking ${mismatch.domain} for manual removal from Netlify...`);
 
-        const removeResult = await fetch('https://dfhanacsmsvvkpunurnp.functions.supabase.co/netlify-domains', {
-          method: 'DELETE',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ domain: mismatch.domain })
+        // Note: Domain removal from Netlify requires manual action in dashboard
+        console.log(`⚠️ Manual removal required: ${mismatch.domain} from Netlify site`);
+
+        // Show warning message to user
+        toast.warning(`Please manually remove ${mismatch.domain} from Netlify dashboard`, {
+          duration: 8000
         });
-
-        if (removeResult.ok) {
-          const result = await removeResult.json();
-          if (!result.success && !result.not_found) {
-            console.warn('Netlify removal warning:', result.error);
-          }
-        }
       }
 
       // Remove from database if it exists there

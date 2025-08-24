@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { supabase, SupabaseConnectionFixer } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
+import { SupabaseConnectionFixer } from '@/utils/supabaseConnectionFixer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';

@@ -17,12 +17,12 @@ import {
   Info
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { 
-  syncAllDomainsFromNetlify, 
-  testNetlifyConnection, 
+import {
+  syncAllDomainsFromNetlify,
+  testNetlifyConnection,
   getDatabaseDomainCount,
-  type ComprehensiveSyncResult 
-} from '@/services/enhancedNetlifySync';
+  type DomainSyncResult
+} from '@/services/netlifyDomainSync';
 import { supabase } from '@/integrations/supabase/client';
 
 interface ManualDomainSyncProps {
@@ -33,7 +33,7 @@ interface SyncProgress {
   phase: 'idle' | 'testing' | 'syncing' | 'complete' | 'error';
   message: string;
   progress: number;
-  details?: ComprehensiveSyncResult;
+  details?: DomainSyncResult;
 }
 
 const ManualDomainSync: React.FC<ManualDomainSyncProps> = ({ onSyncComplete }) => {
