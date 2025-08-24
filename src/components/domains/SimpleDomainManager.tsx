@@ -360,16 +360,7 @@ const SimpleDomainManager = () => {
     }
   };
 
-  if (!user) {
-    return (
-      <Alert className="border-gray-200">
-        <Globe className="h-4 w-4" />
-        <AlertDescription>
-          Please sign in to manage your domains.
-        </AlertDescription>
-      </Alert>
-    );
-  }
+  // This component is protected by DomainsAuthGuard, so user access is already verified
 
   return (
     <div className="space-y-6">
