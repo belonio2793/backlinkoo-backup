@@ -282,7 +282,20 @@ export const DomainsAuthGuard = ({ children }: DomainsAuthGuardProps) => {
     );
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      {children}
+
+      {/* Login Modal for unauthenticated users */}
+      <LoginModal
+        isOpen={showSignInModal}
+        onClose={() => setShowSignInModal(false)}
+        onAuthSuccess={handleAuthSuccess}
+        defaultTab="login"
+        pendingAction="domain management features"
+      />
+    </>
+  );
 };
 
 export default DomainsAuthGuard;
