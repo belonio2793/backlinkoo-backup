@@ -238,9 +238,7 @@ const SimpleDomainManager = () => {
     setRemovingDomain(domainName);
 
     try {
-      console.log(`🗑️ Removing domain: ${domainName}`);
-
-      // Use the new Supabase edge function to remove domain
+      // Use the Supabase edge function to remove domain
       const response = await fetch('https://dfhanacsmsvvkpunurnp.functions.supabase.co/netlify-domains', {
         method: 'DELETE',
         headers: {
@@ -255,7 +253,6 @@ const SimpleDomainManager = () => {
       }
 
       const result = await response.json();
-      console.log('📊 Remove domain result:', result);
 
       if (result.success) {
         toast.success(`✅ Domain ${domainName} removed successfully`);
@@ -265,7 +262,6 @@ const SimpleDomainManager = () => {
       }
 
     } catch (error: any) {
-      console.error('❌ Failed to remove domain:', error);
       toast.error(`Failed to remove domain: ${error.message}`);
     } finally {
       setRemovingDomain(null);
