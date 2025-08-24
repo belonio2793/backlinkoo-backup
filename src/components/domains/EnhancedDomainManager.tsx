@@ -34,6 +34,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuthState } from '@/hooks/useAuthState';
 import NetlifyConfigHelper from './NetlifyConfigHelper';
 import ManualDomainSync from './ManualDomainSync';
+import DatabaseDomainChecker from './DatabaseDomainChecker';
 import { syncAllDomainsFromNetlify, testNetlifyConnection } from '@/services/enhancedNetlifySync';
 
 interface Domain {
@@ -167,7 +168,7 @@ const EnhancedDomainManager = () => {
         toast.success(`✅ Connection successful: ${testResult.message}`, { id: 'test-connection' });
         console.log('✅ Netlify connection test passed:', testResult.details);
       } else {
-        toast.error(`�� Connection failed: ${testResult.message}`, { id: 'test-connection' });
+        toast.error(`❌ Connection failed: ${testResult.message}`, { id: 'test-connection' });
         console.error('❌ Netlify connection test failed:', testResult.message);
       }
     } catch (error: any) {
@@ -458,6 +459,9 @@ const EnhancedDomainManager = () => {
         <h2 className="text-3xl font-bold text-gray-900 mb-2">Enhanced Domain Manager</h2>
         <p className="text-gray-600">Add domains to Netlify with DNS setup instructions and validation</p>
       </div>
+
+      {/* Database Status Checker */}
+      <DatabaseDomainChecker />
 
       {/* Manual Domain Sync */}
       <ManualDomainSync
