@@ -33,6 +33,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthState } from '@/hooks/useAuthState';
 import NetlifyConfigHelper from './NetlifyConfigHelper';
+import { syncDomainsFromNetlify, testNetlifyConnection } from '@/services/netlifyDomainSync';
 
 interface Domain {
   id: string;
@@ -90,6 +91,26 @@ const EnhancedDomainManager = () => {
     try {
       console.log('🔍 Loading domains from database...');
 
+      // First try direct Netlify sync using provided credentials
+      try {
+        console.log('🚀 Syncing domains directly from Netlify...');
+        const syncResult = await syncDomainsFromNetlify();
+
+        if (syncResult.success && syncResult.synced > 0) {
+          toast.success(`✅ Synced ${syncResult.synced} domains from Netlify!`);
+          console.log(`✅ Direct sync successful: ${syncResult.message}`);
+        } else if (syncResult.errors.length > 0) {
+          console.warn('⚠️ Sync completed with errors:', syncResult.errors);
+          toast.warning(`Sync completed with ${syncResult.errors.length} errors. Check console for details.`);
+        } else {
+          console.log('ℹ️ No new domains to sync from Netlify');
+        }
+      } catch (syncError: any) {
+        console.warn('⚠️ Direct Netlify sync failed:', syncError.message);
+        toast.warning(`Netlify sync failed: ${syncError.message}. Showing database domains only.`);
+      }
+
+      // Load domains from database (after sync)
       const { data: domainData, error } = await supabase
         .from('domains')
         .select('*')
@@ -108,53 +129,6 @@ const EnhancedDomainManager = () => {
       console.log(`✅ Loaded ${domainData?.length || 0} domains from database`);
       setDomains(domainData || []);
 
-      // Try to sync with Netlify via edge function
-      try {
-        console.log('🔄 Attempting Netlify sync via edge function...');
-        const { data: netlifyResult, error: netlifyError } = await supabase.functions.invoke('domains', {
-          body: { action: 'sync' }
-        });
-
-        if (netlifyError) {
-          console.warn('⚠️ Edge function error:', netlifyError);
-          throw netlifyError;
-        }
-
-        if (netlifyResult?.success && netlifyResult.synced > 0) {
-          console.log(`✅ Edge function synced ${netlifyResult.synced} domains`);
-          toast.success(`✅ Synced ${netlifyResult.synced} domains from Netlify!`);
-
-          // Reload after sync
-          const { data: updatedData } = await supabase
-            .from('domains')
-            .select('*')
-            .order('created_at', { ascending: false });
-          setDomains(updatedData || []);
-        } else {
-          console.log('ℹ️ No new domains to sync from Netlify');
-        }
-      } catch (netlifyError: any) {
-        console.warn('⚠️ Netlify edge function failed:', netlifyError.message);
-
-        // Check if it's an API key issue
-        if (netlifyError.message?.includes('API key') || netlifyError.message?.includes('NETLIFY_ACCESS_TOKEN')) {
-          toast.warning('⚙️ Netlify secrets not configured. Please set NETLIFY_ACCESS_TOKEN and NETLIFY_SITE_ID in Supabase secrets.');
-          console.error('❌ Missing Netlify secrets in Supabase. Please configure:');
-          console.error('1. Go to https://supabase.com/dashboard/project/dfhanacsmsvvkpunurnp/functions/secrets');
-          console.error('2. Add NETLIFY_ACCESS_TOKEN');
-          console.error('3. Add NETLIFY_SITE_ID');
-        } else {
-          // Try direct Netlify API as fallback
-          console.log('🔄 Attempting direct Netlify API fallback...');
-          try {
-            await syncDirectFromNetlify();
-          } catch (directError: any) {
-            console.warn('⚠️ Direct Netlify sync also failed:', directError.message);
-            toast.warning('Netlify sync unavailable. Using database domains only.');
-          }
-        }
-      }
-
     } catch (error: any) {
       console.error('❌ Failed to load domains:', error);
       toast.error(`Failed to load domains: ${error.message}`);
@@ -164,31 +138,53 @@ const EnhancedDomainManager = () => {
     }
   };
 
-  const syncDirectFromNetlify = async () => {
-    console.log('🔄 Direct Netlify API sync...');
-
-    // Try to use the existing Netlify function
+  const forceNetlifySync = async () => {
+    setLoading(true);
     try {
-      const response = await fetch('/netlify/functions/add-domain-to-netlify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'get_site_info' }),
-      });
+      console.log('🔄 Force syncing from Netlify...');
+      toast.loading('Syncing domains from Netlify...', { id: 'netlify-sync' });
 
-      if (response.ok) {
-        const result = await response.json();
-        console.log('✅ Direct Netlify sync successful:', result);
+      const syncResult = await syncDomainsFromNetlify();
 
-        if (result.domains && result.domains.length > 0) {
-          toast.success(`📡 Found ${result.domains.length} domains via direct Netlify API`);
-          // Could update database here if needed
-        }
+      if (syncResult.success) {
+        toast.success(`✅ Synced ${syncResult.synced} domains from Netlify!`, { id: 'netlify-sync' });
+        console.log(`✅ Force sync successful: ${syncResult.message}`);
+
+        // Reload domains from database
+        const { data: domainData } = await supabase
+          .from('domains')
+          .select('*')
+          .order('created_at', { ascending: false });
+        setDomains(domainData || []);
+
       } else {
-        throw new Error(`Netlify API responded with ${response.status}`);
+        toast.error(`Sync failed: ${syncResult.errors.join(', ')}`, { id: 'netlify-sync' });
+        console.error('❌ Force sync failed:', syncResult.errors);
       }
-    } catch (directError) {
-      console.warn('⚠️ Direct Netlify API failed:', directError);
-      throw directError;
+    } catch (error: any) {
+      console.error('❌ Force sync error:', error);
+      toast.error(`Sync failed: ${error.message}`, { id: 'netlify-sync' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const testConnection = async () => {
+    try {
+      toast.loading('Testing Netlify connection...', { id: 'test-connection' });
+
+      const testResult = await testNetlifyConnection();
+
+      if (testResult.success) {
+        toast.success(`✅ Connection successful: ${testResult.message}`, { id: 'test-connection' });
+        console.log('✅ Netlify connection test passed:', testResult.details);
+      } else {
+        toast.error(`❌ Connection failed: ${testResult.message}`, { id: 'test-connection' });
+        console.error('❌ Netlify connection test failed:', testResult.message);
+      }
+    } catch (error: any) {
+      console.error('❌ Connection test error:', error);
+      toast.error(`Test failed: ${error.message}`, { id: 'test-connection' });
     }
   };
 
@@ -529,19 +525,45 @@ const EnhancedDomainManager = () => {
               <Globe className="h-5 w-5" />
               Your Domains ({domains.length})
             </CardTitle>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={loadDomains}
-              disabled={loading}
-            >
-              {loading ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <RefreshCw className="h-4 w-4 mr-2" />
-              )}
-              Refresh
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={testConnection}
+                disabled={loading}
+                title="Test Netlify API Connection"
+              >
+                <Zap className="h-4 w-4 mr-2" />
+                Test API
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={forceNetlifySync}
+                disabled={loading}
+                title="Force sync from Netlify"
+              >
+                {loading ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                )}
+                Sync Netlify
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={loadDomains}
+                disabled={loading}
+              >
+                {loading ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                )}
+                Refresh
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
