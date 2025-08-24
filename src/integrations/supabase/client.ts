@@ -1,260 +1,44 @@
-// Enhanced Supabase client with comprehensive error handling and retry logic
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
-import { SupabaseConnectionFixer } from '@/utils/supabaseConnectionFixer';
 
-// ✅ Use Vite environment variables (equivalent to NEXT_PUBLIC_* in Next.js)
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL!;
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY!;
+// Supabase API: Initializing
+const supabaseUrl = 'https://dfhanacsmsvvkpunurnp.supabase.co';
+const supabaseKey = import.meta.env.VITE_SUPABASE_KEY;
 
-// Debug logging for environment variables
-console.log('🔍 Environment variable debugging:', {
-  allEnvKeys: Object.keys(import.meta.env),
-  mode: import.meta.env.MODE,
-  dev: import.meta.env.DEV,
-  VITE_SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL,
-  hasViteSupabaseUrl: !!import.meta.env.VITE_SUPABASE_URL,
-  hasViteSupabaseKey: !!import.meta.env.VITE_SUPABASE_ANON_KEY
+console.log('🔧 Supabase configuration:', {
+  url: supabaseUrl,
+  hasKey: !!supabaseKey,
+  keyPrefix: supabaseKey ? supabaseKey.substring(0, 10) + '...' : 'missing'
 });
 
-console.log('🔧 Enhanced Supabase client configuration:', {
-  hasUrl: !!SUPABASE_URL,
-  hasKey: !!SUPABASE_ANON_KEY,
-  url: SUPABASE_URL ? `${SUPABASE_URL.substring(0, 30)}...` : 'missing',
-  keyPrefix: SUPABASE_ANON_KEY ? SUPABASE_ANON_KEY.substring(0, 10) + '...' : 'missing',
-  environment: import.meta.env.MODE
-});
-
-// Use fallback credentials if environment variables aren't loaded
-const finalUrl = SUPABASE_URL || 'https://dfhanacsmsvvkpunurnp.supabase.co';
-const finalKey = SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRmaGFuYWNzbXN2dmtwdW51cm5wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI5NTY2NDcsImV4cCI6MjA2ODUzMjY0N30.MZcB4P_TAOOTktXSG7bNK5BsIMAf1bKXVgT87Zqa5RY';
-
-console.log('🔧 Using Supabase credentials:', {
-  url: finalUrl.substring(0, 30) + '...',
-  hasKey: !!finalKey,
-  keyLength: finalKey?.length || 0
-});
-
-if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-  console.warn('⚠️ Environment variables not loaded properly, using fallback credentials');
-  console.log('💡 This suggests a Vite environment variable loading issue');
-}
-
-// Validate final credentials (non-throwing for development)
-if (!finalUrl || !finalKey) {
-  const config = SupabaseConnectionFixer.checkConfiguration();
-  console.error('❌ Supabase configuration issues:', config.issues);
-  console.log('💡 Recommendations:', config.recommendations);
-  console.warn('⚠️ Missing Supabase environment variables, using fallback mode');
-  // Don't throw - allow fallback to work
-}
-
-if (finalUrl && (!finalUrl.startsWith('https://') || !finalUrl.includes('.supabase.co'))) {
-  console.error('❌ Invalid Supabase URL format. Must be https://*.supabase.co');
-  console.warn('⚠️ Using fallback URL due to invalid format');
-}
-
-if (finalKey && (!finalKey.startsWith('eyJ') || finalKey.length < 100)) {
-  console.error('❌ Invalid Supabase API key format. Must be a valid JWT token.');
-  console.warn('⚠️ Using fallback key due to invalid format');
-}
-
-// Enhanced Supabase client with error resilience
-const enhancedSupabase = createClient<Database>(finalUrl, finalKey, {
+const supabaseClient = createClient<Database>(supabaseUrl, supabaseKey, {
   auth: {
     storage: localStorage,
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,
-    storageKey: 'supabase.auth.token',
-  },
-  global: {
-    headers: {
-      'X-Client-Info': 'backlink-infinity@1.0.0',
-      'Cache-Control': 'no-cache',
-    },
-    fetch: async (url, options = {}) => {
-      // Use the connection fixer's retry mechanism for all Supabase requests
-      return SupabaseConnectionFixer.wrapSupabaseOperation(async () => {
-        // Add more robust fetch with retry logic
-        let attempts = 0;
-        const maxAttempts = 3;
-
-        while (attempts < maxAttempts) {
-          try {
-            console.log(`🔍 Supabase fetch attempt ${attempts + 1}/${maxAttempts} to ${url}`);
-
-            const response = await fetch(url, {
-              ...options,
-              // Shorter timeout to fail fast and retry
-              signal: options.signal || AbortSignal.timeout(15000), // 15 second timeout
-              cache: 'no-cache',
-              headers: {
-                ...options.headers,
-                'Cache-Control': 'no-cache',
-                'Pragma': 'no-cache',
-                'Connection': 'keep-alive',
-              },
-            });
-
-            console.log(`✅ Supabase fetch successful: ${response.status}`);
-            return response;
-
-          } catch (fetchError: any) {
-            attempts++;
-            console.error(`❌ Supabase fetch attempt ${attempts} failed:`, fetchError.message);
-
-            // If this is the last attempt, throw the error
-            if (attempts >= maxAttempts) {
-              console.error(`💥 All ${maxAttempts} fetch attempts failed for ${url}`);
-              throw new Error(`Supabase connection failed after ${maxAttempts} attempts: ${fetchError.message}`);
-            }
-
-            // Wait before retrying (exponential backoff)
-            const delay = Math.min(1000 * Math.pow(2, attempts - 1), 5000);
-            console.log(`⏳ Waiting ${delay}ms before retry...`);
-            await new Promise(resolve => setTimeout(resolve, delay));
-          }
-        }
-
-        throw new Error('Should not reach here');
-
-        // Handle non-200 responses
-        if (!response.ok && response.status >= 500) {
-          throw new Error(`Supabase server error: ${response.status} ${response.statusText}`);
-        }
-
-        return response;
-      }, `Supabase request to ${url}`);
-    },
   },
 });
 
-// Enhanced network error handler
-const handleNetworkError = (error: any, context: string): boolean => {
-  return SupabaseConnectionFixer.isSupabaseNetworkError(error);
-};
-
-// Create resilient auth helpers
-export const resilientAuthOperations = {
-  /**
-   * Get user with retry and error recovery
-   */
-  async getUser() {
-    return SupabaseConnectionFixer.wrapSupabaseOperation(
-      () => supabase.auth.getUser(),
-      'Get user'
-    );
-  },
-
-  /**
-   * Sign in with retry
-   */
-  async signIn(email: string, password: string) {
-    return SupabaseConnectionFixer.wrapSupabaseOperation(
-      () => supabase.auth.signInWithPassword({ email, password }),
-      'Sign in'
-    );
-  },
-
-  /**
-   * Sign out with retry
-   */
-  async signOut() {
-    return SupabaseConnectionFixer.wrapSupabaseOperation(
-      () => supabase.auth.signOut(),
-      'Sign out'
-    );
-  },
-
-  /**
-   * Reset password with retry
-   */
-  async resetPassword(email: string) {
-    return SupabaseConnectionFixer.wrapSupabaseOperation(
-      () => supabase.auth.resetPasswordForEmail(email),
-      'Reset password'
-    );
-  }
-};
-
-// Enhanced database operations
-export const resilientDbOperations = {
-  /**
-   * Query with automatic retry
-   */
-  async query<T>(tableName: string, query: any, context: string = `Query ${tableName}`) {
-    return SupabaseConnectionFixer.wrapSupabaseOperation(
-      () => query,
-      context
-    );
-  }
-};
-
-// Connection health monitoring
-export const connectionHealth = {
-  isOnline: () => navigator.onLine,
-
-  async testConnection(): Promise<boolean> {
+// Test connection in development
+if (import.meta.env.DEV) {
+  setTimeout(async () => {
     try {
-      const { data, error } = await supabase
+      console.log('🔍 Testing Supabase connection...');
+      const { data, error } = await supabaseClient
         .from('domains')
         .select('id')
         .limit(1);
 
-      return !error;
-    } catch (error) {
-      console.error('❌ Connection test failed:', error);
-      return false;
-    }
-  },
-
-  async getConnectionStatus() {
-    const connectivity = await SupabaseConnectionFixer.testConnectivity();
-    return {
-      online: navigator.onLine,
-      internet: connectivity.internet,
-      supabase: connectivity.supabase,
-      overall: connectivity.internet && connectivity.supabase
-    };
-  }
-};
-
-// Test connection with enhanced error handling
-if (import.meta.env.DEV) {
-  setTimeout(async () => {
-    try {
-      console.log('🔍 Testing enhanced Supabase connection...');
-
-      const connectionStatus = await connectionHealth.getConnectionStatus();
-      console.log('📊 Connection status:', connectionStatus);
-
-      if (connectionStatus.overall) {
-        console.log('✅ Supabase connection test successful');
+      if (error) {
+        console.warn('⚠️ Database connection test failed:', error.message);
       } else {
-        console.warn('⚠️ Supabase connection issues detected');
-
-        // Attempt emergency fix
-        const fixResult = await SupabaseConnectionFixer.emergencyFix();
-        console.log('🚨 Emergency fix result:', fixResult);
+        console.log('✅ Supabase connection test successful');
       }
     } catch (testError: any) {
-      console.error('❌ Enhanced connection test failed:', testError);
-
-      // Log detailed error information
-      if (SupabaseConnectionFixer.isSupabaseNetworkError(testError)) {
-        console.error('🔍 This appears to be a network connectivity issue');
-        console.log('💡 Try running: fixSupabaseConnection() in the console');
-      }
+      console.error('❌ Connection test failed:', testError.message);
     }
-  }, 2000);
+  }, 1000);
 }
 
-// Export everything for use throughout the app
-export { handleNetworkError, SupabaseConnectionFixer };
-
-console.log('✅ Enhanced Supabase client initialized with error resilience');
-
-// Use enhanced client with error handling and recovery
-export const supabase = enhancedSupabase;
-console.log('✅ Using enhanced Supabase client with error handling');
+export const supabase = supabaseClient;
