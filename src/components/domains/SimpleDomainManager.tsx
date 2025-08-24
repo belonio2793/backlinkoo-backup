@@ -284,19 +284,16 @@ const SimpleDomainManager = () => {
   };
 
   const removeDomain = async (domainName: string) => {
-    if (!user) return;
-
     setRemovingDomain(domainName);
 
     try {
-      console.log(`🗑️ Removing domain: ${domainName}`);
+      console.log(`🗑️ Removing domain from global system: ${domainName}`);
 
-      // Find the domain first
+      // Find the domain in global system
       const { data: existingDomain, error: findError } = await supabase
         .from('domains')
         .select('*')
         .eq('domain', domainName)
-        .eq('user_id', user.id)
         .single();
 
       if (findError) {
