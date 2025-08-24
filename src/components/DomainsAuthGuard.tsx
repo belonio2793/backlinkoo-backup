@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Shield, Lock, Globe } from 'lucide-react';
 import SupabaseErrorRecovery from '@/components/SupabaseErrorRecovery';
+import { useUserFlow } from '@/contexts/UserFlowContext';
+import { LoginModal } from '@/components/LoginModal';
 
 interface DomainsAuthGuardProps {
   children: React.ReactNode;
