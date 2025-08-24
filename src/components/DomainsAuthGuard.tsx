@@ -19,6 +19,12 @@ export const DomainsAuthGuard = ({ children }: DomainsAuthGuardProps) => {
   const [userEmail, setUserEmail] = useState<string>('');
   const [connectionError, setConnectionError] = useState<Error | null>(null);
 
+  const {
+    showSignInModal,
+    setShowSignInModal,
+    setDefaultAuthTab
+  } = useUserFlow();
+
   const AUTHORIZED_EMAIL = 'support@backlinkoo.com';
 
   useEffect(() => {
