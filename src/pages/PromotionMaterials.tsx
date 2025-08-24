@@ -248,9 +248,9 @@ For fellow marketers looking to scale their SEO efforts, I recommend checking ou
                 <ArrowLeft className="h-4 w-4" />
                 Back to Dashboard
               </Button>
-              <div className="flex items-center gap-2">
-                <Infinity className="h-6 w-6 text-primary" />
-                <span className="text-xl font-semibold">Promotion Materials</span>
+              <div className="flex items-center gap-4">
+                <Infinity className="h-8 w-8 text-primary" />
+                <span className="text-xl sm:text-2xl md:text-3xl font-semibold">Promotion Materials</span>
               </div>
             </div>
             <div className="flex items-center gap-4">
