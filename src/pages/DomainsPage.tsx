@@ -3,7 +3,7 @@ import { Globe } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { useAuthState } from '@/hooks/useAuthState';
-import SimpleDomainManager from '@/components/domains/SimpleDomainManager';
+import EnhancedDomainManager from '@/components/domains/EnhancedDomainManager';
 import DomainsAuthGuard from '@/components/DomainsAuthGuard';
 import '@/utils/testSupabaseConfig'; // Import to run tests in development
 
@@ -14,8 +14,8 @@ const DomainsPage = () => {
         <Header />
 
         <div className="container mx-auto px-4 py-8 max-w-6xl">
-          {/* Simple Domain Manager */}
-          <SimpleDomainManager />
+          {/* Enhanced Domain Manager with DNS Setup and Validation */}
+          <EnhancedDomainManager />
         </div>
 
         <Footer />
