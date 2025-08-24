@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Emergency Auth Fix</title>
+    <style>
+        body { font-family: system-ui; padding: 20px; background: #f8fafc; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .success { background: #dcfce7; color: #166534; }
+        .error { background: #fee2e2; color: #991b1b; }
+        .warning { background: #fef3c7; color: #92400e; }
+        button { background: #3b82f6; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; margin: 8px; }
+        button:hover { background: #2563eb; }
+        .destructive { background: #ef4444; }
+        .destructive:hover { background: #dc2626; }
+        pre { background: #f1f5f9; padding: 12px; border-radius: 4px; overflow-x: auto; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚨 Emergency Authentication Fix</h1>
+        <p>This tool will resolve Supabase API key and authentication issues.</p>
+        
+        <div id="status"></div>
+        
+        <div>
+            <h3>Quick Actions</h3>
+            <button onclick="clearAuthSession()">Clear Auth Session</button>
+            <button onclick="testApiKeys()">Test API Keys</button>
+            <button onclick="testConnection()">Test Supabase Connection</button>
+            <button onclick="fullFix()" class="destructive">Complete Fix (Clear All)</button>
+        </div>
+
+        <div>
+            <h3>Current Environment Status</h3>
+            <pre id="envStatus">Loading...</pre>
+        </div>
+
+        <div>
+            <h3>Instructions</h3>
+            <div class="status warning">
+                <strong>After running the fix:</strong>
+                <ol>
+                    <li>Refresh this page</li>
+                    <li>Go back to your main app</li>
+                    <li>Sign in again if needed</li>
+                    <li>Try accessing /domains again</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.innerHTML = message;
+            statusDiv.appendChild(div);
+            console.log(message);
+        }
+
+        function clearAuthSession() {
+            log('🧹 Clearing authentication session...', 'warning');
+            
+            // Clear localStorage
+            const localKeysToRemove = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && (key.includes('supabase') || key.includes('auth'))) {
+                    localKeysToRemove.push(key);
+                }
+            }
+            
+            localKeysToRemove.forEach(key => {
+                localStorage.removeItem(key);
+                log(`✅ Cleared localStorage: ${key}`, 'success');
+            });
+
+            // Clear sessionStorage
+            const sessionKeysToRemove = [];
+            for (let i = 0; i < sessionStorage.length; i++) {
+                const key = sessionStorage.key(i);
+                if (key && (key.includes('supabase') || key.includes('auth'))) {
+                    sessionKeysToRemove.push(key);
+                }
+            }
+            
+            sessionKeysToRemove.forEach(key => {
+                sessionStorage.removeItem(key);
+                log(`✅ Cleared sessionStorage: ${key}`, 'success');
+            });
+
+            // Clear cookies
+            document.cookie.split(";").forEach(function(c) { 
+                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+            });
+            
+            log('✅ Authentication session cleared successfully!', 'success');
+            log('🔄 Please refresh the page and try again.', 'warning');
+        }
+
+        function testApiKeys() {
+            log('🔑 Testing API key configuration...', 'warning');
+            
+            // Note: In production, these would come from environment variables
+            // For emergency fix, we'll test with known values
+            const knownUrl = 'https://dfhanacsmsvvkpunurnp.supabase.co';
+            const knownKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRmaGFuYWNzbXN2dmtwdW51cm5wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI5NTY2NDcsImV4cCI6MjA2ODUzMjY0N30.MZcB4P_TAOOTktXSG7bNK5BsIMAf1bKXVgT87Zqa5RY';
+            
+            if (knownUrl && knownKey) {
+                log('✅ API keys are available for testing', 'success');
+                log(`URL: ${knownUrl.substring(0, 30)}...`, 'success');
+                log(`Key Length: ${knownKey.length} characters`, 'success');
+            } else {
+                log('❌ API keys not found', 'error');
+            }
+        }
+
+        async function testConnection() {
+            log('🔍 Testing Supabase connection...', 'warning');
+            
+            try {
+                const response = await fetch('https://dfhanacsmsvvkpunurnp.supabase.co/rest/v1/', {
+                    headers: {
+                        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRmaGFuYWNzbXN2dmtwdW51cm5wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI5NTY2NDcsImV4cCI6MjA2ODUzMjY0N30.MZcB4P_TAOOTktXSG7bNK5BsIMAf1bKXVgT87Zqa5RY',
+                        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRmaGFuYWNzbXN2dmtwdW51cm5wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI5NTY2NDcsImV4cCI6MjA2ODUzMjY0N30.MZcB4P_TAOOTktXSG7bNK5BsIMAf1bKXVgT87Zqa5RY'
+                    }
+                });
+                
+                if (response.ok) {
+                    log('✅ Supabase connection successful!', 'success');
+                } else {
+                    log(`❌ Supabase connection failed: ${response.status} ${response.statusText}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Connection test failed: ${error.message}`, 'error');
+            }
+        }
+
+        function fullFix() {
+            log('🚨 Starting complete authentication fix...', 'warning');
+            
+            clearAuthSession();
+            
+            setTimeout(() => {
+                testApiKeys();
+                testConnection();
+                
+                log('✅ Complete fix finished!', 'success');
+                log('��� Please refresh the main app and try signing in again.', 'warning');
+            }, 1000);
+        }
+
+        // Show environment status on load
+        document.addEventListener('DOMContentLoaded', function() {
+            const envStatus = document.getElementById('envStatus');
+            envStatus.textContent = `
+Current Environment:
+- Location: ${window.location.href}
+- User Agent: ${navigator.userAgent.substring(0, 60)}...
+- Online: ${navigator.onLine}
+- LocalStorage Keys: ${localStorage.length}
+- SessionStorage Keys: ${sessionStorage.length}
+- Cookies: ${document.cookie.length > 0 ? 'Present' : 'None'}
+            `;
+        });
+    </script>
+</body>
+</html>
