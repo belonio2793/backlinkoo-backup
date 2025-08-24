@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { supabase, SupabaseConnectionFixer } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
+import { SupabaseConnectionFixer } from '@/utils/supabaseConnectionFixer';
 import type { User } from '@supabase/supabase-js';
 import { toast } from 'sonner';
 import { SafeAuth } from '@/utils/safeAuth';
