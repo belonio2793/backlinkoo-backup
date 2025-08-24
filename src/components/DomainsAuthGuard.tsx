@@ -162,6 +162,8 @@ export const DomainsAuthGuard = ({ children }: DomainsAuthGuardProps) => {
   };
 
   const handleSignInClick = () => {
+    // Set intended route as backup in case user somehow gets to login page
+    localStorage.setItem('intended_route', '/domains');
     setDefaultAuthTab('login');
     setShowSignInModal(true);
   };
