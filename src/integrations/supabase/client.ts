@@ -2,7 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
 // Supabase API: Initializing
-const supabaseUrl = 'https://dfhanacsmsvvkpunurnp.supabase.co';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://dfhanacsmsvvkpunurnp.supabase.co';
 const supabaseKey = import.meta.env.VITE_SUPABASE_KEY;
 
 console.log('🔧 Supabase configuration:', {
