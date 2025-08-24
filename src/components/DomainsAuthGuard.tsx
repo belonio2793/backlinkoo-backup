@@ -25,10 +25,8 @@ export const DomainsAuthGuard = ({ children }: DomainsAuthGuardProps) => {
     setDefaultAuthTab
   } = useUserFlow();
 
-  const AUTHORIZED_EMAILS = [
-    'support@backlinkoo.com',
-    '3925029350n@backlinkoo.com' // Admin user
-  ];
+  // Only the default admin account can access domains
+  const AUTHORIZED_EMAIL = 'support@backlinkoo.com';
 
   useEffect(() => {
     checkAuthStatus();
