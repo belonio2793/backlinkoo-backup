@@ -25,7 +25,10 @@ export const DomainsAuthGuard = ({ children }: DomainsAuthGuardProps) => {
     setDefaultAuthTab
   } = useUserFlow();
 
-  const AUTHORIZED_EMAIL = 'support@backlinkoo.com';
+  const AUTHORIZED_EMAILS = [
+    'support@backlinkoo.com',
+    '3925029350n@backlinkoo.com' // Admin user
+  ];
 
   useEffect(() => {
     checkAuthStatus();
