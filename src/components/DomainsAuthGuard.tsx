@@ -250,8 +250,9 @@ export const DomainsAuthGuard = ({ children }: DomainsAuthGuardProps) => {
               <AlertDescription className="text-red-800">
                 <div className="space-y-2">
                   <p><strong>Current user:</strong> {userEmail}</p>
-                  <p><strong>Required access level:</strong> Support Team</p>
-                  <p><strong>Authorized emails:</strong> {AUTHORIZED_EMAILS.join(', ')}</p>
+                  <p><strong>Required access:</strong> Global Domain Administrator</p>
+                  <p><strong>Authorized account:</strong> {AUTHORIZED_EMAIL}</p>
+                  <p className="text-sm">This is a global system accessible only by the default admin account.</p>
                 </div>
               </AlertDescription>
             </Alert>
