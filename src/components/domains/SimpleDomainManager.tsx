@@ -128,31 +128,67 @@ const SimpleDomainManager = () => {
     setAddingDomain(true);
 
     try {
-      // Use the Supabase edge function to add domain
-      const response = await fetch('https://dfhanacsmsvvkpunurnp.functions.supabase.co/netlify-domains', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
-        },
-        body: JSON.stringify({ domain: cleanedDomain })
-      });
+      console.log(`➕ Adding domain: ${cleanedDomain}`);
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      // First add to database directly
+      const { data: dbDomain, error: dbError } = await supabase
+        .from('domains')
+        .insert({
+          domain: cleanedDomain,
+          user_id: user.id,
+          status: 'pending',
+          netlify_verified: false
+        })
+        .select()
+        .single();
+
+      if (dbError) {
+        if (dbError.code === '23505') {
+          throw new Error('Domain already exists');
+        }
+        if (dbError.code === 'PGRST116' || dbError.message?.includes('does not exist')) {
+          throw new Error('Domains table not found. Please contact support to set up domain management.');
+        }
+        throw new Error(`Database error: ${dbError.message}`);
       }
 
-      const result = await response.json();
+      console.log('✅ Domain added to database');
+      toast.success(`✅ Domain ${cleanedDomain} added successfully`);
 
-      if (result.success) {
-        setNewDomain('');
-        toast.success(`✅ Domain ${cleanedDomain} added successfully`);
-        await loadDomains();
-      } else {
-        throw new Error(result.error || 'Failed to add domain');
+      // Try to sync with Netlify if function is available
+      try {
+        const { data: netlifyResult, error: netlifyError } = await supabase.functions.invoke('domains', {
+          body: {
+            action: 'add',
+            domain: cleanedDomain
+          }
+        });
+
+        if (netlifyResult?.success) {
+          // Update database to reflect Netlify success
+          await supabase
+            .from('domains')
+            .update({
+              netlify_verified: true,
+              status: 'verified'
+            })
+            .eq('id', dbDomain.id);
+
+          toast.success(`🚀 Domain also added to Netlify!`);
+        } else {
+          console.warn('⚠️ Netlify sync failed:', netlifyResult?.error || netlifyError?.message);
+          toast.warning('Domain added locally. Netlify sync will retry automatically.');
+        }
+      } catch (netlifyError: any) {
+        console.warn('⚠️ Netlify function unavailable:', netlifyError.message);
+        toast.warning('Domain added locally. Netlify sync unavailable.');
       }
+
+      setNewDomain('');
+      await loadDomains();
 
     } catch (error: any) {
+      console.error('❌ Add domain error:', error);
       if (error.message.includes('23505') || error.message.includes('already exists')) {
         toast.error(`Domain ${cleanedDomain} already exists`);
       } else {
