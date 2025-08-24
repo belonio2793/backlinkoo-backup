@@ -4,31 +4,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import {
   Globe,
   Plus,
@@ -37,12 +20,14 @@ import {
   Loader2,
   RefreshCw,
   ExternalLink,
-  MoreHorizontal,
   Trash2,
+  Copy,
+  Eye,
   Settings,
-  Cloud,
-  Database,
-  Activity
+  CheckCircle,
+  Clock,
+  AlertCircle,
+  Zap
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -51,132 +36,116 @@ import { useAuthState } from '@/hooks/useAuthState';
 interface Domain {
   id: string;
   domain: string;
-  status: 'pending' | 'verified' | 'removed' | 'error';
+  status: 'pending' | 'verified' | 'removed' | 'error' | 'dns_ready';
   user_id: string;
   netlify_verified: boolean;
-  dns_verified: boolean;
-  txt_record_value?: string;
-  error_message?: string;
   created_at: string;
-  updated_at: string;
-  last_sync?: string;
-  custom_domain: boolean;
-  ssl_status: 'none' | 'pending' | 'issued' | 'error';
-  dns_records: any[];
+  error_message?: string;
+  dns_records?: DNSRecord[];
+  netlify_site_id?: string;
+  validation_status?: string;
+  ssl_status?: string;
 }
 
-interface NetlifyDomainData {
-  custom_domain?: string;
-  domain_aliases: string[];
-  ssl_url?: string;
-  url: string;
+interface DNSRecord {
+  type: string;
+  name: string;
+  value: string;
+  ttl: number;
+  required: boolean;
+  description: string;
+}
+
+interface DNSSetupInstructions {
+  title: string;
+  type: 'subdomain' | 'root';
+  steps: string[];
+  nameservers?: string[];
+  dnsRecords: DNSRecord[];
 }
 
 const EnhancedDomainManager = () => {
   const { user } = useAuthState();
   const [domains, setDomains] = useState<Domain[]>([]);
-  const [netlifyData, setNetlifyData] = useState<NetlifyDomainData | null>(null);
   const [loading, setLoading] = useState(false);
-  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [addingDomain, setAddingDomain] = useState(false);
+  const [validatingDomain, setValidatingDomain] = useState<string | null>(null);
+  const [removingDomain, setRemovingDomain] = useState<string | null>(null);
   const [newDomain, setNewDomain] = useState('');
-  const [addToNetlify, setAddToNetlify] = useState(true);
-  const [processingActions, setProcessingActions] = useState<Set<string>>(new Set());
-  const [syncStats, setSyncStats] = useState({
-    total: 0,
-    synced: 0,
-    errors: 0,
-    lastSync: null as Date | null
-  });
+  
+  // DNS Instructions Modal
+  const [showDNSModal, setShowDNSModal] = useState(false);
+  const [selectedDomain, setSelectedDomain] = useState<Domain | null>(null);
+  const [dnsInstructions, setDnsInstructions] = useState<DNSSetupInstructions | null>(null);
 
   useEffect(() => {
     if (user) {
       loadDomains();
-      loadNetlifyData();
     }
   }, [user]);
 
   const loadDomains = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      
-      const { data, error } = await supabase
+      const { data: domainData, error } = await supabase
         .from('domains')
         .select('*')
-        .eq('user_id', user?.id)
         .order('created_at', { ascending: false });
 
       if (error) {
-        throw new Error(error.message);
+        if (error.code === 'PGRST116') {
+          toast.error('Domains table not found. Please contact support.');
+          setDomains([]);
+          return;
+        }
+        throw error;
       }
 
-      setDomains(data || []);
-      
-      // Calculate sync stats
-      const total = data?.length || 0;
-      const synced = data?.filter(d => d.netlify_verified).length || 0;
-      const errors = data?.filter(d => d.error_message).length || 0;
-      const lastSync = data?.reduce((latest, domain) => {
-        if (domain.last_sync) {
-          const syncDate = new Date(domain.last_sync);
-          return !latest || syncDate > latest ? syncDate : latest;
-        }
-        return latest;
-      }, null as Date | null);
+      setDomains(domainData || []);
 
-      setSyncStats({ total, synced, errors, lastSync });
+      // Try to sync with Netlify
+      try {
+        const { data: netlifyResult } = await supabase.functions.invoke('domains', {
+          body: { action: 'sync' }
+        });
+
+        if (netlifyResult?.success && netlifyResult.synced > 0) {
+          toast.success(`✅ Synced ${netlifyResult.synced} domains from Netlify!`);
+          // Reload after sync
+          const { data: updatedData } = await supabase
+            .from('domains')
+            .select('*')
+            .order('created_at', { ascending: false });
+          setDomains(updatedData || []);
+        }
+      } catch (netlifyError) {
+        console.warn('Netlify sync unavailable:', netlifyError);
+      }
 
     } catch (error: any) {
-      console.error('❌ Failed to load domains:', error);
+      console.error('Failed to load domains:', error);
       toast.error(`Failed to load domains: ${error.message}`);
+      setDomains([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const loadNetlifyData = async () => {
-    try {
-      console.log('🔍 Loading Netlify data...');
-      
-      const { data, error } = await supabase.functions.invoke('domains', {
-        body: { action: 'get_site_info' }
-      });
-
-      if (error) {
-        console.warn('⚠️ Netlify data unavailable:', error);
-        return;
-      }
-
-      if (data?.success) {
-        setNetlifyData(data.data);
-        console.log('✅ Netlify data loaded:', data.data);
-      }
-
-    } catch (error: any) {
-      console.warn('⚠️ Could not load Netlify data:', error);
-    }
-  };
-
   const addDomain = async () => {
-    if (!newDomain.trim() || !user) return;
+    if (!newDomain.trim()) return;
 
-    const cleanedDomain = newDomain.trim().toLowerCase()
-      .replace(/^https?:\/\//, '')
-      .replace(/^www\./, '')
-      .replace(/\/$/, '');
-
-    setProcessingActions(prev => new Set(prev).add('add'));
+    const cleanedDomain = cleanDomain(newDomain);
+    setAddingDomain(true);
 
     try {
-      console.log(`➕ Adding domain: ${cleanedDomain}`);
-
-      // First add to database - this will trigger the automatic Netlify sync
+      // First add to database
       const { data: dbDomain, error: dbError } = await supabase
         .from('domains')
         .insert({
           domain: cleanedDomain,
-          user_id: user.id,
+          user_id: user?.id || '00000000-0000-0000-0000-000000000000',
           status: 'pending',
-          custom_domain: true // New domains are set as custom domains
+          netlify_verified: false,
         })
         .select()
         .single();
@@ -188,357 +157,334 @@ const EnhancedDomainManager = () => {
         throw new Error(`Database error: ${dbError.message}`);
       }
 
-      toast.success(`Domain ${cleanedDomain} added to database`);
+      // Then try to add to Netlify
+      const response = await fetch('/netlify/functions/add-domain-to-netlify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          domain: cleanedDomain,
+          domainId: dbDomain.id 
+        }),
+      });
 
-      // If user wants to add to Netlify immediately (in addition to trigger)
-      if (addToNetlify) {
-        try {
-          const { data: netlifyResult, error: netlifyError } = await supabase.functions.invoke('domains', {
-            body: { 
-              action: 'add', 
-              domain: cleanedDomain 
-            }
-          });
+      const result = await response.json();
 
-          if (netlifyError) {
-            throw new Error(netlifyError.message);
-          }
+      if (result.success) {
+        // Update database with Netlify success
+        await supabase
+          .from('domains')
+          .update({
+            netlify_verified: true,
+            status: 'dns_ready',
+            netlify_site_id: result.netlifyData?.site_id,
+            dns_records: result.dnsInstructions?.dnsRecords,
+          })
+          .eq('id', dbDomain.id);
 
-          if (netlifyResult?.success) {
-            // Update database to reflect Netlify success
-            await supabase
-              .from('domains')
-              .update({
-                netlify_verified: true,
-                status: 'verified',
-                last_sync: new Date().toISOString()
-              })
-              .eq('id', dbDomain.id);
+        toast.success(`✅ Domain ${cleanedDomain} added to Netlify!`);
+        
+        // Show DNS setup instructions
+        const instructions = generateDNSInstructions(cleanedDomain);
+        setDnsInstructions(instructions);
+        setSelectedDomain({ ...dbDomain, dns_records: instructions.dnsRecords });
+        setShowDNSModal(true);
+      } else {
+        // Update database with error
+        await supabase
+          .from('domains')
+          .update({
+            status: 'error',
+            error_message: result.error,
+          })
+          .eq('id', dbDomain.id);
 
-            toast.success(`Domain ${cleanedDomain} added to Netlify successfully`);
-          } else {
-            toast.warning(`Added to database, but Netlify sync will retry: ${netlifyResult?.error || 'Unknown error'}`);
-          }
-        } catch (netlifyError: any) {
-          console.error('Netlify addition failed:', netlifyError);
-          toast.warning(`Added to database, Netlify sync will retry automatically`);
-        }
+        toast.error(`Failed to add to Netlify: ${result.error}`);
       }
 
-      // Reset form and refresh data
       setNewDomain('');
-      setAddDialogOpen(false);
       await loadDomains();
-      await loadNetlifyData();
 
     } catch (error: any) {
-      console.error('❌ Add domain error:', error);
+      console.error('Add domain error:', error);
       toast.error(`Failed to add domain: ${error.message}`);
     } finally {
-      setProcessingActions(prev => {
-        const newSet = new Set(prev);
-        newSet.delete('add');
-        return newSet;
-      });
+      setAddingDomain(false);
     }
   };
 
-  const deleteDomain = async (domainId: string, domainName: string) => {
-    if (!user) return;
-
-    setProcessingActions(prev => new Set(prev).add(domainId));
-
+  const validateDomain = async (domain: Domain) => {
+    setValidatingDomain(domain.domain);
+    
     try {
-      // Find the domain
-      const domain = domains.find(d => d.id === domainId);
-      
-      if (!domain) {
-        throw new Error('Domain not found');
+      // Call validation function
+      const { data: result, error } = await supabase.functions.invoke('domains', {
+        body: { 
+          action: 'validate',
+          domain: domain.domain 
+        }
+      });
+
+      if (error) throw error;
+
+      if (result.success) {
+        // Update domain status
+        await supabase
+          .from('domains')
+          .update({
+            status: result.validated ? 'verified' : 'dns_ready',
+            validation_status: result.validation?.validation_status,
+            ssl_status: result.validation?.ssl_configured ? 'active' : 'pending',
+          })
+          .eq('id', domain.id);
+
+        if (result.validated) {
+          toast.success(`✅ Domain ${domain.domain} is now verified!`);
+        } else {
+          toast.warning(`⏳ Domain ${domain.domain} DNS is still propagating...`);
+        }
+
+        await loadDomains();
+      } else {
+        toast.error(`Validation failed: ${result.error}`);
       }
 
-      // If it's verified in Netlify, remove it there first
-      if (domain.netlify_verified) {
-        try {
-          const { data: netlifyResult, error: netlifyError } = await supabase.functions.invoke('domains', {
-            body: { action: 'remove' }
-          });
+    } catch (error: any) {
+      console.error('Validation error:', error);
+      toast.error(`Failed to validate: ${error.message}`);
+    } finally {
+      setValidatingDomain(null);
+    }
+  };
 
-          if (netlifyError) {
-            console.warn('Netlify removal failed:', netlifyError);
-          } else if (netlifyResult?.success) {
-            toast.success(`Removed ${domainName} from Netlify`);
-          }
-        } catch (netlifyError: any) {
-          console.warn('Netlify removal failed:', netlifyError);
+  const removeDomain = async (domain: Domain) => {
+    setRemovingDomain(domain.domain);
+
+    try {
+      // Try to remove from Netlify first
+      if (domain.netlify_verified) {
+        const response = await fetch('/netlify/functions/add-domain-to-netlify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            action: 'remove',
+            domain: domain.domain 
+          }),
+        });
+
+        const result = await response.json();
+        if (result.success) {
+          toast.success(`Removed ${domain.domain} from Netlify`);
         }
       }
 
       // Remove from database
-      const { error: dbError } = await supabase
+      const { error } = await supabase
         .from('domains')
         .delete()
-        .eq('id', domainId)
-        .eq('user_id', user.id);
+        .eq('id', domain.id);
 
-      if (dbError) {
-        throw new Error(`Database error: ${dbError.message}`);
-      }
+      if (error) throw error;
 
-      toast.success(`Domain ${domainName} deleted successfully`);
+      toast.success(`✅ Domain ${domain.domain} removed successfully`);
       await loadDomains();
-      await loadNetlifyData();
 
     } catch (error: any) {
-      console.error('❌ Delete domain error:', error);
-      toast.error(`Failed to delete domain: ${error.message}`);
+      console.error('Remove domain error:', error);
+      toast.error(`Failed to remove domain: ${error.message}`);
     } finally {
-      setProcessingActions(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(domainId);
-        return newSet;
-      });
+      setRemovingDomain(null);
     }
   };
 
-  const syncWithNetlify = async () => {
-    if (!user) return;
+  const showDNSSetup = (domain: Domain) => {
+    const instructions = generateDNSInstructions(domain.domain);
+    setDnsInstructions(instructions);
+    setSelectedDomain(domain);
+    setShowDNSModal(true);
+  };
 
-    setLoading(true);
-    try {
-      console.log('🔄 Syncing with Netlify...');
+  const cleanDomain = (domain: string): string => {
+    return domain.trim().toLowerCase()
+      .replace(/^https?:\/\//, '')
+      .replace(/^www\./, '')
+      .replace(/\/$/, '');
+  };
 
-      // Trigger manual sync for all domains
-      const syncPromises = domains.map(async (domain) => {
-        const { error } = await supabase.rpc('trigger_domain_sync', { 
-          domain_id: domain.id 
-        });
-        
-        if (error) {
-          console.warn(`Sync failed for ${domain.domain}:`, error);
-        }
-      });
+  const generateDNSInstructions = (domain: string): DNSSetupInstructions => {
+    const isSubdomain = domain.split('.').length > 2;
 
-      await Promise.allSettled(syncPromises);
-      
-      // Refresh data
-      await Promise.all([loadDomains(), loadNetlifyData()]);
-      
-      toast.success('Sync with Netlify completed');
-
-    } catch (error: any) {
-      console.error('❌ Sync failed:', error);
-      toast.error(`Sync failed: ${error.message}`);
-    } finally {
-      setLoading(false);
+    if (isSubdomain) {
+      return {
+        title: 'Subdomain DNS Configuration',
+        type: 'subdomain',
+        steps: [
+          `Add a CNAME record for ${domain}`,
+          'Point it to backlinkoo.netlify.app',
+          'Wait for DNS propagation (5-30 minutes)',
+          'SSL certificate will be automatically provisioned'
+        ],
+        dnsRecords: [
+          {
+            type: 'CNAME',
+            name: domain.split('.')[0],
+            value: 'backlinkoo.netlify.app',
+            ttl: 3600,
+            required: true,
+            description: 'Points subdomain to Netlify'
+          }
+        ]
+      };
+    } else {
+      return {
+        title: 'Root Domain DNS Configuration',
+        type: 'root',
+        steps: [
+          'Add a CNAME record for www subdomain',
+          'Point www to backlinkoo.netlify.app',
+          'Configure A records for root domain',
+          'Wait for DNS propagation (5-30 minutes)',
+          'SSL certificate will be automatically provisioned'
+        ],
+        nameservers: [
+          'dns1.p05.nsone.net',
+          'dns2.p05.nsone.net',
+          'dns3.p05.nsone.net',
+          'dns4.p05.nsone.net'
+        ],
+        dnsRecords: [
+          {
+            type: 'A',
+            name: '@',
+            value: '75.2.60.5',
+            ttl: 3600,
+            required: true,
+            description: 'Points root domain to Netlify'
+          },
+          {
+            type: 'CNAME',
+            name: 'www',
+            value: 'backlinkoo.netlify.app',
+            ttl: 3600,
+            required: true,
+            description: 'Points www subdomain to Netlify'
+          }
+        ]
+      };
     }
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success('Copied to clipboard!');
   };
 
   const getStatusBadge = (domain: Domain) => {
     if (domain.error_message) {
       return <Badge variant="destructive">Error</Badge>;
-    } else if (domain.netlify_verified && domain.status === 'verified') {
-      return <Badge className="bg-green-600">Synced</Badge>;
+    } else if (domain.status === 'verified') {
+      return <Badge className="bg-green-600">Verified</Badge>;
+    } else if (domain.status === 'dns_ready' && domain.netlify_verified) {
+      return <Badge className="bg-blue-600">DNS Setup Required</Badge>;
     } else if (domain.netlify_verified) {
       return <Badge className="bg-blue-600">In Netlify</Badge>;
     } else if (domain.status === 'pending') {
       return <Badge variant="secondary">Pending</Badge>;
     } else {
-      return <Badge variant="outline">Database Only</Badge>;
+      return <Badge variant="outline">Added</Badge>;
     }
   };
 
-  const getSyncIcon = (domain: Domain) => {
-    if (domain.error_message) {
-      return <AlertTriangle className="h-4 w-4 text-red-500" />;
-    } else if (domain.netlify_verified) {
-      return <CheckCircle2 className="h-4 w-4 text-green-500" />;
+  const getStatusIcon = (domain: Domain) => {
+    if (domain.status === 'verified') {
+      return <CheckCircle className="h-5 w-5 text-green-600" />;
+    } else if (domain.status === 'dns_ready') {
+      return <Clock className="h-5 w-5 text-blue-600" />;
+    } else if (domain.error_message) {
+      return <AlertCircle className="h-5 w-5 text-red-600" />;
     } else {
-      return <AlertTriangle className="h-4 w-4 text-gray-400" />;
+      return <Globe className="h-5 w-5 text-gray-600" />;
     }
   };
-
-  if (!user) {
-    return (
-      <Alert className="border-gray-200">
-        <Globe className="h-4 w-4" />
-        <AlertDescription>
-          Please sign in to manage your domains.
-        </AlertDescription>
-      </Alert>
-    );
-  }
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">Enhanced Domain Manager</h2>
-          <p className="text-gray-600">Automatic two-way sync between database and Netlify</p>
-          {syncStats.lastSync && (
-            <p className="text-sm text-gray-500 mt-1">
-              Last sync: {syncStats.lastSync.toLocaleTimeString()} • 
-              {syncStats.synced}/{syncStats.total} synced • 
-              {syncStats.errors} errors
-            </p>
-          )}
-        </div>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={syncWithNetlify}
-            disabled={loading}
-          >
-            {loading ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            ) : (
-              <RefreshCw className="h-4 w-4 mr-2" />
-            )}
-            Sync with Netlify
-          </Button>
-          
-          <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Domain
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Add New Domain</DialogTitle>
-                <DialogDescription>
-                  Add a domain with automatic Netlify sync via database triggers
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4">
-                <Input
-                  placeholder="example.com"
-                  value={newDomain}
-                  onChange={(e) => setNewDomain(e.target.value)}
-                />
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id="addToNetlify"
-                    checked={addToNetlify}
-                    onChange={(e) => setAddToNetlify(e.target.checked)}
-                  />
-                  <label htmlFor="addToNetlify" className="text-sm">
-                    Immediately sync to Netlify (in addition to automatic trigger)
-                  </label>
-                </div>
-                <Alert>
-                  <Activity className="h-4 w-4" />
-                  <AlertDescription>
-                    Domain will be automatically synced to Netlify via database triggers regardless of the checkbox above.
-                  </AlertDescription>
-                </Alert>
-              </div>
-              <DialogFooter>
-                <Button
-                  variant="outline"
-                  onClick={() => setAddDialogOpen(false)}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={addDomain}
-                  disabled={!newDomain.trim() || processingActions.has('add')}
-                >
-                  {processingActions.has('add') ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Adding...
-                    </>
-                  ) : (
-                    'Add Domain'
-                  )}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
+      <div className="text-center">
+        <h2 className="text-3xl font-bold text-gray-900 mb-2">Enhanced Domain Manager</h2>
+        <p className="text-gray-600">Add domains to Netlify with DNS setup instructions and validation</p>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-blue-600">{syncStats.total}</div>
-            <div className="text-sm text-gray-600">Total Domains</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-green-600">{syncStats.synced}</div>
-            <div className="text-sm text-gray-600">Synced with Netlify</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-orange-600">{syncStats.errors}</div>
-            <div className="text-sm text-gray-600">Sync Errors</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-purple-600">
-              {netlifyData ? (netlifyData.domain_aliases?.length || 0) + (netlifyData.custom_domain ? 1 : 0) : '?'}
-            </div>
-            <div className="text-sm text-gray-600">Netlify Domains</div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Netlify Connection Status */}
-      {netlifyData && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Cloud className="h-5 w-5" />
-              Netlify Connection Status
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <p className="text-sm font-medium text-gray-900">Custom Domain</p>
-                <p className="text-sm text-gray-600">{netlifyData.custom_domain || 'None'}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-900">Domain Aliases</p>
-                <p className="text-sm text-gray-600">
-                  {netlifyData.domain_aliases?.length ? `${netlifyData.domain_aliases.length} aliases` : 'None'}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-900">Site URL</p>
-                <a 
-                  href={netlifyData.ssl_url || netlifyData.url} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-sm text-blue-600 hover:underline flex items-center gap-1"
-                >
-                  {netlifyData.ssl_url || netlifyData.url}
-                  <ExternalLink className="h-3 w-3" />
-                </a>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Domains Table */}
+      {/* Add Domain */}
       <Card>
         <CardHeader>
-          <CardTitle>Domains ({domains.length})</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Plus className="h-5 w-5" />
+            Add New Domain
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-3">
+            <Input
+              placeholder="example.com"
+              value={newDomain}
+              onChange={(e) => setNewDomain(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && !addingDomain && addDomain()}
+              disabled={addingDomain}
+              className="flex-1 text-lg py-3"
+            />
+            <Button
+              onClick={addDomain}
+              disabled={addingDomain || !newDomain.trim()}
+              size="lg"
+              className="min-w-[120px]"
+            >
+              {addingDomain ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Adding...
+                </>
+              ) : (
+                <>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Domain
+                </>
+              )}
+            </Button>
+          </div>
+          <p className="text-sm text-gray-500 mt-2">
+            Domain will be added to Netlify and you'll receive DNS setup instructions
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* Domains List */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Globe className="h-5 w-5" />
+              Your Domains ({domains.length})
+            </CardTitle>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={loadDomains}
+              disabled={loading}
+            >
+              {loading ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4 mr-2" />
+              )}
+              Refresh
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {loading ? (
             <div className="text-center py-8">
               <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-              <p>Loading domains...</p>
+              <p className="text-gray-600">Loading domains...</p>
             </div>
           ) : domains.length === 0 ? (
             <div className="text-center py-12">
@@ -546,99 +492,192 @@ const EnhancedDomainManager = () => {
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
                 No domains found
               </h3>
-              <p className="text-gray-500 mb-4">
-                Add your first domain to get started with automatic Netlify sync
+              <p className="text-gray-500">
+                Add your first domain to get started with DNS setup and validation.
               </p>
-              <Button onClick={() => setAddDialogOpen(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Domain
-              </Button>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Domain</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Sync</TableHead>
-                  <TableHead>Last Sync</TableHead>
-                  <TableHead>Added</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {domains.map((domain) => (
-                  <TableRow key={domain.id}>
-                    <TableCell>
+            <div className="space-y-4">
+              {domains.map((domain) => (
+                <div
+                  key={domain.id}
+                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    {getStatusIcon(domain)}
+                    <div>
                       <div className="flex items-center gap-2">
-                        <Globe className="h-4 w-4 text-blue-600" />
-                        <span className="font-medium">{domain.domain}</span>
-                        {domain.custom_domain && (
-                          <Badge variant="outline" className="text-xs">Custom</Badge>
-                        )}
+                        <span className="font-medium text-lg">{domain.domain}</span>
+                        <button
+                          onClick={() => window.open(`https://${domain.domain}`, '_blank')}
+                          className="text-gray-400 hover:text-blue-600 transition-colors"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                        </button>
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      {getStatusBadge(domain)}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        {getSyncIcon(domain)}
-                        <span className="text-sm">
-                          {domain.netlify_verified ? 'Synced' : 'Pending'}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <span className="text-sm text-gray-600">
-                        {domain.last_sync 
-                          ? new Date(domain.last_sync).toLocaleString()
-                          : 'Never'
-                        }
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <span className="text-sm text-gray-600">
-                        {new Date(domain.created_at).toLocaleDateString()}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm">
-                            {processingActions.has(domain.id) ? (
+                      <p className="text-sm text-gray-500">
+                        Added {new Date(domain.created_at).toLocaleDateString()}
+                        {domain.netlify_site_id && ` • Site ID: ${domain.netlify_site_id.substring(0, 8)}...`}
+                      </p>
+                      {domain.error_message && (
+                        <p className="text-sm text-red-600 mt-1">
+                          Error: {domain.error_message}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-3">
+                    {domain.netlify_verified && (
+                      <CheckCircle2 className="h-5 w-5 text-green-600" />
+                    )}
+                    {getStatusBadge(domain)}
+                    
+                    {/* Action Buttons */}
+                    <div className="flex gap-1">
+                      {domain.netlify_verified && (
+                        <>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => showDNSSetup(domain)}
+                            title="View DNS Setup"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => validateDomain(domain)}
+                            disabled={validatingDomain === domain.domain}
+                            title="Validate Domain"
+                          >
+                            {validatingDomain === domain.domain ? (
                               <Loader2 className="h-4 w-4 animate-spin" />
                             ) : (
-                              <MoreHorizontal className="h-4 w-4" />
+                              <Zap className="h-4 w-4" />
                             )}
                           </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onClick={() => window.open(`https://${domain.domain}`, '_blank')}
-                          >
-                            <ExternalLink className="h-4 w-4 mr-2" />
-                            Visit Site
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => deleteDomain(domain.id, domain.domain)}
-                            className="text-red-600"
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                        </>
+                      )}
+                      
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeDomain(domain)}
+                        disabled={removingDomain === domain.domain}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        title="Remove Domain"
+                      >
+                        {removingDomain === domain.domain ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Trash2 className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
         </CardContent>
       </Card>
+
+      {/* DNS Setup Instructions Modal */}
+      <Dialog open={showDNSModal} onOpenChange={setShowDNSModal}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5" />
+              DNS Setup Instructions
+            </DialogTitle>
+            <DialogDescription>
+              Configure your DNS settings to activate {selectedDomain?.domain}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {dnsInstructions && (
+            <div className="space-y-6">
+              <Alert>
+                <Globe className="h-4 w-4" />
+                <AlertDescription>
+                  <strong>{selectedDomain?.domain}</strong> has been added to Netlify.
+                  Follow these DNS configuration steps to activate your domain.
+                </AlertDescription>
+              </Alert>
+
+              <div>
+                <h4 className="font-semibold mb-3">{dnsInstructions.title}</h4>
+                <ol className="list-decimal list-inside space-y-2 text-sm">
+                  {dnsInstructions.steps.map((step, index) => (
+                    <li key={index} className="text-gray-700">{step}</li>
+                  ))}
+                </ol>
+              </div>
+
+              {dnsInstructions.nameservers && (
+                <div>
+                  <h4 className="font-semibold mb-3">Nameservers (Optional)</h4>
+                  <div className="space-y-2">
+                    {dnsInstructions.nameservers.map((ns, index) => (
+                      <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                        <code className="text-sm">{ns}</code>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => copyToClipboard(ns)}
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <h4 className="font-semibold mb-3">DNS Records</h4>
+                <div className="space-y-3">
+                  {dnsInstructions.dnsRecords.map((record, index) => (
+                    <div key={index} className="border rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <Badge variant={record.required ? "default" : "secondary"}>
+                            {record.type}
+                          </Badge>
+                          <span className="text-sm font-medium">{record.name}</span>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => copyToClipboard(`${record.type} ${record.name} ${record.value} ${record.ttl}`)}
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <div className="text-sm space-y-1">
+                        <p><strong>Value:</strong> <code>{record.value}</code></p>
+                        <p><strong>TTL:</strong> {record.ttl} seconds</p>
+                        <p className="text-gray-600">{record.description}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <Alert>
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription>
+                  DNS changes can take 5-30 minutes to propagate. After configuration,
+                  use the validate button to check if your domain is properly configured.
+                </AlertDescription>
+              </Alert>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
