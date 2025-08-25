@@ -37,6 +37,7 @@ import {
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthState } from '@/hooks/useAuthState';
+import { NetlifyDomainSyncService } from '@/services/netlifyDomainSync';
 
 interface Domain {
   id: string;
@@ -62,12 +63,19 @@ const EnhancedDomainsPage = () => {
   const [newDomain, setNewDomain] = useState('');
   const [validationError, setValidationError] = useState('');
   const [processingActions, setProcessingActions] = useState<Set<string>>(new Set());
+  const [netlifyConnected, setNetlifyConnected] = useState<boolean | null>(null);
+  const [syncStats, setSyncStats] = useState<{
+    netlifyCount: number;
+    needsSync: boolean;
+    lastSync?: Date;
+  } | null>(null);
 
   // Real-time subscription
   useEffect(() => {
     if (user) {
       loadDomains();
       setupRealtimeSubscription();
+      checkNetlifyConnection();
     }
   }, [user]);
 
@@ -233,23 +241,39 @@ const EnhancedDomainsPage = () => {
     }
   };
 
-  const syncWithNetlify = async () => {
+  const checkNetlifyConnection = async () => {
+    try {
+      const result = await NetlifyDomainSyncService.testNetlifyConnection();
+      setNetlifyConnected(result.success);
+
+      if (result.success) {
+        // Get sync stats
+        const siteInfo = await NetlifyDomainSyncService.getNetlifySiteInfo();
+        if (siteInfo.success) {
+          setSyncStats({
+            netlifyCount: siteInfo.domains?.length || 0,
+            needsSync: (siteInfo.domains?.length || 0) > domains.length,
+            lastSync: new Date()
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error checking Netlify connection:', error);
+      setNetlifyConnected(false);
+    }
+  };
+
+  const syncFromNetlify = async () => {
     if (!user?.id) return;
 
     setSyncing(true);
     try {
-      // Call Netlify function to sync domains
-      const response = await fetch('/netlify/functions/add-domain-to-netlify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'sync_all_domains', userId: user.id }),
-      });
+      const result = await NetlifyDomainSyncService.syncDomainsFromNetlify(user.id, 'safe');
 
-      const result = await response.json();
-      
       if (result.success) {
-        toast.success('✅ Domains synced with Netlify successfully');
         await loadDomains();
+        await checkNetlifyConnection(); // Refresh sync stats
+        toast.success('✅ Domains synced from Netlify successfully');
       } else {
         toast.error(`Sync failed: ${result.error}`);
       }
@@ -260,6 +284,8 @@ const EnhancedDomainsPage = () => {
       setSyncing(false);
     }
   };
+
+  const syncWithNetlify = syncFromNetlify; // Alias for backward compatibility
 
   const getStatusBadge = (domain: Domain) => {
     if (domain.status === 'verified' && domain.netlify_verified) {
@@ -316,7 +342,18 @@ const EnhancedDomainsPage = () => {
               <Database className="h-8 w-8 text-blue-600 mr-3" />
               <div>
                 <p className="text-2xl font-bold text-gray-900">{domains.length}</p>
-                <p className="text-sm text-gray-600">Total Domains</p>
+                <p className="text-sm text-gray-600">Supabase Domains</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="flex items-center p-6">
+              <Globe className="h-8 w-8 text-indigo-600 mr-3" />
+              <div>
+                <p className="text-2xl font-bold text-gray-900">
+                  {syncStats?.netlifyCount || '?'}
+                </p>
+                <p className="text-sm text-gray-600">Netlify Domains</p>
               </div>
             </CardContent>
           </Card>
@@ -327,18 +364,7 @@ const EnhancedDomainsPage = () => {
                 <p className="text-2xl font-bold text-gray-900">
                   {domains.filter(d => d.status === 'verified' && d.netlify_verified).length}
                 </p>
-                <p className="text-sm text-gray-600">Active</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="flex items-center p-6">
-              <Zap className="h-8 w-8 text-purple-600 mr-3" />
-              <div>
-                <p className="text-2xl font-bold text-gray-900">
-                  {domains.filter(d => d.netlify_verified).length}
-                </p>
-                <p className="text-sm text-gray-600">Netlify Synced</p>
+                <p className="text-sm text-gray-600">Synced</p>
               </div>
             </CardContent>
           </Card>
@@ -354,6 +380,38 @@ const EnhancedDomainsPage = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Netlify Connection Status */}
+        {netlifyConnected !== null && (
+          <Alert className={`mb-6 ${netlifyConnected ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
+            <Globe className="h-4 w-4" />
+            <AlertDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <strong>Netlify Connection:</strong>
+                  {netlifyConnected ? (
+                    <span className="text-green-700 ml-2">✅ Connected</span>
+                  ) : (
+                    <span className="text-red-700 ml-2">❌ Not Connected</span>
+                  )}
+                  {syncStats && syncStats.needsSync && (
+                    <span className="text-blue-700 ml-2">• Sync Available</span>
+                  )}
+                </div>
+                {netlifyConnected && syncStats?.needsSync && (
+                  <Button
+                    size="sm"
+                    onClick={syncFromNetlify}
+                    disabled={syncing}
+                    className="ml-4"
+                  >
+                    {syncing ? 'Syncing...' : 'Sync Now'}
+                  </Button>
+                )}
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
 
         {/* Actions Bar */}
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
@@ -411,18 +469,19 @@ const EnhancedDomainsPage = () => {
             </DialogContent>
           </Dialog>
 
-          <Button 
-            variant="outline" 
-            onClick={syncWithNetlify}
-            disabled={syncing}
+          <Button
+            variant="outline"
+            onClick={syncFromNetlify}
+            disabled={syncing || netlifyConnected === false}
             size="lg"
+            className={netlifyConnected === false ? 'opacity-50' : ''}
           >
             {syncing ? (
               <Loader2 className="h-5 w-5 mr-2 animate-spin" />
             ) : (
               <RefreshCw className="h-5 w-5 mr-2" />
             )}
-            Sync with Netlify
+            {netlifyConnected === false ? 'Netlify Unavailable' : 'Sync from Netlify'}
           </Button>
 
           <Button 
