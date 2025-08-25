@@ -2,11 +2,10 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 
-// Simplified Vite config for debugging
 export default defineConfig({
   server: {
     host: "::",
-    port: 8080,
+    port: 8081,
   },
   plugins: [react()],
   resolve: {
@@ -14,11 +13,16 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  esbuild: {
-    logLevel: 'silent'
+  build: {
+    target: 'es2015',
+    outDir: 'dist',
+    sourcemap: false,
   },
   optimizeDeps: {
-    noDiscovery: true,
-    include: []
+    include: [
+      'react',
+      'react-dom',
+      'react-router-dom'
+    ]
   }
 });
