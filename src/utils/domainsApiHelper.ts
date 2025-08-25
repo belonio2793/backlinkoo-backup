@@ -137,7 +137,7 @@ export class DomainsApiHelper {
         name: row.domain, // Map DB column 'domain' to interface property 'name'
         site_id: row.netlify_site_id,
         source: row.is_global ? 'netlify' : 'manual',
-        status: row.status || 'unknown',
+        status: mapDomainStatus(row.status, row.netlify_verified, row.dns_verified),
         created_at: row.created_at,
         updated_at: row.updated_at
       }));
