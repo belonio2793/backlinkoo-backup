@@ -110,8 +110,13 @@ export class NetlifyDomainSyncService {
         }),
       });
 
-      // Get response text first, then parse JSON
+      // Read response text once, regardless of status
       const responseText = await response.text();
+
+      // Handle non-OK responses
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${responseText}`);
+      }
 
       let result;
       try {
@@ -122,8 +127,8 @@ export class NetlifyDomainSyncService {
         throw new Error(`Invalid JSON response: ${responseText.substring(0, 200)}`);
       }
 
-      if (!response.ok || !result.success) {
-        throw new Error(result.error || `HTTP ${response.status}: Failed to get site info`);
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to get site info');
       }
 
       return {
