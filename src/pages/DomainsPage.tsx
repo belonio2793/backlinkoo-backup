@@ -5,7 +5,7 @@ import { Footer } from '@/components/Footer';
 import { useAuthState } from '@/hooks/useAuthState';
 import EnhancedDomainManager from '@/components/domains/EnhancedDomainManager';
 import DomainsAuthGuard from '@/components/DomainsAuthGuard';
-import '@/utils/testSupabaseConfig'; // Import to run tests in development
+// import '@/utils/testSupabaseConfig'; // Import to run tests in development - temporarily disabled
 
 const DomainsPage = () => {
   return (
