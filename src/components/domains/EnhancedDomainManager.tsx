@@ -486,9 +486,9 @@ const EnhancedDomainManager = () => {
   };
 
   const getStatusIcon = (domain: Domain) => {
-    if (domain.status === 'verified') {
+    if (domain.status === 'active') {
       return <CheckCircle className="h-5 w-5 text-green-600" />;
-    } else if (domain.status === 'dns_ready') {
+    } else if (domain.status === 'pending') {
       return <Clock className="h-5 w-5 text-blue-600" />;
     } else if (domain.error_message) {
       return <AlertCircle className="h-5 w-5 text-red-600" />;
