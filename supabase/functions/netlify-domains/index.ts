@@ -165,12 +165,11 @@ serve(async (req) => {
 
     if (req.method === 'DELETE') {
       // Remove domain from Netlify
-      const url = new URL(req.url);
-      const domain = url.searchParams.get('domain');
-      
+      const { domain } = await req.json();
+
       if (!domain) {
         return new Response(
-          JSON.stringify({ error: 'Domain parameter is required' }), 
+          JSON.stringify({ error: 'Domain name is required' }),
           {
             status: 400,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -178,8 +177,8 @@ serve(async (req) => {
         );
       }
 
-      const deleteUrl = `https://api.netlify.com/api/v1/sites/${NETLIFY_SITE_ID}/domains/${domain}`;
-      
+      const deleteUrl = `${NETLIFY_API}/${domain}`;
+
       console.log(`📡 Removing domain ${domain} from Netlify site`);
 
       const resp = await fetch(deleteUrl, {
@@ -193,12 +192,12 @@ serve(async (req) => {
       if (!resp.ok) {
         const errorText = await resp.text();
         console.error(`❌ Failed to remove domain: ${resp.status} - ${errorText}`);
-        
+
         return new Response(
           JSON.stringify({
             error: `Failed to remove domain: ${resp.status}`,
             details: errorText
-          }), 
+          }),
           {
             status: resp.status,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -208,8 +207,17 @@ serve(async (req) => {
 
       console.log(`✅ Successfully removed domain ${domain} from Netlify`);
 
+      // Remove from Supabase if deletion was successful
+      try {
+        await supabase.from("domains").delete().eq("name", domain);
+        console.log(`✅ Removed domain ${domain} from Supabase`);
+      } catch (syncError) {
+        console.warn('⚠️ Failed to remove domain from Supabase:', syncError);
+        // Continue and return success even if sync fails
+      }
+
       return new Response(
-        JSON.stringify({ success: true, message: `Domain ${domain} removed successfully` }), 
+        JSON.stringify({ success: true, message: `Domain ${domain} removed successfully` }),
         {
           status: 200,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
