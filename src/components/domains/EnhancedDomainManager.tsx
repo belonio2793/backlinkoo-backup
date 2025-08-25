@@ -601,23 +601,84 @@ const EnhancedDomainManager = () => {
               {domains.map((domain) => (
                 <div
                   key={domain.id}
-                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                  className={`flex items-center justify-between p-4 border rounded-lg transition-colors relative ${
+                    isPrimaryDomain(domain.domain)
+                      ? 'bg-blue-50 border-blue-200'
+                      : 'hover:bg-gray-50'
+                  }`}
                 >
+                  {/* Primary domain protection overlay */}
+                  {isPrimaryDomain(domain.domain) && (
+                    <div className="absolute top-2 right-2">
+                      <Badge variant="default" className="bg-blue-600">
+                        Primary
+                      </Badge>
+                    </div>
+                  )}
+
                   <div className="flex items-center gap-3">
                     {getStatusIcon(domain)}
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-medium text-lg">{domain.domain}</span>
-                        <button
-                          onClick={() => window.open(`https://${domain.domain}`, '_blank')}
-                          className="text-gray-400 hover:text-blue-600 transition-colors"
-                        >
-                          <ExternalLink className="h-4 w-4" />
-                        </button>
+                        {editingDomain === domain.domain ? (
+                          <div className="flex items-center gap-2">
+                            <Input
+                              value={editingValue}
+                              onChange={(e) => setEditingValue(e.target.value)}
+                              className="text-lg font-medium w-64"
+                              onKeyPress={(e) => {
+                                if (e.key === 'Enter') saveEdit(domain.domain);
+                                if (e.key === 'Escape') cancelEditing();
+                              }}
+                              autoFocus
+                            />
+                            <Button
+                              size="sm"
+                              onClick={() => saveEdit(domain.domain)}
+                              disabled={savingEdit}
+                            >
+                              {savingEdit ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <CheckCircle className="h-4 w-4" />
+                              )}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={cancelEditing}
+                              disabled={savingEdit}
+                            >
+                              ✕
+                            </Button>
+                          </div>
+                        ) : (
+                          <>
+                            <span className="font-medium text-lg">{domain.domain}</span>
+                            {!isPrimaryDomain(domain.domain) && (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => startEditing(domain)}
+                                className="h-6 w-6 p-0 text-gray-400 hover:text-blue-600"
+                                title="Edit domain"
+                              >
+                                ✏️
+                              </Button>
+                            )}
+                            <button
+                              onClick={() => window.open(`https://${domain.domain}`, '_blank')}
+                              className="text-gray-400 hover:text-blue-600 transition-colors"
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </button>
+                          </>
+                        )}
                       </div>
                       <p className="text-sm text-gray-500">
                         Added {new Date(domain.created_at).toLocaleDateString()}
                         {domain.netlify_site_id && ` • Site ID: ${domain.netlify_site_id.substring(0, 8)}...`}
+                        {isPrimaryDomain(domain.domain) && ' • Primary Domain'}
                       </p>
                       {domain.error_message && (
                         <p className="text-sm text-red-600 mt-1">
