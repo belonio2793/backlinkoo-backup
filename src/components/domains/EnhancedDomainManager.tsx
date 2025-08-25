@@ -89,6 +89,10 @@ const EnhancedDomainManager = () => {
   // Auto-sync state
   const [autoSyncComplete, setAutoSyncComplete] = useState(false);
 
+  // Edge function state
+  const [useEdgeFunction, setUseEdgeFunction] = useState(true);
+  const [edgeFunctionStatus, setEdgeFunctionStatus] = useState<'unknown' | 'deployed' | 'not-deployed'>('unknown');
+
   // Editing state
   const [editingDomain, setEditingDomain] = useState<string | null>(null);
   const [editingValue, setEditingValue] = useState('');
