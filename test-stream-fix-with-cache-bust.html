@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stream Fix Test (Cache Busted)</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .test-result { margin: 10px 0; padding: 15px; border-radius: 8px; border-left: 5px solid; }
+        .success { background-color: #d4edda; border-color: #28a745; color: #155724; }
+        .error { background-color: #f8d7da; border-color: #dc3545; color: #721c24; }
+        .info { background-color: #d1ecf1; border-color: #17a2b8; color: #0c5460; }
+        .warning { background-color: #fff3cd; border-color: #ffc107; color: #856404; }
+        button { 
+            padding: 12px 24px; margin: 10px 5px; font-size: 16px; 
+            border: none; border-radius: 6px; cursor: pointer;
+            background: #007bff; color: white;
+        }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #6c757d; cursor: not-allowed; }
+        pre { background: #f8f9fa; padding: 15px; border-radius: 5px; overflow-x: auto; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Stream Fix Test (Cache Busted)</h1>
+    <p>Testing with cache busting to ensure we're using the latest fixed code.</p>
+    
+    <div class="test-controls">
+        <button onclick="forceReloadAndTest()">🚀 Force Reload & Test</button>
+        <button onclick="testWithCacheBust()">🧪 Test with Cache Busting</button>
+        <button onclick="clearResults()">🗑️ Clear Results</button>
+    </div>
+    
+    <div id="results"></div>
+
+    <script>
+        let resultCount = 0;
+
+        function addResult(type, title, content) {
+            const resultsDiv = document.getElementById('results');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-result ${type}`;
+            resultDiv.innerHTML = `
+                <strong>${++resultCount}. ${title}</strong>
+                <div>${content}</div>
+            `;
+            resultsDiv.appendChild(resultDiv);
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+            resultCount = 0;
+        }
+
+        async function testNetlifyConnection() {
+            try {
+                const cacheBust = `?t=${Date.now()}&r=${Math.random()}`;
+                const response = await fetch(`/netlify/functions/add-domain-to-netlify${cacheBust}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
+                    },
+                    body: JSON.stringify({
+                        action: 'test_config'
+                    }),
+                });
+
+                // Use the FIXED approach: read response text once, regardless of status
+                const responseText = await response.text();
+
+                if (!response.ok) {
+                    return {
+                        success: false,
+                        error: `HTTP ${response.status}: ${responseText}`,
+                        isStreamError: false
+                    };
+                }
+
+                let result;
+                try {
+                    result = JSON.parse(responseText);
+                } catch (jsonError) {
+                    return {
+                        success: false,
+                        error: `Invalid JSON response: ${responseText.substring(0, 200)}`,
+                        isStreamError: false
+                    };
+                }
+
+                return {
+                    success: result.success || false,
+                    config: result.config,
+                    siteInfo: result.siteInfo,
+                    error: result.error,
+                    isStreamError: false
+                };
+
+            } catch (error) {
+                return {
+                    success: false,
+                    error: error.message,
+                    isStreamError: error.message.includes('body stream already read')
+                };
+            }
+        }
+
+        async function testWithCacheBust() {
+            addResult('info', 'Testing with Cache Busting', 'Using cache-busted requests to ensure latest code...');
+
+            try {
+                const results = [];
+                
+                for (let i = 0; i < 3; i++) {
+                    addResult('info', `Cache-Bust Test ${i + 1}/3`, 'Testing with forced fresh request...');
+                    
+                    const result = await testNetlifyConnection();
+                    results.push(result);
+                    
+                    if (result.isStreamError) {
+                        addResult('error', '❌ STREAM ERROR STILL EXISTS', `
+                            💥 "Response body stream already read" error detected!<br>
+                            Error: ${result.error}<br>
+                            🔧 The fix may not be applied or cached code is still running
+                        `);
+                        return;
+                    }
+                    
+                    // Small delay between tests
+                    await new Promise(resolve => setTimeout(resolve, 150));
+                }
+
+                const successCount = results.filter(r => r.success).length;
+                const totalTests = results.length;
+
+                if (successCount === totalTests) {
+                    addResult('success', '🎉 ALL CACHE-BUST TESTS PASSED', `
+                        ✅ All ${totalTests} tests with cache busting passed!<br>
+                        🔧 No "Response body stream already read" errors<br>
+                        🚀 Stream fix is working correctly!<br>
+                        💪 Latest code is properly loaded and working
+                    `);
+                } else if (successCount > 0) {
+                    addResult('warning', '⚠️ Partial Success', `
+                        🔧 No stream errors (GOOD)<br>
+                        ✅ ${successCount}/${totalTests} tests passed<br>
+                        ❌ Some connection issues may exist<br>
+                        💡 Check Netlify credentials and configuration
+                    `);
+                } else {
+                    addResult('error', '❌ All Tests Failed', `
+                        🔧 No stream errors detected (GOOD)<br>
+                        💥 But all ${totalTests} connection tests failed<br>
+                        🔍 Check Netlify configuration and credentials<br>
+                        📋 Errors: ${results.map(r => r.error).join(', ')}
+                    `);
+                }
+
+            } catch (error) {
+                addResult('error', '💥 Cache-Bust Test Crashed', `
+                    Critical Error: ${error.message}<br>
+                    Stack: <pre>${error.stack}</pre>
+                `);
+            }
+        }
+
+        async function forceReloadAndTest() {
+            addResult('info', 'Force Reloading Page', 'Reloading page to ensure fresh code...');
+            
+            // Add a small delay to show the message
+            setTimeout(() => {
+                window.location.reload(true);
+            }, 1000);
+        }
+
+        // Auto-load message
+        document.addEventListener('DOMContentLoaded', function() {
+            addResult('info', 'Cache-Bust Test Ready', `
+                Ready to test stream error fixes with cache busting.<br>
+                🔧 This test uses cache-busting headers to ensure latest code is loaded.<br>
+                🚀 Click "🧪 Test with Cache Busting" to verify the fix works
+            `);
+        });
+    </script>
+</body>
+</html>
