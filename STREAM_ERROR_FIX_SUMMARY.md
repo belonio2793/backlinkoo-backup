@@ -59,6 +59,7 @@ if (!response.ok) {
   - `testNetlifyConnection` - Fixed double read pattern
   - `getNetlifySiteInfo` - Fixed status check after stream read
   - `syncDomainsFromNetlify` - Preventive fix for consistency
+  - `checkSyncStatus` - **NEW FIX** - Fixed direct response.json() usage
 - `test-domains-connection.html` - Added stream error fix verification test
 - `test-stream-error-fix.js` - Created dedicated test script
 - `test-complete-stream-fix.html` - Comprehensive test suite for all methods
