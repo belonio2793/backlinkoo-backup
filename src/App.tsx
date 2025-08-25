@@ -50,6 +50,7 @@ const LazyNotFound = lazy(() => import("./pages/NotFound"));
 const LazyTwitterAdGenerator = lazy(() => import("./pages/TwitterAdGenerator"));
 const LazyAffiliate = lazy(() => import("./pages/Affiliate"));
 const LazyDomainsPage = lazy(() => import("./pages/DomainsPage"));
+const LazyEnhancedDomainsPage = lazy(() => import("./pages/EnhancedDomainsPage"));
 const LazyNetlifyTest = lazy(() => import("./pages/NetlifyTest"));
 const LazySupabaseTest = lazy(() => import("./pages/SupabaseTest"));
 const LazyBlogGenerationTest = lazy(() => import("./components/BlogGenerationTest"));
@@ -255,6 +256,17 @@ const App = () => (
             />
             <Route
               path="/domains"
+              element={
+                <DomainErrorBoundary>
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <LazyEnhancedDomainsPage />
+                  </Suspense>
+                </DomainErrorBoundary>
+              }
+            />
+
+            <Route
+              path="/domains/legacy"
               element={
                 <DomainErrorBoundary>
                   <Suspense fallback={<LoadingSpinner />}>
