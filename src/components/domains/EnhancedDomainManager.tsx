@@ -392,7 +392,7 @@ const EnhancedDomainManager = () => {
   };
 
   const showDNSSetup = (domain: Domain) => {
-    const instructions = generateDNSInstructions(domain.domain);
+    const instructions = generateDNSInstructions(domain.name);
     setDnsInstructions(instructions);
     setSelectedDomain(domain);
     setShowDNSModal(true);
