@@ -72,11 +72,9 @@ const EnhancedDomainsPage = () => {
 
   // Real-time subscription
   useEffect(() => {
-    if (user) {
-      loadDomains();
-      setupRealtimeSubscription();
-      checkNetlifyConnection();
-    }
+    loadDomains();
+    setupRealtimeSubscription();
+    checkNetlifyConnection();
   }, [user]);
 
   const setupRealtimeSubscription = () => {
