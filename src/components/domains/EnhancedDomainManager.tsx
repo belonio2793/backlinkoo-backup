@@ -105,15 +105,25 @@ const EnhancedDomainManager = () => {
   const loadDomains = async () => {
     setLoading(true);
     try {
-      console.log('🔍 Loading domains from database...');
+      console.log('🔍 Syncing domains from Netlify...');
 
-      // Load domains from database first - manual sync will handle Netlify sync
-      console.log('📋 Loading domains from database...');
+      // First, sync domains from Netlify to ensure we have latest data
+      try {
+        const syncResult = await syncAllDomainsFromNetlify();
+        if (syncResult.success) {
+          console.log(`✅ Netlify sync complete: ${syncResult.message}`);
+        } else {
+          console.warn(`⚠️ Netlify sync partial: ${syncResult.message}`);
+        }
+      } catch (syncError) {
+        console.warn('⚠️ Netlify sync failed, continuing with database data:', syncError);
+      }
 
-      // Load domains from database (after sync)
+      // Load domains from database (after sync), filtering for Netlify domains only
       const { data: domainData, error } = await supabase
         .from('domains')
         .select('*')
+        .eq('netlify_verified', true)  // Only show domains that are verified on Netlify
         .order('created_at', { ascending: false });
 
       if (error) {
