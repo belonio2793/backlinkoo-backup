@@ -126,7 +126,43 @@ const EnhancedDomainManager = () => {
       }
 
       console.log(`✅ Loaded ${domainData?.length || 0} domains from database`);
-      setDomains(domainData || []);
+
+      // Ensure primary domain is always present
+      const domains = domainData || [];
+      const hasPrimaryDomain = domains.some(d => d.domain === PRIMARY_DOMAIN);
+
+      if (!hasPrimaryDomain) {
+        console.log('🔧 Adding primary domain to database...');
+        try {
+          const { data: newPrimaryDomain, error: insertError } = await supabase
+            .from('domains')
+            .insert({
+              domain: PRIMARY_DOMAIN,
+              status: 'verified',
+              netlify_verified: true,
+              user_id: user?.id || 'system',
+              netlify_site_id: 'ca6261e6-0a59-40b5-a2bc-5b5481ac8809'
+            })
+            .select()
+            .single();
+
+          if (!insertError && newPrimaryDomain) {
+            domains.unshift(newPrimaryDomain); // Add to beginning
+            console.log('✅ Primary domain added successfully');
+          }
+        } catch (insertError) {
+          console.warn('⚠️ Could not add primary domain:', insertError);
+        }
+      }
+
+      // Sort to ensure primary domain appears first
+      const sortedDomains = domains.sort((a, b) => {
+        if (isPrimaryDomain(a.domain)) return -1;
+        if (isPrimaryDomain(b.domain)) return 1;
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      });
+
+      setDomains(sortedDomains);
 
     } catch (error: any) {
       console.error('❌ Failed to load domains:', error);
