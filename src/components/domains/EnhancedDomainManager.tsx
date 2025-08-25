@@ -669,19 +669,55 @@ const EnhancedDomainManager = () => {
               Your Domains ({domains.length})
             </CardTitle>
             <div className="flex gap-2">
+              {/* Edge Function Status Indicator */}
+              <div className="flex items-center gap-2 mr-2">
+                {edgeFunctionStatus === 'deployed' && (
+                  <div className="flex items-center gap-1">
+                    <Zap className="h-4 w-4 text-green-600" />
+                    <span className="text-xs text-green-600 font-medium">Edge Function</span>
+                  </div>
+                )}
+                {edgeFunctionStatus === 'not-deployed' && (
+                  <div className="flex items-center gap-1">
+                    <AlertTriangle className="h-4 w-4 text-orange-500" />
+                    <span className="text-xs text-orange-500 font-medium">Local Sync</span>
+                  </div>
+                )}
+                {edgeFunctionStatus === 'unknown' && (
+                  <div className="flex items-center gap-1">
+                    <Clock className="h-4 w-4 text-gray-400" />
+                    <span className="text-xs text-gray-400 font-medium">Checking...</span>
+                  </div>
+                )}
+              </div>
+
               <Button
                 variant="outline"
                 size="sm"
-                onClick={loadDomains}
+                onClick={testConnection}
                 disabled={loading}
-                title="Sync from Netlify and refresh domains list"
+                title="Test edge function and Netlify connections"
+              >
+                <Shield className="h-4 w-4 mr-2" />
+                Test Connection
+              </Button>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={forceNetlifySync}
+                disabled={loading}
+                title={useEdgeFunction ? "Sync via Supabase Edge Function" : "Sync directly from Netlify"}
+                className={edgeFunctionStatus === 'deployed' ? 'border-green-200 bg-green-50' : ''}
               >
                 {loading ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : edgeFunctionStatus === 'deployed' ? (
+                  <Zap className="h-4 w-4 mr-2 text-green-600" />
                 ) : (
                   <RefreshCw className="h-4 w-4 mr-2" />
                 )}
-                Sync from Netlify
+                {edgeFunctionStatus === 'deployed' ? 'Sync via Edge Function' : 'Sync from Netlify'}
               </Button>
             </div>
           </div>
