@@ -10,6 +10,11 @@ import { Footer } from '@/components/Footer';
 import { useAuthState } from '@/hooks/useAuthState';
 import { toast } from 'sonner';
 import { DomainService, type Domain } from '@/services/domainService';
+import { DomainServiceDev } from '@/services/domainServiceDev';
+
+// Use development service if in development mode
+const isDev = import.meta.env.DEV || window.location.hostname === 'localhost';
+const DomainAPI = isDev ? DomainServiceDev : DomainService;
 
 const DomainsPage = () => {
   const { user } = useAuthState();
