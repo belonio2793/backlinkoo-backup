@@ -136,7 +136,12 @@ const EnhancedDomainManager = () => {
         throw error;
       }
 
-      console.log(`✅ Loaded ${domainData?.length || 0} domains from database`);
+      console.log(`✅ Loaded ${domainData?.length || 0} Netlify domains from database`);
+
+      // Debug: Log domain data structure
+      if (domainData && domainData.length > 0) {
+        console.log('🔍 Domain data sample:', domainData[0]);
+      }
 
       // Ensure primary domain is always present
       const domains = domainData || [];
@@ -668,11 +673,13 @@ const EnhancedDomainManager = () => {
                           </div>
                         ) : (
                           <div className="flex items-center gap-2">
-                            <span className="font-medium text-lg">{domain.domain}</span>
+                            <span className="font-medium text-lg">
+                              {domain.domain || domain.name || 'Unknown Domain'}
+                            </span>
                             <button
-                              onClick={() => window.open(`https://${domain.domain}`, '_blank')}
+                              onClick={() => window.open(`https://${domain.domain || domain.name}`, '_blank')}
                               className="text-gray-400 hover:text-blue-600 transition-colors"
-                              title={`Visit ${domain.domain}`}
+                              title={`Visit ${domain.domain || domain.name}`}
                             >
                               <ExternalLink className="h-4 w-4" />
                             </button>
