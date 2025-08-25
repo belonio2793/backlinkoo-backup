@@ -15,6 +15,16 @@ interface NetlifyDomain {
   updated_at: string;
 }
 
+// Netlify configuration (using your actual values)
+const NETLIFY_SITE_ID = "ca6261e6-0a59-40b5-a2bc-5b5481ac8809";
+const NETLIFY_ACCESS_TOKEN = "nfp_Xngqzk9sydkiKUvfdrqHLSnBCZiH33U8b967";
+const NETLIFY_API = `https://api.netlify.com/api/v1/sites/${NETLIFY_SITE_ID}/domains`;
+
+// Supabase configuration (from environment)
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
