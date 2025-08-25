@@ -589,40 +589,25 @@ const EnhancedDomainManager = () => {
           </div>
         </CardHeader>
 
-        {/* Edge Function Deployment Instructions */}
-        {edgeFunctionStatus === 'not-deployed' && (
-          <div className="px-6 pb-4">
-            <Alert className="border-orange-200 bg-orange-50">
-              <AlertTriangle className="h-4 w-4 text-orange-600" />
-              <AlertDescription className="text-orange-800">
-                <div className="font-medium mb-2">Supabase Edge Function Not Deployed</div>
-                <div className="text-sm mb-2">
-                  For faster and more reliable domain syncing, deploy the Netlify domains edge function:
+        {/* Sync Instructions */}
+        <div className="px-6 pb-4">
+          <Alert className="border-blue-200 bg-blue-50">
+            <Zap className="h-4 w-4 text-blue-600" />
+            <AlertDescription className="text-blue-800">
+              <div className="font-medium mb-2">Domain Sync Process</div>
+              <div className="text-sm">
+                1. Add domains to your list (status: pending) •
+                2. Click "Push to Netlify" to sync them •
+                3. Domains become active in Netlify
+              </div>
+              {syncStats.pending > 0 && (
+                <div className="text-xs mt-2 text-blue-600">
+                  {syncStats.pending} domain(s) ready to sync to Netlify
                 </div>
-                <code className="bg-orange-100 px-2 py-1 rounded text-sm">
-                  supabase functions deploy netlify-domains --no-verify-jwt
-                </code>
-                <div className="text-xs mt-2 text-orange-600">
-                  Currently using direct API sync. Deploy the edge function for production use.
-                </div>
-              </AlertDescription>
-            </Alert>
-          </div>
-        )}
-
-        {edgeFunctionStatus === 'deployed' && (
-          <div className="px-6 pb-4">
-            <Alert className="border-green-200 bg-green-50">
-              <Zap className="h-4 w-4 text-green-600" />
-              <AlertDescription className="text-green-800">
-                <div className="font-medium">Edge Function Active</div>
-                <div className="text-sm text-green-600">
-                  Domain syncing is using the deployed Supabase Edge Function for optimal performance.
-                </div>
-              </AlertDescription>
-            </Alert>
-          </div>
-        )}
+              )}
+            </AlertDescription>
+          </Alert>
+        </div>
 
         <CardContent>
           {loading ? (
