@@ -142,10 +142,21 @@ export class NetlifyDomainSyncService {
         }),
       });
 
-      const result = await response.json();
+      // Clone the response to prevent "body stream already read" errors
+      const responseClone = response.clone();
+
+      let result;
+      try {
+        result = await response.json();
+      } catch (jsonError) {
+        // If JSON parsing fails, try to get text from the clone
+        console.warn('Failed to parse JSON response, trying text:', jsonError);
+        const errorText = await responseClone.text();
+        throw new Error(`Invalid JSON response: ${errorText.substring(0, 200)}`);
+      }
 
       return {
-        success: result.success,
+        success: result.success || false,
         config: result.config,
         siteInfo: result.siteInfo,
         error: result.error
@@ -153,7 +164,7 @@ export class NetlifyDomainSyncService {
 
     } catch (error: any) {
       console.error('❌ Error testing Netlify connection:', error);
-      
+
       return {
         success: false,
         error: error.message
