@@ -62,6 +62,8 @@ if (!response.ok) {
 - `test-domains-connection.html` - Added stream error fix verification test
 - `test-stream-error-fix.js` - Created dedicated test script
 - `test-complete-stream-fix.html` - Comprehensive test suite for all methods
+- `test-stream-fix-with-cache-bust.html` - Cache-busting test for browser cache issues
+- `force-cache-refresh.js` - Script to force browser cache refresh
 
 ## How to Verify the Fix
 
