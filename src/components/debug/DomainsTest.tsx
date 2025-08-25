@@ -5,6 +5,11 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, CheckCircle, XCircle, Database, Globe } from 'lucide-react';
 import { DomainService } from '@/services/domainService';
+import { DomainServiceDev } from '@/services/domainServiceDev';
+
+// Use development service if in development mode
+const isDev = import.meta.env.DEV || window.location.hostname === 'localhost';
+const DomainAPI = isDev ? DomainServiceDev : DomainService;
 import { useAuthState } from '@/hooks/useAuthState';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -54,7 +59,7 @@ const DomainsTest = () => {
       setResults([...testResults]);
 
       try {
-        const netlifyResult = await DomainService.testNetlifyConnection();
+        const netlifyResult = await DomainAPI.testNetlifyConnection();
         if (netlifyResult.success) {
           testResults[2] = { test: 'Netlify Connection', status: 'passed', message: '✅ Connected to Netlify API' };
         } else {
@@ -70,7 +75,7 @@ const DomainsTest = () => {
       setResults([...testResults]);
 
       try {
-        const syncResult = await DomainService.syncFromNetlify(user.id);
+        const syncResult = await DomainAPI.syncFromNetlify(user.id);
         if (syncResult.success) {
           testResults[3] = { test: 'Netlify Sync', status: 'passed', message: `✅ ${syncResult.message}` };
         } else {
@@ -86,7 +91,7 @@ const DomainsTest = () => {
       setResults([...testResults]);
 
       try {
-        const domains = await DomainService.getUserDomains(user.id);
+        const domains = await DomainAPI.getUserDomains(user.id);
         testResults[4] = { test: 'Load User Domains', status: 'passed', message: `✅ Found ${domains.length} domains` };
       } catch (error: any) {
         testResults[4] = { test: 'Load User Domains', status: 'failed', message: `❌ ${error.message}` };
@@ -98,8 +103,8 @@ const DomainsTest = () => {
       setResults([...testResults]);
 
       try {
-        const validDomain = DomainService.isValidDomain('example.com');
-        const invalidDomain = DomainService.isValidDomain('not-a-domain');
+        const validDomain = DomainAPI.isValidDomain('example.com');
+        const invalidDomain = DomainAPI.isValidDomain('not-a-domain');
         
         if (validDomain && !invalidDomain) {
           testResults[5] = { test: 'Domain Validation', status: 'passed', message: '✅ Domain validation working correctly' };
