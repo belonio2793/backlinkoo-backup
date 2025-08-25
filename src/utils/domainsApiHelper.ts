@@ -22,6 +22,21 @@ export interface Domain {
   updated_at?: string;
 }
 
+/**
+ * Map database domain status to UI-friendly status
+ */
+function mapDomainStatus(
+  dbStatus: string,
+  netlifyVerified: boolean,
+  dnsVerified: boolean
+): 'active' | 'pending' | 'verified' | 'unverified' | 'error' {
+  if (dbStatus === 'error') return 'error';
+  if (dbStatus === 'verified' || (netlifyVerified && dnsVerified)) return 'verified';
+  if (dbStatus === 'dns_ready' || netlifyVerified) return 'pending';
+  if (dbStatus === 'active') return 'active';
+  return 'unverified';
+}
+
 export interface NetlifyDomain {
   id: string;
   name: string;
