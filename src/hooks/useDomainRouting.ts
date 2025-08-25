@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { DomainRoutingService, DomainContext, DomainBlogSettings } from '@/services/domainRoutingService';
+import { DomainBlogService, DomainBlogPost } from '@/services/domainBlogService';
 
 export interface UseDomainRoutingReturn {
   domain: DomainContext | null;
