@@ -34,6 +34,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthState } from '@/hooks/useAuthState';
 import { syncAllDomainsFromNetlify, testNetlifyConnection } from '@/services/enhancedNetlifySync';
+import TabbedDomainManager from './TabbedDomainManager';
 
 interface Domain {
   id: string;
@@ -104,20 +105,30 @@ const EnhancedDomainManager = () => {
   const loadDomains = async () => {
     setLoading(true);
     try {
-      console.log('🔍 Loading domains from database...');
+      console.log('🔍 Syncing domains from Netlify...');
 
-      // Load domains from database first - manual sync will handle Netlify sync
-      console.log('📋 Loading domains from database...');
+      // First, sync domains from Netlify to ensure we have latest data
+      try {
+        const syncResult = await syncAllDomainsFromNetlify();
+        if (syncResult.success) {
+          console.log(`✅ Netlify sync complete: ${syncResult.message}`);
+        } else {
+          console.warn(`⚠️ Netlify sync partial: ${syncResult.message}`);
+        }
+      } catch (syncError) {
+        console.warn('⚠️ Netlify sync failed, continuing with database data:', syncError);
+      }
 
-      // Load domains from database (after sync)
+      // Load domains from database (after sync), filtering for Netlify domains only
       const { data: domainData, error } = await supabase
         .from('domains')
         .select('*')
+        .eq('netlify_verified', true)  // Only show domains that are verified on Netlify
         .order('created_at', { ascending: false });
 
       if (error) {
         if (error.code === 'PGRST116') {
-          console.warn('⚠️ Domains table not found');
+          console.warn('⚠�� Domains table not found');
           toast.error('Domains table not found. Please contact support.');
           setDomains([]);
           return;
@@ -125,7 +136,12 @@ const EnhancedDomainManager = () => {
         throw error;
       }
 
-      console.log(`✅ Loaded ${domainData?.length || 0} domains from database`);
+      console.log(`✅ Loaded ${domainData?.length || 0} Netlify domains from database`);
+
+      // Debug: Log domain data structure
+      if (domainData && domainData.length > 0) {
+        console.log('🔍 Domain data sample:', domainData[0]);
+      }
 
       // Ensure primary domain is always present
       const domains = domainData || [];
@@ -548,48 +564,14 @@ const EnhancedDomainManager = () => {
       </div>
 
 
-      {/* Add Domain */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Plus className="h-5 w-5" />
-            Add New Domain
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex gap-3">
-            <Input
-              placeholder="example.com"
-              value={newDomain}
-              onChange={(e) => setNewDomain(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && !addingDomain && addDomain()}
-              disabled={addingDomain}
-              className="flex-1 text-lg py-3"
-            />
-            <Button
-              onClick={addDomain}
-              disabled={addingDomain || !newDomain.trim()}
-              size="lg"
-              className="min-w-[120px]"
-            >
-              {addingDomain ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Adding...
-                </>
-              ) : (
-                <>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Domain
-                </>
-              )}
-            </Button>
-          </div>
-          <p className="text-sm text-gray-500 mt-2">
-            Domain will be added to Netlify and you'll receive DNS setup instructions
-          </p>
-        </CardContent>
-      </Card>
+      {/* Tabbed Domain Manager */}
+      <TabbedDomainManager
+        newDomain={newDomain}
+        setNewDomain={setNewDomain}
+        addingDomain={addingDomain}
+        onAddSingleDomain={addDomain}
+        onRefreshDomains={loadDomains}
+      />
 
       {/* Domains List */}
       <Card>
@@ -605,14 +587,14 @@ const EnhancedDomainManager = () => {
                 size="sm"
                 onClick={loadDomains}
                 disabled={loading}
-                title="Refresh domains list"
+                title="Sync from Netlify and refresh domains list"
               >
                 {loading ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 ) : (
                   <RefreshCw className="h-4 w-4 mr-2" />
                 )}
-                Refresh
+                Sync from Netlify
               </Button>
             </div>
           </div>
@@ -690,32 +672,28 @@ const EnhancedDomainManager = () => {
                             </Button>
                           </div>
                         ) : (
-                          <>
-                            <span className="font-medium text-lg">{domain.domain}</span>
-                            {!isPrimaryDomain(domain.domain) && (
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => startEditing(domain)}
-                                className="h-6 w-6 p-0 text-gray-400 hover:text-blue-600"
-                                title="Edit domain"
-                              >
-                                ✏️
-                              </Button>
-                            )}
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium text-lg">
+                              {domain.domain || domain.name || 'Unknown Domain'}
+                            </span>
                             <button
-                              onClick={() => window.open(`https://${domain.domain}`, '_blank')}
+                              onClick={() => window.open(`https://${domain.domain || domain.name}`, '_blank')}
                               className="text-gray-400 hover:text-blue-600 transition-colors"
+                              title={`Visit ${domain.domain || domain.name}`}
                             >
                               <ExternalLink className="h-4 w-4" />
                             </button>
-                          </>
+                          </div>
                         )}
                       </div>
                       <p className="text-sm text-gray-500">
+                        <span className="font-medium">Source:</span> {domain.is_global ? 'Netlify Sync' : 'Manual'} •
                         Added {new Date(domain.created_at).toLocaleDateString()}
                         {domain.netlify_site_id && ` • Site ID: ${domain.netlify_site_id.substring(0, 8)}...`}
                         {isPrimaryDomain(domain.domain) && ' • Primary Domain'}
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        URL: <code className="bg-gray-100 px-1 rounded">https://{domain.domain}</code>
                       </p>
                       {domain.error_message && (
                         <p className="text-sm text-red-600 mt-1">

@@ -22,6 +22,21 @@ export interface Domain {
   updated_at?: string;
 }
 
+/**
+ * Map database domain status to UI-friendly status
+ */
+function mapDomainStatus(
+  dbStatus: string,
+  netlifyVerified: boolean,
+  dnsVerified: boolean
+): 'active' | 'pending' | 'verified' | 'unverified' | 'error' {
+  if (dbStatus === 'error') return 'error';
+  if (dbStatus === 'verified' || (netlifyVerified && dnsVerified)) return 'verified';
+  if (dbStatus === 'dns_ready' || netlifyVerified) return 'pending';
+  if (dbStatus === 'active') return 'active';
+  return 'unverified';
+}
+
 export interface NetlifyDomain {
   id: string;
   name: string;
@@ -130,7 +145,17 @@ export class DomainsApiHelper {
       }
 
       console.log(`📊 Found ${data?.length || 0} domains in database`);
-      return data || [];
+
+      // Map database rows to Domain interface (domain column → name property)
+      return (data || []).map(row => ({
+        id: row.id,
+        name: row.domain, // Map DB column 'domain' to interface property 'name'
+        site_id: row.netlify_site_id,
+        source: row.is_global ? 'netlify' : 'manual',
+        status: mapDomainStatus(row.status, row.netlify_verified, row.dns_verified),
+        created_at: row.created_at,
+        updated_at: row.updated_at
+      }));
 
     } catch (error) {
       console.error('❌ Fetch domains from database failed:', error);
@@ -149,10 +174,9 @@ export class DomainsApiHelper {
       const { data, error } = await supabase
         .from('domains')
         .insert({
-          name: domainName,
-          site_id: 'ca6261e6-0a59-40b5-a2bc-5b5481ac8809',
-          source: 'manual',
-          status: 'active'
+          domain: domainName, // Use correct DB column name
+          netlify_site_id: 'ca6261e6-0a59-40b5-a2bc-5b5481ac8809',
+          status: 'pending' // Use correct status enum value
         })
         .select()
         .single();
