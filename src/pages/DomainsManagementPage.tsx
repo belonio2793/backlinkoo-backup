@@ -30,20 +30,20 @@ import {
   RefreshCw,
   ExternalLink,
   Trash2,
-  Shield,
   Database,
-  Zap
+  Zap,
+  Wifi,
+  WifiOff
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuthState } from '@/hooks/useAuthState';
-import { NetlifyDomainSyncService } from '@/services/netlifyDomainSync';
+import DomainManagementService from '@/services/domainManagementService';
 
 interface Domain {
   id: string;
   domain: string;
   status: 'pending' | 'verified' | 'removed' | 'error';
-  user_id: string;
+  user_id?: string;
   netlify_verified: boolean;
   dns_verified: boolean;
   error_message?: string;
@@ -54,7 +54,7 @@ interface Domain {
   ssl_status: 'none' | 'pending' | 'issued' | 'error';
 }
 
-const EnhancedDomainsPage = () => {
+const DomainsManagementPage = () => {
   const { user } = useAuthState();
   const [domains, setDomains] = useState<Domain[]>([]);
   const [loading, setLoading] = useState(true);
@@ -64,61 +64,56 @@ const EnhancedDomainsPage = () => {
   const [validationError, setValidationError] = useState('');
   const [processingActions, setProcessingActions] = useState<Set<string>>(new Set());
   const [netlifyConnected, setNetlifyConnected] = useState<boolean | null>(null);
-  const [syncStats, setSyncStats] = useState<{
-    netlifyCount: number;
-    needsSync: boolean;
-    lastSync?: Date;
-  } | null>(null);
+  const [domainStats, setDomainStats] = useState({
+    total: 0,
+    verified: 0,
+    pending: 0,
+    errors: 0,
+    netlifyVerified: 0
+  });
 
-  // Real-time subscription
+  // Initialize component
   useEffect(() => {
-    loadDomains();
-    setupRealtimeSubscription();
-    checkNetlifyConnection();
-  }, [user]);
+    initializePage();
+  }, []);
 
-  const setupRealtimeSubscription = () => {
-    const subscriptionConfig = {
-      event: '*' as const,
-      schema: 'public',
-      table: 'domains',
-      ...(user?.id && { filter: `user_id=eq.${user.id}` })
-    };
+  const initializePage = async () => {
+    await Promise.all([
+      loadDomains(),
+      testNetlifyConnection()
+    ]);
+    
+    // Setup real-time subscription
+    const cleanup = DomainManagementService.setupRealtimeSubscription(
+      (payload) => {
+        console.log('Real-time domain update:', payload);
+        loadDomains(); // Refresh domains on any change
+      },
+      user?.id
+    );
 
-    const channel = supabase
-      .channel('domains-realtime')
-      .on(
-        'postgres_changes',
-        subscriptionConfig,
-        (payload) => {
-          console.log('Real-time domain update:', payload);
-          loadDomains(); // Refresh domains on any change
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    // Cleanup on unmount
+    return cleanup;
   };
 
   const loadDomains = async () => {
-    if (!user?.id) return;
-
     try {
-      const { data, error } = await supabase
-        .from('domains')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+      setLoading(true);
+      const { domains: loadedDomains, error } = await DomainManagementService.getDomains(user?.id);
 
       if (error) {
-        console.error('Failed to load domains:', error);
-        toast.error(`Failed to load domains: ${error.message}`);
+        toast.error(`Failed to load domains: ${error}`);
         return;
       }
 
-      setDomains(data || []);
+      setDomains(loadedDomains);
+      
+      // Update stats
+      const stats = await DomainManagementService.getDomainStats(user?.id);
+      setDomainStats(stats);
+
+      console.log(`✅ Loaded ${loadedDomains.length} domains`);
+
     } catch (error: any) {
       console.error('Load domains error:', error);
       toast.error(`Failed to load domains: ${error.message}`);
@@ -127,82 +122,74 @@ const EnhancedDomainsPage = () => {
     }
   };
 
-  const validateDomain = (domain: string): string | null => {
-    if (!domain.trim()) {
-      return 'Domain cannot be empty';
+  const testNetlifyConnection = async () => {
+    try {
+      const result = await DomainManagementService.testNetlifyConnection();
+      setNetlifyConnected(result.success);
+      
+      if (!result.success) {
+        console.warn('Netlify connection test failed:', result.message);
+      }
+    } catch (error) {
+      console.error('Netlify connection test error:', error);
+      setNetlifyConnected(false);
     }
+  };
 
-    const cleanDomain = domain.trim()
-      .toLowerCase()
-      .replace(/^https?:\/\//, '')
-      .replace(/^www\./, '')
-      .replace(/\/$/, '');
-
-    // Check for valid domain format
-    const domainRegex = /^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z]{2,})+$/;
-    if (!domainRegex.test(cleanDomain)) {
-      return 'Invalid domain format. Use format: example.com';
-    }
-
-    // Check if domain already exists
-    if (domains.some(d => d.domain === cleanDomain)) {
-      return 'Domain already exists in your list';
-    }
-
-    return null;
+  const validateDomainInput = (domain: string) => {
+    const validation = DomainManagementService.validateDomain(domain);
+    setValidationError(validation.isValid ? '' : validation.error || '');
+    return validation.isValid;
   };
 
   const handleDomainInput = (value: string) => {
     setNewDomain(value);
-    const error = validateDomain(value);
-    setValidationError(error || '');
+    validateDomainInput(value);
   };
 
   const addDomain = async () => {
-    if (!user?.id || !newDomain.trim()) return;
-
-    const validation = validateDomain(newDomain);
-    if (validation) {
-      setValidationError(validation);
+    if (!newDomain.trim()) {
+      setValidationError('Domain cannot be empty');
       return;
     }
 
-    const cleanDomain = newDomain.trim()
-      .toLowerCase()
-      .replace(/^https?:\/\//, '')
-      .replace(/^www\./, '')
-      .replace(/\/$/, '');
+    if (!validateDomainInput(newDomain)) {
+      return;
+    }
+
+    // Check if domain already exists
+    const cleanDomain = DomainManagementService.cleanDomain(newDomain);
+    if (domains.some(d => d.domain === cleanDomain)) {
+      setValidationError('Domain already exists in your list');
+      return;
+    }
 
     setProcessingActions(prev => new Set(prev).add('add'));
 
     try {
-      const { error } = await supabase
-        .from('domains')
-        .insert({
-          domain: cleanDomain,
-          user_id: user.id,
-          status: 'pending',
-          netlify_verified: false,
-          dns_verified: false,
-          custom_domain: false,
-          ssl_status: 'none'
-        });
+      const result = await DomainManagementService.addDomain(cleanDomain, user?.id);
 
-      if (error) {
-        if (error.code === '23505') {
-          throw new Error('Domain already exists');
+      if (result.success) {
+        toast.success(result.message || `✅ Domain ${cleanDomain} added successfully`);
+        setNewDomain('');
+        setValidationError('');
+        setAddDialogOpen(false);
+        
+        // Refresh domains to show the new addition
+        await loadDomains();
+        
+        if (!result.netlify_verified) {
+          toast.warning('Domain added to database but failed to sync with Netlify. Check configuration.');
         }
-        throw error;
+      } else {
+        toast.error(result.error || 'Failed to add domain');
+        setValidationError(result.error || 'Failed to add domain');
       }
 
-      toast.success(`✅ Domain ${cleanDomain} added successfully`);
-      setNewDomain('');
-      setValidationError('');
-      setAddDialogOpen(false);
-      
     } catch (error: any) {
       console.error('Add domain error:', error);
       toast.error(`Failed to add domain: ${error.message}`);
+      setValidationError(error.message);
     } finally {
       setProcessingActions(prev => {
         const newSet = new Set(prev);
@@ -213,25 +200,31 @@ const EnhancedDomainsPage = () => {
   };
 
   const deleteDomain = async (domainId: string, domainName: string) => {
-    if (!user?.id) return;
+    if (!confirm(`Are you sure you want to remove ${domainName}? This will remove it from both Supabase and Netlify.`)) {
+      return;
+    }
 
     setProcessingActions(prev => new Set(prev).add(domainId));
 
     try {
-      const { error } = await supabase
-        .from('domains')
-        .delete()
-        .eq('id', domainId)
-        .eq('user_id', user.id);
+      const result = await DomainManagementService.removeDomain(domainName, user?.id);
 
-      if (error) {
-        throw error;
+      if (result.success) {
+        toast.success(result.message || `✅ Domain ${domainName} removed successfully`);
+        
+        // Refresh domains to show the removal
+        await loadDomains();
+        
+        if (!result.netlify_removed) {
+          toast.warning('Domain removed from database but may still exist in Netlify');
+        }
+      } else {
+        toast.error(result.error || 'Failed to remove domain');
       }
 
-      toast.success(`Domain ${domainName} deleted successfully`);
     } catch (error: any) {
       console.error('Delete domain error:', error);
-      toast.error(`Failed to delete domain: ${error.message}`);
+      toast.error(`Failed to remove domain: ${error.message}`);
     } finally {
       setProcessingActions(prev => {
         const newSet = new Set(prev);
@@ -241,61 +234,49 @@ const EnhancedDomainsPage = () => {
     }
   };
 
-  const checkNetlifyConnection = async () => {
-    try {
-      const result = await NetlifyDomainSyncService.testNetlifyConnection();
-      setNetlifyConnected(result.success);
-
-      if (result.success) {
-        // Get sync stats
-        const siteInfo = await NetlifyDomainSyncService.getNetlifySiteInfo();
-        if (siteInfo.success) {
-          setSyncStats({
-            netlifyCount: siteInfo.domains?.length || 0,
-            needsSync: (siteInfo.domains?.length || 0) > domains.length,
-            lastSync: new Date()
-          });
-        }
-      }
-    } catch (error) {
-      console.error('Error checking Netlify connection:', error);
-      setNetlifyConnected(false);
-    }
-  };
-
-  const syncFromNetlify = async () => {
-    if (!user?.id) return;
-
+  const syncDomains = async () => {
     setSyncing(true);
     try {
-      const result = await NetlifyDomainSyncService.syncDomainsFromNetlify(user.id, 'safe');
+      const result = await DomainManagementService.syncDomains(user?.id);
 
       if (result.success) {
+        toast.success('✅ Domains synced successfully');
+        
+        // Show sync results
+        if (result.sync_results) {
+          const { sync_results } = result;
+          toast.info(
+            `Sync completed: ${sync_results.total_netlify} Netlify domains, ` +
+            `${sync_results.total_supabase} Supabase domains, ` +
+            `${sync_results.updated_in_supabase} updated`
+          );
+        }
+        
         await loadDomains();
-        await checkNetlifyConnection(); // Refresh sync stats
-        toast.success('✅ Domains synced from Netlify successfully');
+        await testNetlifyConnection();
       } else {
-        toast.error(`Sync failed: ${result.error}`);
+        toast.error(result.error || 'Failed to sync domains');
       }
+
     } catch (error: any) {
-      console.error('Netlify sync error:', error);
-      toast.error(`Sync failed: ${error.message}`);
+      console.error('Sync error:', error);
+      toast.error(`Failed to sync domains: ${error.message}`);
     } finally {
       setSyncing(false);
     }
   };
 
-  const syncWithNetlify = syncFromNetlify; // Alias for backward compatibility
-
   const getStatusBadge = (domain: Domain) => {
     if (domain.status === 'verified' && domain.netlify_verified) {
-      return <Badge className="bg-green-600">Active</Badge>;
+      return <Badge className="bg-green-600">✅ Active</Badge>;
     } else if (domain.status === 'error') {
-      return <Badge variant="destructive">Error</Badge>;
+      return <Badge variant="destructive">❌ Error</Badge>;
     } else if (domain.netlify_verified) {
-      return <Badge className="bg-blue-600">Netlify Only</Badge>;
+      return <Badge className="bg-blue-600">🌐 Netlify Only</Badge>;
+    } else if (domain.status === 'verified') {
+      return <Badge className="bg-yellow-600">📄 Database Only</Badge>;
     } else {
-      return <Badge variant="secondary">Pending</Badge>;
+      return <Badge variant="secondary">⏳ Pending</Badge>;
     }
   };
 
@@ -309,7 +290,6 @@ const EnhancedDomainsPage = () => {
     }
   };
 
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       <div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -320,29 +300,18 @@ const EnhancedDomainsPage = () => {
             Domain Management
           </h1>
           <p className="text-gray-600 text-lg">
-            Manage your domains with real-time Supabase sync and Netlify integration
+            Manage your domains with real-time Supabase and Netlify synchronization
           </p>
         </div>
 
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
           <Card>
             <CardContent className="flex items-center p-6">
               <Database className="h-8 w-8 text-blue-600 mr-3" />
               <div>
-                <p className="text-2xl font-bold text-gray-900">{domains.length}</p>
-                <p className="text-sm text-gray-600">Supabase Domains</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="flex items-center p-6">
-              <Globe className="h-8 w-8 text-indigo-600 mr-3" />
-              <div>
-                <p className="text-2xl font-bold text-gray-900">
-                  {syncStats?.netlifyCount || '?'}
-                </p>
-                <p className="text-sm text-gray-600">Netlify Domains</p>
+                <p className="text-2xl font-bold text-gray-900">{domainStats.total}</p>
+                <p className="text-sm text-gray-600">Total Domains</p>
               </div>
             </CardContent>
           </Card>
@@ -350,20 +319,34 @@ const EnhancedDomainsPage = () => {
             <CardContent className="flex items-center p-6">
               <CheckCircle2 className="h-8 w-8 text-green-600 mr-3" />
               <div>
-                <p className="text-2xl font-bold text-gray-900">
-                  {domains.filter(d => d.status === 'verified' && d.netlify_verified).length}
-                </p>
-                <p className="text-sm text-gray-600">Synced</p>
+                <p className="text-2xl font-bold text-gray-900">{domainStats.verified}</p>
+                <p className="text-sm text-gray-600">Verified</p>
               </div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="flex items-center p-6">
-              <AlertTriangle className="h-8 w-8 text-orange-600 mr-3" />
+              <Globe className="h-8 w-8 text-indigo-600 mr-3" />
               <div>
-                <p className="text-2xl font-bold text-gray-900">
-                  {domains.filter(d => d.status === 'error').length}
-                </p>
+                <p className="text-2xl font-bold text-gray-900">{domainStats.netlifyVerified}</p>
+                <p className="text-sm text-gray-600">Netlify Synced</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="flex items-center p-6">
+              <Loader2 className="h-8 w-8 text-yellow-600 mr-3" />
+              <div>
+                <p className="text-2xl font-bold text-gray-900">{domainStats.pending}</p>
+                <p className="text-sm text-gray-600">Pending</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="flex items-center p-6">
+              <AlertTriangle className="h-8 w-8 text-red-600 mr-3" />
+              <div>
+                <p className="text-2xl font-bold text-gray-900">{domainStats.errors}</p>
                 <p className="text-sm text-gray-600">Issues</p>
               </div>
             </CardContent>
@@ -371,36 +354,31 @@ const EnhancedDomainsPage = () => {
         </div>
 
         {/* Netlify Connection Status */}
-        {netlifyConnected !== null && (
-          <Alert className={`mb-6 ${netlifyConnected ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
-            <Globe className="h-4 w-4" />
-            <AlertDescription>
-              <div className="flex items-center justify-between">
-                <div>
-                  <strong>Netlify Connection:</strong>
-                  {netlifyConnected ? (
-                    <span className="text-green-700 ml-2">✅ Connected</span>
-                  ) : (
-                    <span className="text-red-700 ml-2">❌ Not Connected</span>
-                  )}
-                  {syncStats && syncStats.needsSync && (
-                    <span className="text-blue-700 ml-2">• Sync Available</span>
-                  )}
-                </div>
-                {netlifyConnected && syncStats?.needsSync && (
-                  <Button
-                    size="sm"
-                    onClick={syncFromNetlify}
-                    disabled={syncing}
-                    className="ml-4"
-                  >
-                    {syncing ? 'Syncing...' : 'Sync Now'}
-                  </Button>
+        <Alert className={`mb-6 ${netlifyConnected ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
+          {netlifyConnected ? <Wifi className="h-4 w-4" /> : <WifiOff className="h-4 w-4" />}
+          <AlertDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <strong>Netlify Connection:</strong>
+                {netlifyConnected ? (
+                  <span className="text-green-700 ml-2">✅ Connected</span>
+                ) : (
+                  <span className="text-red-700 ml-2">❌ Not Connected</span>
                 )}
+                <div className="text-sm text-gray-600 mt-1">
+                  Site ID: ca6261e6-0a59-40b5-a2bc-5b5481ac8809
+                </div>
               </div>
-            </AlertDescription>
-          </Alert>
-        )}
+              <Button
+                size="sm"
+                onClick={testNetlifyConnection}
+                variant="outline"
+              >
+                Test Connection
+              </Button>
+            </div>
+          </AlertDescription>
+        </Alert>
 
         {/* Actions Bar */}
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
@@ -415,7 +393,7 @@ const EnhancedDomainsPage = () => {
               <DialogHeader>
                 <DialogTitle>Add New Domain</DialogTitle>
                 <DialogDescription>
-                  Add a domain to your Supabase database. It will be synced with Netlify automatically.
+                  Add a domain to both Supabase database and Netlify. The domain will be automatically synced.
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4">
@@ -431,9 +409,10 @@ const EnhancedDomainsPage = () => {
                   )}
                 </div>
                 <Alert>
-                  <Globe className="h-4 w-4" />
+                  <Zap className="h-4 w-4" />
                   <AlertDescription>
-                    Domain will be validated and added to your database. Real-time sync with Netlify will occur automatically.
+                    Domain will be added to Supabase database and registered as a Netlify domain alias.
+                    Two-way sync ensures consistency across both platforms.
                   </AlertDescription>
                 </Alert>
               </div>
@@ -460,17 +439,16 @@ const EnhancedDomainsPage = () => {
 
           <Button
             variant="outline"
-            onClick={syncFromNetlify}
+            onClick={syncDomains}
             disabled={syncing || netlifyConnected === false}
             size="lg"
-            className={netlifyConnected === false ? 'opacity-50' : ''}
           >
             {syncing ? (
               <Loader2 className="h-5 w-5 mr-2 animate-spin" />
             ) : (
               <RefreshCw className="h-5 w-5 mr-2" />
             )}
-            {netlifyConnected === false ? 'Netlify Unavailable' : 'Sync from Netlify'}
+            {netlifyConnected === false ? 'Netlify Unavailable' : 'Sync Domains'}
           </Button>
 
           <Button 
@@ -538,6 +516,11 @@ const EnhancedDomainsPage = () => {
                             <Badge variant="outline" className="text-xs">Custom</Badge>
                           )}
                         </div>
+                        {domain.error_message && (
+                          <div className="text-xs text-red-600 mt-1">
+                            {domain.error_message}
+                          </div>
+                        )}
                       </TableCell>
                       <TableCell>
                         {getStatusBadge(domain)}
@@ -593,22 +576,6 @@ const EnhancedDomainsPage = () => {
                 </TableBody>
               </Table>
             )}
-
-            {domains.some(d => d.error_message) && (
-              <Alert className="mt-4 border-red-200">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertDescription>
-                  <strong>Some domains have errors:</strong>
-                  {domains
-                    .filter(d => d.error_message)
-                    .map(d => (
-                      <div key={d.id} className="text-sm mt-1">
-                        {d.domain}: {d.error_message}
-                      </div>
-                    ))}
-                </AlertDescription>
-              </Alert>
-            )}
           </CardContent>
         </Card>
 
@@ -616,8 +583,9 @@ const EnhancedDomainsPage = () => {
         <Alert className="mt-6">
           <Zap className="h-4 w-4" />
           <AlertDescription>
-            <strong>Real-time sync enabled:</strong> Changes to your domains are automatically synced between Supabase and Netlify. 
-            Domain validation happens instantly as you type.
+            <strong>Real-time two-way sync enabled:</strong> Changes to your domains are automatically 
+            synchronized between Supabase database and Netlify domain aliases. Domain validation 
+            happens instantly, and the interface reflects the current state of both systems.
           </AlertDescription>
         </Alert>
       </div>
@@ -625,4 +593,4 @@ const EnhancedDomainsPage = () => {
   );
 };
 
-export default EnhancedDomainsPage;
+export default DomainsManagementPage;
