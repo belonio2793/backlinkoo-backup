@@ -210,59 +210,29 @@ const EnhancedDomainManager = () => {
     }
   };
 
-  const forceNetlifySync = async () => {
+  const syncDomainsToNetlify = async () => {
     setLoading(true);
     try {
-      console.log('🔄 Force syncing from Netlify...');
+      console.log('🔄 Syncing domains from Supabase to Netlify...');
+      toast.loading('Syncing domains to Netlify...', { id: 'netlify-sync' });
 
-      if (useEdgeFunction) {
-        // Use Supabase Edge Function for sync
-        toast.loading('Syncing domains via Supabase Edge Function...', { id: 'netlify-sync' });
+      const syncResult = await syncToNetlify();
 
-        const syncResult = await syncDomainsViaEdgeFunction();
-
-        if (syncResult.success) {
-          toast.success(`✅ ${syncResult.message}`, { id: 'netlify-sync' });
-          console.log(`✅ Edge function sync successful: ${syncResult.message}`);
-          setEdgeFunctionStatus('deployed');
-        } else {
-          toast.error(`Edge function sync failed: ${syncResult.errors.join(', ')}`, { id: 'netlify-sync' });
-          console.error('❌ Edge function sync failed:', syncResult.errors);
-
-          // Fall back to local sync if edge function fails
-          console.log('🔄 Falling back to local sync...');
-          toast.loading('Falling back to local sync...', { id: 'netlify-sync' });
-          const fallbackResult = await syncAllDomainsFromNetlify();
-
-          if (fallbackResult.success) {
-            toast.success(`✅ Local sync successful: ${fallbackResult.message}`, { id: 'netlify-sync' });
-            setEdgeFunctionStatus('not-deployed');
-          } else {
-            toast.error(`Both edge function and local sync failed`, { id: 'netlify-sync' });
-            throw new Error('All sync methods failed');
-          }
-        }
+      if (syncResult.success) {
+        toast.success(`✅ ${syncResult.message}`, { id: 'netlify-sync' });
+        console.log(`✅ Sync successful: ${syncResult.message}`);
+        setLastSync(new Date());
       } else {
-        // Use local sync service
-        toast.loading('Syncing domains locally...', { id: 'netlify-sync' });
-
-        const syncResult = await syncAllDomainsFromNetlify();
-
-        if (syncResult.success) {
-          toast.success(`✅ ${syncResult.message}`, { id: 'netlify-sync' });
-          console.log(`✅ Local sync successful: ${syncResult.message}`);
-        } else {
-          toast.error(`Local sync failed: ${syncResult.errors.join(', ')}`, { id: 'netlify-sync' });
-          console.error('❌ Local sync failed:', syncResult.errors);
-          throw new Error('Local sync failed');
-        }
+        toast.error(`Sync failed: ${syncResult.message}`, { id: 'netlify-sync' });
+        console.error('❌ Sync failed:', syncResult.error);
       }
 
-      // Reload domains from database after sync
+      // Reload domains and stats after sync
       await loadDomains();
+      await loadSyncStats();
 
     } catch (error: any) {
-      console.error('❌ Force sync error:', error);
+      console.error('❌ Sync error:', error);
       toast.error(`Sync failed: ${error.message}`, { id: 'netlify-sync' });
     } finally {
       setLoading(false);
