@@ -64,6 +64,7 @@ const EnhancedDomainsPage = () => {
   const [validationError, setValidationError] = useState('');
   const [processingActions, setProcessingActions] = useState<Set<string>>(new Set());
   const [netlifyConnected, setNetlifyConnected] = useState<boolean | null>(null);
+  const [checkingConnection, setCheckingConnection] = useState(false);
   const [syncStats, setSyncStats] = useState<{
     netlifyCount: number;
     needsSync: boolean;
@@ -242,11 +243,21 @@ const EnhancedDomainsPage = () => {
   };
 
   const checkNetlifyConnection = async () => {
+    // Prevent multiple simultaneous calls
+    if (checkingConnection) {
+      console.log('🔄 Netlify connection check already in progress, skipping...');
+      return;
+    }
+
     try {
+      setCheckingConnection(true);
+      console.log('🔍 Starting Netlify connection check...');
+
       const result = await NetlifyDomainSyncService.testNetlifyConnection();
       setNetlifyConnected(result.success);
 
       if (result.success) {
+        console.log('✅ Netlify connection successful, getting sync stats...');
         // Get sync stats
         const siteInfo = await NetlifyDomainSyncService.getNetlifySiteInfo();
         if (siteInfo.success) {
@@ -255,11 +266,18 @@ const EnhancedDomainsPage = () => {
             needsSync: (siteInfo.domains?.length || 0) > domains.length,
             lastSync: new Date()
           });
+          console.log('📊 Sync stats updated:', siteInfo.domains?.length || 0, 'Netlify domains');
+        } else {
+          console.warn('⚠️ Failed to get sync stats:', siteInfo.error);
         }
+      } else {
+        console.warn('❌ Netlify connection failed:', result.error);
       }
-    } catch (error) {
-      console.error('Error checking Netlify connection:', error);
+    } catch (error: any) {
+      console.error('❌ Error checking Netlify connection:', error);
       setNetlifyConnected(false);
+    } finally {
+      setCheckingConnection(false);
     }
   };
 
