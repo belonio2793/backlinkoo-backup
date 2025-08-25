@@ -79,6 +79,7 @@ export default defineConfig(({ mode }) => ({
     __DEV__: mode === 'development',
   },
   optimizeDeps: {
+    disabled: false,
     include: [
       'react',
       'react-dom',
