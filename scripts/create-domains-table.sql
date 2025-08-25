@@ -1,88 +1,45 @@
--- Domains table for DNS management and validation
-CREATE TABLE IF NOT EXISTS domains (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE,
-  domain text NOT NULL,
-  status text DEFAULT 'pending' CHECK (status IN ('pending', 'validating', 'active', 'failed', 'expired')),
-  
-  -- DNS Configuration
-  verification_token text NOT NULL DEFAULT 'blo-' || substr(gen_random_uuid()::text, 1, 12),
-  required_a_record inet,
-  required_cname text,
-  hosting_provider text DEFAULT 'backlinkoo',
-  
-  -- Validation tracking
-  dns_validated boolean DEFAULT false,
-  txt_record_validated boolean DEFAULT false,
-  a_record_validated boolean DEFAULT false,
-  cname_validated boolean DEFAULT false,
-  ssl_enabled boolean DEFAULT false,
-  
-  -- Metadata
-  last_validation_attempt timestamptz,
-  validation_error text,
-  auto_retry_count integer DEFAULT 0,
-  max_retries integer DEFAULT 10,
-  
-  -- Blog integration
-  blog_enabled boolean DEFAULT false,
-  blog_subdirectory text DEFAULT 'blog',
-  pages_published integer DEFAULT 0,
-  
-  created_at timestamptz DEFAULT now(),
-  updated_at timestamptz DEFAULT now(),
-  
-  UNIQUE(user_id, domain)
+-- domains table schema
+-- This table stores all domains for the automation link building system
+
+create table if not exists domains (
+  id uuid default uuid_generate_v4() primary key,
+  name text not null unique,            -- domain name (ex: example.com)
+  site_id text,                         -- Netlify site ID (links to your site)
+  source text default 'manual',         -- 'manual' or 'netlify'
+  status text default 'active',         -- 'active', 'pending', 'verified', 'unverified', 'error'
+  created_at timestamptz default now(), -- when added
+  updated_at timestamptz default now()  -- when last updated
 );
 
--- Enable RLS
-ALTER TABLE domains ENABLE ROW LEVEL SECURITY;
+-- Create index for faster lookups
+create index if not exists idx_domains_name on domains(name);
+create index if not exists idx_domains_source on domains(source);
+create index if not exists idx_domains_status on domains(status);
 
--- RLS Policies
-CREATE POLICY "Users can view own domains" ON domains
-  FOR SELECT USING (auth.uid() = user_id);
+-- Keep updated_at fresh with trigger
+create or replace function update_timestamp()
+returns trigger as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$ language plpgsql;
 
-CREATE POLICY "Users can insert own domains" ON domains
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
+-- Drop existing trigger if it exists
+drop trigger if exists update_domains_updated_at on domains;
 
-CREATE POLICY "Users can update own domains" ON domains
-  FOR UPDATE USING (auth.uid() = user_id);
+-- Create trigger for updated_at
+create trigger update_domains_updated_at
+  before update on domains
+  for each row
+  execute procedure update_timestamp();
 
-CREATE POLICY "Users can delete own domains" ON domains
-  FOR DELETE USING (auth.uid() = user_id);
+-- Insert some example data (optional)
+-- insert into domains (name, site_id, source, status) values 
+--   ('example.com', 'ca6261e6-0a59-40b5-a2bc-5b5481ac8809', 'manual', 'active'),
+--   ('leadpages.org', 'ca6261e6-0a59-40b5-a2bc-5b5481ac8809', 'netlify', 'verified')
+-- on conflict (name) do nothing;
 
--- Indexes for performance
-CREATE INDEX IF NOT EXISTS idx_domains_user_id ON domains(user_id);
-CREATE INDEX IF NOT EXISTS idx_domains_status ON domains(status);
-CREATE INDEX IF NOT EXISTS idx_domains_domain ON domains(domain);
-CREATE INDEX IF NOT EXISTS idx_domains_validation ON domains(dns_validated, status);
-
--- Function to update updated_at timestamp
-CREATE OR REPLACE FUNCTION update_domains_updated_at()
-RETURNS TRIGGER AS $$
-BEGIN
-  NEW.updated_at = now();
-  RETURN NEW;
-END;
-$$ language 'plpgsql';
-
--- Trigger for updated_at
-DROP TRIGGER IF EXISTS update_domains_updated_at ON domains;
-CREATE TRIGGER update_domains_updated_at
-  BEFORE UPDATE ON domains
-  FOR EACH ROW EXECUTE FUNCTION update_domains_updated_at();
-
--- DNS validation attempts table
-CREATE TABLE IF NOT EXISTS domain_validation_logs (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  domain_id uuid REFERENCES domains(id) ON DELETE CASCADE,
-  validation_type text NOT NULL, -- 'txt', 'a', 'cname', 'full'
-  success boolean NOT NULL,
-  error_message text,
-  dns_response jsonb,
-  created_at timestamptz DEFAULT now()
-);
-
--- Index for validation logs
-CREATE INDEX IF NOT EXISTS idx_domain_validation_logs_domain_id ON domain_validation_logs(domain_id);
-CREATE INDEX IF NOT EXISTS idx_domain_validation_logs_created_at ON domain_validation_logs(created_at);
+-- Grant permissions (adjust as needed)
+grant select, insert, update, delete on domains to authenticated;
+grant select, insert, update, delete on domains to anon;
