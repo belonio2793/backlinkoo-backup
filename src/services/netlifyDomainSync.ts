@@ -38,7 +38,7 @@ export class NetlifyDomainSyncService {
   static async syncDomainsFromNetlify(userId: string, syncMode: 'safe' | 'force' = 'safe'): Promise<NetlifySyncResult> {
     try {
       console.log('🔄 Starting Netlify-to-Supabase domain sync...');
-      
+
       const response = await fetch('/netlify/functions/sync-domains-from-netlify', {
         method: 'POST',
         headers: {
@@ -50,7 +50,18 @@ export class NetlifyDomainSyncService {
         }),
       });
 
-      const result = await response.json();
+      // Clone the response to prevent "body stream already read" errors
+      const responseClone = response.clone();
+
+      let result;
+      try {
+        result = await response.json();
+      } catch (jsonError) {
+        // If JSON parsing fails, try to get text from the clone
+        console.warn('Failed to parse JSON response, trying text:', jsonError);
+        const errorText = await responseClone.text();
+        throw new Error(`Invalid JSON response: ${errorText.substring(0, 200)}`);
+      }
 
       if (!response.ok) {
         throw new Error(result.error || `HTTP ${response.status}`);
@@ -71,7 +82,7 @@ export class NetlifyDomainSyncService {
 
     } catch (error: any) {
       console.error('❌ Netlify sync error:', error);
-      
+
       return {
         success: false,
         message: `Sync failed: ${error.message}`,
