@@ -7,20 +7,9 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuthState } from '@/hooks/useAuthState';
 import { toast } from 'sonner';
-
-interface Domain {
-  id: string;
-  domain: string;
-  status: 'pending' | 'verified' | 'error';
-  user_id: string;
-  netlify_verified: boolean;
-  created_at: string;
-  netlify_site_id?: string;
-  error_message?: string;
-}
+import { DomainService, type Domain } from '@/services/domainService';
 
 const DomainsPage = () => {
   const { user } = useAuthState();
@@ -39,22 +28,22 @@ const DomainsPage = () => {
   }, [user]);
 
   const loadDomains = async () => {
+    if (!user?.id) return;
+
     setLoading(true);
     try {
       // First sync domains from Netlify
-      await syncFromNetlify();
-      
+      const syncResult = await DomainService.syncFromNetlify(user.id);
+      if (syncResult.success) {
+        console.log(syncResult.message);
+      } else {
+        console.warn('Netlify sync failed:', syncResult.error);
+      }
+
       // Load domains from database
-      const { data, error } = await supabase
-        .from('domains')
-        .select('*')
-        .eq('user_id', user?.id)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      setDomains(data || []);
-      console.log(`Loaded ${data?.length || 0} domains`);
+      const domains = await DomainService.getUserDomains(user.id);
+      setDomains(domains);
+      console.log(`Loaded ${domains.length} domains`);
     } catch (error: any) {
       console.error('Failed to load domains:', error);
       toast.error(`Failed to load domains: ${error.message}`);
@@ -63,123 +52,25 @@ const DomainsPage = () => {
     }
   };
 
-  const syncFromNetlify = async () => {
-    try {
-      // Get domains from Netlify
-      const response = await fetch('/netlify/functions/add-domain-to-netlify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'get_site_info' }),
-      });
-
-      const result = await response.json();
-      
-      if (result.success && result.domains) {
-        console.log('Netlify domains found:', result.domains);
-        
-        // Sync each domain to database
-        for (const domain of result.domains) {
-          await upsertDomain(domain);
-        }
-      }
-    } catch (error) {
-      console.warn('Netlify sync failed:', error);
-    }
-  };
-
-  const upsertDomain = async (domainName: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('domains')
-        .upsert({
-          domain: domainName,
-          user_id: user?.id,
-          status: 'verified',
-          netlify_verified: true,
-          netlify_site_id: NETLIFY_SITE_ID,
-        }, {
-          onConflict: 'user_id,domain',
-          ignoreDuplicates: false
-        })
-        .select();
-
-      if (error && !error.message.includes('duplicate key')) {
-        console.error('Failed to upsert domain:', error);
-      }
-    } catch (error) {
-      console.warn('Domain upsert warning:', error);
-    }
-  };
-
   const addDomain = async () => {
-    if (!newDomain.trim()) return;
+    if (!newDomain.trim() || !user?.id) return;
 
-    const cleanedDomain = newDomain.trim()
-      .toLowerCase()
-      .replace(/^https?:\/\//, '')
-      .replace(/^www\./, '')
-      .replace(/\/$/, '');
+    if (!DomainService.isValidDomain(newDomain)) {
+      toast.error('Please enter a valid domain name');
+      return;
+    }
 
     setAdding(true);
     try {
-      // First add to database
-      const { data: dbDomain, error: dbError } = await supabase
-        .from('domains')
-        .insert({
-          domain: cleanedDomain,
-          user_id: user?.id,
-          status: 'pending',
-          netlify_verified: false,
-        })
-        .select()
-        .single();
-
-      if (dbError) {
-        if (dbError.code === '23505') {
-          throw new Error('Domain already exists');
-        }
-        throw dbError;
-      }
-
-      // Add to Netlify
-      const response = await fetch('/netlify/functions/add-domain-to-netlify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          domain: cleanedDomain,
-          domainId: dbDomain.id 
-        }),
-      });
-
-      const result = await response.json();
+      const result = await DomainService.addDomain(newDomain, user.id);
 
       if (result.success) {
-        // Update database with success
-        await supabase
-          .from('domains')
-          .update({
-            status: 'verified',
-            netlify_verified: true,
-            netlify_site_id: NETLIFY_SITE_ID,
-          })
-          .eq('id', dbDomain.id);
-
-        toast.success(`✅ ${cleanedDomain} added successfully!`);
+        toast.success(`✅ ${result.message}`);
         setNewDomain('');
+        await loadDomains();
       } else {
-        // Update database with error
-        await supabase
-          .from('domains')
-          .update({
-            status: 'error',
-            error_message: result.error,
-          })
-          .eq('id', dbDomain.id);
-
-        toast.error(`Failed to add to Netlify: ${result.error}`);
+        toast.error(result.message);
       }
-
-      await loadDomains();
     } catch (error: any) {
       console.error('Add domain error:', error);
       toast.error(`Failed to add domain: ${error.message}`);
@@ -189,18 +80,18 @@ const DomainsPage = () => {
   };
 
   const removeDomain = async (domain: Domain) => {
+    if (!user?.id) return;
+
     setRemoving(domain.id);
     try {
-      // Remove from database
-      const { error } = await supabase
-        .from('domains')
-        .delete()
-        .eq('id', domain.id);
+      const result = await DomainService.removeDomain(domain.id, user.id);
 
-      if (error) throw error;
-
-      toast.success(`✅ ${domain.domain} removed successfully`);
-      await loadDomains();
+      if (result.success) {
+        toast.success(`✅ ${result.message}`);
+        await loadDomains();
+      } else {
+        toast.error(result.message);
+      }
     } catch (error: any) {
       console.error('Remove domain error:', error);
       toast.error(`Failed to remove domain: ${error.message}`);
@@ -220,7 +111,7 @@ const DomainsPage = () => {
   };
 
   const isPrimaryDomain = (domain: string) => {
-    return domain === 'backlinkoo.com';
+    return DomainService.isPrimaryDomain(domain);
   };
 
   if (!user) {
