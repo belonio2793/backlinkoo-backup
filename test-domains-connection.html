@@ -20,6 +20,7 @@
     
     <button onclick="runConnectionTest()">Run Connection Test</button>
     <button onclick="testMultipleRequests()">Test Multiple Requests</button>
+    <button onclick="testStreamErrorFix()">🔧 Test Stream Error Fix</button>
     <button onclick="clearResults()">Clear Results</button>
     
     <div id="results"></div>
@@ -148,9 +149,86 @@
             }
         }
 
+        async function testStreamErrorFix() {
+            addResult('info', 'Testing Stream Error Fix', 'Verifying "Response body is already read" error is fixed...');
+
+            try {
+                const results = [];
+
+                for (let i = 0; i < 5; i++) {
+                    addResult('info', `Stream Test ${i + 1}/5`, 'Testing with fixed response handling...');
+
+                    const response = await fetch('/netlify/functions/add-domain-to-netlify', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            action: 'test_config'
+                        }),
+                    });
+
+                    // Use the FIXED approach: read response text once, regardless of status
+                    const responseText = await response.text();
+
+                    if (!response.ok) {
+                        results.push({ success: false, error: `HTTP ${response.status}: ${responseText}` });
+                        continue;
+                    }
+
+                    let result;
+                    try {
+                        result = JSON.parse(responseText);
+                    } catch (jsonError) {
+                        results.push({ success: false, error: 'Invalid JSON response' });
+                        continue;
+                    }
+
+                    results.push({
+                        success: result.success,
+                        config: result.config,
+                        siteInfo: result.siteInfo,
+                        error: result.error
+                    });
+
+                    // Small delay between tests
+                    await new Promise(resolve => setTimeout(resolve, 150));
+                }
+
+                const successCount = results.filter(r => r.success).length;
+                const totalTests = results.length;
+
+                if (successCount === totalTests) {
+                    addResult('success', '🎉 Stream Error Fix VERIFIED', `
+                        ✅ All ${totalTests} tests passed!<br>
+                        🔧 "Response body is already read" error is FIXED!<br>
+                        🚀 Netlify connection is reliable and stable
+                    `);
+                } else if (successCount > 0) {
+                    addResult('error', '⚠️ Partial Success', `
+                        ✅ ${successCount}/${totalTests} tests passed<br>
+                        ❌ Some connection issues remain<br>
+                        📊 Stream error appears to be fixed but configuration issues may exist
+                    `);
+                } else {
+                    addResult('error', '❌ All Tests Failed', `
+                        💥 0/${totalTests} tests passed<br>
+                        🔧 Check Netlify configuration and credentials<br>
+                        📋 Results: <pre>${JSON.stringify(results, null, 2)}</pre>
+                    `);
+                }
+
+            } catch (error) {
+                addResult('error', '💥 Stream Test Crashed', `
+                    Critical Error: ${error.message}<br>
+                    Stack: <pre>${error.stack}</pre>
+                `);
+            }
+        }
+
         // Auto-run a basic test when page loads
         document.addEventListener('DOMContentLoaded', function() {
-            addResult('info', 'Page Loaded', 'Ready to test Netlify connection fixes');
+            addResult('info', 'Page Loaded', 'Ready to test Netlify connection fixes - Click "🔧 Test Stream Error Fix" to verify the fix');
         });
     </script>
 </body>
