@@ -34,6 +34,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthState } from '@/hooks/useAuthState';
 import { syncAllDomainsFromNetlify, testNetlifyConnection } from '@/services/enhancedNetlifySync';
+import TabbedDomainManager from './TabbedDomainManager';
 
 interface Domain {
   id: string;
@@ -548,48 +549,14 @@ const EnhancedDomainManager = () => {
       </div>
 
 
-      {/* Add Domain */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Plus className="h-5 w-5" />
-            Add New Domain
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex gap-3">
-            <Input
-              placeholder="example.com"
-              value={newDomain}
-              onChange={(e) => setNewDomain(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && !addingDomain && addDomain()}
-              disabled={addingDomain}
-              className="flex-1 text-lg py-3"
-            />
-            <Button
-              onClick={addDomain}
-              disabled={addingDomain || !newDomain.trim()}
-              size="lg"
-              className="min-w-[120px]"
-            >
-              {addingDomain ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Adding...
-                </>
-              ) : (
-                <>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Domain
-                </>
-              )}
-            </Button>
-          </div>
-          <p className="text-sm text-gray-500 mt-2">
-            Domain will be added to Netlify and you'll receive DNS setup instructions
-          </p>
-        </CardContent>
-      </Card>
+      {/* Tabbed Domain Manager */}
+      <TabbedDomainManager
+        newDomain={newDomain}
+        setNewDomain={setNewDomain}
+        addingDomain={addingDomain}
+        onAddSingleDomain={addDomain}
+        onRefreshDomains={loadDomains}
+      />
 
       {/* Domains List */}
       <Card>
