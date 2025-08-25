@@ -52,6 +52,7 @@ const LazyAffiliate = lazy(() => import("./pages/Affiliate"));
 const LazyDomainsPage = lazy(() => import("./pages/DomainsPage"));
 const LazyEnhancedDomainsPage = lazy(() => import("./pages/EnhancedDomainsPage"));
 const LazyNetlifyTest = lazy(() => import("./pages/NetlifyTest"));
+const LazyNetlifyConnectionTest = lazy(() => import("./pages/NetlifyConnectionTest"));
 const LazySupabaseTest = lazy(() => import("./pages/SupabaseTest"));
 const LazyBlogGenerationTest = lazy(() => import("./components/BlogGenerationTest"));
 const LazyAuthFix = lazy(() => import("./pages/AuthFix"));
@@ -281,6 +282,15 @@ const App = () => (
               element={
                 <Suspense fallback={<LoadingSpinner />}>
                   <LazyNetlifyTest />
+                </Suspense>
+              }
+            />
+
+            <Route
+              path="/netlify-connection-test"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyNetlifyConnectionTest />
                 </Suspense>
               }
             />

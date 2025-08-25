@@ -38,7 +38,7 @@ export class NetlifyDomainSyncService {
   static async syncDomainsFromNetlify(userId: string, syncMode: 'safe' | 'force' = 'safe'): Promise<NetlifySyncResult> {
     try {
       console.log('🔄 Starting Netlify-to-Supabase domain sync...');
-      
+
       const response = await fetch('/netlify/functions/sync-domains-from-netlify', {
         method: 'POST',
         headers: {
@@ -50,10 +50,21 @@ export class NetlifyDomainSyncService {
         }),
       });
 
-      const result = await response.json();
+      // Read response text once, regardless of status
+      const responseText = await response.text();
 
+      // Handle non-OK responses
       if (!response.ok) {
-        throw new Error(result.error || `HTTP ${response.status}`);
+        throw new Error(`HTTP ${response.status}: ${responseText}`);
+      }
+
+      let result;
+      try {
+        result = JSON.parse(responseText);
+      } catch (jsonError) {
+        console.warn('Failed to parse JSON response:', jsonError);
+        console.warn('Response text:', responseText.substring(0, 500));
+        throw new Error(`Invalid JSON response: ${responseText.substring(0, 200)}`);
       }
 
       if (!result.success) {
@@ -71,7 +82,7 @@ export class NetlifyDomainSyncService {
 
     } catch (error: any) {
       console.error('❌ Netlify sync error:', error);
-      
+
       return {
         success: false,
         message: `Sync failed: ${error.message}`,
@@ -100,9 +111,24 @@ export class NetlifyDomainSyncService {
         }),
       });
 
-      const result = await response.json();
+      // Read response text once, regardless of status
+      const responseText = await response.text();
 
-      if (!response.ok || !result.success) {
+      // Handle non-OK responses
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${responseText}`);
+      }
+
+      let result;
+      try {
+        result = JSON.parse(responseText);
+      } catch (jsonError) {
+        console.warn('Failed to parse JSON response:', jsonError);
+        console.warn('Response text:', responseText.substring(0, 500));
+        throw new Error(`Invalid JSON response: ${responseText.substring(0, 200)}`);
+      }
+
+      if (!result.success) {
         throw new Error(result.error || 'Failed to get site info');
       }
 
@@ -114,7 +140,7 @@ export class NetlifyDomainSyncService {
 
     } catch (error: any) {
       console.error('❌ Error getting Netlify site info:', error);
-      
+
       return {
         success: false,
         error: error.message
@@ -142,10 +168,25 @@ export class NetlifyDomainSyncService {
         }),
       });
 
-      const result = await response.json();
+      // Read response text once, regardless of status
+      const responseText = await response.text();
+
+      // Handle non-OK responses
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${responseText}`);
+      }
+
+      let result;
+      try {
+        result = JSON.parse(responseText);
+      } catch (jsonError) {
+        console.warn('Failed to parse JSON response:', jsonError);
+        console.warn('Response text:', responseText.substring(0, 500));
+        throw new Error(`Invalid JSON response: ${responseText.substring(0, 200)}`);
+      }
 
       return {
-        success: result.success,
+        success: result.success || false,
         config: result.config,
         siteInfo: result.siteInfo,
         error: result.error
@@ -153,7 +194,7 @@ export class NetlifyDomainSyncService {
 
     } catch (error: any) {
       console.error('❌ Error testing Netlify connection:', error);
-      
+
       return {
         success: false,
         error: error.message
@@ -254,7 +295,22 @@ Sync Results:
         }),
       });
 
-      const result = await response.json();
+      // Read response text once, regardless of status
+      const responseText = await response.text();
+
+      // Handle non-OK responses
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${responseText}`);
+      }
+
+      let result;
+      try {
+        result = JSON.parse(responseText);
+      } catch (jsonError) {
+        console.warn('Failed to parse JSON response:', jsonError);
+        console.warn('Response text:', responseText.substring(0, 500));
+        throw new Error(`Invalid JSON response: ${responseText.substring(0, 200)}`);
+      }
       
       const netlifyDomains = new Set(netlifyInfo.domains || []);
       const supabaseDomains = new Set(result.supabaseDomains || []);

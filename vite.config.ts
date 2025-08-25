@@ -6,7 +6,7 @@ export default defineConfig({
   root: "./",
   server: {
     host: "::",
-    port: 8081,
+    port: 3001,
   },
   plugins: [react()],
   resolve: {
