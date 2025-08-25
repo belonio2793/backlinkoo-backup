@@ -7,16 +7,6 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
-    fs: {
-      deny: [
-        '**/test-*.html',
-        '**/debug-*.html',
-        '**/emergency-*.html',
-        '**/fix-*.html',
-        '**/investigate-*.html',
-        '**/admin-*.html'
-      ]
-    }
   },
   plugins: [
     react(),
