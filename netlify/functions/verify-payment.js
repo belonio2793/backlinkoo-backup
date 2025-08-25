@@ -69,6 +69,17 @@ exports.handler = async (event, context) => {
       };
     }
 
+    if (!Stripe) {
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({
+          verified: false,
+          error: 'Stripe module not available'
+        })
+      };
+    }
+
     const stripe = new Stripe(stripeSecretKey, {
       apiVersion: "2023-10-16",
     });
