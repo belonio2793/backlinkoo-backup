@@ -27,14 +27,12 @@ import {
   CheckCircle,
   Clock,
   AlertCircle,
-  Zap
+  Zap,
+  Shield
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthState } from '@/hooks/useAuthState';
-import NetlifyConfigHelper from './NetlifyConfigHelper';
-import ManualDomainSync from './ManualDomainSync';
-import DatabaseDomainChecker from './DatabaseDomainChecker';
 import { syncAllDomainsFromNetlify, testNetlifyConnection } from '@/services/enhancedNetlifySync';
 
 interface Domain {
@@ -76,7 +74,7 @@ const EnhancedDomainManager = () => {
   const [validatingDomain, setValidatingDomain] = useState<string | null>(null);
   const [removingDomain, setRemovingDomain] = useState<string | null>(null);
   const [newDomain, setNewDomain] = useState('');
-  
+
   // DNS Instructions Modal
   const [showDNSModal, setShowDNSModal] = useState(false);
   const [selectedDomain, setSelectedDomain] = useState<Domain | null>(null);
@@ -84,6 +82,18 @@ const EnhancedDomainManager = () => {
 
   // Auto-sync state
   const [autoSyncComplete, setAutoSyncComplete] = useState(false);
+
+  // Editing state
+  const [editingDomain, setEditingDomain] = useState<string | null>(null);
+  const [editingValue, setEditingValue] = useState('');
+  const [savingEdit, setSavingEdit] = useState(false);
+
+  // Primary domain (protected from editing)
+  const PRIMARY_DOMAIN = 'backlinkoo.com';
+
+  const isPrimaryDomain = (domainName: string) => {
+    return domainName === PRIMARY_DOMAIN;
+  };
 
   useEffect(() => {
     if (user) {
@@ -116,7 +126,43 @@ const EnhancedDomainManager = () => {
       }
 
       console.log(`✅ Loaded ${domainData?.length || 0} domains from database`);
-      setDomains(domainData || []);
+
+      // Ensure primary domain is always present
+      const domains = domainData || [];
+      const hasPrimaryDomain = domains.some(d => d.domain === PRIMARY_DOMAIN);
+
+      if (!hasPrimaryDomain) {
+        console.log('🔧 Adding primary domain to database...');
+        try {
+          const { data: newPrimaryDomain, error: insertError } = await supabase
+            .from('domains')
+            .insert({
+              domain: PRIMARY_DOMAIN,
+              status: 'verified',
+              netlify_verified: true,
+              user_id: user?.id || 'system',
+              netlify_site_id: 'ca6261e6-0a59-40b5-a2bc-5b5481ac8809'
+            })
+            .select()
+            .single();
+
+          if (!insertError && newPrimaryDomain) {
+            domains.unshift(newPrimaryDomain); // Add to beginning
+            console.log('✅ Primary domain added successfully');
+          }
+        } catch (insertError) {
+          console.warn('⚠️ Could not add primary domain:', insertError);
+        }
+      }
+
+      // Sort to ensure primary domain appears first
+      const sortedDomains = domains.sort((a, b) => {
+        if (isPrimaryDomain(a.domain)) return -1;
+        if (isPrimaryDomain(b.domain)) return 1;
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      });
+
+      setDomains(sortedDomains);
 
     } catch (error: any) {
       console.error('❌ Failed to load domains:', error);
@@ -255,6 +301,47 @@ const EnhancedDomainManager = () => {
       toast.error(`Failed to add domain: ${error.message}`);
     } finally {
       setAddingDomain(false);
+    }
+  };
+
+  const startEditing = (domain: Domain) => {
+    if (isPrimaryDomain(domain.domain)) {
+      toast.warning('Cannot edit primary domain');
+      return;
+    }
+    setEditingDomain(domain.domain);
+    setEditingValue(domain.domain);
+  };
+
+  const cancelEditing = () => {
+    setEditingDomain(null);
+    setEditingValue('');
+  };
+
+  const saveEdit = async (originalDomain: string) => {
+    if (!editingValue.trim() || editingValue === originalDomain) {
+      cancelEditing();
+      return;
+    }
+
+    setSavingEdit(true);
+    try {
+      // Update domain in database
+      const { error } = await supabase
+        .from('domains')
+        .update({ domain: editingValue.trim() })
+        .eq('domain', originalDomain);
+
+      if (error) throw error;
+
+      toast.success(`Domain updated from ${originalDomain} to ${editingValue}`);
+      cancelEditing();
+      await loadDomains();
+    } catch (error: any) {
+      console.error('Edit domain error:', error);
+      toast.error(`Failed to update domain: ${error.message}`);
+    } finally {
+      setSavingEdit(false);
     }
   };
 
@@ -456,25 +543,10 @@ const EnhancedDomainManager = () => {
     <div className="space-y-6">
       {/* Header */}
       <div className="text-center">
-        <h2 className="text-3xl font-bold text-gray-900 mb-2">Enhanced Domain Manager</h2>
-        <p className="text-gray-600">Add domains to Netlify with DNS setup instructions and validation</p>
+        <h2 className="text-3xl font-bold text-gray-900 mb-2">Automation Link Building Domains</h2>
+        <p className="text-gray-600">Add domains for publishing across diversified backlink profile using our content generation and campaigns management system</p>
       </div>
 
-      {/* Database Status Checker */}
-      <DatabaseDomainChecker />
-
-      {/* Manual Domain Sync */}
-      <ManualDomainSync
-        onSyncComplete={(syncedDomains) => {
-          setDomains(syncedDomains);
-          setAutoSyncComplete(true);
-        }}
-      />
-
-      {/* Configuration Helper (fallback) */}
-      {!autoSyncComplete && (
-        <NetlifyConfigHelper onConfigurationComplete={loadDomains} />
-      )}
 
       {/* Add Domain */}
       <Card>
@@ -531,32 +603,9 @@ const EnhancedDomainManager = () => {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={testConnection}
-                disabled={loading}
-                title="Test Netlify API Connection"
-              >
-                <Zap className="h-4 w-4 mr-2" />
-                Test API
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={forceNetlifySync}
-                disabled={loading}
-                title="Force sync from Netlify"
-              >
-                {loading ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                )}
-                Sync Netlify
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
                 onClick={loadDomains}
                 disabled={loading}
+                title="Refresh domains list"
               >
                 {loading ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -589,23 +638,84 @@ const EnhancedDomainManager = () => {
               {domains.map((domain) => (
                 <div
                   key={domain.id}
-                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                  className={`flex items-center justify-between p-4 border rounded-lg transition-colors relative ${
+                    isPrimaryDomain(domain.domain)
+                      ? 'bg-blue-50 border-blue-200'
+                      : 'hover:bg-gray-50'
+                  }`}
                 >
+                  {/* Primary domain protection overlay */}
+                  {isPrimaryDomain(domain.domain) && (
+                    <div className="absolute top-2 right-2">
+                      <Badge variant="default" className="bg-blue-600">
+                        Primary
+                      </Badge>
+                    </div>
+                  )}
+
                   <div className="flex items-center gap-3">
                     {getStatusIcon(domain)}
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-medium text-lg">{domain.domain}</span>
-                        <button
-                          onClick={() => window.open(`https://${domain.domain}`, '_blank')}
-                          className="text-gray-400 hover:text-blue-600 transition-colors"
-                        >
-                          <ExternalLink className="h-4 w-4" />
-                        </button>
+                        {editingDomain === domain.domain ? (
+                          <div className="flex items-center gap-2">
+                            <Input
+                              value={editingValue}
+                              onChange={(e) => setEditingValue(e.target.value)}
+                              className="text-lg font-medium w-64"
+                              onKeyPress={(e) => {
+                                if (e.key === 'Enter') saveEdit(domain.domain);
+                                if (e.key === 'Escape') cancelEditing();
+                              }}
+                              autoFocus
+                            />
+                            <Button
+                              size="sm"
+                              onClick={() => saveEdit(domain.domain)}
+                              disabled={savingEdit}
+                            >
+                              {savingEdit ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <CheckCircle className="h-4 w-4" />
+                              )}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={cancelEditing}
+                              disabled={savingEdit}
+                            >
+                              ✕
+                            </Button>
+                          </div>
+                        ) : (
+                          <>
+                            <span className="font-medium text-lg">{domain.domain}</span>
+                            {!isPrimaryDomain(domain.domain) && (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => startEditing(domain)}
+                                className="h-6 w-6 p-0 text-gray-400 hover:text-blue-600"
+                                title="Edit domain"
+                              >
+                                ✏️
+                              </Button>
+                            )}
+                            <button
+                              onClick={() => window.open(`https://${domain.domain}`, '_blank')}
+                              className="text-gray-400 hover:text-blue-600 transition-colors"
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </button>
+                          </>
+                        )}
                       </div>
                       <p className="text-sm text-gray-500">
                         Added {new Date(domain.created_at).toLocaleDateString()}
                         {domain.netlify_site_id && ` • Site ID: ${domain.netlify_site_id.substring(0, 8)}...`}
+                        {isPrimaryDomain(domain.domain) && ' • Primary Domain'}
                       </p>
                       {domain.error_message && (
                         <p className="text-sm text-red-600 mt-1">
@@ -650,20 +760,32 @@ const EnhancedDomainManager = () => {
                         </>
                       )}
                       
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeDomain(domain)}
-                        disabled={removingDomain === domain.domain}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                        title="Remove Domain"
-                      >
-                        {removingDomain === domain.domain ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <Trash2 className="h-4 w-4" />
-                        )}
-                      </Button>
+                      {!isPrimaryDomain(domain.domain) ? (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeDomain(domain)}
+                          disabled={removingDomain === domain.domain}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          title="Remove Domain"
+                        >
+                          {removingDomain === domain.domain ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="h-4 w-4" />
+                          )}
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          disabled
+                          className="text-gray-400 cursor-not-allowed"
+                          title="Primary domain cannot be removed"
+                        >
+                          <Shield className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </div>

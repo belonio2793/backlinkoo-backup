@@ -15,6 +15,16 @@ interface NetlifyDomain {
   updated_at: string;
 }
 
+// Netlify configuration (using your actual values)
+const NETLIFY_SITE_ID = "ca6261e6-0a59-40b5-a2bc-5b5481ac8809";
+const NETLIFY_ACCESS_TOKEN = "nfp_Xngqzk9sydkiKUvfdrqHLSnBCZiH33U8b967";
+const NETLIFY_API = `https://api.netlify.com/api/v1/sites/${NETLIFY_SITE_ID}/domains`;
+
+// Supabase configuration (from environment)
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -22,19 +32,13 @@ serve(async (req) => {
   }
 
   try {
-    // Get environment variables
-    const NETLIFY_SITE_ID = Deno.env.get('NETLIFY_SITE_ID') || "ca6261e6-0a59-40b5-a2bc-5b5481ac8809";
-    const NETLIFY_ACCESS_TOKEN = Deno.env.get('NETLIFY_ACCESS_TOKEN') || "nfp_Xngqzk9sydkiKUvfdrqHLSnBCZiH33U8b967";
-
     console.log(`🔍 Processing ${req.method} request to netlify-domains function`);
 
     if (req.method === 'GET') {
       // Fetch domains from Netlify API
-      const url = `https://api.netlify.com/api/v1/sites/${NETLIFY_SITE_ID}/domains`;
-      
-      console.log(`📡 Fetching domains from: ${url}`);
-      
-      const resp = await fetch(url, {
+      console.log(`📡 Fetching domains from: ${NETLIFY_API}`);
+
+      const resp = await fetch(NETLIFY_API, {
         headers: {
           "Authorization": `Bearer ${NETLIFY_ACCESS_TOKEN}`,
           "Content-Type": "application/json"
@@ -44,12 +48,12 @@ serve(async (req) => {
       if (!resp.ok) {
         const errorText = await resp.text();
         console.error(`❌ Netlify API error: ${resp.status} - ${errorText}`);
-        
+
         return new Response(
           JSON.stringify({
             error: `Netlify API error: ${resp.status}`,
             details: errorText
-          }), 
+          }),
           {
             status: resp.status,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -60,8 +64,27 @@ serve(async (req) => {
       const domains = await resp.json();
       console.log(`✅ Successfully fetched ${domains?.length || 0} domains from Netlify`);
 
+      // Sync domains to Supabase
+      try {
+        for (const domain of domains) {
+          await supabase.from("domains").upsert(
+            {
+              name: domain.name || domain.domain,
+              site_id: NETLIFY_SITE_ID,
+              source: "netlify",
+              status: domain.state === "verified" ? "verified" : "unverified"
+            },
+            { onConflict: "name" }
+          );
+        }
+        console.log(`✅ Synced ${domains.length} domains to Supabase`);
+      } catch (syncError) {
+        console.warn('⚠️ Failed to sync to Supabase:', syncError);
+        // Continue and return domains even if sync fails
+      }
+
       return new Response(
-        JSON.stringify(domains), 
+        JSON.stringify(domains),
         {
           status: 200,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -72,10 +95,10 @@ serve(async (req) => {
     if (req.method === 'POST') {
       // Add domain to Netlify
       const { domain } = await req.json();
-      
+
       if (!domain) {
         return new Response(
-          JSON.stringify({ error: 'Domain name is required' }), 
+          JSON.stringify({ error: 'Domain name is required' }),
           {
             status: 400,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -83,11 +106,9 @@ serve(async (req) => {
         );
       }
 
-      const url = `https://api.netlify.com/api/v1/sites/${NETLIFY_SITE_ID}/domains`;
-      
       console.log(`📡 Adding domain ${domain} to Netlify site`);
 
-      const resp = await fetch(url, {
+      const resp = await fetch(NETLIFY_API, {
         method: 'POST',
         headers: {
           "Authorization": `Bearer ${NETLIFY_ACCESS_TOKEN}`,
@@ -99,12 +120,12 @@ serve(async (req) => {
       if (!resp.ok) {
         const errorText = await resp.text();
         console.error(`❌ Failed to add domain: ${resp.status} - ${errorText}`);
-        
+
         return new Response(
           JSON.stringify({
             error: `Failed to add domain: ${resp.status}`,
             details: errorText
-          }), 
+          }),
           {
             status: resp.status,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -115,8 +136,22 @@ serve(async (req) => {
       const result = await resp.json();
       console.log(`✅ Successfully added domain ${domain} to Netlify`);
 
+      // Sync to Supabase if domain was added successfully
+      try {
+        await supabase.from("domains").upsert({
+          name: domain,
+          site_id: NETLIFY_SITE_ID,
+          source: "netlify",
+          status: result.state === "verified" ? "verified" : "unverified"
+        });
+        console.log(`✅ Synced new domain ${domain} to Supabase`);
+      } catch (syncError) {
+        console.warn('⚠️ Failed to sync new domain to Supabase:', syncError);
+        // Continue and return result even if sync fails
+      }
+
       return new Response(
-        JSON.stringify(result), 
+        JSON.stringify(result),
         {
           status: 200,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -126,12 +161,11 @@ serve(async (req) => {
 
     if (req.method === 'DELETE') {
       // Remove domain from Netlify
-      const url = new URL(req.url);
-      const domain = url.searchParams.get('domain');
-      
+      const { domain } = await req.json();
+
       if (!domain) {
         return new Response(
-          JSON.stringify({ error: 'Domain parameter is required' }), 
+          JSON.stringify({ error: 'Domain name is required' }),
           {
             status: 400,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -139,8 +173,8 @@ serve(async (req) => {
         );
       }
 
-      const deleteUrl = `https://api.netlify.com/api/v1/sites/${NETLIFY_SITE_ID}/domains/${domain}`;
-      
+      const deleteUrl = `${NETLIFY_API}/${domain}`;
+
       console.log(`📡 Removing domain ${domain} from Netlify site`);
 
       const resp = await fetch(deleteUrl, {
@@ -154,12 +188,12 @@ serve(async (req) => {
       if (!resp.ok) {
         const errorText = await resp.text();
         console.error(`❌ Failed to remove domain: ${resp.status} - ${errorText}`);
-        
+
         return new Response(
           JSON.stringify({
             error: `Failed to remove domain: ${resp.status}`,
             details: errorText
-          }), 
+          }),
           {
             status: resp.status,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -169,8 +203,17 @@ serve(async (req) => {
 
       console.log(`✅ Successfully removed domain ${domain} from Netlify`);
 
+      // Remove from Supabase if deletion was successful
+      try {
+        await supabase.from("domains").delete().eq("name", domain);
+        console.log(`✅ Removed domain ${domain} from Supabase`);
+      } catch (syncError) {
+        console.warn('⚠️ Failed to remove domain from Supabase:', syncError);
+        // Continue and return success even if sync fails
+      }
+
       return new Response(
-        JSON.stringify({ success: true, message: `Domain ${domain} removed successfully` }), 
+        JSON.stringify({ success: true, message: `Domain ${domain} removed successfully` }),
         {
           status: 200,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
