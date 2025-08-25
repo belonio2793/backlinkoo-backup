@@ -88,7 +88,13 @@ if (!response.ok) {
 2. Click "Run Netlify Connection Test"
 3. Verify multiple tests pass without stream errors
 
-### Option 5: Console Test
+### Option 5: Cache-Busting Test (If Browser Cache Issues)
+1. Navigate to `/test-stream-fix-with-cache-bust.html`
+2. Click "🧪 Test with Cache Busting" button
+3. This test uses cache-busting headers to ensure latest code is loaded
+4. Or click "🚀 Force Reload & Test" to perform a hard refresh
+
+### Option 6: Console Test
 1. Open browser console on any page
 2. Run:
 ```javascript
@@ -98,6 +104,27 @@ script.src = '/test-stream-error-fix.js';
 document.head.appendChild(script);
 script.onload = () => testNetlifyConnectionFix();
 ```
+
+## Browser Cache Note
+
+If you're still seeing the error after applying the fix, you may need to clear your browser cache:
+
+**Option A: Hard Refresh**
+- Press `Ctrl+F5` (Windows) or `Cmd+Shift+R` (Mac) to force a hard refresh
+
+**Option B: Use Cache Refresh Script**
+1. Open browser console on any page
+2. Run:
+```javascript
+const script = document.createElement('script');
+script.src = '/force-cache-refresh.js';
+document.head.appendChild(script);
+```
+
+**Option C: Clear Browser Cache Manually**
+1. Open DevTools (F12)
+2. Right-click the refresh button
+3. Select "Empty Cache and Hard Reload"
 
 ## Expected Results After Fix
 
