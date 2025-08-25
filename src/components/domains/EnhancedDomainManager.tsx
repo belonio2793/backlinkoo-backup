@@ -524,34 +524,32 @@ const EnhancedDomainManager = () => {
               Your Domains ({domains.length})
             </CardTitle>
             <div className="flex gap-2">
-              {/* Edge Function Status Indicator */}
-              <div className="flex items-center gap-2 mr-2">
-                {edgeFunctionStatus === 'deployed' && (
-                  <div className="flex items-center gap-1">
-                    <Zap className="h-4 w-4 text-green-600" />
-                    <span className="text-xs text-green-600 font-medium">Edge Function</span>
-                  </div>
-                )}
-                {edgeFunctionStatus === 'not-deployed' && (
-                  <div className="flex items-center gap-1">
-                    <AlertTriangle className="h-4 w-4 text-orange-500" />
-                    <span className="text-xs text-orange-500 font-medium">Local Sync</span>
-                  </div>
-                )}
-                {edgeFunctionStatus === 'unknown' && (
-                  <div className="flex items-center gap-1">
-                    <Clock className="h-4 w-4 text-gray-400" />
-                    <span className="text-xs text-gray-400 font-medium">Checking...</span>
-                  </div>
-                )}
-              </div>
+              {/* Sync Stats */}
+              {syncStats.total > 0 && (
+                <div className="flex items-center gap-2 mr-2 text-sm">
+                  <span className="text-gray-500">
+                    {syncStats.pending} pending • {syncStats.active} active
+                    {syncStats.error > 0 && ` • ${syncStats.error} errors`}
+                  </span>
+                </div>
+              )}
+
+              {/* Last Sync Time */}
+              {lastSync && (
+                <div className="flex items-center gap-1 mr-2">
+                  <Clock className="h-4 w-4 text-gray-400" />
+                  <span className="text-xs text-gray-400">
+                    Synced {lastSync.toLocaleTimeString()}
+                  </span>
+                </div>
+              )}
 
               <Button
                 variant="outline"
                 size="sm"
                 onClick={testConnection}
                 disabled={loading}
-                title="Test edge function and Netlify connections"
+                title="Test edge function connection"
               >
                 <Shield className="h-4 w-4 mr-2" />
                 Test Connection
@@ -560,19 +558,32 @@ const EnhancedDomainManager = () => {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={forceNetlifySync}
+                onClick={syncDomainsToNetlify}
                 disabled={loading}
-                title={useEdgeFunction ? "Sync via Supabase Edge Function" : "Sync directly from Netlify"}
-                className={edgeFunctionStatus === 'deployed' ? 'border-green-200 bg-green-50' : ''}
+                title="Push pending domains from Supabase to Netlify"
+                className="border-blue-200 bg-blue-50"
               >
                 {loading ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : edgeFunctionStatus === 'deployed' ? (
-                  <Zap className="h-4 w-4 mr-2 text-green-600" />
+                ) : (
+                  <Zap className="h-4 w-4 mr-2 text-blue-600" />
+                )}
+                Push to Netlify
+              </Button>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={loadDomains}
+                disabled={loading}
+                title="Refresh domains list"
+              >
+                {loading ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 ) : (
                   <RefreshCw className="h-4 w-4 mr-2" />
                 )}
-                {edgeFunctionStatus === 'deployed' ? 'Sync via Edge Function' : 'Sync from Netlify'}
+                Refresh
               </Button>
             </div>
           </div>
