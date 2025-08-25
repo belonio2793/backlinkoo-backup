@@ -295,7 +295,22 @@ Sync Results:
         }),
       });
 
-      const result = await response.json();
+      // Read response text once, regardless of status
+      const responseText = await response.text();
+
+      // Handle non-OK responses
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${responseText}`);
+      }
+
+      let result;
+      try {
+        result = JSON.parse(responseText);
+      } catch (jsonError) {
+        console.warn('Failed to parse JSON response:', jsonError);
+        console.warn('Response text:', responseText.substring(0, 500));
+        throw new Error(`Invalid JSON response: ${responseText.substring(0, 200)}`);
+      }
       
       const netlifyDomains = new Set(netlifyInfo.domains || []);
       const supabaseDomains = new Set(result.supabaseDomains || []);
