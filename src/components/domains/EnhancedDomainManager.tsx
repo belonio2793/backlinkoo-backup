@@ -369,37 +369,19 @@ const EnhancedDomainManager = () => {
     }
   };
 
-  const removeDomain = async (domain: Domain) => {
-    setRemovingDomain(domain.domain);
+  const removeDomainHandler = async (domain: Domain) => {
+    setRemovingDomain(domain.name);
 
     try {
-      // Try to remove from Netlify first
-      if (domain.netlify_verified) {
-        const response = await fetch('/netlify/functions/add-domain-to-netlify', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            action: 'remove',
-            domain: domain.domain 
-          }),
-        });
+      const result = await removeDomain(domain.id);
 
-        const result = await response.json();
-        if (result.success) {
-          toast.success(`Removed ${domain.domain} from Netlify`);
-        }
+      if (result.success) {
+        toast.success(`✅ ${result.message}`);
+        await loadDomains();
+        await loadSyncStats();
+      } else {
+        toast.error(`Failed to remove domain: ${result.message}`);
       }
-
-      // Remove from database
-      const { error } = await supabase
-        .from('domains')
-        .delete()
-        .eq('id', domain.id);
-
-      if (error) throw error;
-
-      toast.success(`✅ Domain ${domain.domain} removed successfully`);
-      await loadDomains();
 
     } catch (error: any) {
       console.error('Remove domain error:', error);
