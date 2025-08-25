@@ -267,6 +267,47 @@ const EnhancedDomainManager = () => {
     }
   };
 
+  const startEditing = (domain: Domain) => {
+    if (isPrimaryDomain(domain.domain)) {
+      toast.warning('Cannot edit primary domain');
+      return;
+    }
+    setEditingDomain(domain.domain);
+    setEditingValue(domain.domain);
+  };
+
+  const cancelEditing = () => {
+    setEditingDomain(null);
+    setEditingValue('');
+  };
+
+  const saveEdit = async (originalDomain: string) => {
+    if (!editingValue.trim() || editingValue === originalDomain) {
+      cancelEditing();
+      return;
+    }
+
+    setSavingEdit(true);
+    try {
+      // Update domain in database
+      const { error } = await supabase
+        .from('domains')
+        .update({ domain: editingValue.trim() })
+        .eq('domain', originalDomain);
+
+      if (error) throw error;
+
+      toast.success(`Domain updated from ${originalDomain} to ${editingValue}`);
+      cancelEditing();
+      await loadDomains();
+    } catch (error: any) {
+      console.error('Edit domain error:', error);
+      toast.error(`Failed to update domain: ${error.message}`);
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
   const validateDomain = async (domain: Domain) => {
     setValidatingDomain(domain.domain);
     
