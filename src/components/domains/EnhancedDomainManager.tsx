@@ -259,13 +259,38 @@ const EnhancedDomainManager = () => {
 
   const testConnection = async () => {
     try {
-      toast.loading('Testing Netlify connection...', { id: 'test-connection' });
+      toast.loading('Testing connections...', { id: 'test-connection' });
 
+      // Test edge function first if enabled
+      if (useEdgeFunction) {
+        console.log('🔍 Testing edge function connection...');
+        const edgeTestResult = await testEdgeFunctionConnection();
+
+        if (edgeTestResult.success) {
+          toast.success(`✅ Edge function deployed and accessible`, { id: 'test-connection' });
+          console.log('✅ Edge function test passed:', edgeTestResult.message);
+          setEdgeFunctionStatus('deployed');
+          return;
+        } else {
+          console.warn('⚠️ Edge function test failed:', edgeTestResult.message);
+          setEdgeFunctionStatus('not-deployed');
+
+          // Show deployment instructions
+          const deployInfo = getEdgeFunctionDeploymentInfo();
+          toast.error(`Edge function not deployed. Run: ${deployInfo.deployCommand}`, {
+            id: 'test-connection',
+            duration: 8000
+          });
+        }
+      }
+
+      // Test local Netlify connection
+      console.log('🔍 Testing direct Netlify connection...');
       const testResult = await testNetlifyConnection();
 
       if (testResult.success) {
-        toast.success(`✅ Connection successful: ${testResult.message}`, { id: 'test-connection' });
-        console.log('✅ Netlify connection test passed:', testResult.details);
+        toast.success(`✅ Direct Netlify connection successful: ${testResult.message}`, { id: 'test-connection' });
+        console.log('✅ Netlify connection test passed:', testResult.siteInfo);
       } else {
         toast.error(`❌ Connection failed: ${testResult.message}`, { id: 'test-connection' });
         console.error('❌ Netlify connection test failed:', testResult.message);
@@ -273,6 +298,17 @@ const EnhancedDomainManager = () => {
     } catch (error: any) {
       console.error('❌ Connection test error:', error);
       toast.error(`Test failed: ${error.message}`, { id: 'test-connection' });
+    }
+  };
+
+  const checkEdgeFunctionStatus = async () => {
+    try {
+      const testResult = await testEdgeFunctionConnection();
+      setEdgeFunctionStatus(testResult.success ? 'deployed' : 'not-deployed');
+      return testResult.success;
+    } catch (error) {
+      setEdgeFunctionStatus('not-deployed');
+      return false;
     }
   };
 
