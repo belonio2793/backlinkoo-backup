@@ -33,8 +33,8 @@ export interface ComprehensiveSyncResult {
 }
 
 class EnhancedNetlifySync {
-  private readonly NETLIFY_ACCESS_TOKEN = 'nfp_Xngqzk9sydkiKUvfdrqHLSnBCZiH33U8b967';
-  private readonly NETLIFY_SITE_ID = 'ca6261e6-0a59-40b5-a2bc-5b5481ac8809';
+  private readonly NETLIFY_ACCESS_TOKEN = import.meta.env.VITE_NETLIFY_ACCESS_TOKEN || 'nfp_Xngqzk9sydkiKUvfdrqHLSnBCZiH33U8b967';
+  private readonly NETLIFY_SITE_ID = import.meta.env.VITE_NETLIFY_SITE_ID || 'ca6261e6-0a59-40b5-a2bc-5b5481ac8809';
   private readonly NETLIFY_API_BASE = 'https://api.netlify.com/api/v1';
 
   /**
