@@ -88,12 +88,9 @@ const EnhancedDomainManager = () => {
   const [selectedDomain, setSelectedDomain] = useState<Domain | null>(null);
   const [dnsInstructions, setDnsInstructions] = useState<DNSSetupInstructions | null>(null);
 
-  // Auto-sync state
-  const [autoSyncComplete, setAutoSyncComplete] = useState(false);
-
-  // Edge function state
-  const [useEdgeFunction, setUseEdgeFunction] = useState(true);
-  const [edgeFunctionStatus, setEdgeFunctionStatus] = useState<'unknown' | 'deployed' | 'not-deployed'>('unknown');
+  // Sync state
+  const [syncStats, setSyncStats] = useState({ total: 0, pending: 0, active: 0, error: 0 });
+  const [lastSync, setLastSync] = useState<Date | null>(null);
 
   // Editing state
   const [editingDomain, setEditingDomain] = useState<string | null>(null);
