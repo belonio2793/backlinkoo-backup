@@ -44,19 +44,18 @@ import {
 } from '@/services/supabaseToNetlifySync';
 import TabbedDomainManager from './TabbedDomainManager';
 
-interface Domain {
-  id: string;
-  domain: string;
-  status: 'pending' | 'verified' | 'removed' | 'error' | 'dns_ready';
-  user_id: string;
-  netlify_verified: boolean;
-  created_at: string;
-  error_message?: string;
-  dns_records?: DNSRecord[];
-  netlify_site_id?: string;
-  validation_status?: string;
-  ssl_status?: string;
-}
+// Domain interface is now imported from the service
+// interface Domain {
+//   id: string;
+//   name: string;
+//   site_id?: string;
+//   source: 'supabase' | 'netlify';
+//   status: 'pending' | 'active' | 'error';
+//   user_id?: string;
+//   created_at: string;
+//   updated_at: string;
+//   error_message?: string;
+// }
 
 interface DNSRecord {
   type: string;
