@@ -32,10 +32,6 @@ serve(async (req) => {
   }
 
   try {
-    // Get environment variables
-    const NETLIFY_SITE_ID = Deno.env.get('NETLIFY_SITE_ID') || "ca6261e6-0a59-40b5-a2bc-5b5481ac8809";
-    const NETLIFY_ACCESS_TOKEN = Deno.env.get('NETLIFY_ACCESS_TOKEN') || "nfp_Xngqzk9sydkiKUvfdrqHLSnBCZiH33U8b967";
-
     console.log(`🔍 Processing ${req.method} request to netlify-domains function`);
 
     if (req.method === 'GET') {
