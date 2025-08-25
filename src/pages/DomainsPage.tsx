@@ -10,11 +10,17 @@ import { Footer } from '@/components/Footer';
 import { useAuthState } from '@/hooks/useAuthState';
 import { toast } from 'sonner';
 import { DomainService, type Domain } from '@/services/domainService';
-import { DomainServiceDev } from '@/services/domainServiceDev';
 
-// Use development service if in development mode
-const isDev = import.meta.env.DEV || window.location.hostname === 'localhost';
-const DomainAPI = isDev ? DomainServiceDev : DomainService;
+// Use development service if in development mode - with fallback
+let DomainAPI = DomainService;
+try {
+  if (import.meta.env.DEV || window.location.hostname === 'localhost') {
+    const { DomainServiceDev } = await import('@/services/domainServiceDev');
+    DomainAPI = DomainServiceDev;
+  }
+} catch (error) {
+  console.log('Using production domain service');
+}
 
 const DomainsPage = () => {
   const { user } = useAuthState();
