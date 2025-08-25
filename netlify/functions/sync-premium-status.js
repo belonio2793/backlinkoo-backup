@@ -69,9 +69,7 @@ exports.handler = async (event, context) => {
     console.log('💎 Premium subscriptions:', premiumSubs);
 
     // Step 3: Determine if user should be premium
-    // Check if this is a force premium request
-    const { forcePremium } = JSON.parse(event.body || '{}');
-
+    // forcePremium was already extracted above on line 28
     const shouldBePremium = forcePremium ||
                            profile.subscription_tier === 'premium' ||
                            profile.subscription_tier === 'monthly' ||
