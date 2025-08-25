@@ -34,6 +34,11 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthState } from '@/hooks/useAuthState';
 import { syncAllDomainsFromNetlify, testNetlifyConnection } from '@/services/enhancedNetlifySync';
+import {
+  syncDomainsViaEdgeFunction,
+  testEdgeFunctionConnection,
+  getEdgeFunctionDeploymentInfo
+} from '@/services/netlifyEdgeFunctionSync';
 import TabbedDomainManager from './TabbedDomainManager';
 
 interface Domain {
