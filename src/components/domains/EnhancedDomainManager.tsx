@@ -258,78 +258,23 @@ const EnhancedDomainManager = () => {
     }
   };
 
-  const addDomain = async () => {
+  const addNewDomain = async () => {
     if (!newDomain.trim()) return;
 
     const cleanedDomain = cleanDomain(newDomain);
     setAddingDomain(true);
 
     try {
-      // First add to database
-      const { data: dbDomain, error: dbError } = await supabase
-        .from('domains')
-        .insert({
-          domain: cleanedDomain,
-          user_id: user?.id || '00000000-0000-0000-0000-000000000000',
-          status: 'pending',
-          netlify_verified: false,
-        })
-        .select()
-        .single();
-
-      if (dbError) {
-        if (dbError.code === '23505') {
-          throw new Error('Domain already exists');
-        }
-        throw new Error(`Database error: ${dbError.message}`);
-      }
-
-      // Then try to add to Netlify
-      const response = await fetch('/netlify/functions/add-domain-to-netlify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          domain: cleanedDomain,
-          domainId: dbDomain.id 
-        }),
-      });
-
-      const result = await response.json();
+      const result = await addDomain(cleanedDomain);
 
       if (result.success) {
-        // Update database with Netlify success
-        await supabase
-          .from('domains')
-          .update({
-            netlify_verified: true,
-            status: 'dns_ready',
-            netlify_site_id: result.netlifyData?.site_id,
-            dns_records: result.dnsInstructions?.dnsRecords,
-          })
-          .eq('id', dbDomain.id);
-
-        toast.success(`✅ Domain ${cleanedDomain} added to Netlify!`);
-        
-        // Show DNS setup instructions
-        const instructions = generateDNSInstructions(cleanedDomain);
-        setDnsInstructions(instructions);
-        setSelectedDomain({ ...dbDomain, dns_records: instructions.dnsRecords });
-        setShowDNSModal(true);
+        toast.success(`✅ ${result.message}`);
+        setNewDomain('');
+        await loadDomains();
+        await loadSyncStats();
       } else {
-        // Update database with error
-        await supabase
-          .from('domains')
-          .update({
-            status: 'error',
-            error_message: result.error,
-          })
-          .eq('id', dbDomain.id);
-
-        toast.error(`Failed to add to Netlify: ${result.error}`);
+        toast.error(`Failed to add domain: ${result.message}`);
       }
-
-      setNewDomain('');
-      await loadDomains();
 
     } catch (error: any) {
       console.error('Add domain error:', error);
