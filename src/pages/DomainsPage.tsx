@@ -38,7 +38,7 @@ const DomainsPage = () => {
     setLoading(true);
     try {
       // First sync domains from Netlify
-      const syncResult = await DomainService.syncFromNetlify(user.id);
+      const syncResult = await DomainAPI.syncFromNetlify(user.id);
       if (syncResult.success) {
         console.log(syncResult.message);
       } else {
@@ -46,7 +46,7 @@ const DomainsPage = () => {
       }
 
       // Load domains from database
-      const domains = await DomainService.getUserDomains(user.id);
+      const domains = await DomainAPI.getUserDomains(user.id);
       setDomains(domains);
       console.log(`Loaded ${domains.length} domains`);
     } catch (error: any) {
@@ -60,14 +60,14 @@ const DomainsPage = () => {
   const addDomain = async () => {
     if (!newDomain.trim() || !user?.id) return;
 
-    if (!DomainService.isValidDomain(newDomain)) {
+    if (!DomainAPI.isValidDomain(newDomain)) {
       toast.error('Please enter a valid domain name');
       return;
     }
 
     setAdding(true);
     try {
-      const result = await DomainService.addDomain(newDomain, user.id);
+      const result = await DomainAPI.addDomain(newDomain, user.id);
 
       if (result.success) {
         toast.success(`✅ ${result.message}`);
@@ -89,7 +89,7 @@ const DomainsPage = () => {
 
     setRemoving(domain.id);
     try {
-      const result = await DomainService.removeDomain(domain.id, user.id);
+      const result = await DomainAPI.removeDomain(domain.id, user.id);
 
       if (result.success) {
         toast.success(`✅ ${result.message}`);
@@ -116,7 +116,7 @@ const DomainsPage = () => {
   };
 
   const isPrimaryDomain = (domain: string) => {
-    return DomainService.isPrimaryDomain(domain);
+    return DomainAPI.isPrimaryDomain(domain);
   };
 
   if (!user) {
