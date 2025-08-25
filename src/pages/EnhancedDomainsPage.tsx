@@ -78,16 +78,18 @@ const EnhancedDomainsPage = () => {
   }, [user]);
 
   const setupRealtimeSubscription = () => {
+    const subscriptionConfig = {
+      event: '*' as const,
+      schema: 'public',
+      table: 'domains',
+      ...(user?.id && { filter: `user_id=eq.${user.id}` })
+    };
+
     const channel = supabase
       .channel('domains-realtime')
       .on(
         'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'domains',
-          filter: `user_id=eq.${user?.id}`
-        },
+        subscriptionConfig,
         (payload) => {
           console.log('Real-time domain update:', payload);
           loadDomains(); // Refresh domains on any change
