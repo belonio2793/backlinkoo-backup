@@ -587,14 +587,14 @@ const EnhancedDomainManager = () => {
                 size="sm"
                 onClick={loadDomains}
                 disabled={loading}
-                title="Refresh domains list"
+                title="Sync from Netlify and refresh domains list"
               >
                 {loading ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 ) : (
                   <RefreshCw className="h-4 w-4 mr-2" />
                 )}
-                Refresh
+                Sync from Netlify
               </Button>
             </div>
           </div>
