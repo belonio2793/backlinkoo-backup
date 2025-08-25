@@ -511,7 +511,7 @@ const EnhancedDomainManager = () => {
         newDomain={newDomain}
         setNewDomain={setNewDomain}
         addingDomain={addingDomain}
-        onAddSingleDomain={addDomain}
+        onAddSingleDomain={addNewDomain}
         onRefreshDomains={loadDomains}
       />
 
