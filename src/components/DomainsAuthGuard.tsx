@@ -106,8 +106,8 @@ export const DomainsAuthGuard = ({ children }: DomainsAuthGuardProps) => {
       setIsAuthenticated(true);
       setUserEmail(user.email || '');
 
-      // Check authorization - only allow the default admin account
-      const authorized = user.email === AUTHORIZED_EMAIL;
+      // Check authorization - only allow authorized accounts
+      const authorized = AUTHORIZED_EMAILS.includes(user.email || '');
       setIsAuthorized(authorized);
 
       console.log(`🔐 Domains access check: ${user.email} -> ${authorized ? 'AUTHORIZED' : 'DENIED'}`);
