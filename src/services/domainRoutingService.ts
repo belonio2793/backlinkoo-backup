@@ -225,7 +225,7 @@ export class DomainRoutingService {
   static async getDomainBlogPostBySlug(domainId: string, slug: string) {
     try {
       const { data, error } = await supabase
-        .from('blog_posts')
+        .from('domain_blog_posts')
         .select(`
           *,
           domain_blog_categories(name, slug, color)
@@ -298,7 +298,7 @@ export class DomainRoutingService {
       };
       
       const { data, error } = await supabase
-        .from('blog_posts')
+        .from('domain_blog_posts')
         .insert(blogPost)
         .select()
         .single();
