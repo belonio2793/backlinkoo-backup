@@ -513,32 +513,9 @@ const EnhancedDomainManager = () => {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={testConnection}
-                disabled={loading}
-                title="Test Netlify API Connection"
-              >
-                <Zap className="h-4 w-4 mr-2" />
-                Test API
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={forceNetlifySync}
-                disabled={loading}
-                title="Force sync from Netlify"
-              >
-                {loading ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                )}
-                Sync Netlify
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
                 onClick={loadDomains}
                 disabled={loading}
+                title="Refresh domains list"
               >
                 {loading ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
