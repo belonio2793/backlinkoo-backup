@@ -460,21 +460,6 @@ const EnhancedDomainManager = () => {
         <p className="text-gray-600">Add domains for publishing across diversified backlink profile using our content generation and campaigns management system</p>
       </div>
 
-      {/* Database Status Checker */}
-      <DatabaseDomainChecker />
-
-      {/* Manual Domain Sync */}
-      <ManualDomainSync
-        onSyncComplete={(syncedDomains) => {
-          setDomains(syncedDomains);
-          setAutoSyncComplete(true);
-        }}
-      />
-
-      {/* Configuration Helper (fallback) */}
-      {!autoSyncComplete && (
-        <NetlifyConfigHelper onConfigurationComplete={loadDomains} />
-      )}
 
       {/* Add Domain */}
       <Card>
