@@ -162,14 +162,13 @@ export class NetlifyDomainSyncService {
         }),
       });
 
-      // Check if response is ok first
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`HTTP ${response.status}: ${errorText}`);
-      }
-
-      // Get response text first, then parse JSON
+      // Read response text once, regardless of status
       const responseText = await response.text();
+
+      // Handle non-OK responses
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${responseText}`);
+      }
 
       let result;
       try {
