@@ -94,6 +94,7 @@ export const useDomainBlog = () => {
     offset?: number;
     categoryId?: string;
     status?: string;
+    tags?: string[];
   } = {}) => {
     if (!domain) {
       throw new Error('No domain context available');
@@ -103,7 +104,7 @@ export const useDomainBlog = () => {
     setError(null);
 
     try {
-      const result = await DomainRoutingService.getDomainBlogPosts(domain.id, {
+      const result = await DomainBlogService.getDomainBlogPosts(domain.id, {
         status: 'published',
         ...options
       });
@@ -130,7 +131,7 @@ export const useDomainBlog = () => {
     setError(null);
 
     try {
-      const result = await DomainRoutingService.getDomainBlogPostBySlug(domain.id, slug);
+      const result = await DomainBlogService.getDomainBlogPostBySlug(domain.id, slug);
 
       if (result.error) {
         throw new Error(result.error);
@@ -149,14 +150,17 @@ export const useDomainBlog = () => {
     postData: {
       title: string;
       content: string;
-      slug?: string;
-      target_url?: string;
-      anchor_text?: string;
-      keywords?: string[];
-      category_id?: string;
-      meta_description?: string;
-      author_name?: string;
-      is_trial_post?: boolean;
+      targetUrl?: string;
+      anchorText?: string;
+      primaryKeyword?: string;
+      wordCount?: number;
+      readingTime?: number;
+      seoScore?: number;
+      customSlug?: string;
+      excerpt?: string;
+      metaDescription?: string;
+      tags?: string[];
+      categoryId?: string;
     },
     userId?: string
   ) => {
@@ -168,9 +172,23 @@ export const useDomainBlog = () => {
     setError(null);
 
     try {
-      const result = await DomainRoutingService.createDomainBlogPost(
+      const result = await DomainBlogService.createDomainBlogPost(
+        {
+          title: postData.title,
+          content: postData.content,
+          targetUrl: postData.targetUrl,
+          anchorText: postData.anchorText,
+          primaryKeyword: postData.primaryKeyword,
+          wordCount: postData.wordCount || 500,
+          readingTime: postData.readingTime || 3,
+          seoScore: postData.seoScore || 75,
+          customSlug: postData.customSlug,
+          excerpt: postData.excerpt,
+          metaDescription: postData.metaDescription,
+          tags: postData.tags,
+          categoryId: postData.categoryId
+        },
         domain.id,
-        postData,
         userId
       );
 
