@@ -14,6 +14,7 @@ import { DomainService, type Domain } from '@/services/domainService';
 import { DomainServiceDev } from '@/services/domainServiceDev';
 import { DomainSyncService } from '@/services/domainSyncService';
 import EnhancedDomainSync from '@/components/domains/EnhancedDomainSync';
+import DomainTableDiagnostic from '@/components/domains/DomainTableDiagnostic';
 
 // Use development service if in development mode
 const isDev = import.meta.env.DEV || window.location.hostname === 'localhost';
@@ -161,9 +162,10 @@ const DomainsPage = () => {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="domains" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="domains">Domain List</TabsTrigger>
             <TabsTrigger value="sync">Sync Management</TabsTrigger>
+            <TabsTrigger value="diagnostic">Diagnostic</TabsTrigger>
           </TabsList>
 
           <TabsContent value="domains" className="mt-6">
@@ -322,6 +324,10 @@ const DomainsPage = () => {
 
           <TabsContent value="sync" className="mt-6">
             <EnhancedDomainSync onSyncComplete={loadDomains} />
+          </TabsContent>
+
+          <TabsContent value="diagnostic" className="mt-6">
+            <DomainTableDiagnostic />
           </TabsContent>
         </Tabs>
       </div>
