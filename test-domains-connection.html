@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Domains Connection Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .error { background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        .info { background-color: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; }
+        button { padding: 10px 20px; margin: 10px 0; font-size: 16px; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 5px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Domains Connection Test</h1>
+    <p>This test verifies that the "Response body is already used" error has been fixed.</p>
+    
+    <button onclick="runConnectionTest()">Run Connection Test</button>
+    <button onclick="testMultipleRequests()">Test Multiple Requests</button>
+    <button onclick="clearResults()">Clear Results</button>
+    
+    <div id="results"></div>
+
+    <script>
+        let resultCount = 0;
+
+        function addResult(type, title, content) {
+            const resultsDiv = document.getElementById('results');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-result ${type}`;
+            resultDiv.innerHTML = `
+                <strong>${++resultCount}. ${title}</strong>
+                <div>${content}</div>
+            `;
+            resultsDiv.appendChild(resultDiv);
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+            resultCount = 0;
+        }
+
+        async function testNetlifyFunction(action) {
+            try {
+                const response = await fetch('/netlify/functions/add-domain-to-netlify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ action }),
+                });
+
+                // Use the same approach as the fixed code
+                const responseText = await response.text();
+                
+                let result;
+                try {
+                    result = JSON.parse(responseText);
+                } catch (jsonError) {
+                    throw new Error(`Invalid JSON response: ${responseText.substring(0, 200)}`);
+                }
+
+                return {
+                    success: response.ok && result.success,
+                    status: response.status,
+                    result: result,
+                    error: result.error
+                };
+
+            } catch (error) {
+                return {
+                    success: false,
+                    error: error.message
+                };
+            }
+        }
+
+        async function runConnectionTest() {
+            addResult('info', 'Starting Connection Test', 'Testing Netlify function connection...');
+
+            try {
+                const testResult = await testNetlifyFunction('test_config');
+                
+                if (testResult.success) {
+                    addResult('success', 'Connection Test PASSED', `
+                        ✅ Netlify connection working<br>
+                        Site: ${testResult.result.siteInfo?.name || 'Unknown'}<br>
+                        Token Valid: ${testResult.result.config?.tokenValid ? 'Yes' : 'No'}
+                    `);
+                } else {
+                    addResult('error', 'Connection Test FAILED', `
+                        ❌ Error: ${testResult.error}<br>
+                        Status: ${testResult.status}
+                    `);
+                }
+
+            } catch (error) {
+                addResult('error', 'Connection Test CRASHED', `
+                    💥 Critical Error: ${error.message}
+                `);
+            }
+        }
+
+        async function testMultipleRequests() {
+            addResult('info', 'Starting Multiple Request Test', 'Testing for "Response body is already used" errors...');
+
+            try {
+                const results = [];
+                
+                for (let i = 0; i < 5; i++) {
+                    addResult('info', `Request ${i + 1}/5`, 'Making request...');
+                    
+                    const result = await testNetlifyFunction('test_config');
+                    results.push(result);
+                    
+                    // Small delay between requests
+                    await new Promise(resolve => setTimeout(resolve, 200));
+                }
+
+                const successCount = results.filter(r => r.success).length;
+                const errorCount = results.filter(r => !r.success).length;
+
+                if (errorCount === 0) {
+                    addResult('success', 'Multiple Request Test PASSED', `
+                        ✅ All ${results.length} requests succeeded<br>
+                        🎉 No "Response body is already used" errors detected!<br>
+                        Success Rate: ${successCount}/${results.length}
+                    `);
+                } else {
+                    addResult('error', 'Multiple Request Test FAILED', `
+                        ❌ ${errorCount} requests failed<br>
+                        Success Rate: ${successCount}/${results.length}<br>
+                        <details>
+                            <summary>Error Details</summary>
+                            <pre>${JSON.stringify(results.filter(r => !r.success), null, 2)}</pre>
+                        </details>
+                    `);
+                }
+
+            } catch (error) {
+                addResult('error', 'Multiple Request Test CRASHED', `
+                    💥 Critical Error: ${error.message}
+                `);
+            }
+        }
+
+        // Auto-run a basic test when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            addResult('info', 'Page Loaded', 'Ready to test Netlify connection fixes');
+        });
+    </script>
+</body>
+</html>
