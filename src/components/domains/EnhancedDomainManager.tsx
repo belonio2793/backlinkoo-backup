@@ -73,7 +73,7 @@ const EnhancedDomainManager = () => {
   const [validatingDomain, setValidatingDomain] = useState<string | null>(null);
   const [removingDomain, setRemovingDomain] = useState<string | null>(null);
   const [newDomain, setNewDomain] = useState('');
-  
+
   // DNS Instructions Modal
   const [showDNSModal, setShowDNSModal] = useState(false);
   const [selectedDomain, setSelectedDomain] = useState<Domain | null>(null);
@@ -81,6 +81,18 @@ const EnhancedDomainManager = () => {
 
   // Auto-sync state
   const [autoSyncComplete, setAutoSyncComplete] = useState(false);
+
+  // Editing state
+  const [editingDomain, setEditingDomain] = useState<string | null>(null);
+  const [editingValue, setEditingValue] = useState('');
+  const [savingEdit, setSavingEdit] = useState(false);
+
+  // Primary domain (protected from editing)
+  const PRIMARY_DOMAIN = 'backlinkoo.com';
+
+  const isPrimaryDomain = (domainName: string) => {
+    return domainName === PRIMARY_DOMAIN;
+  };
 
   useEffect(() => {
     if (user) {
