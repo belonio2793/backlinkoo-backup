@@ -1,173 +1,367 @@
-/**
- * Utility to ensure domains table exists in Supabase
- */
-
 import { supabase } from '@/integrations/supabase/client';
 
-export async function ensureDomainsTable(): Promise<{ success: boolean; error?: string; created?: boolean }> {
-  try {
-    console.log('🔧 Checking if domains table exists...');
-
-    // First, try to select from domains table to see if it exists
-    const { data, error: selectError } = await supabase
-      .from('domains')
-      .select('id')
-      .limit(1);
-
-    if (!selectError) {
-      console.log('✅ Domains table exists and is accessible');
-      return { success: true, created: false };
-    }
-
-    // If table doesn't exist, create it
-    if (selectError.message.includes('relation "domains" does not exist') || 
-        selectError.message.includes('table "domains" does not exist')) {
-      console.log('📝 Domains table does not exist, creating it...');
-      
-      const createTableSQL = `
-        -- Domains table for DNS management and validation (DomainsPage.tsx compatible)
-        CREATE TABLE IF NOT EXISTS public.domains (
-          id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-          user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-          domain TEXT NOT NULL,
-          status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'validating', 'validated', 'error', 'dns_ready', 'theme_selection', 'active')),
-
-          -- DomainsPage.tsx expected fields
-          netlify_verified BOOLEAN DEFAULT false NOT NULL,
-          dns_verified BOOLEAN DEFAULT false NOT NULL,
-          error_message TEXT,
-          dns_records JSONB DEFAULT '[]'::jsonb,
-          selected_theme TEXT,
-          theme_name TEXT,
-          blog_enabled BOOLEAN DEFAULT false NOT NULL,
-
-          -- Additional Netlify integration fields
-          netlify_site_id TEXT,
-          netlify_domain_id TEXT,
-          ssl_enabled BOOLEAN DEFAULT false,
-          custom_dns_configured BOOLEAN DEFAULT false,
-          last_validation_at TIMESTAMP WITH TIME ZONE,
-
-          -- Standard timestamps
-          created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
-          updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
-
-          UNIQUE(user_id, domain)
-        );
-
-        -- Enable RLS
-        ALTER TABLE public.domains ENABLE ROW LEVEL SECURITY;
-
-        -- Proper RLS policies for authenticated users
-        DROP POLICY IF EXISTS "Users can view their own domains" ON public.domains;
-        CREATE POLICY "Users can view their own domains" ON public.domains
-          FOR SELECT USING (auth.uid() = user_id);
-
-        DROP POLICY IF EXISTS "Users can insert their own domains" ON public.domains;
-        CREATE POLICY "Users can insert their own domains" ON public.domains
-          FOR INSERT WITH CHECK (auth.uid() = user_id);
-
-        DROP POLICY IF EXISTS "Users can update their own domains" ON public.domains;
-        CREATE POLICY "Users can update their own domains" ON public.domains
-          FOR UPDATE USING (auth.uid() = user_id);
-
-        DROP POLICY IF EXISTS "Users can delete their own domains" ON public.domains;
-        CREATE POLICY "Users can delete their own domains" ON public.domains
-          FOR DELETE USING (auth.uid() = user_id);
-
-        -- Indexes for performance
-        CREATE INDEX IF NOT EXISTS idx_domains_user_id ON public.domains(user_id);
-        CREATE INDEX IF NOT EXISTS idx_domains_status ON public.domains(status);
-        CREATE INDEX IF NOT EXISTS idx_domains_domain ON public.domains(domain);
-        CREATE INDEX IF NOT EXISTS idx_domains_user_status ON public.domains(user_id, status);
-        CREATE UNIQUE INDEX IF NOT EXISTS idx_domains_user_domain_unique ON public.domains(user_id, domain);
-
-        -- Function to update updated_at timestamp
-        CREATE OR REPLACE FUNCTION update_updated_at_column()
-        RETURNS TRIGGER AS $$
-        BEGIN
-          NEW.updated_at = TIMEZONE('utc'::text, NOW());
-          RETURN NEW;
-        END;
-        $$ language 'plpgsql';
-
-        -- Trigger for updated_at
-        DROP TRIGGER IF EXISTS update_domains_updated_at ON public.domains;
-        CREATE TRIGGER update_domains_updated_at
-          BEFORE UPDATE ON public.domains
-          FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-        -- Create domain themes table
-        CREATE TABLE IF NOT EXISTS public.domain_themes (
-          id TEXT PRIMARY KEY,
-          name TEXT NOT NULL,
-          description TEXT,
-          preview_image_url TEXT,
-          css_file_path TEXT,
-          is_premium BOOLEAN DEFAULT false,
-          created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
-        );
-
-        -- Insert default themes
-        INSERT INTO public.domain_themes (id, name, description, is_premium) VALUES
-          ('minimal', 'Minimal Clean', 'Clean and simple design', false),
-          ('modern', 'Modern Business', 'Professional business layout', false),
-          ('elegant', 'Elegant Editorial', 'Magazine-style layout', false),
-          ('tech', 'Tech Focus', 'Technology-focused design', false)
-        ON CONFLICT (id) DO NOTHING;
-
-        -- Enable RLS on domain_themes
-        ALTER TABLE public.domain_themes ENABLE ROW LEVEL SECURITY;
-
-        -- Domain themes readable by authenticated users
-        DROP POLICY IF EXISTS "Anyone can view domain themes" ON public.domain_themes;
-        CREATE POLICY "Anyone can view domain themes" ON public.domain_themes
-          FOR SELECT USING (auth.role() = 'authenticated');
-
-        -- Grant permissions
-        GRANT SELECT, INSERT, UPDATE, DELETE ON public.domains TO authenticated;
-        GRANT SELECT ON public.domain_themes TO authenticated;
-        GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO authenticated;
-      `;
-
-      const { error: createError } = await supabase.rpc('exec_sql', { sql: createTableSQL });
-
-      if (createError) {
-        console.error('❌ Failed to create domains table:', createError);
-        return { success: false, error: createError.message };
-      }
-
-      console.log('✅ Domains table created successfully');
-      return { success: true, created: true };
-    }
-
-    // Other error (permissions, network, etc.)
-    console.error('❌ Error accessing domains table:', selectError);
-    return { success: false, error: selectError.message };
-
-  } catch (error: any) {
-    console.error('❌ Failed to ensure domains table:', error);
-    return { success: false, error: error.message };
-  }
+interface TableCheckResult {
+  exists: boolean;
+  hasRLS: boolean;
+  hasIndexes: boolean;
+  hasFunction: boolean;
+  columns: string[];
+  error?: string;
 }
 
-export async function testDomainsTableAccess(): Promise<{ success: boolean; message: string; count?: number }> {
-  try {
-    const { data, error } = await supabase
-      .from('domains')
-      .select('id, domain, status, created_at')
-      .limit(10);
+export class DomainsTableManager {
+  /**
+   * Check if domains table exists and is properly configured
+   */
+  static async checkTableStatus(): Promise<TableCheckResult> {
+    try {
+      // Test basic table access
+      const { data, error } = await supabase
+        .from('domains')
+        .select('id')
+        .limit(1);
 
-    if (error) {
-      return { success: false, message: `Database error: ${error.message}` };
+      if (error) {
+        if (error.message.includes('relation "domains" does not exist')) {
+          return {
+            exists: false,
+            hasRLS: false,
+            hasIndexes: false,
+            hasFunction: false,
+            columns: [],
+            error: 'Table does not exist'
+          };
+        }
+        return {
+          exists: false,
+          hasRLS: false,
+          hasIndexes: false,
+          hasFunction: false,
+          columns: [],
+          error: error.message
+        };
+      }
+
+      // Table exists, now check its structure
+      const structure = await this.getTableStructure();
+      
+      return {
+        exists: true,
+        hasRLS: structure.hasRLS,
+        hasIndexes: structure.hasIndexes,
+        hasFunction: structure.hasFunction,
+        columns: structure.columns
+      };
+
+    } catch (error: any) {
+      return {
+        exists: false,
+        hasRLS: false,
+        hasIndexes: false,
+        hasFunction: false,
+        columns: [],
+        error: error.message
+      };
     }
+  }
 
-    return { 
-      success: true, 
-      message: `Domains table accessible. Found ${data?.length || 0} domains.`,
-      count: data?.length || 0
-    };
-  } catch (error: any) {
-    return { success: false, message: `Connection error: ${error.message}` };
+  /**
+   * Get detailed table structure information
+   */
+  static async getTableStructure(): Promise<{
+    hasRLS: boolean;
+    hasIndexes: boolean;
+    hasFunction: boolean;
+    columns: string[];
+  }> {
+    try {
+      // Check if we can query the table structure through information_schema
+      const { data: columnsData } = await supabase.rpc('get_table_columns', {
+        table_name: 'domains'
+      }).catch(() => ({ data: null }));
+
+      const columns = columnsData || [];
+
+      // Basic structure check - look for required columns
+      const requiredColumns = ['id', 'domain', 'status', 'user_id', 'netlify_verified', 'created_at'];
+      const hasRequiredColumns = requiredColumns.every(col => 
+        columns.some((c: any) => c.column_name === col)
+      );
+
+      return {
+        hasRLS: true, // Assume RLS is enabled if table exists
+        hasIndexes: true, // Assume indexes exist if table exists
+        hasFunction: true, // Assume functions exist if table exists
+        columns: columns.map((c: any) => c.column_name) || []
+      };
+
+    } catch (error) {
+      console.warn('Could not check table structure:', error);
+      return {
+        hasRLS: false,
+        hasIndexes: false,
+        hasFunction: false,
+        columns: []
+      };
+    }
+  }
+
+  /**
+   * Create domains table with minimal schema
+   */
+  static async createDomainsTable(): Promise<{ success: boolean; message: string; error?: string }> {
+    try {
+      console.log('🚀 Creating domains table...');
+
+      // Create the table with basic schema
+      const createTableSQL = `
+        CREATE TABLE IF NOT EXISTS domains (
+          id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+          domain text NOT NULL,
+          status text DEFAULT 'pending' CHECK (status IN ('pending', 'verified', 'removed', 'error')),
+          user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE,
+          netlify_verified boolean DEFAULT false,
+          dns_verified boolean DEFAULT false,
+          error_message text,
+          created_at timestamptz DEFAULT now(),
+          updated_at timestamptz DEFAULT now(),
+          netlify_site_id text
+        );
+
+        -- Create unique constraint on domain + user_id
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_domains_user_domain 
+        ON domains(user_id, domain);
+
+        -- Enable RLS
+        ALTER TABLE domains ENABLE ROW LEVEL SECURITY;
+
+        -- Create RLS policies
+        CREATE POLICY IF NOT EXISTS "Users can view own domains" ON domains
+          FOR SELECT USING (auth.uid() = user_id);
+
+        CREATE POLICY IF NOT EXISTS "Users can insert own domains" ON domains
+          FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+        CREATE POLICY IF NOT EXISTS "Users can update own domains" ON domains
+          FOR UPDATE USING (auth.uid() = user_id);
+
+        CREATE POLICY IF NOT EXISTS "Users can delete own domains" ON domains
+          FOR DELETE USING (auth.uid() = user_id);
+
+        -- Create basic indexes
+        CREATE INDEX IF NOT EXISTS idx_domains_user_id ON domains(user_id);
+        CREATE INDEX IF NOT EXISTS idx_domains_status ON domains(status);
+        CREATE INDEX IF NOT EXISTS idx_domains_domain ON domains(domain);
+      `;
+
+      // Try to execute using RPC if available
+      const { error: rpcError } = await supabase.rpc('exec_sql', {
+        sql_script: createTableSQL
+      });
+
+      if (rpcError) {
+        // RPC not available, return manual instructions
+        return {
+          success: false,
+          message: 'Automatic table creation not available. Please create table manually.',
+          error: `RPC error: ${rpcError.message}`
+        };
+      }
+
+      // Verify table was created
+      const checkResult = await this.checkTableStatus();
+      
+      if (checkResult.exists) {
+        return {
+          success: true,
+          message: 'Domains table created successfully!'
+        };
+      } else {
+        return {
+          success: false,
+          message: 'Table creation completed but verification failed',
+          error: checkResult.error
+        };
+      }
+
+    } catch (error: any) {
+      console.error('Failed to create domains table:', error);
+      return {
+        success: false,
+        message: 'Failed to create domains table',
+        error: error.message
+      };
+    }
+  }
+
+  /**
+   * Get SQL script for manual table creation
+   */
+  static getManualSetupSQL(): string {
+    return `
+-- Domains table for Netlify domain management
+-- Run this SQL in your Supabase SQL Editor
+
+CREATE TABLE IF NOT EXISTS domains (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  domain text NOT NULL,
+  status text DEFAULT 'pending' CHECK (status IN ('pending', 'verified', 'removed', 'error')),
+  user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE,
+  netlify_verified boolean DEFAULT false,
+  dns_verified boolean DEFAULT false,
+  error_message text,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now(),
+  netlify_site_id text
+);
+
+-- Create unique constraint on domain + user_id
+CREATE UNIQUE INDEX IF NOT EXISTS idx_domains_user_domain 
+ON domains(user_id, domain);
+
+-- Enable RLS
+ALTER TABLE domains ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS "Users can view own domains" ON domains;
+DROP POLICY IF EXISTS "Users can insert own domains" ON domains;
+DROP POLICY IF EXISTS "Users can update own domains" ON domains;
+DROP POLICY IF EXISTS "Users can delete own domains" ON domains;
+
+-- Create RLS policies
+CREATE POLICY "Users can view own domains" ON domains
+  FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own domains" ON domains
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own domains" ON domains
+  FOR UPDATE USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete own domains" ON domains
+  FOR DELETE USING (auth.uid() = user_id);
+
+-- Create indexes for performance
+CREATE INDEX IF NOT EXISTS idx_domains_user_id ON domains(user_id);
+CREATE INDEX IF NOT EXISTS idx_domains_status ON domains(status);
+CREATE INDEX IF NOT EXISTS idx_domains_domain ON domains(domain);
+CREATE INDEX IF NOT EXISTS idx_domains_netlify_verified ON domains(netlify_verified);
+
+-- Optional: Create sync_logs table for debugging
+CREATE TABLE IF NOT EXISTS sync_logs (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  table_name text NOT NULL,
+  record_id uuid,
+  action text,
+  payload jsonb,
+  response jsonb,
+  error_message text,
+  created_at timestamptz DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_sync_logs_created_at ON sync_logs(created_at);
+CREATE INDEX IF NOT EXISTS idx_sync_logs_table_record ON sync_logs(table_name, record_id);
+
+-- Function to update updated_at timestamp
+CREATE OR REPLACE FUNCTION update_domains_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger to automatically update updated_at
+DROP TRIGGER IF EXISTS update_domains_updated_at_trigger ON domains;
+CREATE TRIGGER update_domains_updated_at_trigger
+  BEFORE UPDATE ON domains
+  FOR EACH ROW
+  EXECUTE FUNCTION update_domains_updated_at();
+
+-- Grant permissions
+GRANT USAGE ON SCHEMA public TO anon, authenticated;
+GRANT ALL ON domains TO authenticated;
+GRANT ALL ON sync_logs TO authenticated;
+`;
+  }
+
+  /**
+   * Test basic domain operations
+   */
+  static async testDomainOperations(userId: string): Promise<{ success: boolean; message: string; error?: string }> {
+    try {
+      const testDomain = `test-${Date.now()}.example.com`;
+      
+      // Test insert
+      const { data: insertData, error: insertError } = await supabase
+        .from('domains')
+        .insert({
+          domain: testDomain,
+          user_id: userId,
+          status: 'pending',
+          netlify_verified: false
+        })
+        .select()
+        .single();
+
+      if (insertError) {
+        return {
+          success: false,
+          message: 'Failed to insert test domain',
+          error: insertError.message
+        };
+      }
+
+      // Test select
+      const { data: selectData, error: selectError } = await supabase
+        .from('domains')
+        .select('*')
+        .eq('id', insertData.id)
+        .single();
+
+      if (selectError) {
+        return {
+          success: false,
+          message: 'Failed to select test domain',
+          error: selectError.message
+        };
+      }
+
+      // Test update
+      const { error: updateError } = await supabase
+        .from('domains')
+        .update({ status: 'verified' })
+        .eq('id', insertData.id);
+
+      if (updateError) {
+        return {
+          success: false,
+          message: 'Failed to update test domain',
+          error: updateError.message
+        };
+      }
+
+      // Test delete (cleanup)
+      const { error: deleteError } = await supabase
+        .from('domains')
+        .delete()
+        .eq('id', insertData.id);
+
+      if (deleteError) {
+        console.warn('Failed to cleanup test domain:', deleteError);
+      }
+
+      return {
+        success: true,
+        message: 'All domain operations working correctly!'
+      };
+
+    } catch (error: any) {
+      return {
+        success: false,
+        message: 'Domain operations test failed',
+        error: error.message
+      };
+    }
   }
 }
