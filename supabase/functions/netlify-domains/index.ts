@@ -40,11 +40,9 @@ serve(async (req) => {
 
     if (req.method === 'GET') {
       // Fetch domains from Netlify API
-      const url = `https://api.netlify.com/api/v1/sites/${NETLIFY_SITE_ID}/domains`;
-      
-      console.log(`📡 Fetching domains from: ${url}`);
-      
-      const resp = await fetch(url, {
+      console.log(`📡 Fetching domains from: ${NETLIFY_API}`);
+
+      const resp = await fetch(NETLIFY_API, {
         headers: {
           "Authorization": `Bearer ${NETLIFY_ACCESS_TOKEN}`,
           "Content-Type": "application/json"
@@ -54,12 +52,12 @@ serve(async (req) => {
       if (!resp.ok) {
         const errorText = await resp.text();
         console.error(`❌ Netlify API error: ${resp.status} - ${errorText}`);
-        
+
         return new Response(
           JSON.stringify({
             error: `Netlify API error: ${resp.status}`,
             details: errorText
-          }), 
+          }),
           {
             status: resp.status,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -70,8 +68,27 @@ serve(async (req) => {
       const domains = await resp.json();
       console.log(`✅ Successfully fetched ${domains?.length || 0} domains from Netlify`);
 
+      // Sync domains to Supabase
+      try {
+        for (const domain of domains) {
+          await supabase.from("domains").upsert(
+            {
+              name: domain.name || domain.domain,
+              site_id: NETLIFY_SITE_ID,
+              source: "netlify",
+              status: domain.state === "verified" ? "verified" : "unverified"
+            },
+            { onConflict: "name" }
+          );
+        }
+        console.log(`✅ Synced ${domains.length} domains to Supabase`);
+      } catch (syncError) {
+        console.warn('⚠️ Failed to sync to Supabase:', syncError);
+        // Continue and return domains even if sync fails
+      }
+
       return new Response(
-        JSON.stringify(domains), 
+        JSON.stringify(domains),
         {
           status: 200,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
