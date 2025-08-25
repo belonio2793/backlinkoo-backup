@@ -456,8 +456,8 @@ const EnhancedDomainManager = () => {
     <div className="space-y-6">
       {/* Header */}
       <div className="text-center">
-        <h2 className="text-3xl font-bold text-gray-900 mb-2">Enhanced Domain Manager</h2>
-        <p className="text-gray-600">Add domains to Netlify with DNS setup instructions and validation</p>
+        <h2 className="text-3xl font-bold text-gray-900 mb-2">Automation Link Building Domains</h2>
+        <p className="text-gray-600">Add domains for publishing across diversified backlink profile using our content generation and campaigns management system</p>
       </div>
 
       {/* Database Status Checker */}
