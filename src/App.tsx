@@ -292,6 +292,15 @@ const App = () => (
             />
 
             <Route
+              path="/domains/sync-test"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  {React.createElement(React.lazy(() => import('./pages/DomainSyncTestPage')))}
+                </Suspense>
+              }
+            />
+
+            <Route
               path="/test"
               element={
                 <Suspense fallback={<div>Loading...</div>}>
