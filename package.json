@@ -35,7 +35,9 @@
     "domains:test": "node scripts/test-domain-sync.js",
     "domains:netlify": "node scripts/test-netlify-domains.js",
     "domains:verify": "node scripts/verify-admin-account.js",
-    "domains:check": "node -e \"console.log('Testing domain system...'); import('./scripts/setup-domains.js').then(m => m.setupDomainsTable()).then(() => console.log('✅ Domain system ready!')).catch(console.error)\""
+    "domains:check": "node -e \"console.log('Testing domain system...'); import('./scripts/setup-domains.js').then(m => m.setupDomainsTable()).then(() => console.log('✅ Domain system ready!')).catch(console.error)\"",
+    "domains:deploy": "node scripts/deploy-netlify-edge-function.js deploy",
+    "domains:deploy-info": "node scripts/deploy-netlify-edge-function.js info"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",

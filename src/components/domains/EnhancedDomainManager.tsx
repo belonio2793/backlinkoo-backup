@@ -33,22 +33,29 @@ import {
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthState } from '@/hooks/useAuthState';
-import { syncAllDomainsFromNetlify, testNetlifyConnection } from '@/services/enhancedNetlifySync';
+import {
+  getAllDomains,
+  addDomain,
+  syncToNetlify,
+  removeDomain,
+  testEdgeFunction,
+  getSyncStats,
+  type Domain
+} from '@/services/supabaseToNetlifySync';
 import TabbedDomainManager from './TabbedDomainManager';
 
-interface Domain {
-  id: string;
-  domain: string;
-  status: 'pending' | 'verified' | 'removed' | 'error' | 'dns_ready';
-  user_id: string;
-  netlify_verified: boolean;
-  created_at: string;
-  error_message?: string;
-  dns_records?: DNSRecord[];
-  netlify_site_id?: string;
-  validation_status?: string;
-  ssl_status?: string;
-}
+// Domain interface is now imported from the service
+// interface Domain {
+//   id: string;
+//   name: string;
+//   site_id?: string;
+//   source: 'supabase' | 'netlify';
+//   status: 'pending' | 'active' | 'error';
+//   user_id?: string;
+//   created_at: string;
+//   updated_at: string;
+//   error_message?: string;
+// }
 
 interface DNSRecord {
   type: string;
@@ -81,8 +88,9 @@ const EnhancedDomainManager = () => {
   const [selectedDomain, setSelectedDomain] = useState<Domain | null>(null);
   const [dnsInstructions, setDnsInstructions] = useState<DNSSetupInstructions | null>(null);
 
-  // Auto-sync state
-  const [autoSyncComplete, setAutoSyncComplete] = useState(false);
+  // Sync state
+  const [syncStats, setSyncStats] = useState({ total: 0, pending: 0, active: 0, error: 0 });
+  const [lastSync, setLastSync] = useState<Date | null>(null);
 
   // Editing state
   const [editingDomain, setEditingDomain] = useState<string | null>(null);
@@ -99,6 +107,7 @@ const EnhancedDomainManager = () => {
   useEffect(() => {
     if (user) {
       loadDomains();
+      loadSyncStats();
     }
   }, [user]);
 
@@ -109,7 +118,19 @@ const EnhancedDomainManager = () => {
 
       // First, sync domains from Netlify to ensure we have latest data
       try {
-        const syncResult = await syncAllDomainsFromNetlify();
+        let syncResult;
+        if (useEdgeFunction && edgeFunctionStatus === 'deployed') {
+          console.log('🔄 Using edge function for sync...');
+          syncResult = await syncDomainsViaEdgeFunction();
+          if (!syncResult.success) {
+            console.warn('⚠️ Edge function sync failed, falling back to local sync');
+            syncResult = await syncAllDomainsFromNetlify();
+          }
+        } else {
+          console.log('🔄 Using local sync...');
+          syncResult = await syncAllDomainsFromNetlify();
+        }
+
         if (syncResult.success) {
           console.log(`✅ Netlify sync complete: ${syncResult.message}`);
         } else {
@@ -189,31 +210,29 @@ const EnhancedDomainManager = () => {
     }
   };
 
-  const forceNetlifySync = async () => {
+  const syncDomainsToNetlify = async () => {
     setLoading(true);
     try {
-      console.log('🔄 Force syncing from Netlify...');
-      toast.loading('Syncing domains from Netlify...', { id: 'netlify-sync' });
+      console.log('🔄 Syncing domains from Supabase to Netlify...');
+      toast.loading('Syncing domains to Netlify...', { id: 'netlify-sync' });
 
-      const syncResult = await syncAllDomainsFromNetlify();
+      const syncResult = await syncToNetlify();
 
       if (syncResult.success) {
         toast.success(`✅ ${syncResult.message}`, { id: 'netlify-sync' });
-        console.log(`✅ Force sync successful: ${syncResult.message}`);
-
-        // Reload domains from database
-        const { data: domainData } = await supabase
-          .from('domains')
-          .select('*')
-          .order('created_at', { ascending: false });
-        setDomains(domainData || []);
-
+        console.log(`✅ Sync successful: ${syncResult.message}`);
+        setLastSync(new Date());
       } else {
-        toast.error(`Sync failed: ${syncResult.errors.join(', ')}`, { id: 'netlify-sync' });
-        console.error('❌ Force sync failed:', syncResult.errors);
+        toast.error(`Sync failed: ${syncResult.message}`, { id: 'netlify-sync' });
+        console.error('❌ Sync failed:', syncResult.error);
       }
+
+      // Reload domains and stats after sync
+      await loadDomains();
+      await loadSyncStats();
+
     } catch (error: any) {
-      console.error('❌ Force sync error:', error);
+      console.error('❌ Sync error:', error);
       toast.error(`Sync failed: ${error.message}`, { id: 'netlify-sync' });
     } finally {
       setLoading(false);
@@ -222,16 +241,16 @@ const EnhancedDomainManager = () => {
 
   const testConnection = async () => {
     try {
-      toast.loading('Testing Netlify connection...', { id: 'test-connection' });
+      toast.loading('Testing edge function...', { id: 'test-connection' });
 
-      const testResult = await testNetlifyConnection();
+      const testResult = await testEdgeFunction();
 
       if (testResult.success) {
-        toast.success(`✅ Connection successful: ${testResult.message}`, { id: 'test-connection' });
-        console.log('✅ Netlify connection test passed:', testResult.details);
+        toast.success(`✅ Edge function working: ${testResult.message}`, { id: 'test-connection' });
+        console.log('✅ Edge function test passed');
       } else {
-        toast.error(`❌ Connection failed: ${testResult.message}`, { id: 'test-connection' });
-        console.error('❌ Netlify connection test failed:', testResult.message);
+        toast.error(`❌ Edge function test failed: ${testResult.message}`, { id: 'test-connection' });
+        console.error('❌ Edge function test failed:', testResult.message);
       }
     } catch (error: any) {
       console.error('❌ Connection test error:', error);
@@ -239,78 +258,23 @@ const EnhancedDomainManager = () => {
     }
   };
 
-  const addDomain = async () => {
+  const addNewDomain = async () => {
     if (!newDomain.trim()) return;
 
     const cleanedDomain = cleanDomain(newDomain);
     setAddingDomain(true);
 
     try {
-      // First add to database
-      const { data: dbDomain, error: dbError } = await supabase
-        .from('domains')
-        .insert({
-          domain: cleanedDomain,
-          user_id: user?.id || '00000000-0000-0000-0000-000000000000',
-          status: 'pending',
-          netlify_verified: false,
-        })
-        .select()
-        .single();
-
-      if (dbError) {
-        if (dbError.code === '23505') {
-          throw new Error('Domain already exists');
-        }
-        throw new Error(`Database error: ${dbError.message}`);
-      }
-
-      // Then try to add to Netlify
-      const response = await fetch('/netlify/functions/add-domain-to-netlify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          domain: cleanedDomain,
-          domainId: dbDomain.id 
-        }),
-      });
-
-      const result = await response.json();
+      const result = await addDomain(cleanedDomain);
 
       if (result.success) {
-        // Update database with Netlify success
-        await supabase
-          .from('domains')
-          .update({
-            netlify_verified: true,
-            status: 'dns_ready',
-            netlify_site_id: result.netlifyData?.site_id,
-            dns_records: result.dnsInstructions?.dnsRecords,
-          })
-          .eq('id', dbDomain.id);
-
-        toast.success(`✅ Domain ${cleanedDomain} added to Netlify!`);
-        
-        // Show DNS setup instructions
-        const instructions = generateDNSInstructions(cleanedDomain);
-        setDnsInstructions(instructions);
-        setSelectedDomain({ ...dbDomain, dns_records: instructions.dnsRecords });
-        setShowDNSModal(true);
+        toast.success(`✅ ${result.message}`);
+        setNewDomain('');
+        await loadDomains();
+        await loadSyncStats();
       } else {
-        // Update database with error
-        await supabase
-          .from('domains')
-          .update({
-            status: 'error',
-            error_message: result.error,
-          })
-          .eq('id', dbDomain.id);
-
-        toast.error(`Failed to add to Netlify: ${result.error}`);
+        toast.error(`Failed to add domain: ${result.message}`);
       }
-
-      setNewDomain('');
-      await loadDomains();
 
     } catch (error: any) {
       console.error('Add domain error:', error);
@@ -405,37 +369,19 @@ const EnhancedDomainManager = () => {
     }
   };
 
-  const removeDomain = async (domain: Domain) => {
-    setRemovingDomain(domain.domain);
+  const removeDomainHandler = async (domain: Domain) => {
+    setRemovingDomain(domain.name);
 
     try {
-      // Try to remove from Netlify first
-      if (domain.netlify_verified) {
-        const response = await fetch('/netlify/functions/add-domain-to-netlify', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            action: 'remove',
-            domain: domain.domain 
-          }),
-        });
+      const result = await removeDomain(domain.id);
 
-        const result = await response.json();
-        if (result.success) {
-          toast.success(`Removed ${domain.domain} from Netlify`);
-        }
+      if (result.success) {
+        toast.success(`✅ ${result.message}`);
+        await loadDomains();
+        await loadSyncStats();
+      } else {
+        toast.error(`Failed to remove domain: ${result.message}`);
       }
-
-      // Remove from database
-      const { error } = await supabase
-        .from('domains')
-        .delete()
-        .eq('id', domain.id);
-
-      if (error) throw error;
-
-      toast.success(`✅ Domain ${domain.domain} removed successfully`);
-      await loadDomains();
 
     } catch (error: any) {
       console.error('Remove domain error:', error);
@@ -446,7 +392,7 @@ const EnhancedDomainManager = () => {
   };
 
   const showDNSSetup = (domain: Domain) => {
-    const instructions = generateDNSInstructions(domain.domain);
+    const instructions = generateDNSInstructions(domain.name);
     setDnsInstructions(instructions);
     setSelectedDomain(domain);
     setShowDNSModal(true);
@@ -530,23 +476,19 @@ const EnhancedDomainManager = () => {
   const getStatusBadge = (domain: Domain) => {
     if (domain.error_message) {
       return <Badge variant="destructive">Error</Badge>;
-    } else if (domain.status === 'verified') {
-      return <Badge className="bg-green-600">Verified</Badge>;
-    } else if (domain.status === 'dns_ready' && domain.netlify_verified) {
-      return <Badge className="bg-blue-600">DNS Setup Required</Badge>;
-    } else if (domain.netlify_verified) {
-      return <Badge className="bg-blue-600">In Netlify</Badge>;
+    } else if (domain.status === 'active') {
+      return <Badge className="bg-green-600">Active in Netlify</Badge>;
     } else if (domain.status === 'pending') {
-      return <Badge variant="secondary">Pending</Badge>;
+      return <Badge className="bg-blue-600">Pending Sync</Badge>;
     } else {
-      return <Badge variant="outline">Added</Badge>;
+      return <Badge variant="outline">Unknown</Badge>;
     }
   };
 
   const getStatusIcon = (domain: Domain) => {
-    if (domain.status === 'verified') {
+    if (domain.status === 'active') {
       return <CheckCircle className="h-5 w-5 text-green-600" />;
-    } else if (domain.status === 'dns_ready') {
+    } else if (domain.status === 'pending') {
       return <Clock className="h-5 w-5 text-blue-600" />;
     } else if (domain.error_message) {
       return <AlertCircle className="h-5 w-5 text-red-600" />;
@@ -569,7 +511,7 @@ const EnhancedDomainManager = () => {
         newDomain={newDomain}
         setNewDomain={setNewDomain}
         addingDomain={addingDomain}
-        onAddSingleDomain={addDomain}
+        onAddSingleDomain={addNewDomain}
         onRefreshDomains={loadDomains}
       />
 
@@ -582,23 +524,91 @@ const EnhancedDomainManager = () => {
               Your Domains ({domains.length})
             </CardTitle>
             <div className="flex gap-2">
+              {/* Sync Stats */}
+              {syncStats.total > 0 && (
+                <div className="flex items-center gap-2 mr-2 text-sm">
+                  <span className="text-gray-500">
+                    {syncStats.pending} pending • {syncStats.active} active
+                    {syncStats.error > 0 && ` • ${syncStats.error} errors`}
+                  </span>
+                </div>
+              )}
+
+              {/* Last Sync Time */}
+              {lastSync && (
+                <div className="flex items-center gap-1 mr-2">
+                  <Clock className="h-4 w-4 text-gray-400" />
+                  <span className="text-xs text-gray-400">
+                    Synced {lastSync.toLocaleTimeString()}
+                  </span>
+                </div>
+              )}
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={testConnection}
+                disabled={loading}
+                title="Test edge function connection"
+              >
+                <Shield className="h-4 w-4 mr-2" />
+                Test Connection
+              </Button>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={syncDomainsToNetlify}
+                disabled={loading}
+                title="Push pending domains from Supabase to Netlify"
+                className="border-blue-200 bg-blue-50"
+              >
+                {loading ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Zap className="h-4 w-4 mr-2 text-blue-600" />
+                )}
+                Push to Netlify
+              </Button>
+
               <Button
                 variant="outline"
                 size="sm"
                 onClick={loadDomains}
                 disabled={loading}
-                title="Sync from Netlify and refresh domains list"
+                title="Refresh domains list"
               >
                 {loading ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 ) : (
                   <RefreshCw className="h-4 w-4 mr-2" />
                 )}
-                Sync from Netlify
+                Refresh
               </Button>
             </div>
           </div>
         </CardHeader>
+
+        {/* Sync Instructions */}
+        <div className="px-6 pb-4">
+          <Alert className="border-blue-200 bg-blue-50">
+            <Zap className="h-4 w-4 text-blue-600" />
+            <AlertDescription className="text-blue-800">
+              <div className="font-medium mb-2">Domain Sync Process</div>
+              <div className="text-sm">
+                1. Add domains to your list (status: pending) •
+                2. Click "Push to Netlify" to sync them •
+                3. Domains become active in Netlify
+              </div>
+              {syncStats.pending > 0 && (
+                <div className="text-xs mt-2 text-blue-600">
+                  {syncStats.pending} domain(s) ready to sync to Netlify
+                </div>
+              )}
+            </AlertDescription>
+          </Alert>
+        </div>
+
         <CardContent>
           {loading ? (
             <div className="text-center py-8">

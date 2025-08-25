@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 
 export default defineConfig({
+  root: "./",
   server: {
     host: "::",
     port: 8081,
@@ -17,6 +18,11 @@ export default defineConfig({
     target: 'es2015',
     outDir: 'dist',
     sourcemap: false,
+    rollupOptions: {
+      input: {
+        main: path.resolve(__dirname, 'index.html')
+      }
+    }
   },
   optimizeDeps: {
     include: [
