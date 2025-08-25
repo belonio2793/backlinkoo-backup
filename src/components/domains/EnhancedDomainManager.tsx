@@ -27,7 +27,8 @@ import {
   CheckCircle,
   Clock,
   AlertCircle,
-  Zap
+  Zap,
+  Shield
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
