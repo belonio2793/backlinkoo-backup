@@ -723,20 +723,32 @@ const EnhancedDomainManager = () => {
                         </>
                       )}
                       
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeDomain(domain)}
-                        disabled={removingDomain === domain.domain}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                        title="Remove Domain"
-                      >
-                        {removingDomain === domain.domain ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <Trash2 className="h-4 w-4" />
-                        )}
-                      </Button>
+                      {!isPrimaryDomain(domain.domain) ? (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeDomain(domain)}
+                          disabled={removingDomain === domain.domain}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          title="Remove Domain"
+                        >
+                          {removingDomain === domain.domain ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="h-4 w-4" />
+                          )}
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          disabled
+                          className="text-gray-400 cursor-not-allowed"
+                          title="Primary domain cannot be removed"
+                        >
+                          <Shield className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </div>
