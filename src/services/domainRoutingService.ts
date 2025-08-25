@@ -172,7 +172,7 @@ export class DomainRoutingService {
    * Get blog posts for a specific domain
    */
   static async getDomainBlogPosts(
-    domainId: string, 
+    domainId: string,
     options: {
       limit?: number;
       offset?: number;
@@ -182,7 +182,7 @@ export class DomainRoutingService {
   ) {
     try {
       let query = supabase
-        .from('blog_posts')
+        .from('domain_blog_posts')
         .select(`
           *,
           domain_blog_categories(name, slug, color)
