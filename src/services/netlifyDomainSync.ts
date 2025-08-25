@@ -50,17 +50,16 @@ export class NetlifyDomainSyncService {
         }),
       });
 
-      // Clone the response to prevent "body stream already read" errors
-      const responseClone = response.clone();
+      // Get response text first, then parse JSON
+      const responseText = await response.text();
 
       let result;
       try {
-        result = await response.json();
+        result = JSON.parse(responseText);
       } catch (jsonError) {
-        // If JSON parsing fails, try to get text from the clone
-        console.warn('Failed to parse JSON response, trying text:', jsonError);
-        const errorText = await responseClone.text();
-        throw new Error(`Invalid JSON response: ${errorText.substring(0, 200)}`);
+        console.warn('Failed to parse JSON response:', jsonError);
+        console.warn('Response text:', responseText.substring(0, 500));
+        throw new Error(`Invalid JSON response: ${responseText.substring(0, 200)}`);
       }
 
       if (!response.ok) {
@@ -111,17 +110,16 @@ export class NetlifyDomainSyncService {
         }),
       });
 
-      // Clone the response to prevent "body stream already read" errors
-      const responseClone = response.clone();
+      // Get response text first, then parse JSON
+      const responseText = await response.text();
 
       let result;
       try {
-        result = await response.json();
+        result = JSON.parse(responseText);
       } catch (jsonError) {
-        // If JSON parsing fails, try to get text from the clone
-        console.warn('Failed to parse JSON response, trying text:', jsonError);
-        const errorText = await responseClone.text();
-        throw new Error(`Invalid JSON response: ${errorText.substring(0, 200)}`);
+        console.warn('Failed to parse JSON response:', jsonError);
+        console.warn('Response text:', responseText.substring(0, 500));
+        throw new Error(`Invalid JSON response: ${responseText.substring(0, 200)}`);
       }
 
       if (!response.ok || !result.success) {
@@ -164,17 +162,22 @@ export class NetlifyDomainSyncService {
         }),
       });
 
-      // Clone the response to prevent "body stream already read" errors
-      const responseClone = response.clone();
+      // Check if response is ok first
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
+      }
+
+      // Get response text first, then parse JSON
+      const responseText = await response.text();
 
       let result;
       try {
-        result = await response.json();
+        result = JSON.parse(responseText);
       } catch (jsonError) {
-        // If JSON parsing fails, try to get text from the clone
-        console.warn('Failed to parse JSON response, trying text:', jsonError);
-        const errorText = await responseClone.text();
-        throw new Error(`Invalid JSON response: ${errorText.substring(0, 200)}`);
+        console.warn('Failed to parse JSON response:', jsonError);
+        console.warn('Response text:', responseText.substring(0, 500));
+        throw new Error(`Invalid JSON response: ${responseText.substring(0, 200)}`);
       }
 
       return {
