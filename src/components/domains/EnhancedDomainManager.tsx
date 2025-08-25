@@ -476,16 +476,12 @@ const EnhancedDomainManager = () => {
   const getStatusBadge = (domain: Domain) => {
     if (domain.error_message) {
       return <Badge variant="destructive">Error</Badge>;
-    } else if (domain.status === 'verified') {
-      return <Badge className="bg-green-600">Verified</Badge>;
-    } else if (domain.status === 'dns_ready' && domain.netlify_verified) {
-      return <Badge className="bg-blue-600">DNS Setup Required</Badge>;
-    } else if (domain.netlify_verified) {
-      return <Badge className="bg-blue-600">In Netlify</Badge>;
+    } else if (domain.status === 'active') {
+      return <Badge className="bg-green-600">Active in Netlify</Badge>;
     } else if (domain.status === 'pending') {
-      return <Badge variant="secondary">Pending</Badge>;
+      return <Badge className="bg-blue-600">Pending Sync</Badge>;
     } else {
-      return <Badge variant="outline">Added</Badge>;
+      return <Badge variant="outline">Unknown</Badge>;
     }
   };
 
