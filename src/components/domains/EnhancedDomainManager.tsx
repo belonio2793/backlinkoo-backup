@@ -118,7 +118,7 @@ const EnhancedDomainManager = () => {
 
       if (error) {
         if (error.code === 'PGRST116') {
-          console.warn('⚠️ Domains table not found');
+          console.warn('⚠�� Domains table not found');
           toast.error('Domains table not found. Please contact support.');
           setDomains([]);
           return;
@@ -657,32 +657,26 @@ const EnhancedDomainManager = () => {
                             </Button>
                           </div>
                         ) : (
-                          <>
+                          <div className="flex items-center gap-2">
                             <span className="font-medium text-lg">{domain.domain}</span>
-                            {!isPrimaryDomain(domain.domain) && (
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => startEditing(domain)}
-                                className="h-6 w-6 p-0 text-gray-400 hover:text-blue-600"
-                                title="Edit domain"
-                              >
-                                ✏️
-                              </Button>
-                            )}
                             <button
                               onClick={() => window.open(`https://${domain.domain}`, '_blank')}
                               className="text-gray-400 hover:text-blue-600 transition-colors"
+                              title={`Visit ${domain.domain}`}
                             >
                               <ExternalLink className="h-4 w-4" />
                             </button>
-                          </>
+                          </div>
                         )}
                       </div>
                       <p className="text-sm text-gray-500">
+                        <span className="font-medium">Source:</span> {domain.is_global ? 'Netlify Sync' : 'Manual'} •
                         Added {new Date(domain.created_at).toLocaleDateString()}
                         {domain.netlify_site_id && ` • Site ID: ${domain.netlify_site_id.substring(0, 8)}...`}
                         {isPrimaryDomain(domain.domain) && ' • Primary Domain'}
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        URL: <code className="bg-gray-100 px-1 rounded">https://{domain.domain}</code>
                       </p>
                       {domain.error_message && (
                         <p className="text-sm text-red-600 mt-1">
