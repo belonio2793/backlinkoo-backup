@@ -100,10 +100,21 @@ export class NetlifyDomainSyncService {
         }),
       });
 
-      const result = await response.json();
+      // Clone the response to prevent "body stream already read" errors
+      const responseClone = response.clone();
+
+      let result;
+      try {
+        result = await response.json();
+      } catch (jsonError) {
+        // If JSON parsing fails, try to get text from the clone
+        console.warn('Failed to parse JSON response, trying text:', jsonError);
+        const errorText = await responseClone.text();
+        throw new Error(`Invalid JSON response: ${errorText.substring(0, 200)}`);
+      }
 
       if (!response.ok || !result.success) {
-        throw new Error(result.error || 'Failed to get site info');
+        throw new Error(result.error || `HTTP ${response.status}: Failed to get site info`);
       }
 
       return {
@@ -114,7 +125,7 @@ export class NetlifyDomainSyncService {
 
     } catch (error: any) {
       console.error('❌ Error getting Netlify site info:', error);
-      
+
       return {
         success: false,
         error: error.message
