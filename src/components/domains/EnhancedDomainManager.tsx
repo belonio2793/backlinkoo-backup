@@ -106,9 +106,8 @@ const EnhancedDomainManager = () => {
 
   useEffect(() => {
     if (user) {
-      // Check edge function status first
-      checkEdgeFunctionStatus();
       loadDomains();
+      loadSyncStats();
     }
   }, [user]);
 
