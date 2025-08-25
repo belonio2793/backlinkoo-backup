@@ -1,4 +1,9 @@
-const Stripe = require("stripe");
+let Stripe;
+try {
+  Stripe = require("stripe");
+} catch (error) {
+  console.warn("Stripe module not available:", error.message);
+}
 const { createClient } = require('@supabase/supabase-js');
 
 // Initialize Supabase client
@@ -60,6 +65,17 @@ exports.handler = async (event, context) => {
         body: JSON.stringify({ 
           verified: false,
           error: 'Stripe configuration missing' 
+        })
+      };
+    }
+
+    if (!Stripe) {
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({
+          verified: false,
+          error: 'Stripe module not available'
         })
       };
     }

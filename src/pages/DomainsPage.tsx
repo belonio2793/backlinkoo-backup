@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { Globe, Plus, RefreshCw, ExternalLink, Trash2, Loader2 } from 'lucide-react';
+import { Globe, Plus, RefreshCw, ExternalLink, Trash2, Loader2, Settings } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { useAuthState } from '@/hooks/useAuthState';
 import { toast } from 'sonner';
 import { DomainService, type Domain } from '@/services/domainService';
 import { DomainServiceDev } from '@/services/domainServiceDev';
+import { DomainSyncService } from '@/services/domainSyncService';
+import EnhancedDomainSync from '@/components/domains/EnhancedDomainSync';
+import DomainTableDiagnostic from '@/components/domains/DomainTableDiagnostic';
 
 // Use development service if in development mode
 const isDev = import.meta.env.DEV || window.location.hostname === 'localhost';
@@ -37,12 +41,22 @@ const DomainsPage = () => {
 
     setLoading(true);
     try {
-      // First sync domains from Netlify
-      const syncResult = await DomainAPI.syncFromNetlify(user.id);
-      if (syncResult.success) {
-        console.log(syncResult.message);
+      // Use enhanced sync service for better reliability
+      if (!isDev) {
+        const syncResult = await DomainSyncService.performBidirectionalSync(user.id);
+        if (syncResult.success) {
+          console.log('✅ Bidirectional sync completed:', syncResult.message);
+        } else {
+          console.warn('⚠️ Sync had issues:', syncResult.error);
+        }
       } else {
-        console.warn('Netlify sync failed:', syncResult.error);
+        // Fallback to original sync for development
+        const syncResult = await DomainAPI.syncFromNetlify(user.id);
+        if (syncResult.success) {
+          console.log(syncResult.message);
+        } else {
+          console.warn('Netlify sync failed:', syncResult.error);
+        }
       }
 
       // Load domains from database
@@ -142,9 +156,19 @@ const DomainsPage = () => {
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Domain Management</h1>
           <p className="text-gray-600">
-            Manage domains for your Netlify site (ID: {NETLIFY_SITE_ID.substring(0, 8)}...)
+            Manage domains for your Netlify site and keep them synced with Supabase
           </p>
         </div>
+
+        {/* Main Content Tabs */}
+        <Tabs defaultValue="domains" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="domains">Domain List</TabsTrigger>
+            <TabsTrigger value="sync">Sync Management</TabsTrigger>
+            <TabsTrigger value="diagnostic">Diagnostic</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="domains" className="mt-6">
 
         {/* Add Domain Section */}
         <Card className="mb-6">
@@ -288,14 +312,24 @@ const DomainsPage = () => {
           </CardContent>
         </Card>
 
-        {/* Help Section */}
-        <Alert className="mt-6">
-          <Globe className="h-4 w-4" />
-          <AlertDescription>
-            <strong>Next Steps:</strong> After adding a domain, configure your DNS records to point to Netlify. 
-            Contact support if you need help with DNS configuration.
-          </AlertDescription>
-        </Alert>
+            {/* Help Section */}
+            <Alert className="mt-6">
+              <Globe className="h-4 w-4" />
+              <AlertDescription>
+                <strong>Next Steps:</strong> After adding a domain, configure your DNS records to point to Netlify.
+                Use the Sync Management tab to keep domains synchronized between Supabase and Netlify.
+              </AlertDescription>
+            </Alert>
+          </TabsContent>
+
+          <TabsContent value="sync" className="mt-6">
+            <EnhancedDomainSync onSyncComplete={loadDomains} />
+          </TabsContent>
+
+          <TabsContent value="diagnostic" className="mt-6">
+            <DomainTableDiagnostic />
+          </TabsContent>
+        </Tabs>
       </div>
 
       <Footer />
