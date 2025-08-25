@@ -99,10 +99,10 @@ serve(async (req) => {
     if (req.method === 'POST') {
       // Add domain to Netlify
       const { domain } = await req.json();
-      
+
       if (!domain) {
         return new Response(
-          JSON.stringify({ error: 'Domain name is required' }), 
+          JSON.stringify({ error: 'Domain name is required' }),
           {
             status: 400,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -110,11 +110,9 @@ serve(async (req) => {
         );
       }
 
-      const url = `https://api.netlify.com/api/v1/sites/${NETLIFY_SITE_ID}/domains`;
-      
       console.log(`📡 Adding domain ${domain} to Netlify site`);
 
-      const resp = await fetch(url, {
+      const resp = await fetch(NETLIFY_API, {
         method: 'POST',
         headers: {
           "Authorization": `Bearer ${NETLIFY_ACCESS_TOKEN}`,
@@ -126,12 +124,12 @@ serve(async (req) => {
       if (!resp.ok) {
         const errorText = await resp.text();
         console.error(`❌ Failed to add domain: ${resp.status} - ${errorText}`);
-        
+
         return new Response(
           JSON.stringify({
             error: `Failed to add domain: ${resp.status}`,
             details: errorText
-          }), 
+          }),
           {
             status: resp.status,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -142,8 +140,22 @@ serve(async (req) => {
       const result = await resp.json();
       console.log(`✅ Successfully added domain ${domain} to Netlify`);
 
+      // Sync to Supabase if domain was added successfully
+      try {
+        await supabase.from("domains").upsert({
+          name: domain,
+          site_id: NETLIFY_SITE_ID,
+          source: "netlify",
+          status: result.state === "verified" ? "verified" : "unverified"
+        });
+        console.log(`✅ Synced new domain ${domain} to Supabase`);
+      } catch (syncError) {
+        console.warn('⚠️ Failed to sync new domain to Supabase:', syncError);
+        // Continue and return result even if sync fails
+      }
+
       return new Response(
-        JSON.stringify(result), 
+        JSON.stringify(result),
         {
           status: 200,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
