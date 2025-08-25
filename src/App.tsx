@@ -259,6 +259,17 @@ const App = () => (
               element={
                 <DomainErrorBoundary>
                   <Suspense fallback={<LoadingSpinner />}>
+                    <LazyEnhancedDomainsPage />
+                  </Suspense>
+                </DomainErrorBoundary>
+              }
+            />
+
+            <Route
+              path="/domains/legacy"
+              element={
+                <DomainErrorBoundary>
+                  <Suspense fallback={<LoadingSpinner />}>
                     <LazyDomainsPage />
                   </Suspense>
                 </DomainErrorBoundary>
