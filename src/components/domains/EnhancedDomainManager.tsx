@@ -32,9 +32,6 @@ import {
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthState } from '@/hooks/useAuthState';
-import NetlifyConfigHelper from './NetlifyConfigHelper';
-import ManualDomainSync from './ManualDomainSync';
-import DatabaseDomainChecker from './DatabaseDomainChecker';
 import { syncAllDomainsFromNetlify, testNetlifyConnection } from '@/services/enhancedNetlifySync';
 
 interface Domain {
