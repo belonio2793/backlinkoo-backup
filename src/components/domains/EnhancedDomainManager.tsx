@@ -120,7 +120,19 @@ const EnhancedDomainManager = () => {
 
       // First, sync domains from Netlify to ensure we have latest data
       try {
-        const syncResult = await syncAllDomainsFromNetlify();
+        let syncResult;
+        if (useEdgeFunction && edgeFunctionStatus === 'deployed') {
+          console.log('🔄 Using edge function for sync...');
+          syncResult = await syncDomainsViaEdgeFunction();
+          if (!syncResult.success) {
+            console.warn('⚠️ Edge function sync failed, falling back to local sync');
+            syncResult = await syncAllDomainsFromNetlify();
+          }
+        } else {
+          console.log('🔄 Using local sync...');
+          syncResult = await syncAllDomainsFromNetlify();
+        }
+
         if (syncResult.success) {
           console.log(`✅ Netlify sync complete: ${syncResult.message}`);
         } else {
