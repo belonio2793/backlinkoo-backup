@@ -120,14 +120,6 @@ export function PaymentSystemStatus() {
 
         {/* Quick Actions */}
         <div className="flex gap-2 pt-2">
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => window.open('/payment-test', '_blank')}
-          >
-            <ExternalLink className="h-4 w-4 mr-1" />
-            Test Payments
-          </Button>
         </div>
 
         {/* Feature Status */}
