@@ -53,12 +53,10 @@ export function BuyCreditsButton({
       });
 
       if (result.success) {
-        if (result.isDemoMode) {
-          toast({
-            title: "✅ Demo Purchase Complete!",
-            description: `${credits} credits would be added to your account.`,
-          });
-        }
+        toast({
+          title: "✅ Purchase Processing",
+          description: `${credits} credits will be added to your account.`,
+        });
       } else {
         throw new Error(result.error || 'Purchase failed');
       }

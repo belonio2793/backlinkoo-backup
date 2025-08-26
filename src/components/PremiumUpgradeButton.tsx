@@ -55,12 +55,10 @@ export function PremiumUpgradeButton({
       });
 
       if (result.success) {
-        if (result.isDemoMode) {
-          toast({
-            title: "✅ Demo Upgrade Complete!",
-            description: `Premium ${plan} plan would be activated.`,
-          });
-        }
+        toast({
+          title: "✅ Upgrade Processing",
+          description: `Premium ${plan} plan is being activated.`,
+        });
       } else {
         throw new Error(result.error || 'Upgrade failed');
       }
