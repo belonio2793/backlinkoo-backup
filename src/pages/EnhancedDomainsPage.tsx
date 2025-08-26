@@ -301,7 +301,7 @@ const EnhancedDomainsPage = () => {
           });
           console.log('📊 Sync stats updated:', siteInfo.domains?.length || 0, 'Netlify domains');
         } else {
-          console.warn('⚠��� Failed to get sync stats:', siteInfo.error);
+          console.warn('⚠️ Failed to get sync stats:', siteInfo.error);
         }
       } else {
         console.warn('❌ Netlify connection failed:', result.error);
@@ -825,9 +825,10 @@ const EnhancedDomainsPage = () => {
                     <TableHead>Status</TableHead>
                     <TableHead>Verification</TableHead>
                     <TableHead>SSL Status</TableHead>
-                    <TableHead>TXT Record</TableHead>
-                    <TableHead>DNS Records</TableHead>
-                    <TableHead>Added</TableHead>
+                    <TableHead>DNS Configuration</TableHead>
+                    <TableHead>Theme/Blog</TableHead>
+                    <TableHead>Netlify</TableHead>
+                    <TableHead>Last Validation</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
