@@ -54,6 +54,14 @@ interface Domain {
   custom_domain: boolean;
   ssl_status: 'none' | 'pending' | 'issued' | 'error';
   dns_records?: any[];
+  selected_theme?: string;
+  theme_name?: string;
+  blog_enabled?: boolean;
+  netlify_site_id?: string;
+  netlify_domain_id?: string;
+  ssl_enabled?: boolean;
+  custom_dns_configured?: boolean;
+  last_validation_at?: string;
 }
 
 const EnhancedDomainsPage = () => {
