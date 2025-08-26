@@ -25,10 +25,14 @@ export default defineConfig({
     }
   },
   optimizeDeps: {
+    force: true,
     include: [
       'react',
       'react-dom',
       'react-router-dom'
     ]
+  },
+  esbuild: {
+    logOverride: { 'this-is-undefined-in-esm': 'silent' }
   }
 });
