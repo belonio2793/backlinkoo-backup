@@ -41,6 +41,7 @@ import { QuickTrialUpgrade } from "@/components/QuickTrialUpgrade";
 import { TrialConversionService } from "@/services/trialConversionService";
 import { useAuthModal, usePremiumModal, useWaitlistModal, useModal } from "@/contexts/ModalContext";
 import { WaitlistModal } from "@/components/WaitlistModal";
+import { UniversalPaymentComponent } from "@/components/UniversalPaymentComponent";
 
 
 
