@@ -586,6 +586,49 @@ const EnhancedDomainsPage = () => {
     setDnsModalOpen(true);
   };
 
+  const performBulkSync = async () => {
+    if (!user?.id) return;
+
+    setBulkSyncing(true);
+    setSyncResults(null);
+
+    try {
+      console.log('🚀 Starting comprehensive Netlify domain sync...');
+      toast.info('🔍 Fetching all domains from Netlify...', { duration: 3000 });
+
+      const result = await NetlifyDomainBulkSync.syncAllDomainsToSupabase(user.id);
+      setSyncResults(result);
+
+      if (result.success) {
+        // Refresh the domains list
+        await loadDomains();
+
+        if (result.successfulSyncs > 0) {
+          toast.success(
+            `✅ Successfully synced ${result.successfulSyncs} domains from Netlify!`,
+            { duration: 5000 }
+          );
+        } else if (result.domains.length === 0) {
+          toast.warning(
+            '⚠️ No domains found in Netlify. You may need to connect to Netlify MCP.',
+            { duration: 8000 }
+          );
+        }
+      } else {
+        toast.error(`❌ Sync failed: ${result.errors[0]?.error || 'Unknown error'}`);
+      }
+
+      // Show detailed results modal
+      setSyncModalOpen(true);
+
+    } catch (error: any) {
+      console.error('❌ Bulk sync error:', error);
+      toast.error(`Sync failed: ${error.message}`);
+    } finally {
+      setBulkSyncing(false);
+    }
+  };
+
   const getStatusBadge = (domain: Domain) => {
     if (domain.status === 'verified' && domain.netlify_verified) {
       return <Badge className="bg-green-600">Active</Badge>;
