@@ -46,12 +46,14 @@ interface Domain {
   user_id: string;
   netlify_verified: boolean;
   dns_verified: boolean;
+  txt_record_value?: string;
   error_message?: string;
   created_at: string;
   updated_at: string;
   last_sync?: string;
   custom_domain: boolean;
   ssl_status: 'none' | 'pending' | 'issued' | 'error';
+  dns_records?: any[];
 }
 
 const EnhancedDomainsPage = () => {
@@ -540,7 +542,10 @@ const EnhancedDomainsPage = () => {
                   <TableRow>
                     <TableHead>Domain</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Sync Status</TableHead>
+                    <TableHead>Verification</TableHead>
+                    <TableHead>SSL Status</TableHead>
+                    <TableHead>TXT Record</TableHead>
+                    <TableHead>DNS Records</TableHead>
                     <TableHead>Added</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
@@ -561,14 +566,70 @@ const EnhancedDomainsPage = () => {
                         {getStatusBadge(domain)}
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-2">
-                          {domain.netlify_verified ? (
-                            <Badge className="bg-green-100 text-green-800">Netlify ✓</Badge>
-                          ) : (
-                            <Badge variant="secondary">Local Only</Badge>
+                        <div className="flex flex-col gap-1">
+                          <div className="flex items-center gap-2">
+                            {domain.netlify_verified ? (
+                              <Badge className="bg-green-100 text-green-800 text-xs">Netlify ✓</Badge>
+                            ) : (
+                              <Badge variant="secondary" className="text-xs">Local Only</Badge>
+                            )}
+                            {domain.dns_verified && (
+                              <Badge className="bg-blue-100 text-blue-800 text-xs">DNS ✓</Badge>
+                            )}
+                          </div>
+                          {!domain.netlify_verified && !domain.dns_verified && (
+                            <span className="text-xs text-gray-500">Not verified</span>
                           )}
-                          {domain.dns_verified && (
-                            <Badge className="bg-blue-100 text-blue-800">DNS ✓</Badge>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Badge
+                            variant={domain.ssl_status === 'issued' ? 'default' : domain.ssl_status === 'pending' ? 'secondary' : 'destructive'}
+                            className="text-xs"
+                          >
+                            {domain.ssl_status === 'issued' ? '🔒 SSL Active' :
+                             domain.ssl_status === 'pending' ? '⏳ SSL Pending' :
+                             domain.ssl_status === 'error' ? '❌ SSL Error' :
+                             '🔓 No SSL'}
+                          </Badge>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="max-w-32">
+                          {domain.txt_record_value ? (
+                            <div className="text-xs">
+                              <code className="bg-gray-100 px-1 py-0.5 rounded text-xs break-all">
+                                {domain.txt_record_value.length > 20
+                                  ? `${domain.txt_record_value.substring(0, 20)}...`
+                                  : domain.txt_record_value}
+                              </code>
+                            </div>
+                          ) : (
+                            <span className="text-xs text-gray-400">Not set</span>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="max-w-32">
+                          {domain.dns_records && domain.dns_records.length > 0 ? (
+                            <div className="text-xs">
+                              <Badge variant="outline" className="text-xs">
+                                {domain.dns_records.length} record{domain.dns_records.length !== 1 ? 's' : ''}
+                              </Badge>
+                              <div className="text-xs text-gray-500 mt-1">
+                                {domain.dns_records.slice(0, 2).map((record: any, idx: number) => (
+                                  <div key={idx} className="truncate">
+                                    {record.type || 'Record'}: {record.value ? record.value.substring(0, 15) + '...' : 'N/A'}
+                                  </div>
+                                ))}
+                                {domain.dns_records.length > 2 && (
+                                  <div className="text-xs text-gray-400">+{domain.dns_records.length - 2} more</div>
+                                )}
+                              </div>
+                            </div>
+                          ) : (
+                            <span className="text-xs text-gray-400">No records</span>
                           )}
                         </div>
                       </TableCell>
