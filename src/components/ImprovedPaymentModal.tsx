@@ -221,14 +221,14 @@ export const ImprovedPaymentModal = ({
         </DialogHeader>
 
         {/* Configuration Status */}
-        {stripeStatus.demoMode && (
+        {!stripePaymentService.getStatus().configured && (
           <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
             <div className="flex items-center gap-2 text-yellow-800">
               <Shield className="h-4 w-4" />
-              <span className="font-medium">Demo Mode Active</span>
+              <span className="font-medium">Configuration Required</span>
             </div>
             <p className="text-sm text-yellow-700 mt-1">
-              Stripe is not fully configured. Purchases will be simulated for testing.
+              Stripe keys need to be configured for live payments.
             </p>
           </div>
         )}
