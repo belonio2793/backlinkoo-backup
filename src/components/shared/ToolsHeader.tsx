@@ -10,7 +10,8 @@ import {
   X,
   ChevronRight,
   Zap,
-  Trash2
+  Trash2,
+  CreditCard
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { User } from '@supabase/supabase-js';
