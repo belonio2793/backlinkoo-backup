@@ -42,7 +42,7 @@ import { NetlifyDomainSyncService } from '@/services/netlifyDomainSync';
 interface Domain {
   id: string;
   domain: string;
-  status: 'pending' | 'verified' | 'removed' | 'error';
+  status: 'pending' | 'verified' | 'removed' | 'error' | 'validating' | 'validated' | 'dns_ready' | 'theme_selection' | 'active';
   user_id: string;
   netlify_verified: boolean;
   dns_verified: boolean;
@@ -54,6 +54,14 @@ interface Domain {
   custom_domain: boolean;
   ssl_status: 'none' | 'pending' | 'issued' | 'error';
   dns_records?: any[];
+  selected_theme?: string;
+  theme_name?: string;
+  blog_enabled?: boolean;
+  netlify_site_id?: string;
+  netlify_domain_id?: string;
+  ssl_enabled?: boolean;
+  custom_dns_configured?: boolean;
+  last_validation_at?: string;
 }
 
 const EnhancedDomainsPage = () => {
@@ -359,14 +367,21 @@ const EnhancedDomainsPage = () => {
     if (!user?.id) return;
 
     const confirmed = window.confirm(
-      'This will use the Supabase edge function to fetch ALL domains from Netlify and sync them to your domains table. Continue?'
+      '🚀 Smart Domain Discovery & Sync\n\n' +
+      'This will automatically:\n' +
+      '✅ Discover all domains from your Netlify account\n' +
+      '✅ Validate and store them in your domains database\n' +
+      '✅ Update verification status and SSL information\n' +
+      '✅ Sync DNS records and configuration\n\n' +
+      'Continue with domain discovery?'
     );
 
     if (!confirmed) return;
 
     setEdgeFunctionSyncing(true);
     try {
-      console.log('🚀 Calling Supabase netlify-domains edge function...');
+      console.log('🚀 Starting Smart Domain Discovery...');
+      toast.info('🔍 Discovering domains from Netlify...', { duration: 3000 });
 
       const { data, error } = await supabase.functions.invoke('netlify-domains', {
         body: {
@@ -376,27 +391,42 @@ const EnhancedDomainsPage = () => {
       });
 
       if (error) {
-        console.error('❌ Edge function error:', error);
-        toast.error(`Edge function failed: ${error.message}`);
+        console.error('❌ Domain discovery failed:', error);
+        toast.error(`❌ Discovery failed: ${error.message}`);
         return;
       }
 
       if (data?.success) {
-        console.log('✅ Edge function sync completed:', data);
+        console.log('✅ Smart domain discovery completed:', data);
 
-        // Refresh domains list
+        // Refresh domains list to show newly discovered domains
         await loadDomains();
         await checkNetlifyConnection();
 
         const results = data.sync_results;
+        const discoveredDomains = data.netlify_domains || [];
+
+        // Show detailed success message with discovered domains
         toast.success(
-          `✅ Edge Function Sync Complete!\n` +
-          `• Netlify domains: ${results.total_netlify}\n` +
-          `• Supabase domains: ${results.total_supabase}\n` +
-          `• Updated: ${results.updated_in_supabase}\n` +
-          `• In sync: ${results.in_sync}`,
-          { duration: 10000 }
+          `🎉 Domain Discovery Complete!\n\n` +
+          `📊 Discovery Results:\n` +
+          `• Found ${results.total_netlify} Netlify domains\n` +
+          `• Database has ${results.total_supabase} domains\n` +
+          `• Updated ${results.updated_in_supabase} domains\n` +
+          `• ${results.in_sync} already synced\n\n` +
+          `${discoveredDomains.length > 0 ? `🌐 Domains: ${discoveredDomains.slice(0, 3).join(', ')}${discoveredDomains.length > 3 ? ' +more' : ''}` : ''}`,
+          { duration: 12000 }
         );
+
+        // Additional toast for discovered domains
+        if (discoveredDomains.length > 0) {
+          setTimeout(() => {
+            toast.info(
+              `✨ ${discoveredDomains.length} domains are now stored in your database with full verification status!`,
+              { duration: 5000 }
+            );
+          }, 1000);
+        }
 
         // Show individual domain info
         if (data.netlify_domains && data.netlify_domains.length > 0) {
@@ -468,7 +498,7 @@ const EnhancedDomainsPage = () => {
         }
 
       } else {
-        console.error('❌ Edge function returned error:', data);
+        console.error('�� Edge function returned error:', data);
         toast.error(`Sync failed: ${data?.error || 'Unknown error'}`);
       }
 
@@ -651,47 +681,25 @@ const EnhancedDomainsPage = () => {
             </DialogContent>
           </Dialog>
 
-          <Button
-            variant="outline"
-            onClick={syncFromNetlify}
-            disabled={syncing || netlifyConnected === false}
-            size="lg"
-            className={netlifyConnected === false ? 'opacity-50' : ''}
-          >
-            {syncing ? (
-              <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-            ) : (
-              <RefreshCw className="h-5 w-5 mr-2" />
-            )}
-            {netlifyConnected === false ? 'Netlify Unavailable' : 'Sync from Netlify'}
-          </Button>
-
-          <Button
-            onClick={syncAllFromNetlify}
-            disabled={syncing || netlifyConnected === false}
-            size="lg"
-            className={`${netlifyConnected === false ? 'opacity-50' : ''} bg-blue-600 hover:bg-blue-700`}
-          >
-            {syncing ? (
-              <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-            ) : (
-              <Zap className="h-5 w-5 mr-2" />
-            )}
-            {netlifyConnected === false ? 'Netlify Unavailable' : 'Sync ALL Domains'}
-          </Button>
 
           <Button
             onClick={syncViaEdgeFunction}
             disabled={edgeFunctionSyncing}
+            variant="outline"
             size="lg"
-            className="bg-purple-600 hover:bg-purple-700 text-white"
+            className="bg-white border-gray-300 hover:border-gray-400 text-gray-900 hover:bg-gray-50 transition-colors duration-200"
           >
             {edgeFunctionSyncing ? (
-              <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin text-gray-600" />
+                <span>Discovering...</span>
+              </>
             ) : (
-              <Database className="h-5 w-5 mr-2" />
+              <>
+                <Database className="h-4 w-4 mr-2 text-gray-600" />
+                <span>Smart Domain Sync</span>
+              </>
             )}
-            {edgeFunctionSyncing ? 'Syncing via Edge Function...' : 'Sync via Edge Function'}
           </Button>
 
           <Button 
@@ -872,6 +880,76 @@ const EnhancedDomainsPage = () => {
                   ))}
                 </TableBody>
               </Table>
+            )}
+
+            {/* Synced Domains List */}
+            {domains.filter(d => d.netlify_verified || d.last_sync).length > 0 && (
+              <div className="mt-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="h-1 w-1 bg-green-500 rounded-full animate-pulse"></div>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Synced Domains ({domains.filter(d => d.netlify_verified || d.last_sync).length})
+                  </h3>
+                </div>
+                <div className="space-y-3">
+                  {domains
+                    .filter(d => d.netlify_verified || d.last_sync)
+                    .map((domain) => (
+                      <div
+                        key={domain.id}
+                        className="flex items-center justify-between p-4 bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg hover:shadow-md transition-all duration-200"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="flex items-center justify-center w-10 h-10 bg-green-100 rounded-full">
+                            <Globe className="h-5 w-5 text-green-600" />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-gray-900">{domain.domain}</span>
+                              {domain.netlify_verified && (
+                                <Badge className="bg-green-100 text-green-800 text-xs">
+                                  ✓ Netlify Synced
+                                </Badge>
+                              )}
+                              {domain.ssl_status === 'issued' && (
+                                <Badge className="bg-blue-100 text-blue-800 text-xs">
+                                  🔒 SSL Active
+                                </Badge>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-4 mt-1 text-sm text-gray-600">
+                              {domain.last_sync && (
+                                <span>Last synced: {new Date(domain.last_sync).toLocaleString()}</span>
+                              )}
+                              <span>Added: {new Date(domain.created_at).toLocaleDateString()}</span>
+                              {domain.netlify_site_id && (
+                                <span className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded">
+                                  Site ID: {domain.netlify_site_id.substring(0, 8)}...
+                                </span>
+                              )}
+                              {domain.dns_records && domain.dns_records.length > 0 && (
+                                <span className="text-xs bg-green-50 text-green-700 px-2 py-1 rounded">
+                                  {domain.dns_records.length} DNS records
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => window.open(`https://${domain.domain}`, '_blank')}
+                            className="text-gray-600 hover:text-gray-900"
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                          </Button>
+                          <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
             )}
 
             {domains.some(d => d.error_message) && (
