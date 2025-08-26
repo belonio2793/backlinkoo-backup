@@ -685,53 +685,21 @@ const EnhancedDomainsPage = () => {
           <Button
             onClick={syncViaEdgeFunction}
             disabled={edgeFunctionSyncing}
+            variant="outline"
             size="lg"
-            className="relative overflow-hidden bg-gradient-to-r from-emerald-500 via-cyan-500 to-blue-500 hover:from-emerald-600 hover:via-cyan-600 hover:to-blue-600 text-white shadow-2xl hover:shadow-emerald-500/25 transition-all duration-500 transform hover:scale-105 border-0 group min-w-[200px]"
+            className="bg-white border-gray-300 hover:border-gray-400 text-gray-900 hover:bg-gray-50 transition-colors duration-200"
           >
-            {/* Animated background */}
-            <div className="absolute inset-0 bg-gradient-to-r from-white/30 via-transparent to-white/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-emerald-400 via-cyan-400 to-blue-400 rounded-lg opacity-0 group-hover:opacity-75 blur transition-all duration-500" />
-
-            {/* Main content */}
-            <div className="relative flex items-center justify-center">
-              <div className="flex items-center">
-                {edgeFunctionSyncing ? (
-                  <>
-                    <Loader2 className="h-5 w-5 mr-3 animate-spin text-white" />
-                    <div className="flex space-x-1 mr-3">
-                      <div className="w-1 h-1 bg-white rounded-full animate-pulse" style={{animationDelay: '0ms'}} />
-                      <div className="w-1 h-1 bg-white rounded-full animate-pulse" style={{animationDelay: '200ms'}} />
-                      <div className="w-1 h-1 bg-white rounded-full animate-pulse" style={{animationDelay: '400ms'}} />
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="relative mr-3">
-                      <Database className="h-5 w-5 text-white group-hover:scale-110 transition-transform duration-300" />
-                      <div className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full opacity-75 group-hover:animate-ping" />
-                    </div>
-                    <div className="h-4 w-px bg-white/30 mr-3" />
-                  </>
-                )}
-
-                <div className="flex flex-col items-start">
-                  <span className="font-semibold text-sm leading-tight">
-                    {edgeFunctionSyncing ? 'Discovering Domains...' : 'Smart Domain Sync'}
-                  </span>
-                  <span className="text-xs text-emerald-100 opacity-90">
-                    {edgeFunctionSyncing ? 'Fetching from Netlify' : 'Auto-discover & store'}
-                  </span>
-                </div>
-
-                {!edgeFunctionSyncing && (
-                  <div className="ml-3 flex items-center space-x-1">
-                    <div className="w-2 h-2 bg-green-300 rounded-full animate-pulse" style={{animationDelay: '0ms'}} />
-                    <div className="w-2 h-2 bg-yellow-300 rounded-full animate-pulse" style={{animationDelay: '500ms'}} />
-                    <div className="w-2 h-2 bg-blue-300 rounded-full animate-pulse" style={{animationDelay: '1000ms'}} />
-                  </div>
-                )}
-              </div>
-            </div>
+            {edgeFunctionSyncing ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin text-gray-600" />
+                <span>Discovering...</span>
+              </>
+            ) : (
+              <>
+                <Database className="h-4 w-4 mr-2 text-gray-600" />
+                <span>Smart Domain Sync</span>
+              </>
+            )}
           </Button>
 
           <Button 
