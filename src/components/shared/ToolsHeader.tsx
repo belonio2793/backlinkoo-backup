@@ -182,6 +182,24 @@ const ToolsHeader = ({ user, currentTool }: ToolsHeaderProps) => {
             {/* Premium Upgrade Button */}
             {user && <ToolsHeaderUpgradeButton />}
 
+            {/* Buy Credits Button */}
+            {user && (
+              <UniversalPaymentComponent
+                trigger={
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="bg-transparent hover:bg-green-50/50 border border-green-200/60 text-green-600 hover:text-green-700 hover:border-green-300/80 transition-all duration-200 font-medium px-4 py-2 backdrop-blur-sm shadow-sm hover:shadow-md"
+                  >
+                    <CreditCard className="h-4 w-4 mr-2" />
+                    Buy Credits
+                  </Button>
+                }
+                defaultType="credits"
+                defaultCredits={100}
+              />
+            )}
+
             {/* Clear Cache Button - Always visible */}
             <Button
               onClick={handleClearCacheAndCookies}
