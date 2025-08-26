@@ -651,34 +651,6 @@ const EnhancedDomainsPage = () => {
             </DialogContent>
           </Dialog>
 
-          <Button
-            variant="outline"
-            onClick={syncFromNetlify}
-            disabled={syncing || netlifyConnected === false}
-            size="lg"
-            className={netlifyConnected === false ? 'opacity-50' : ''}
-          >
-            {syncing ? (
-              <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-            ) : (
-              <RefreshCw className="h-5 w-5 mr-2" />
-            )}
-            {netlifyConnected === false ? 'Netlify Unavailable' : 'Sync from Netlify'}
-          </Button>
-
-          <Button
-            onClick={syncAllFromNetlify}
-            disabled={syncing || netlifyConnected === false}
-            size="lg"
-            className={`${netlifyConnected === false ? 'opacity-50' : ''} bg-blue-600 hover:bg-blue-700`}
-          >
-            {syncing ? (
-              <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-            ) : (
-              <Zap className="h-5 w-5 mr-2" />
-            )}
-            {netlifyConnected === false ? 'Netlify Unavailable' : 'Sync ALL Domains'}
-          </Button>
 
           <Button
             onClick={syncViaEdgeFunction}
