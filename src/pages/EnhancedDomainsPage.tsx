@@ -468,7 +468,7 @@ const EnhancedDomainsPage = () => {
         }
 
       } else {
-        console.error('❌ Edge function returned error:', data);
+        console.error('�� Edge function returned error:', data);
         toast.error(`Sync failed: ${data?.error || 'Unknown error'}`);
       }
 
@@ -684,14 +684,22 @@ const EnhancedDomainsPage = () => {
             onClick={syncViaEdgeFunction}
             disabled={edgeFunctionSyncing}
             size="lg"
-            className="bg-purple-600 hover:bg-purple-700 text-white"
+            className="relative overflow-hidden bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 hover:from-indigo-700 hover:via-purple-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 border-0 group"
           >
-            {edgeFunctionSyncing ? (
-              <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-            ) : (
-              <Database className="h-5 w-5 mr-2" />
-            )}
-            {edgeFunctionSyncing ? 'Syncing via Edge Function...' : 'Sync via Edge Function'}
+            <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="relative flex items-center">
+              {edgeFunctionSyncing ? (
+                <Loader2 className="h-5 w-5 mr-2 animate-spin text-white" />
+              ) : (
+                <Database className="h-5 w-5 mr-2 text-white group-hover:animate-pulse" />
+              )}
+              <span className="font-medium">
+                {edgeFunctionSyncing ? 'Syncing via Edge Function...' : 'Sync via Edge Function'}
+              </span>
+              {!edgeFunctionSyncing && (
+                <div className="ml-2 w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+              )}
+            </div>
           </Button>
 
           <Button 
