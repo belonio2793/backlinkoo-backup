@@ -72,7 +72,17 @@ async function createStripeSubscription(
 ): Promise<{ url: string; sessionId: string }> {
   const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
-  if (!stripeSecretKey) {
+  if (!stripeSecretKey || stripeSecretKey.includes('placeholder')) {
+    // Development fallback - return demo checkout URL
+    const isDevelopment = process.env.NODE_ENV !== 'production';
+    if (isDevelopment) {
+      console.warn('⚠️ Development mode: Using demo subscription URL (Stripe not configured)');
+      const plan = PRICING_CONFIG[subscriptionData.plan];
+      return {
+        url: `${originUrl}/payment-success?demo=true&subscription=${subscriptionData.plan}&amount=${plan.price}`,
+        sessionId: 'demo_subscription_' + Date.now()
+      };
+    }
     throw new Error("STRIPE_SECRET_KEY is not configured in Netlify environment variables");
   }
 
