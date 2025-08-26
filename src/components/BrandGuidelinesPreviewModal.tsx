@@ -513,14 +513,6 @@ export function BrandGuidelinesPreviewModal({ isOpen, onClose }: BrandGuidelines
                 <Badge className="bg-white/20 text-white">
                   ✨ Featured Resource
                 </Badge>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={onClose}
-                  className="text-white hover:bg-white/20"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
               </div>
             </div>
           </DialogHeader>

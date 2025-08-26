@@ -177,13 +177,6 @@ export const WaitlistModal: React.FC<WaitlistModalProps> = ({
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-4xl mx-auto bg-white border-0 shadow-2xl p-0 overflow-hidden">
-        {/* Close Button */}
-        <button
-          onClick={handleClose}
-          className="absolute top-4 right-4 z-50 p-2 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white transition-colors shadow-lg"
-        >
-          <X className="w-5 h-5 text-gray-600" />
-        </button>
 
         {step === 'email' && (
           <div className="relative">

@@ -715,17 +715,7 @@ export function PremiumPlanModal({
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-5xl max-h-[95vh] overflow-y-auto p-0">
         <DialogHeader className="p-6 pb-0">
-          <div className="flex items-center justify-between">
-            <DialogTitle className="sr-only">Premium Plan Upgrade</DialogTitle>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleClose}
-              className="h-8 w-8 p-0 rounded-full"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
+          <DialogTitle className="sr-only">Premium Plan Upgrade</DialogTitle>
         </DialogHeader>
         
         <div className="p-6 pt-2">
