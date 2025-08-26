@@ -309,7 +309,6 @@ export default function DevEnvironmentStatus() {
                 <h4 className="font-medium">Application URLs:</h4>
                 <ul className="text-sm space-y-1">
                   <li>• <strong>Frontend:</strong> {window.location.origin}</li>
-                  <li>• <strong>Payment Test:</strong> {window.location.origin}/payment-test</li>
                   <li>• <strong>Dashboard:</strong> {window.location.origin}/dashboard</li>
                   <li>• <strong>Blog:</strong> {window.location.origin}/blog</li>
                 </ul>
@@ -334,14 +333,6 @@ export default function DevEnvironmentStatus() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Button 
-                onClick={() => window.open('/payment-test', '_blank')}
-                variant="outline"
-                className="flex items-center gap-2"
-              >
-                <CreditCard className="h-4 w-4" />
-                Test Payments
-              </Button>
               <Button 
                 onClick={() => window.open('/dashboard', '_blank')}
                 variant="outline"
