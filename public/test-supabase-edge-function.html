@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Supabase Edge Function Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+        .result { background: #f5f5f5; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .error { background: #ffe6e6; border: 1px solid #ff9999; }
+        .success { background: #e6ffe6; border: 1px solid #99ff99; }
+        .warning { background: #fff3cd; border: 1px solid #ffd700; }
+        button { padding: 10px 20px; margin: 5px; background: #007cba; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #005a84; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        button.admin { background: #dc3545; }
+        button.admin:hover { background: #c82333; }
+        button.edge { background: #6f42c1; }
+        button.edge:hover { background: #5a359f; }
+        pre { background: #f8f8f8; padding: 10px; border-radius: 3px; overflow-x: auto; font-size: 12px; }
+        .config { background: #fff; border: 1px solid #ddd; padding: 10px; border-radius: 5px; margin: 10px 0; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <h1>🚀 Supabase Edge Function Test</h1>
+    
+    <div class="config">
+        <h3>🔧 Configuration</h3>
+        <p><strong>Supabase URL:</strong> https://dfhanacsmsvvkpunurnp.supabase.co</p>
+        <p><strong>Edge Function:</strong> netlify-domains</p>
+        <p><strong>Actions Available:</strong> sync, add, remove</p>
+        <p><strong>Environment:</strong> Requires NETLIFY_ACCESS_TOKEN and NETLIFY_SITE_ID on Supabase</p>
+    </div>
+    
+    <div>
+        <button onclick="testConnection()" class="edge">🔌 Test Connection</button>
+        <button onclick="syncUserDomains()" class="edge">👤 Sync User Domains</button>
+        <button onclick="syncAllDomains()" class="admin">🌐 Sync ALL Domains (Admin)</button>
+        <button onclick="fetchSupabaseDomains()">📊 View Supabase Domains</button>
+        <button onclick="clearResults()">🗑️ Clear Results</button>
+    </div>
+
+    <div id="results"></div>
+
+    <script>
+        // Initialize Supabase client
+        const supabaseUrl = 'https://dfhanacsmsvvkpunurnp.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRmaGFuYWNzbXN2dmtwdW51cm5wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI1ODU0OTEsImV4cCI6MjA0ODE2MTQ5MX0.V-i2EvNutJHXDZXg3xgOTQWq5VOpB8ktjhm6CJmzAmc'; // anon key
+        
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        function log(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `result ${type}`;
+            div.innerHTML = `<strong>[${new Date().toLocaleTimeString()}]</strong> ${message}`;
+            results.appendChild(div);
+            results.scrollTop = results.scrollHeight;
+            console.log(message);
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        async function testConnection() {
+            log('🔌 Testing Supabase connection...');
+            
+            try {
+                const { data, error } = await supabase.from('domains').select('count', { count: 'exact' });
+                
+                if (error) {
+                    log(`❌ Supabase connection failed: ${error.message}`, 'error');
+                } else {
+                    log(`✅ Supabase connection successful! Found ${data.length} domains in database.`, 'success');
+                }
+            } catch (error) {
+                log(`❌ Connection error: ${error.message}`, 'error');
+            }
+        }
+
+        async function syncUserDomains() {
+            log('👤 Calling edge function to sync domains for current user...');
+            
+            try {
+                const { data, error } = await supabase.functions.invoke('netlify-domains', {
+                    body: {
+                        action: 'sync',
+                        user_id: '00000000-0000-0000-0000-000000000000' // Default user ID
+                    }
+                });
+
+                if (error) {
+                    log(`❌ Edge function error: ${error.message}`, 'error');
+                    return;
+                }
+
+                if (data?.success) {
+                    log('✅ User domains sync completed successfully!', 'success');
+                    
+                    const results = data.sync_results;
+                    log(`📊 Sync Results:`, 'success');
+                    log(`• Netlify domains: ${results.total_netlify}`, 'success');
+                    log(`• Supabase domains: ${results.total_supabase}`, 'success');
+                    log(`• Updated: ${results.updated_in_supabase}`, 'success');
+                    log(`• In sync: ${results.in_sync}`, 'success');
+                    
+                    if (data.netlify_domains && data.netlify_domains.length > 0) {
+                        log(`🌐 Netlify domains: ${data.netlify_domains.join(', ')}`, 'success');
+                    }
+                    
+                    log(`<pre>${JSON.stringify(data, null, 2)}</pre>`, 'success');
+                } else {
+                    log(`❌ Sync failed: ${data?.error || 'Unknown error'}`, 'error');
+                    log(`<pre>${JSON.stringify(data, null, 2)}</pre>`, 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ Edge function call failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function syncAllDomains() {
+            const confirmed = confirm('This will sync ALL domains from Netlify for ALL users. Continue?');
+            if (!confirmed) return;
+
+            log('🌐 Calling edge function to sync ALL domains (admin)...');
+            
+            try {
+                const { data, error } = await supabase.functions.invoke('netlify-domains', {
+                    body: {
+                        action: 'sync'
+                        // No user_id = sync for all users
+                    }
+                });
+
+                if (error) {
+                    log(`❌ Edge function error: ${error.message}`, 'error');
+                    return;
+                }
+
+                if (data?.success) {
+                    log('✅ Global domains sync completed successfully!', 'success');
+                    
+                    const results = data.sync_results;
+                    log(`📊 Global Sync Results:`, 'success');
+                    log(`• Netlify domains: ${results.total_netlify}`, 'success');
+                    log(`• Supabase domains: ${results.total_supabase}`, 'success');
+                    log(`• Updated: ${results.updated_in_supabase}`, 'success');
+                    log(`• In sync: ${results.in_sync}`, 'success');
+                    
+                    if (data.netlify_domains && data.netlify_domains.length > 0) {
+                        log(`🌐 Netlify domains: ${data.netlify_domains.join(', ')}`, 'success');
+                    }
+                    
+                    log(`<pre>${JSON.stringify(data, null, 2)}</pre>`, 'success');
+                } else {
+                    log(`❌ Sync failed: ${data?.error || 'Unknown error'}`, 'error');
+                    log(`<pre>${JSON.stringify(data, null, 2)}</pre>`, 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ Edge function call failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function fetchSupabaseDomains() {
+            log('📊 Fetching domains from Supabase...');
+            
+            try {
+                const { data, error } = await supabase
+                    .from('domains')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) {
+                    log(`❌ Failed to fetch domains: ${error.message}`, 'error');
+                    return;
+                }
+
+                log(`✅ Found ${data.length} domains in Supabase:`, 'success');
+                
+                if (data.length > 0) {
+                    data.forEach((domain, index) => {
+                        log(`${index + 1}. ${domain.domain} - Status: ${domain.status}, Netlify: ${domain.netlify_verified ? '✅' : '❌'}, DNS: ${domain.dns_verified ? '✅' : '❌'}`, 'success');
+                    });
+                    
+                    log(`<pre>${JSON.stringify(data, null, 2)}</pre>`, 'success');
+                } else {
+                    log('No domains found in Supabase database.', 'warning');
+                }
+                
+            } catch (error) {
+                log(`❌ Error fetching domains: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-load
+        log('🚀 Supabase Edge Function Test Ready');
+        log('Click the buttons above to test the netlify-domains edge function.');
+        log('Make sure NETLIFY_ACCESS_TOKEN is set in your Supabase environment variables.');
+    </script>
+</body>
+</html>

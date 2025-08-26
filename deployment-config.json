@@ -1,0 +1,24 @@
+{
+  "site_id": "ca6261e6-0a59-40b5-a2bc-5b5481ac8809",
+  "build": {
+    "command": "npm run build",
+    "directory": "dist",
+    "functions": "netlify/functions",
+    "node_version": "18"
+  },
+  "functions": {
+    "directory": "netlify/functions",
+    "node_bundler": "esbuild"
+  },
+  "edge_functions": [],
+  "headers": [
+    {
+      "for": "/*",
+      "values": {
+        "X-Frame-Options": "DENY",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "strict-origin-when-cross-origin"
+      }
+    }
+  ]
+}
