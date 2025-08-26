@@ -419,6 +419,67 @@ const EnhancedDomainsPage = () => {
     }
   };
 
+  const testEdgeFunctionWithAllDomains = async () => {
+    const confirmed = window.confirm(
+      'This will sync ALL domains from Netlify for ALL users (admin function). Continue?'
+    );
+
+    if (!confirmed) return;
+
+    setEdgeFunctionSyncing(true);
+    try {
+      console.log('🚀 Calling Supabase netlify-domains edge function (all users)...');
+
+      const { data, error } = await supabase.functions.invoke('netlify-domains', {
+        body: {
+          action: 'sync'
+          // No user_id = fetch for all users
+        }
+      });
+
+      if (error) {
+        console.error('❌ Edge function error:', error);
+        toast.error(`Edge function failed: ${error.message}`);
+        return;
+      }
+
+      if (data?.success) {
+        console.log('✅ Edge function sync completed:', data);
+
+        // Refresh domains list
+        await loadDomains();
+
+        const results = data.sync_results;
+        toast.success(
+          `✅ Global Edge Function Sync Complete!\n` +
+          `• Netlify domains: ${results.total_netlify}\n` +
+          `• Supabase domains: ${results.total_supabase}\n` +
+          `• Updated: ${results.updated_in_supabase}\n` +
+          `• In sync: ${results.in_sync}`,
+          { duration: 10000 }
+        );
+
+        // Show individual domain info
+        if (data.netlify_domains && data.netlify_domains.length > 0) {
+          toast.info(
+            `🌐 Netlify domains found: ${data.netlify_domains.join(', ')}`,
+            { duration: 8000 }
+          );
+        }
+
+      } else {
+        console.error('❌ Edge function returned error:', data);
+        toast.error(`Sync failed: ${data?.error || 'Unknown error'}`);
+      }
+
+    } catch (error: any) {
+      console.error('❌ Edge function call failed:', error);
+      toast.error(`Edge function call failed: ${error.message}`);
+    } finally {
+      setEdgeFunctionSyncing(false);
+    }
+  };
+
   const getStatusBadge = (domain: Domain) => {
     if (domain.status === 'verified' && domain.netlify_verified) {
       return <Badge className="bg-green-600">Active</Badge>;
