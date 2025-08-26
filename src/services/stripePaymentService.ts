@@ -1,9 +1,7 @@
 /**
- * Comprehensive Stripe Payment Service
- * Handles all Stripe operations with proper fallbacks and demo mode
+ * Production Stripe Payment Service
+ * Real Stripe payments only - no demo mode or fallbacks
  */
-
-import { getStripeConfig, getStripeEndpoints, validateStripeSetup } from '@/utils/stripeConfig';
 
 export interface StripePaymentOptions {
   amount: number;
@@ -20,51 +18,27 @@ export interface StripePaymentResult {
   url?: string;
   sessionId?: string;
   error?: string;
-  isDemoMode?: boolean;
 }
 
 class StripePaymentService {
-  private isConfigured: boolean = false;
-  private isDemoMode: boolean = false;
+  private publishableKey: string;
 
   constructor() {
-    this.checkConfiguration();
-  }
-
-  private checkConfiguration(): void {
-    const config = getStripeConfig();
-    const validation = validateStripeSetup();
-
-    this.isConfigured = config.isConfigured;
-    this.isDemoMode = config.mode === 'demo';
-
-    console.log('🔧 Stripe Configuration:', {
-      mode: config.mode,
-      configured: this.isConfigured,
-      demoMode: this.isDemoMode,
-      isProduction: config.isProduction
-    });
-
-    if (validation.warnings.length > 0) {
-      console.warn('⚠️ Stripe Warnings:', validation.warnings);
+    this.publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+    
+    if (!this.publishableKey || !this.publishableKey.startsWith('pk_')) {
+      throw new Error('VITE_STRIPE_PUBLISHABLE_KEY is required and must be a valid Stripe key');
     }
 
-    if (!this.isConfigured) {
-      console.error('❌ Stripe Configuration Error:', validation.errors);
-      console.info('📋 Setup Instructions:', validation.instructions);
-    }
+    console.log('🔧 Stripe Production Service Initialized');
   }
 
   /**
    * Create payment session for credits
    */
   async createPayment(options: StripePaymentOptions): Promise<StripePaymentResult> {
-    if (this.isDemoMode) {
-      return this.createDemoPayment(options);
-    }
-
     try {
-      const endpoint = await this.getWorkingEndpoint('create-payment');
+      const endpoint = '/.netlify/functions/create-payment';
       
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -88,27 +62,20 @@ class StripePaymentService {
 
       const result = await response.json();
       
-      if (result.url) {
-        // Open checkout in new window
-        this.openCheckoutWindow(result.url, result.sessionId, 'payment');
-        
-        return {
-          success: true,
-          url: result.url,
-          sessionId: result.sessionId
-        };
-      } else {
+      if (!result.url) {
         throw new Error('No payment URL received from server');
       }
+
+      // Open checkout in new window
+      this.openCheckoutWindow(result.url, result.sessionId, 'payment');
+      
+      return {
+        success: true,
+        url: result.url,
+        sessionId: result.sessionId
+      };
     } catch (error) {
       console.error('Payment creation error:', error);
-      
-      // Fallback to demo mode if real payment fails
-      if (!this.isDemoMode) {
-        console.warn('Real payment failed, falling back to demo mode');
-        return this.createDemoPayment(options);
-      }
-      
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Payment creation failed'
@@ -120,12 +87,8 @@ class StripePaymentService {
    * Create subscription session
    */
   async createSubscription(options: StripePaymentOptions): Promise<StripePaymentResult> {
-    if (this.isDemoMode) {
-      return this.createDemoSubscription(options);
-    }
-
     try {
-      const endpoint = await this.getWorkingEndpoint('create-subscription');
+      const endpoint = '/.netlify/functions/create-subscription';
       
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -147,71 +110,25 @@ class StripePaymentService {
 
       const result = await response.json();
       
-      if (result.url) {
-        // Open checkout in new window
-        this.openCheckoutWindow(result.url, result.sessionId, 'subscription');
-        
-        return {
-          success: true,
-          url: result.url,
-          sessionId: result.sessionId
-        };
-      } else {
+      if (!result.url) {
         throw new Error('No subscription URL received from server');
       }
+
+      // Open checkout in new window
+      this.openCheckoutWindow(result.url, result.sessionId, 'subscription');
+      
+      return {
+        success: true,
+        url: result.url,
+        sessionId: result.sessionId
+      };
     } catch (error) {
       console.error('Subscription creation error:', error);
-      
-      // Fallback to demo mode if real subscription fails
-      if (!this.isDemoMode) {
-        console.warn('Real subscription failed, falling back to demo mode');
-        return this.createDemoSubscription(options);
-      }
-      
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Subscription creation failed'
       };
     }
-  }
-
-  /**
-   * Try different endpoints to find working one
-   */
-  private async getWorkingEndpoint(functionName: 'create-payment' | 'create-subscription' | 'verify-payment'): Promise<string> {
-    const endpoints = getStripeEndpoints();
-    const targetEndpoint = endpoints[functionName];
-
-    // Try primary endpoint first
-    try {
-      const response = await fetch(targetEndpoint, { method: 'OPTIONS' });
-      if (response.ok || response.status === 405) { // 405 is fine, means endpoint exists
-        console.log(`✅ Using endpoint: ${targetEndpoint}`);
-        return targetEndpoint;
-      }
-    } catch (error) {
-      console.warn(`❌ Primary endpoint ${targetEndpoint} failed:`, error);
-    }
-
-    // Try fallback endpoints
-    const fallbacks = [
-      `/api/${functionName}`,
-      `/.netlify/functions/${functionName}`
-    ];
-
-    for (const endpoint of fallbacks) {
-      try {
-        const response = await fetch(endpoint, { method: 'OPTIONS' });
-        if (response.ok || response.status === 405) {
-          console.log(`✅ Using fallback endpoint: ${endpoint}`);
-          return endpoint;
-        }
-      } catch (error) {
-        console.warn(`❌ Fallback ${endpoint} failed:`, error);
-      }
-    }
-
-    throw new Error(`No working endpoints found for ${functionName}. Check Netlify deployment.`);
   }
 
   /**
@@ -285,72 +202,6 @@ class StripePaymentService {
   }
 
   /**
-   * Create demo payment (for development/testing)
-   */
-  private async createDemoPayment(options: StripePaymentOptions): Promise<StripePaymentResult> {
-    console.log('🎭 Demo Mode: Creating simulated payment', options);
-    
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const demoUrl = `/payment-success?demo=true&credits=${options.credits}&amount=${options.amount}&sessionId=demo_${Date.now()}`;
-    
-    // Open demo success page in new window
-    const demoWindow = window.open(
-      demoUrl,
-      'demo-checkout',
-      'width=600,height=400,scrollbars=yes,resizable=yes'
-    );
-    
-    if (demoWindow) {
-      setTimeout(() => {
-        demoWindow.close();
-        this.showSuccessNotification('payment');
-      }, 3000);
-    }
-    
-    return {
-      success: true,
-      url: demoUrl,
-      sessionId: `demo_payment_${Date.now()}`,
-      isDemoMode: true
-    };
-  }
-
-  /**
-   * Create demo subscription (for development/testing)
-   */
-  private async createDemoSubscription(options: StripePaymentOptions): Promise<StripePaymentResult> {
-    console.log('🎭 Demo Mode: Creating simulated subscription', options);
-    
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const demoUrl = `/subscription-success?demo=true&plan=${options.plan}&sessionId=demo_${Date.now()}`;
-    
-    // Open demo success page in new window
-    const demoWindow = window.open(
-      demoUrl,
-      'demo-checkout',
-      'width=600,height=400,scrollbars=yes,resizable=yes'
-    );
-    
-    if (demoWindow) {
-      setTimeout(() => {
-        demoWindow.close();
-        this.showSuccessNotification('subscription');
-      }, 3000);
-    }
-    
-    return {
-      success: true,
-      url: demoUrl,
-      sessionId: `demo_subscription_${Date.now()}`,
-      isDemoMode: true
-    };
-  }
-
-  /**
    * Show success notification
    */
   private showSuccessNotification(type: 'payment' | 'subscription'): void {
@@ -393,24 +244,14 @@ class StripePaymentService {
   }
 
   /**
-   * Get configuration status
-   */
-  getStatus(): { configured: boolean; demoMode: boolean } {
-    return {
-      configured: this.isConfigured,
-      demoMode: this.isDemoMode
-    };
-  }
-
-  /**
    * Quick credit purchase presets
    */
   async quickPurchase(credits: 50 | 100 | 250 | 500, guestEmail?: string): Promise<StripePaymentResult> {
     const pricing = {
       50: 70,    // $1.40 per credit
-      100: 140,
-      250: 350,
-      500: 700
+      100: 140,  // $1.40 per credit
+      250: 350,  // $1.40 per credit
+      500: 700   // $1.40 per credit
     };
 
     return this.createPayment({
@@ -434,6 +275,16 @@ class StripePaymentService {
       isGuest: !!guestEmail,
       guestEmail
     });
+  }
+
+  /**
+   * Get service status
+   */
+  getStatus(): { configured: boolean; mode: string } {
+    return {
+      configured: !!this.publishableKey && this.publishableKey.startsWith('pk_'),
+      mode: 'production'
+    };
   }
 }
 
