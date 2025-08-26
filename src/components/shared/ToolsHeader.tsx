@@ -10,13 +10,15 @@ import {
   X,
   ChevronRight,
   Zap,
-  Trash2
+  Trash2,
+  CreditCard
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { User } from '@supabase/supabase-js';
 import { LoginModal } from "@/components/LoginModal";
 import { useToast } from "@/hooks/use-toast";
 import { ToolsHeaderUpgradeButton } from "@/components/PremiumUpgradeButton";
+import { UniversalPaymentComponent } from "@/components/UniversalPaymentComponent";
 
 interface ToolsHeaderProps {
   user: User | null;
@@ -179,6 +181,24 @@ const ToolsHeader = ({ user, currentTool }: ToolsHeaderProps) => {
           <div className="flex items-center gap-3">
             {/* Premium Upgrade Button */}
             {user && <ToolsHeaderUpgradeButton />}
+
+            {/* Buy Credits Button */}
+            {user && (
+              <UniversalPaymentComponent
+                trigger={
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="bg-transparent hover:bg-green-50/50 border border-green-200/60 text-green-600 hover:text-green-700 hover:border-green-300/80 transition-all duration-200 font-medium px-4 py-2 backdrop-blur-sm shadow-sm hover:shadow-md"
+                  >
+                    <CreditCard className="h-4 w-4 mr-2" />
+                    Buy Credits
+                  </Button>
+                }
+                defaultType="credits"
+                defaultCredits={100}
+              />
+            )}
 
             {/* Clear Cache Button - Always visible */}
             <Button

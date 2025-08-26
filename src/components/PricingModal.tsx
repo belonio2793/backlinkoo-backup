@@ -232,12 +232,16 @@ export const PricingModal = ({
         })
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+      let data;
+      try {
+        data = await response.json();
+      } catch (parseError) {
+        throw new Error(`Invalid response from payment service: ${response.status} ${response.statusText}`);
       }
 
-      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || `HTTP ${response.status}: ${response.statusText}`);
+      }
 
       if (data.url) {
         // Use mobile-optimized payment handler
@@ -315,12 +319,16 @@ export const PricingModal = ({
         })
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+      let data;
+      try {
+        data = await response.json();
+      } catch (parseError) {
+        throw new Error(`Invalid response from subscription service: ${response.status} ${response.statusText}`);
       }
 
-      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || `HTTP ${response.status}: ${response.statusText}`);
+      }
 
       if (data.url) {
         // Use mobile-optimized payment handler
