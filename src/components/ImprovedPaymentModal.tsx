@@ -146,12 +146,10 @@ export const ImprovedPaymentModal = ({
       });
 
       if (result.success) {
-        if (result.isDemoMode) {
-          toast({
-            title: "✅ Demo Purchase Complete!",
-            description: `${credits} credits would be added to your account.`,
-          });
-        }
+        toast({
+          title: "✅ Payment Processing",
+          description: "Your payment is being processed. Credits will be added shortly.",
+        });
         onClose();
       } else {
         throw new Error(result.error || 'Payment failed');
