@@ -72,6 +72,7 @@ const EnhancedDomainsPage = () => {
     needsSync: boolean;
     lastSync?: Date;
   } | null>(null);
+  const [edgeFunctionSyncing, setEdgeFunctionSyncing] = useState(false);
 
   // Real-time subscription
   useEffect(() => {
