@@ -42,7 +42,7 @@ import { NetlifyDomainSyncService } from '@/services/netlifyDomainSync';
 interface Domain {
   id: string;
   domain: string;
-  status: 'pending' | 'verified' | 'removed' | 'error';
+  status: 'pending' | 'verified' | 'removed' | 'error' | 'validating' | 'validated' | 'dns_ready' | 'theme_selection' | 'active';
   user_id: string;
   netlify_verified: boolean;
   dns_verified: boolean;
