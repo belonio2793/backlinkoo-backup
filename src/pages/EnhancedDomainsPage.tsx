@@ -619,6 +619,20 @@ const EnhancedDomainsPage = () => {
             {netlifyConnected === false ? 'Netlify Unavailable' : 'Sync ALL Domains'}
           </Button>
 
+          <Button
+            onClick={syncViaEdgeFunction}
+            disabled={edgeFunctionSyncing}
+            size="lg"
+            className="bg-purple-600 hover:bg-purple-700 text-white"
+          >
+            {edgeFunctionSyncing ? (
+              <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+            ) : (
+              <Database className="h-5 w-5 mr-2" />
+            )}
+            {edgeFunctionSyncing ? 'Syncing via Edge Function...' : 'Sync via Edge Function'}
+          </Button>
+
           <Button 
             variant="outline" 
             onClick={loadDomains}
