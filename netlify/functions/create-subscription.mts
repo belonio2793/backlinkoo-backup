@@ -72,8 +72,8 @@ async function createStripeSubscription(
 ): Promise<{ url: string; sessionId: string }> {
   const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
-  if (!stripeSecretKey || stripeSecretKey.includes('placeholder')) {
-    throw new Error("STRIPE_SECRET_KEY is not configured in Netlify environment variables");
+  if (!stripeSecretKey || !stripeSecretKey.startsWith('sk_')) {
+    throw new Error("STRIPE_SECRET_KEY is required and must be a valid Stripe secret key");
   }
 
   const stripe = new Stripe(stripeSecretKey, {
