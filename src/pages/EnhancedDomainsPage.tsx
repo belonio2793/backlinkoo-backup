@@ -38,11 +38,13 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthState } from '@/hooks/useAuthState';
 import { NetlifyDomainSyncService } from '@/services/netlifyDomainSync';
+import { NetlifyApiService, type DomainValidation } from '@/services/netlifyApiService';
+import { NetlifyDomainBulkSync, type BulkSyncResult } from '@/services/netlifyDomainBulkSync';
 
 interface Domain {
   id: string;
   domain: string;
-  status: 'pending' | 'verified' | 'removed' | 'error' | 'validating' | 'validated' | 'dns_ready' | 'theme_selection' | 'active';
+  status: 'pending' | 'validating' | 'validated' | 'error' | 'dns_ready' | 'theme_selection' | 'active';
   user_id: string;
   netlify_verified: boolean;
   dns_verified: boolean;
@@ -62,6 +64,9 @@ interface Domain {
   ssl_enabled?: boolean;
   custom_dns_configured?: boolean;
   last_validation_at?: string;
+  pages_published?: number;
+  netlify_validation_status?: 'valid' | 'not_configured' | 'pending' | 'error';
+  cname_record?: string;
 }
 
 const EnhancedDomainsPage = () => {
@@ -81,6 +86,21 @@ const EnhancedDomainsPage = () => {
     lastSync?: Date;
   } | null>(null);
   const [edgeFunctionSyncing, setEdgeFunctionSyncing] = useState(false);
+  const [dnsModalOpen, setDnsModalOpen] = useState(false);
+  const [selectedDomainForDns, setSelectedDomainForDns] = useState<Domain | null>(null);
+  const [validatingDomains, setValidatingDomains] = useState<Set<string>>(new Set());
+  const [bulkSyncing, setBulkSyncing] = useState(false);
+  const [syncResults, setSyncResults] = useState<BulkSyncResult | null>(null);
+  const [syncModalOpen, setSyncModalOpen] = useState(false);
+
+  // Constants for DNS configuration
+  const CNAME_RECORD = 'backlinkoo.netlify.app';
+  const NAMESERVERS = [
+    'dns1.p05.nsone.net',
+    'dns2.p05.nsone.net',
+    'dns3.p05.nsone.net',
+    'dns4.p05.nsone.net'
+  ];
 
   // Real-time subscription
   useEffect(() => {
@@ -120,7 +140,13 @@ const EnhancedDomainsPage = () => {
     try {
       const { data, error } = await supabase
         .from('domains')
-        .select('*')
+        .select(`
+          id, domain, status, user_id, netlify_verified, dns_verified,
+          txt_record_value, error_message, created_at, updated_at, last_sync,
+          custom_domain, ssl_status, dns_records, selected_theme, theme_name,
+          blog_enabled, netlify_site_id, netlify_domain_id, ssl_enabled,
+          custom_dns_configured, last_validation_at, pages_published
+        `)
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
@@ -510,6 +536,99 @@ const EnhancedDomainsPage = () => {
     }
   };
 
+  const validateDomainWithNetlify = async (domain: Domain) => {
+    if (!user?.id) return;
+
+    setValidatingDomains(prev => new Set(prev).add(domain.id));
+
+    try {
+      // Call Netlify API to validate domain
+      const validation = await NetlifyApiService.validateDomain(domain.domain);
+
+      if (validation.success && validation.validation) {
+        // Update domain with validation results
+        const { error } = await supabase
+          .from('domains')
+          .update({
+            netlify_verified: validation.validation.domain_exists_in_netlify,
+            ssl_enabled: validation.validation.ssl_configured,
+            dns_verified: validation.validation.dns_records_found,
+            last_validation_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', domain.id)
+          .eq('user_id', user.id);
+
+        if (error) {
+          console.error('Failed to update domain validation:', error);
+          toast.error(`Failed to update validation: ${error.message}`);
+        } else {
+          toast.success(`✅ Domain ${domain.domain} validated with Netlify`);
+          loadDomains(); // Refresh the list
+        }
+      } else {
+        toast.error(`❌ Validation failed: ${validation.error || 'Unknown error'}`);
+      }
+    } catch (error: any) {
+      console.error('Netlify validation error:', error);
+      toast.error(`Validation error: ${error.message}`);
+    } finally {
+      setValidatingDomains(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(domain.id);
+        return newSet;
+      });
+    }
+  };
+
+  const openDnsModal = (domain: Domain) => {
+    setSelectedDomainForDns(domain);
+    setDnsModalOpen(true);
+  };
+
+  const performBulkSync = async () => {
+    if (!user?.id) return;
+
+    setBulkSyncing(true);
+    setSyncResults(null);
+
+    try {
+      console.log('🚀 Starting comprehensive Netlify domain sync...');
+      toast.info('🔍 Fetching all domains from Netlify...', { duration: 3000 });
+
+      const result = await NetlifyDomainBulkSync.syncAllDomainsToSupabase(user.id);
+      setSyncResults(result);
+
+      if (result.success) {
+        // Refresh the domains list
+        await loadDomains();
+
+        if (result.successfulSyncs > 0) {
+          toast.success(
+            `✅ Successfully synced ${result.successfulSyncs} domains from Netlify!`,
+            { duration: 5000 }
+          );
+        } else if (result.domains.length === 0) {
+          toast.warning(
+            '⚠️ No domains found in Netlify. You may need to connect to Netlify MCP.',
+            { duration: 8000 }
+          );
+        }
+      } else {
+        toast.error(`❌ Sync failed: ${result.errors[0]?.error || 'Unknown error'}`);
+      }
+
+      // Show detailed results modal
+      setSyncModalOpen(true);
+
+    } catch (error: any) {
+      console.error('❌ Bulk sync error:', error);
+      toast.error(`Sync failed: ${error.message}`);
+    } finally {
+      setBulkSyncing(false);
+    }
+  };
+
   const getStatusBadge = (domain: Domain) => {
     if (domain.status === 'verified' && domain.netlify_verified) {
       return <Badge className="bg-green-600">Active</Badge>;
@@ -627,6 +746,25 @@ const EnhancedDomainsPage = () => {
 
         {/* Actions Bar */}
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
+          {/* Comprehensive Netlify Sync Button */}
+          <Button
+            onClick={performBulkSync}
+            disabled={bulkSyncing}
+            size="lg"
+            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white border-0 shadow-lg"
+          >
+            {bulkSyncing ? (
+              <>
+                <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                <span>Syncing from Netlify...</span>
+              </>
+            ) : (
+              <>
+                <Database className="h-5 w-5 mr-2" />
+                <span>Sync All Netlify Domains</span>
+              </>
+            )}
+          </Button>
           <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
             <DialogTrigger asChild>
               <Button size="lg" className="flex-1 sm:flex-none">
@@ -753,9 +891,10 @@ const EnhancedDomainsPage = () => {
                     <TableHead>Status</TableHead>
                     <TableHead>Verification</TableHead>
                     <TableHead>SSL Status</TableHead>
-                    <TableHead>TXT Record</TableHead>
-                    <TableHead>DNS Records</TableHead>
-                    <TableHead>Added</TableHead>
+                    <TableHead>DNS Configuration</TableHead>
+                    <TableHead>Theme/Blog</TableHead>
+                    <TableHead>Netlify</TableHead>
+                    <TableHead>Last Validation</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -806,51 +945,103 @@ const EnhancedDomainsPage = () => {
                       </TableCell>
                       <TableCell>
                         <div className="max-w-32">
-                          {domain.txt_record_value ? (
-                            <div className="text-xs">
-                              <code className="bg-gray-100 px-1 py-0.5 rounded text-xs break-all">
-                                {domain.txt_record_value.length > 20
-                                  ? `${domain.txt_record_value.substring(0, 20)}...`
-                                  : domain.txt_record_value}
+                          <div className="text-xs space-y-1">
+                            <div className="flex items-center gap-1">
+                              <span className="font-medium">CNAME:</span>
+                              <code className="bg-blue-50 text-blue-700 px-1 py-0.5 rounded text-xs">
+                                {CNAME_RECORD}
                               </code>
                             </div>
-                          ) : (
-                            <span className="text-xs text-gray-400">Not set</span>
+                            {domain.txt_record_value && (
+                              <div className="flex items-center gap-1">
+                                <span className="font-medium">TXT:</span>
+                                <code className="bg-gray-100 px-1 py-0.5 rounded text-xs">
+                                  {domain.txt_record_value.substring(0, 12)}...
+                                </code>
+                              </div>
+                            )}
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-xs h-6 px-2"
+                              onClick={() => openDnsModal(domain)}
+                            >
+                              DNS Setup
+                            </Button>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-xs space-y-1">
+                          {domain.selected_theme && (
+                            <div className="flex items-center gap-1">
+                              <Badge variant="outline" className="text-xs">
+                                {domain.theme_name || domain.selected_theme}
+                              </Badge>
+                            </div>
+                          )}
+                          {domain.blog_enabled && (
+                            <Badge className="bg-purple-100 text-purple-800 text-xs">
+                              📝 Blog Enabled
+                            </Badge>
+                          )}
+                          {domain.pages_published && domain.pages_published > 0 && (
+                            <div className="text-xs text-gray-500">
+                              {domain.pages_published} pages
+                            </div>
                           )}
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="max-w-32">
-                          {domain.dns_records && domain.dns_records.length > 0 ? (
-                            <div className="text-xs">
-                              <Badge variant="outline" className="text-xs">
-                                {domain.dns_records.length} record{domain.dns_records.length !== 1 ? 's' : ''}
+                        <div className="text-xs space-y-1">
+                          {domain.netlify_site_id && (
+                            <div className="flex items-center gap-1">
+                              <Badge className="bg-green-100 text-green-800 text-xs">
+                                Site: {domain.netlify_site_id.substring(0, 8)}...
                               </Badge>
-                              <div className="text-xs text-gray-500 mt-1">
-                                {domain.dns_records.slice(0, 2).map((record: any, idx: number) => (
-                                  <div key={idx} className="truncate">
-                                    {record.type || 'Record'}: {record.value ? record.value.substring(0, 15) + '...' : 'N/A'}
-                                  </div>
-                                ))}
-                                {domain.dns_records.length > 2 && (
-                                  <div className="text-xs text-gray-400">+{domain.dns_records.length - 2} more</div>
-                                )}
+                            </div>
+                          )}
+                          {domain.dns_records && domain.dns_records.length > 0 && (
+                            <Badge variant="outline" className="text-xs">
+                              {domain.dns_records.length} DNS records
+                            </Badge>
+                          )}
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-xs h-6 px-2"
+                            onClick={() => validateDomainWithNetlify(domain)}
+                            disabled={validatingDomains.has(domain.id)}
+                          >
+                            {validatingDomains.has(domain.id) ? (
+                              <>
+                                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                Validating
+                              </>
+                            ) : (
+                              'Validate'
+                            )}
+                          </Button>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-xs">
+                          {domain.last_validation_at ? (
+                            <div>
+                              <div className="font-medium text-gray-700">
+                                {new Date(domain.last_validation_at).toLocaleDateString()}
+                              </div>
+                              <div className="text-gray-500">
+                                {new Date(domain.last_validation_at).toLocaleTimeString()}
                               </div>
                             </div>
                           ) : (
-                            <span className="text-xs text-gray-400">No records</span>
+                            <span className="text-gray-400">Never validated</span>
                           )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-sm text-gray-600">
-                          {new Date(domain.created_at).toLocaleDateString()}
-                        </span>
-                        {domain.last_sync && (
-                          <div className="text-xs text-gray-500">
-                            Synced: {new Date(domain.last_sync).toLocaleTimeString()}
+                          <div className="text-gray-500 mt-1">
+                            Added: {new Date(domain.created_at).toLocaleDateString()}
                           </div>
-                        )}
+                        </div>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
@@ -974,10 +1165,370 @@ const EnhancedDomainsPage = () => {
         <Alert className="mt-6">
           <Zap className="h-4 w-4" />
           <AlertDescription>
-            <strong>Real-time sync enabled:</strong> Changes to your domains are automatically synced between Supabase and Netlify. 
+            <strong>Real-time sync enabled:</strong> Changes to your domains are automatically synced between Supabase and Netlify.
             Domain validation happens instantly as you type.
           </AlertDescription>
         </Alert>
+
+        {/* DNS Propagation Modal */}
+        <Dialog open={dnsModalOpen} onOpenChange={setDnsModalOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Globe className="h-5 w-5 text-blue-600" />
+                DNS Configuration for {selectedDomainForDns?.domain}
+              </DialogTitle>
+              <DialogDescription>
+                Configure your domain's DNS settings to connect with Netlify
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-6">
+              {/* CNAME Record Section */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h3 className="font-semibold text-blue-900 mb-3 flex items-center gap-2">
+                  <Shield className="h-4 w-4" />
+                  CNAME Record Configuration
+                </h3>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between bg-white p-3 rounded border">
+                    <div>
+                      <span className="font-medium text-gray-700">Record Type:</span>
+                      <span className="ml-2 bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm font-mono">CNAME</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between bg-white p-3 rounded border">
+                    <div>
+                      <span className="font-medium text-gray-700">Name/Host:</span>
+                      <span className="ml-2 bg-gray-100 text-gray-800 px-2 py-1 rounded text-sm font-mono">@</span>
+                      <span className="ml-2 text-sm text-gray-500">(or your domain name)</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between bg-white p-3 rounded border">
+                    <div className="flex-1">
+                      <span className="font-medium text-gray-700">Value/Target:</span>
+                      <div className="mt-1 flex items-center gap-2">
+                        <code className="bg-blue-100 text-blue-800 px-3 py-2 rounded text-sm font-mono flex-1">
+                          {CNAME_RECORD}
+                        </code>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            navigator.clipboard.writeText(CNAME_RECORD);
+                            toast.success('CNAME record copied to clipboard!');
+                          }}
+                        >
+                          Copy
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Nameservers Section */}
+              <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                <h3 className="font-semibold text-orange-900 mb-3 flex items-center gap-2">
+                  <Database className="h-4 w-4" />
+                  Nameservers Configuration
+                </h3>
+                <p className="text-sm text-orange-700 mb-3">
+                  If you need to use custom nameservers, update your domain's NS records to:
+                </p>
+                <div className="space-y-2">
+                  {NAMESERVERS.map((ns, index) => (
+                    <div key={index} className="flex items-center justify-between bg-white p-3 rounded border">
+                      <code className="bg-gray-100 text-gray-800 px-3 py-2 rounded text-sm font-mono flex-1">
+                        {ns}
+                      </code>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          navigator.clipboard.writeText(ns);
+                          toast.success(`Nameserver ${index + 1} copied to clipboard!`);
+                        }}
+                      >
+                        Copy
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Instructions */}
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <h3 className="font-semibold text-green-900 mb-3">Setup Instructions</h3>
+                <ol className="list-decimal list-inside space-y-2 text-sm text-green-800">
+                  <li>Log in to your domain registrar (GoDaddy, Namecheap, Cloudflare, etc.)</li>
+                  <li>Navigate to DNS management or Domain settings</li>
+                  <li>Add a CNAME record pointing to <code className="bg-green-100 px-1 py-0.5 rounded">{CNAME_RECORD}</code></li>
+                  <li>Wait 5-30 minutes for DNS propagation</li>
+                  <li>Click "Validate" to check your domain connection</li>
+                </ol>
+              </div>
+
+              {/* Propagation Status */}
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                  <RefreshCw className="h-4 w-4" />
+                  DNS Propagation Status
+                </h3>
+                <p className="text-sm text-gray-600 mb-3">
+                  DNS changes can take up to 48 hours to fully propagate worldwide, but usually complete within 30 minutes.
+                </p>
+                <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      if (selectedDomainForDns) {
+                        validateDomainWithNetlify(selectedDomainForDns);
+                      }
+                    }}
+                    disabled={!selectedDomainForDns || validatingDomains.has(selectedDomainForDns?.id || '')}
+                  >
+                    {validatingDomains.has(selectedDomainForDns?.id || '') ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Checking...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle2 className="h-4 w-4 mr-2" />
+                        Check DNS Propagation
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      if (selectedDomainForDns) {
+                        window.open(`https://dnschecker.org/#CNAME/${selectedDomainForDns.domain}`, '_blank');
+                      }
+                    }}
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    External DNS Checker
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setDnsModalOpen(false)}>
+                Close
+              </Button>
+              <Button
+                onClick={() => {
+                  if (selectedDomainForDns) {
+                    window.open(`https://${selectedDomainForDns.domain}`, '_blank');
+                  }
+                }}
+              >
+                <ExternalLink className="h-4 w-4 mr-2" />
+                Test Domain
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Sync Results Modal */}
+        <Dialog open={syncModalOpen} onOpenChange={setSyncModalOpen}>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Database className="h-5 w-5 text-blue-600" />
+                Netlify Domain Sync Results
+              </DialogTitle>
+              <DialogDescription>
+                Complete summary of domains synced from Netlify to Supabase
+              </DialogDescription>
+            </DialogHeader>
+
+            {syncResults && (
+              <div className="space-y-6">
+                {/* Summary Stats */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Globe className="h-5 w-5 text-blue-600" />
+                      <span className="font-semibold text-blue-900">Total Processed</span>
+                    </div>
+                    <div className="text-2xl font-bold text-blue-800">
+                      {syncResults.totalProcessed}
+                    </div>
+                    <div className="text-sm text-blue-600">
+                      domains found in Netlify
+                    </div>
+                  </div>
+
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <CheckCircle2 className="h-5 w-5 text-green-600" />
+                      <span className="font-semibold text-green-900">Successfully Synced</span>
+                    </div>
+                    <div className="text-2xl font-bold text-green-800">
+                      {syncResults.successfulSyncs}
+                    </div>
+                    <div className="text-sm text-green-600">
+                      domains stored in Supabase
+                    </div>
+                  </div>
+
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <AlertTriangle className="h-5 w-5 text-red-600" />
+                      <span className="font-semibold text-red-900">Errors</span>
+                    </div>
+                    <div className="text-2xl font-bold text-red-800">
+                      {syncResults.errors.length}
+                    </div>
+                    <div className="text-sm text-red-600">
+                      sync failures
+                    </div>
+                  </div>
+                </div>
+
+                {/* Synced Domains */}
+                {syncResults.domains.length > 0 && (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <h3 className="font-semibold text-green-900 mb-3 flex items-center gap-2">
+                      <CheckCircle2 className="h-4 w-4" />
+                      Domains Found in Netlify ({syncResults.domains.length})
+                    </h3>
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {syncResults.domains.map((domain, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between bg-white p-3 rounded border"
+                        >
+                          <div className="flex items-center gap-3">
+                            <Globe className="h-4 w-4 text-green-600" />
+                            <div>
+                              <span className="font-medium text-gray-900">{domain.domain}</span>
+                              <div className="flex items-center gap-2 mt-1">
+                                <Badge
+                                  variant={domain.type === 'custom' ? 'default' : 'secondary'}
+                                  className="text-xs"
+                                >
+                                  {domain.type === 'custom' ? 'Custom Domain' : 'Domain Alias'}
+                                </Badge>
+                                {domain.ssl_status === 'issued' && (
+                                  <Badge className="bg-blue-100 text-blue-800 text-xs">
+                                    🔒 SSL Active
+                                  </Badge>
+                                )}
+                                {domain.verified && (
+                                  <Badge className="bg-green-100 text-green-800 text-xs">
+                                    ✓ Verified
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-sm text-gray-600">
+                            {domain.netlify_site_id && (
+                              <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
+                                Site: {domain.netlify_site_id.substring(0, 8)}...
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Error Details */}
+                {syncResults.errors.length > 0 && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <h3 className="font-semibold text-red-900 mb-3 flex items-center gap-2">
+                      <AlertTriangle className="h-4 w-4" />
+                      Sync Errors ({syncResults.errors.length})
+                    </h3>
+                    <div className="space-y-2 max-h-32 overflow-y-auto">
+                      {syncResults.errors.map((error, index) => (
+                        <div
+                          key={index}
+                          className="bg-white p-3 rounded border border-red-200"
+                        >
+                          <div className="font-medium text-red-800">{error.domain}</div>
+                          <div className="text-sm text-red-600 mt-1">{error.error}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Instructions */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <h3 className="font-semibold text-blue-900 mb-3">What Happens Next?</h3>
+                  <div className="space-y-2 text-sm text-blue-800">
+                    <div className="flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-blue-600 mt-0.5" />
+                      <span>All synced domains are now stored in your Supabase database</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-blue-600 mt-0.5" />
+                      <span>Domain verification status, SSL certificates, and DNS records have been imported</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-blue-600 mt-0.5" />
+                      <span>You can now manage all domains through this interface</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-blue-600 mt-0.5" />
+                      <span>Future changes will sync automatically between Netlify and Supabase</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* No Domains Found */}
+                {syncResults.domains.length === 0 && syncResults.errors.length === 1 && syncResults.errors[0].domain === 'no_domains' && (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <h3 className="font-semibold text-yellow-900 mb-3 flex items-center gap-2">
+                      <AlertTriangle className="h-4 w-4" />
+                      No Domains Found in Netlify
+                    </h3>
+                    <p className="text-sm text-yellow-800 mb-4">
+                      We couldn't find any domains in your Netlify account. This could be because:
+                    </p>
+                    <ul className="list-disc list-inside text-sm text-yellow-700 space-y-1 mb-4">
+                      <li>Your Netlify API token is not configured</li>
+                      <li>You need to connect to Netlify MCP</li>
+                      <li>Your Netlify site doesn't have any custom domains yet</li>
+                      <li>The API connection failed</li>
+                    </ul>
+                    <Button
+                      onClick={() => window.open('https://app.netlify.com/projects/backlinkoo/domain-management', '_blank')}
+                      className="w-full"
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Open Netlify Domain Management
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setSyncModalOpen(false)}>
+                Close
+              </Button>
+              <Button
+                onClick={() => {
+                  setSyncModalOpen(false);
+                  loadDomains(); // Refresh the main view
+                }}
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Refresh Domains
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
