@@ -168,14 +168,13 @@ exports.handler = async (event, context) => {
     const { isGuest = false } = body;
     let guestEmail = body.guestEmail ? sanitizeInput(body.guestEmail) : '';
 
+    // Use guestEmail for both guest and authenticated users
+    // Client sends user email in guestEmail field for both cases
     let email = guestEmail;
 
-    // For authenticated users, try to get email from various sources
+    // For authenticated users, ensure we have an email
     if (!isGuest && !email) {
-      // In development, use a placeholder email for authenticated users
-      // In production, this should come from the authentication context
-      email = 'authenticated-user@backlinkoo.com';
-      console.log('⚠️ Using placeholder email for authenticated user in development');
+      throw new Error('Email is required for authenticated user subscriptions. Please ensure you are logged in and try again.');
     }
 
     // Only validate email format for guest users
