@@ -262,6 +262,20 @@ const Index = () => {
                 <div className="w-24 h-9 bg-gray-200 animate-pulse rounded"></div>
               ) : user ? (
                 <>
+                  <UniversalPaymentComponent
+                    trigger={
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="bg-transparent hover:bg-green-50/50 border border-green-200/60 text-green-600 hover:text-green-700 hover:border-green-300/80 transition-all duration-200 font-medium px-4 py-1 text-sm backdrop-blur-sm shadow-sm hover:shadow-md"
+                      >
+                        <CreditCard className="h-4 w-4 mr-1" />
+                        Buy Credits
+                      </Button>
+                    }
+                    defaultType="credits"
+                    defaultCredits={100}
+                  />
                   <Button
                     onClick={() => startTransition(() => navigate("/dashboard"))}
                     className="bg-transparent hover:bg-blue-50/50 border border-blue-200/60 text-blue-700 hover:text-blue-800 hover:border-blue-300/80 transition-all duration-200 font-medium px-4 py-1 text-sm backdrop-blur-sm shadow-sm hover:shadow-md"
