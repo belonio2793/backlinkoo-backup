@@ -33,52 +33,6 @@
   <body>
     <div id="root"></div>
 
-    <!-- Emergency FullStory disable (if causing fetch interference) -->
-    <script>
-      // Check if we need to disable FullStory due to fetch errors
-      if (localStorage.getItem('disable_fullstory') === 'true' ||
-          new URLSearchParams(window.location.search).get('no_fullstory') === 'true') {
-        console.log('🚫 FullStory disabled via emergency setting');
-        // Load the disable script
-        const script = document.createElement('script');
-        script.src = '/disable-fullstory.js';
-        document.head.appendChild(script);
-      }
-    </script>
-
-    <!-- Prevent wallet extension conflicts -->
-    <script>
-      // Defensive code to prevent ethereum object redefinition errors
-      (function() {
-        try {
-          // If ethereum object already exists, make it configurable to prevent conflicts
-          if (typeof window.ethereum !== 'undefined') {
-            const descriptor = Object.getOwnPropertyDescriptor(window, 'ethereum');
-            if (descriptor && !descriptor.configurable) {
-              // Store the existing ethereum object
-              const existingEthereum = window.ethereum;
-
-              // Delete the property so it can be redefined
-              delete window.ethereum;
-
-              // Redefine it as configurable
-              Object.defineProperty(window, 'ethereum', {
-                value: existingEthereum,
-                writable: true,
-                configurable: true,
-                enumerable: true
-              });
-            }
-          }
-        } catch (error) {
-          // Silently handle any errors to prevent breaking the app
-          console.debug('Ethereum object handling:', error.message);
-        }
-      })();
-    </script>
-
-    <!-- Network debugging utilities -->
-    <script src="/debug-network.js"></script>
 
     <script type="module" src="/src/main.tsx"></script>
   </body>
