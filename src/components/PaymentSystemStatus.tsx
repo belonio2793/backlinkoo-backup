@@ -1,16 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { getStripeConfig, validateStripeSetup } from '@/utils/stripeConfig';
 import { stripePaymentService } from '@/services/stripePaymentService';
 import {
   CheckCircle,
   XCircle,
-  CreditCard,
-  Crown,
-  ExternalLink
+  CreditCard
 } from 'lucide-react';
 
 export function PaymentSystemStatus() {
@@ -117,10 +114,6 @@ export function PaymentSystemStatus() {
             </AlertDescription>
           </Alert>
         )}
-
-        {/* Quick Actions */}
-        <div className="flex gap-2 pt-2">
-        </div>
 
         {/* Feature Status */}
         <div className="border-t pt-4">
