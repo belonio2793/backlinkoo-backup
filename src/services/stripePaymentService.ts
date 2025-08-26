@@ -3,6 +3,8 @@
  * Handles all Stripe operations with proper fallbacks and demo mode
  */
 
+import { getStripeConfig, getStripeEndpoints, validateStripeSetup } from '@/utils/stripeConfig';
+
 export interface StripePaymentOptions {
   amount: number;
   credits?: number;
