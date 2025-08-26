@@ -301,7 +301,7 @@ const EnhancedDomainsPage = () => {
           });
           console.log('📊 Sync stats updated:', siteInfo.domains?.length || 0, 'Netlify domains');
         } else {
-          console.warn('⚠️ Failed to get sync stats:', siteInfo.error);
+          console.warn('⚠��� Failed to get sync stats:', siteInfo.error);
         }
       } else {
         console.warn('❌ Netlify connection failed:', result.error);
@@ -530,6 +530,56 @@ const EnhancedDomainsPage = () => {
     } finally {
       setEdgeFunctionSyncing(false);
     }
+  };
+
+  const validateDomainWithNetlify = async (domain: Domain) => {
+    if (!user?.id) return;
+
+    setValidatingDomains(prev => new Set(prev).add(domain.id));
+
+    try {
+      // Call Netlify API to validate domain
+      const validation = await NetlifyApiService.validateDomain(domain.domain);
+
+      if (validation.success && validation.validation) {
+        // Update domain with validation results
+        const { error } = await supabase
+          .from('domains')
+          .update({
+            netlify_verified: validation.validation.domain_exists_in_netlify,
+            ssl_enabled: validation.validation.ssl_configured,
+            dns_verified: validation.validation.dns_records_found,
+            last_validation_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', domain.id)
+          .eq('user_id', user.id);
+
+        if (error) {
+          console.error('Failed to update domain validation:', error);
+          toast.error(`Failed to update validation: ${error.message}`);
+        } else {
+          toast.success(`✅ Domain ${domain.domain} validated with Netlify`);
+          loadDomains(); // Refresh the list
+        }
+      } else {
+        toast.error(`❌ Validation failed: ${validation.error || 'Unknown error'}`);
+      }
+    } catch (error: any) {
+      console.error('Netlify validation error:', error);
+      toast.error(`Validation error: ${error.message}`);
+    } finally {
+      setValidatingDomains(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(domain.id);
+        return newSet;
+      });
+    }
+  };
+
+  const openDnsModal = (domain: Domain) => {
+    setSelectedDomainForDns(domain);
+    setDnsModalOpen(true);
   };
 
   const getStatusBadge = (domain: Domain) => {
