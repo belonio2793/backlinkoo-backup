@@ -89,6 +89,9 @@ const EnhancedDomainsPage = () => {
   const [dnsModalOpen, setDnsModalOpen] = useState(false);
   const [selectedDomainForDns, setSelectedDomainForDns] = useState<Domain | null>(null);
   const [validatingDomains, setValidatingDomains] = useState<Set<string>>(new Set());
+  const [bulkSyncing, setBulkSyncing] = useState(false);
+  const [syncResults, setSyncResults] = useState<BulkSyncResult | null>(null);
+  const [syncModalOpen, setSyncModalOpen] = useState(false);
 
   // Constants for DNS configuration
   const CNAME_RECORD = 'backlinkoo.netlify.app';
