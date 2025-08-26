@@ -746,6 +746,25 @@ const EnhancedDomainsPage = () => {
 
         {/* Actions Bar */}
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
+          {/* Comprehensive Netlify Sync Button */}
+          <Button
+            onClick={performBulkSync}
+            disabled={bulkSyncing}
+            size="lg"
+            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white border-0 shadow-lg"
+          >
+            {bulkSyncing ? (
+              <>
+                <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                <span>Syncing from Netlify...</span>
+              </>
+            ) : (
+              <>
+                <Database className="h-5 w-5 mr-2" />
+                <span>Sync All Netlify Domains</span>
+              </>
+            )}
+          </Button>
           <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
             <DialogTrigger asChild>
               <Button size="lg" className="flex-1 sm:flex-none">
