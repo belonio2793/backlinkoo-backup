@@ -112,14 +112,7 @@ export function MobileOptimizedPaymentButton({
       if (result.success) {
         console.log('✅ Payment initiated successfully');
         
-        // Show success message
-        toast({
-          title: "Payment Initiated",
-          description: isMobile 
-            ? "Redirecting to secure checkout..." 
-            : "Opening secure checkout window...",
-          variant: "default"
-        });
+        // Payment initiated successfully
 
         // Call success callback
         onSuccess?.();
