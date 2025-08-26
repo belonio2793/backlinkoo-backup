@@ -127,9 +127,23 @@ export const PaymentModal = ({ isOpen, onClose, initialCredits }: PaymentModalPr
       }
     } catch (error) {
       console.error('Payment error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+
+      // Provide more specific error messages
+      let userFriendlyMessage = "Failed to create payment session";
+      if (errorMessage.includes('not configured')) {
+        userFriendlyMessage = "Payment system is not configured. Please contact support.";
+      } else if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
+        userFriendlyMessage = "Network error. Please check your connection and try again.";
+      } else if (errorMessage.includes('rate limit')) {
+        userFriendlyMessage = "Too many requests. Please wait a moment and try again.";
+      } else if (errorMessage.includes('Invalid amount')) {
+        userFriendlyMessage = "Invalid payment amount. Please check your selection.";
+      }
+
       toast({
         title: "Payment Error",
-        description: "Failed to create payment session",
+        description: userFriendlyMessage,
         variant: "destructive",
       });
     } finally {
