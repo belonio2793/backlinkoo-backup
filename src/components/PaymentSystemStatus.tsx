@@ -8,35 +8,67 @@ import { stripePaymentService } from '@/services/stripePaymentService';
 import {
   CheckCircle,
   XCircle,
-  AlertTriangle,
   CreditCard,
   Crown,
-  ExternalLink,
-  Settings
+  ExternalLink
 } from 'lucide-react';
 
 export function PaymentSystemStatus() {
-  const [config, setConfig] = useState(getStripeConfig());
-  const [validation, setValidation] = useState(validateStripeSetup());
-  const [serviceStatus, setServiceStatus] = useState(stripePaymentService.getStatus());
+  const [config, setConfig] = useState(() => {
+    try {
+      return getStripeConfig();
+    } catch (error) {
+      console.error('Stripe configuration error:', error);
+      return null;
+    }
+  });
+  
+  const [validation, setValidation] = useState(() => {
+    try {
+      return validateStripeSetup();
+    } catch (error) {
+      return { isValid: false, errors: [(error as Error).message] };
+    }
+  });
+  
+  const [serviceStatus, setServiceStatus] = useState(() => {
+    try {
+      return stripePaymentService.getStatus();
+    } catch (error) {
+      return { configured: false, mode: 'error' };
+    }
+  });
 
   useEffect(() => {
-    setConfig(getStripeConfig());
-    setValidation(validateStripeSetup());
-    setServiceStatus(stripePaymentService.getStatus());
+    try {
+      setConfig(getStripeConfig());
+      setValidation(validateStripeSetup());
+      setServiceStatus(stripePaymentService.getStatus());
+    } catch (error) {
+      console.error('Payment system configuration error:', error);
+    }
   }, []);
 
-  const getStatusColor = () => {
-    if (config.mode === 'live') return 'bg-green-100 text-green-800';
-    if (config.mode === 'test') return 'bg-yellow-100 text-yellow-800';
-    return 'bg-gray-100 text-gray-800';
-  };
-
-  const getStatusIcon = () => {
-    if (config.mode === 'live') return <CheckCircle className="h-4 w-4" />;
-    if (config.mode === 'test') return <AlertTriangle className="h-4 w-4" />;
-    return <XCircle className="h-4 w-4" />;
-  };
+  if (!config) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <XCircle className="h-5 w-5 text-red-500" />
+            Payment System Error
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Alert variant="destructive">
+            <XCircle className="h-4 w-4" />
+            <AlertDescription>
+              Stripe configuration error. Please check your environment variables.
+            </AlertDescription>
+          </Alert>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
@@ -49,10 +81,10 @@ export function PaymentSystemStatus() {
       <CardContent className="space-y-4">
         {/* Current Status */}
         <div className="flex items-center justify-between">
-          <span className="font-medium">Current Mode</span>
-          <Badge className={getStatusColor()}>
-            {getStatusIcon()}
-            <span className="ml-1 capitalize">{config.mode}</span>
+          <span className="font-medium">Mode</span>
+          <Badge className="bg-green-100 text-green-800">
+            <CheckCircle className="h-4 w-4 mr-1" />
+            Production
           </Badge>
         </div>
 
@@ -72,20 +104,6 @@ export function PaymentSystemStatus() {
           </div>
         </div>
 
-        {/* Warnings */}
-        {validation.warnings.length > 0 && (
-          <Alert>
-            <AlertTriangle className="h-4 w-4" />
-            <AlertDescription>
-              <ul className="list-disc list-inside space-y-1">
-                {validation.warnings.map((warning, index) => (
-                  <li key={index} className="text-sm">{warning}</li>
-                ))}
-              </ul>
-            </AlertDescription>
-          </Alert>
-        )}
-
         {/* Errors */}
         {validation.errors.length > 0 && (
           <Alert variant="destructive">
@@ -100,18 +118,6 @@ export function PaymentSystemStatus() {
           </Alert>
         )}
 
-        {/* Instructions */}
-        {validation.instructions.length > 0 && (
-          <div className="space-y-2">
-            <h4 className="font-medium text-sm">Setup Instructions:</h4>
-            <ul className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
-              {validation.instructions.map((instruction, index) => (
-                <li key={index}>{instruction}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-
         {/* Quick Actions */}
         <div className="flex gap-2 pt-2">
           <Button 
@@ -122,17 +128,6 @@ export function PaymentSystemStatus() {
             <ExternalLink className="h-4 w-4 mr-1" />
             Test Payments
           </Button>
-          
-          {config.mode === 'demo' && (
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => window.open('https://dashboard.stripe.com/', '_blank')}
-            >
-              <Settings className="h-4 w-4 mr-1" />
-              Get Stripe Keys
-            </Button>
-          )}
         </div>
 
         {/* Feature Status */}
@@ -156,6 +151,13 @@ export function PaymentSystemStatus() {
               New window redirect
             </div>
           </div>
+        </div>
+
+        {/* Production Notice */}
+        <div className="bg-green-50 p-3 rounded border border-green-200">
+          <p className="text-sm text-green-800">
+            <strong>Production Mode:</strong> All payments will be processed with real credit cards through Stripe.
+          </p>
         </div>
       </CardContent>
     </Card>

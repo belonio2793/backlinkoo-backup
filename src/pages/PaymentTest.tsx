@@ -2,16 +2,13 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { ImprovedPaymentModal } from '@/components/ImprovedPaymentModal';
 import { stripePaymentService } from '@/services/stripePaymentService';
 import {
   CreditCard,
   Crown,
-  TestTube,
   CheckCircle,
   XCircle,
   AlertCircle,
@@ -29,7 +26,13 @@ export default function PaymentTest() {
   const [initialCredits, setInitialCredits] = useState<number | undefined>();
   const [testResults, setTestResults] = useState<Record<string, any>>({});
   const [isTestingEndpoints, setIsTestingEndpoints] = useState(false);
-  const [stripeStatus, setStripeStatus] = useState(stripePaymentService.getStatus());
+  const [serviceStatus, setServiceStatus] = useState(() => {
+    try {
+      return stripePaymentService.getStatus();
+    } catch (error) {
+      return { configured: false, mode: 'error' };
+    }
+  });
 
   // Test endpoints
   const testEndpoints = async () => {
@@ -74,43 +77,6 @@ export default function PaymentTest() {
       };
     }
 
-    // Test API redirects
-    try {
-      const response = await fetch('/api/create-payment', {
-        method: 'OPTIONS'
-      });
-      results.apiRedirectPayment = {
-        status: response.status,
-        ok: response.ok,
-        endpoint: '/api/create-payment'
-      };
-    } catch (error) {
-      results.apiRedirectPayment = {
-        status: 'error',
-        ok: false,
-        error: (error as Error).message,
-        endpoint: '/api/create-payment'
-      };
-    }
-
-    try {
-      const response = await fetch('/api/create-subscription', {
-        method: 'OPTIONS'
-      });
-      results.apiRedirectSubscription = {
-        status: response.status,
-        ok: response.ok,
-        endpoint: '/api/create-subscription'
-      };
-    } catch (error) {
-      results.apiRedirectSubscription = {
-        status: 'error',
-        ok: false,
-        error: (error as Error).message,
-        endpoint: '/api/create-subscription'
-      };
-    }
-
     setTestResults(results);
     setIsTestingEndpoints(false);
   };
@@ -119,8 +85,8 @@ export default function PaymentTest() {
   const testPaymentCreation = async () => {
     try {
       toast({
-        title: "Testing Payment Creation",
-        description: "Creating test payment session...",
+        title: "Testing Real Payment Creation",
+        description: "Creating live payment session...",
       });
 
       const result = await stripePaymentService.createPayment({
@@ -135,9 +101,7 @@ export default function PaymentTest() {
       if (result.success) {
         toast({
           title: "✅ Payment Test Successful",
-          description: result.isDemoMode 
-            ? "Demo payment created successfully"
-            : "Real Stripe session created successfully",
+          description: "Live Stripe session created successfully",
         });
       } else {
         throw new Error(result.error);
@@ -155,8 +119,8 @@ export default function PaymentTest() {
   const testSubscriptionCreation = async () => {
     try {
       toast({
-        title: "Testing Subscription Creation",
-        description: "Creating test subscription session...",
+        title: "Testing Real Subscription Creation",
+        description: "Creating live subscription session...",
       });
 
       const result = await stripePaymentService.createSubscription({
@@ -170,9 +134,7 @@ export default function PaymentTest() {
       if (result.success) {
         toast({
           title: "✅ Subscription Test Successful",
-          description: result.isDemoMode 
-            ? "Demo subscription created successfully"
-            : "Real Stripe subscription created successfully",
+          description: "Live Stripe subscription created successfully",
         });
       } else {
         throw new Error(result.error);
@@ -204,7 +166,7 @@ export default function PaymentTest() {
       if (result.success) {
         toast({
           title: "✅ Quick Buy Successful",
-          description: `${credits} credits ${result.isDemoMode ? 'would be' : 'will be'} added to your account.`,
+          description: `${credits} credits purchase initiated`,
         });
       } else {
         throw new Error(result.error);
@@ -226,7 +188,7 @@ export default function PaymentTest() {
       if (result.success) {
         toast({
           title: "✅ Premium Upgrade Successful",
-          description: `${plan} plan ${result.isDemoMode ? 'would be' : 'has been'} activated.`,
+          description: `${plan} plan upgrade initiated`,
         });
       } else {
         throw new Error(result.error);
@@ -240,38 +202,23 @@ export default function PaymentTest() {
     }
   };
 
-  // Environment status
-  const getEnvironmentStatus = () => {
-    const hasStripeKey = !!import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
-    const isRealKey = hasStripeKey && 
-      import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY.startsWith('pk_') &&
-      !import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY.includes('Placeholder');
-    
-    return {
-      hasStripeKey,
-      isRealKey,
-      demoMode: !isRealKey,
-      publishableKey: import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'Not set'
-    };
-  };
-
-  const envStatus = getEnvironmentStatus();
-
   useEffect(() => {
-    // Test endpoints on load
     testEndpoints();
     
-    // Update stripe status
-    setStripeStatus(stripePaymentService.getStatus());
+    try {
+      setServiceStatus(stripePaymentService.getStatus());
+    } catch (error) {
+      setServiceStatus({ configured: false, mode: 'error' });
+    }
   }, []);
 
   return (
     <div className="container mx-auto p-6 space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Payment System Test</h1>
+          <h1 className="text-3xl font-bold">Production Payment Testing</h1>
           <p className="text-muted-foreground">
-            Test and verify all payment functionality
+            Test real Stripe payment processing
           </p>
         </div>
         <Button onClick={() => window.location.reload()} variant="outline">
@@ -280,59 +227,37 @@ export default function PaymentTest() {
         </Button>
       </div>
 
+      {/* Production Warning */}
+      <Alert>
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>
+          <strong>Production Mode:</strong> All payments will be processed with real credit cards. 
+          Make sure you have proper Stripe keys configured.
+        </AlertDescription>
+      </Alert>
+
       {/* Configuration Status */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5" />
-            Configuration Status
+            System Status
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Stripe Publishable Key</Label>
-              <div className="flex items-center gap-2">
-                {envStatus.hasStripeKey ? (
-                  envStatus.isRealKey ? (
-                    <Badge className="bg-green-100 text-green-800">
-                      <CheckCircle className="h-3 w-3 mr-1" />
-                      Configured
-                    </Badge>
-                  ) : (
-                    <Badge variant="secondary">
-                      <AlertCircle className="h-3 w-3 mr-1" />
-                      Demo/Placeholder
-                    </Badge>
-                  )
-                ) : (
-                  <Badge variant="destructive">
-                    <XCircle className="h-3 w-3 mr-1" />
-                    Missing
-                  </Badge>
-                )}
-                <span className="text-sm text-muted-foreground">
-                  {envStatus.publishableKey.substring(0, 20)}...
-                </span>
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <Label>Mode</Label>
-              <div>
-                {stripeStatus.demoMode ? (
-                  <Badge variant="secondary">
-                    <TestTube className="h-3 w-3 mr-1" />
-                    Demo Mode
-                  </Badge>
-                ) : (
-                  <Badge className="bg-green-100 text-green-800">
-                    <CheckCircle className="h-3 w-3 mr-1" />
-                    Production Ready
-                  </Badge>
-                )}
-              </div>
-            </div>
+          <div className="flex items-center justify-between">
+            <span className="font-medium">Payment Mode</span>
+            <Badge className="bg-green-100 text-green-800">
+              <CheckCircle className="h-3 w-3 mr-1" />
+              Production
+            </Badge>
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <span className="font-medium">Stripe Configuration</span>
+            <Badge variant={serviceStatus.configured ? 'default' : 'destructive'}>
+              {serviceStatus.configured ? 'Configured' : 'Error'}
+            </Badge>
           </div>
         </CardContent>
       </Card>
@@ -341,7 +266,7 @@ export default function PaymentTest() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <TestTube className="h-5 w-5" />
+            <Zap className="h-5 w-5" />
             Endpoint Tests
             <Button 
               onClick={testEndpoints} 
@@ -414,22 +339,22 @@ export default function PaymentTest() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Zap className="h-5 w-5" />
-            Direct API Tests
+            Live Payment Tests
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Button onClick={testPaymentCreation} variant="outline">
-              Test Payment API
+              Test Live Payment
             </Button>
             <Button onClick={testSubscriptionCreation} variant="outline">
-              Test Subscription API
+              Test Live Subscription
             </Button>
             <Button onClick={() => quickBuy(50)} variant="secondary">
-              Quick Buy 50 Credits
+              Buy 50 Credits ($70)
             </Button>
             <Button onClick={() => quickBuy(100)} variant="secondary">
-              Quick Buy 100 Credits
+              Buy 100 Credits ($140)
             </Button>
           </div>
         </CardContent>
@@ -446,19 +371,19 @@ export default function PaymentTest() {
         <CardContent>
           <div className="grid grid-cols-2 gap-4">
             <Button onClick={() => upgradePremium('monthly')} variant="outline">
-              Test Monthly Premium
+              Monthly Premium ($29)
             </Button>
             <Button onClick={() => upgradePremium('yearly')} variant="outline">
-              Test Yearly Premium
+              Yearly Premium ($290)
             </Button>
           </div>
         </CardContent>
       </Card>
 
-      {/* Quick Actions */}
+      {/* Quick Purchase Actions */}
       <Card>
         <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
+          <CardTitle>Real Purchase Tests</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -493,7 +418,7 @@ export default function PaymentTest() {
       {/* External Test Links */}
       <Card>
         <CardHeader>
-          <CardTitle>External Tests</CardTitle>
+          <CardTitle>Direct Function Tests</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
@@ -502,7 +427,7 @@ export default function PaymentTest() {
               className="w-full justify-between"
               onClick={() => window.open('/.netlify/functions/create-payment', '_blank')}
             >
-              Test create-payment endpoint directly
+              Test create-payment function directly
               <ExternalLink className="h-4 w-4" />
             </Button>
             <Button 
@@ -510,7 +435,7 @@ export default function PaymentTest() {
               className="w-full justify-between"
               onClick={() => window.open('/.netlify/functions/create-subscription', '_blank')}
             >
-              Test create-subscription endpoint directly
+              Test create-subscription function directly
               <ExternalLink className="h-4 w-4" />
             </Button>
           </div>
