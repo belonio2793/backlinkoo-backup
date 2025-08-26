@@ -39,6 +39,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuthState } from '@/hooks/useAuthState';
 import { NetlifyDomainSyncService } from '@/services/netlifyDomainSync';
 import { NetlifyApiService, type DomainValidation } from '@/services/netlifyApiService';
+import { NetlifyDomainBulkSync, type BulkSyncResult } from '@/services/netlifyDomainBulkSync';
 
 interface Domain {
   id: string;
