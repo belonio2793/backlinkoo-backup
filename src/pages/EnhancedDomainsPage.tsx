@@ -38,11 +38,12 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthState } from '@/hooks/useAuthState';
 import { NetlifyDomainSyncService } from '@/services/netlifyDomainSync';
+import { NetlifyApiService, type DomainValidation } from '@/services/netlifyApiService';
 
 interface Domain {
   id: string;
   domain: string;
-  status: 'pending' | 'verified' | 'removed' | 'error' | 'validating' | 'validated' | 'dns_ready' | 'theme_selection' | 'active';
+  status: 'pending' | 'validating' | 'validated' | 'error' | 'dns_ready' | 'theme_selection' | 'active';
   user_id: string;
   netlify_verified: boolean;
   dns_verified: boolean;
@@ -62,6 +63,9 @@ interface Domain {
   ssl_enabled?: boolean;
   custom_dns_configured?: boolean;
   last_validation_at?: string;
+  pages_published?: number;
+  netlify_validation_status?: 'valid' | 'not_configured' | 'pending' | 'error';
+  cname_record?: string;
 }
 
 const EnhancedDomainsPage = () => {
