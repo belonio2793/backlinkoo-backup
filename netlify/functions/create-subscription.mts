@@ -1,4 +1,4 @@
-import type { Context, Config } from "@netlify/functions";
+import type { Context } from "@netlify/functions";
 import Stripe from "stripe";
 
 interface SubscriptionRequest {
@@ -72,7 +72,7 @@ async function createStripeSubscription(
 ): Promise<{ url: string; sessionId: string }> {
   const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
-  if (!stripeSecretKey) {
+  if (!stripeSecretKey || stripeSecretKey.includes('placeholder')) {
     throw new Error("STRIPE_SECRET_KEY is not configured in Netlify environment variables");
   }
 
@@ -263,8 +263,4 @@ export default async (req: Request, context: Context) => {
       }
     );
   }
-};
-
-export const config: Config = {
-  path: "/.netlify/functions/create-subscription"
 };

@@ -1,4 +1,4 @@
-import type { Context, Config } from "@netlify/functions";
+import type { Context } from "@netlify/functions";
 import Stripe from "stripe";
 import { createClient } from '@supabase/supabase-js';
 
@@ -69,7 +69,7 @@ async function createStripePayment(
   const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
   if (!stripeSecretKey || stripeSecretKey.includes('placeholder')) {
-    throw new Error("Stripe is not configured for this environment. Please set up your Stripe API keys or use demo mode.");
+    throw new Error("Stripe is not configured for this environment. Please set up your Stripe API keys in Netlify environment variables.");
   }
 
   const stripe = new Stripe(stripeSecretKey, {
@@ -241,8 +241,4 @@ export default async (req: Request, context: Context) => {
       }
     );
   }
-};
-
-export const config: Config = {
-  path: "/.netlify/functions/create-payment"
 };
