@@ -243,6 +243,4 @@ export default async (req: Request, context: Context) => {
   }
 };
 
-export const config: Config = {
-  path: "/.netlify/functions/create-payment"
-};
+// Removed conflicting path configuration to fix 404 errors
