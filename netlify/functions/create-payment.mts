@@ -69,16 +69,7 @@ async function createStripePayment(
   const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
   if (!stripeSecretKey || stripeSecretKey.includes('placeholder')) {
-    // Development fallback - return demo checkout URL
-    const isDevelopment = process.env.NODE_ENV !== 'production';
-    if (isDevelopment) {
-      console.warn('⚠️ Development mode: Using demo payment URL (Stripe not configured)');
-      return {
-        url: `${originUrl}/payment-success?demo=true&credits=${paymentData.credits || 0}&amount=${paymentData.amount}`,
-        sessionId: 'demo_session_' + Date.now()
-      };
-    }
-    throw new Error("Stripe is not configured for this environment. Please set up your Stripe API keys.");
+    throw new Error("Stripe is not configured for this environment. Please set up your Stripe API keys in Netlify environment variables.");
   }
 
   const stripe = new Stripe(stripeSecretKey, {
