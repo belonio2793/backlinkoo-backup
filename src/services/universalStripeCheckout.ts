@@ -131,12 +131,16 @@ export class UniversalStripeCheckout {
         body: JSON.stringify(subscriptionData)
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Subscription creation failed: ${response.status} - ${errorText}`);
+      let result;
+      try {
+        result = await response.json();
+      } catch (parseError) {
+        throw new Error(`Invalid response from subscription service: ${response.status} ${response.statusText}`);
       }
 
-      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(`Subscription creation failed: ${response.status} - ${result.error || response.statusText}`);
+      }
       
       if (result.url) {
         // Open Stripe checkout in new window
