@@ -307,6 +307,8 @@ export class SubscriptionService {
           errorMessage = 'Payment service temporarily unavailable. Please try again in a moment or contact support if the issue persists.';
         } else if (errorMessage.includes('No such price')) {
           errorMessage = 'Invalid Stripe price ID. Please verify your Stripe configuration and ensure the price exists.';
+        } else if (errorMessage.includes('404') || errorMessage.includes('Not Found')) {
+          errorMessage = 'Subscription service not found. Please check your configuration or contact support.';
         }
 
         ErrorLogger.logError('Subscription creation error', error);
