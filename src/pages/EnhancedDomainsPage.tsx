@@ -1333,6 +1333,202 @@ const EnhancedDomainsPage = () => {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Sync Results Modal */}
+        <Dialog open={syncModalOpen} onOpenChange={setSyncModalOpen}>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Database className="h-5 w-5 text-blue-600" />
+                Netlify Domain Sync Results
+              </DialogTitle>
+              <DialogDescription>
+                Complete summary of domains synced from Netlify to Supabase
+              </DialogDescription>
+            </DialogHeader>
+
+            {syncResults && (
+              <div className="space-y-6">
+                {/* Summary Stats */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Globe className="h-5 w-5 text-blue-600" />
+                      <span className="font-semibold text-blue-900">Total Processed</span>
+                    </div>
+                    <div className="text-2xl font-bold text-blue-800">
+                      {syncResults.totalProcessed}
+                    </div>
+                    <div className="text-sm text-blue-600">
+                      domains found in Netlify
+                    </div>
+                  </div>
+
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <CheckCircle2 className="h-5 w-5 text-green-600" />
+                      <span className="font-semibold text-green-900">Successfully Synced</span>
+                    </div>
+                    <div className="text-2xl font-bold text-green-800">
+                      {syncResults.successfulSyncs}
+                    </div>
+                    <div className="text-sm text-green-600">
+                      domains stored in Supabase
+                    </div>
+                  </div>
+
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <AlertTriangle className="h-5 w-5 text-red-600" />
+                      <span className="font-semibold text-red-900">Errors</span>
+                    </div>
+                    <div className="text-2xl font-bold text-red-800">
+                      {syncResults.errors.length}
+                    </div>
+                    <div className="text-sm text-red-600">
+                      sync failures
+                    </div>
+                  </div>
+                </div>
+
+                {/* Synced Domains */}
+                {syncResults.domains.length > 0 && (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <h3 className="font-semibold text-green-900 mb-3 flex items-center gap-2">
+                      <CheckCircle2 className="h-4 w-4" />
+                      Domains Found in Netlify ({syncResults.domains.length})
+                    </h3>
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {syncResults.domains.map((domain, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between bg-white p-3 rounded border"
+                        >
+                          <div className="flex items-center gap-3">
+                            <Globe className="h-4 w-4 text-green-600" />
+                            <div>
+                              <span className="font-medium text-gray-900">{domain.domain}</span>
+                              <div className="flex items-center gap-2 mt-1">
+                                <Badge
+                                  variant={domain.type === 'custom' ? 'default' : 'secondary'}
+                                  className="text-xs"
+                                >
+                                  {domain.type === 'custom' ? 'Custom Domain' : 'Domain Alias'}
+                                </Badge>
+                                {domain.ssl_status === 'issued' && (
+                                  <Badge className="bg-blue-100 text-blue-800 text-xs">
+                                    🔒 SSL Active
+                                  </Badge>
+                                )}
+                                {domain.verified && (
+                                  <Badge className="bg-green-100 text-green-800 text-xs">
+                                    ✓ Verified
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-sm text-gray-600">
+                            {domain.netlify_site_id && (
+                              <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
+                                Site: {domain.netlify_site_id.substring(0, 8)}...
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Error Details */}
+                {syncResults.errors.length > 0 && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <h3 className="font-semibold text-red-900 mb-3 flex items-center gap-2">
+                      <AlertTriangle className="h-4 w-4" />
+                      Sync Errors ({syncResults.errors.length})
+                    </h3>
+                    <div className="space-y-2 max-h-32 overflow-y-auto">
+                      {syncResults.errors.map((error, index) => (
+                        <div
+                          key={index}
+                          className="bg-white p-3 rounded border border-red-200"
+                        >
+                          <div className="font-medium text-red-800">{error.domain}</div>
+                          <div className="text-sm text-red-600 mt-1">{error.error}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Instructions */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <h3 className="font-semibold text-blue-900 mb-3">What Happens Next?</h3>
+                  <div className="space-y-2 text-sm text-blue-800">
+                    <div className="flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-blue-600 mt-0.5" />
+                      <span>All synced domains are now stored in your Supabase database</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-blue-600 mt-0.5" />
+                      <span>Domain verification status, SSL certificates, and DNS records have been imported</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-blue-600 mt-0.5" />
+                      <span>You can now manage all domains through this interface</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-blue-600 mt-0.5" />
+                      <span>Future changes will sync automatically between Netlify and Supabase</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* No Domains Found */}
+                {syncResults.domains.length === 0 && syncResults.errors.length === 1 && syncResults.errors[0].domain === 'no_domains' && (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <h3 className="font-semibold text-yellow-900 mb-3 flex items-center gap-2">
+                      <AlertTriangle className="h-4 w-4" />
+                      No Domains Found in Netlify
+                    </h3>
+                    <p className="text-sm text-yellow-800 mb-4">
+                      We couldn't find any domains in your Netlify account. This could be because:
+                    </p>
+                    <ul className="list-disc list-inside text-sm text-yellow-700 space-y-1 mb-4">
+                      <li>Your Netlify API token is not configured</li>
+                      <li>You need to connect to Netlify MCP</li>
+                      <li>Your Netlify site doesn't have any custom domains yet</li>
+                      <li>The API connection failed</li>
+                    </ul>
+                    <Button
+                      onClick={() => window.open('https://app.netlify.com/projects/backlinkoo/domain-management', '_blank')}
+                      className="w-full"
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Open Netlify Domain Management
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setSyncModalOpen(false)}>
+                Close
+              </Button>
+              <Button
+                onClick={() => {
+                  setSyncModalOpen(false);
+                  loadDomains(); // Refresh the main view
+                }}
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Refresh Domains
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
