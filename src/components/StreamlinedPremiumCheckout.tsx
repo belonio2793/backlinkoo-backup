@@ -135,10 +135,6 @@ export function StreamlinedPremiumCheckout({
 
       if (result.success && result.url) {
         // Redirect to payment provider
-        toast({
-          title: "Opening Secure Checkout",
-          description: "Complete your payment in the new window that just opened.",
-        });
 
         // Open in new window
         const checkoutWindow = window.open(

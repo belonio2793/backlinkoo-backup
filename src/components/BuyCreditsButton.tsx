@@ -38,10 +38,6 @@ export function BuyCreditsButton({
     setIsLoading(true);
 
     try {
-      toast({
-        title: "🚀 Processing Purchase",
-        description: "Opening secure checkout...",
-      });
 
       const result = await stripePaymentService.createPayment({
         amount: finalAmount,

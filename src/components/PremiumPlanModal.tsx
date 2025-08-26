@@ -172,10 +172,6 @@ export function PremiumPlanModal({
         timestamp: Date.now()
       }));
 
-      toast({
-        title: "🚀 Opening Secure Checkout",
-        description: "Preparing your Stripe payment session...",
-      });
 
       // Create subscription using the subscription service with checkout redirect manager
       const result = await SubscriptionService.createSubscription(
