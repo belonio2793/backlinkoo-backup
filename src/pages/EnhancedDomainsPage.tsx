@@ -882,6 +882,66 @@ const EnhancedDomainsPage = () => {
               </Table>
             )}
 
+            {/* Synced Domains List */}
+            {domains.filter(d => d.netlify_verified || d.last_sync).length > 0 && (
+              <div className="mt-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="h-1 w-1 bg-green-500 rounded-full animate-pulse"></div>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Synced Domains ({domains.filter(d => d.netlify_verified || d.last_sync).length})
+                  </h3>
+                </div>
+                <div className="space-y-3">
+                  {domains
+                    .filter(d => d.netlify_verified || d.last_sync)
+                    .map((domain) => (
+                      <div
+                        key={domain.id}
+                        className="flex items-center justify-between p-4 bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg hover:shadow-md transition-all duration-200"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="flex items-center justify-center w-10 h-10 bg-green-100 rounded-full">
+                            <Globe className="h-5 w-5 text-green-600" />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-gray-900">{domain.domain}</span>
+                              {domain.netlify_verified && (
+                                <Badge className="bg-green-100 text-green-800 text-xs">
+                                  ✓ Netlify Synced
+                                </Badge>
+                              )}
+                              {domain.ssl_status === 'issued' && (
+                                <Badge className="bg-blue-100 text-blue-800 text-xs">
+                                  🔒 SSL Active
+                                </Badge>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-4 mt-1 text-sm text-gray-600">
+                              {domain.last_sync && (
+                                <span>Last synced: {new Date(domain.last_sync).toLocaleString()}</span>
+                              )}
+                              <span>Added: {new Date(domain.created_at).toLocaleDateString()}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => window.open(`https://${domain.domain}`, '_blank')}
+                            className="text-gray-600 hover:text-gray-900"
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                          </Button>
+                          <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
+
             {domains.some(d => d.error_message) && (
               <Alert className="mt-4 border-red-200">
                 <AlertTriangle className="h-4 w-4" />
