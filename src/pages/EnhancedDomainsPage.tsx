@@ -85,6 +85,18 @@ const EnhancedDomainsPage = () => {
     lastSync?: Date;
   } | null>(null);
   const [edgeFunctionSyncing, setEdgeFunctionSyncing] = useState(false);
+  const [dnsModalOpen, setDnsModalOpen] = useState(false);
+  const [selectedDomainForDns, setSelectedDomainForDns] = useState<Domain | null>(null);
+  const [validatingDomains, setValidatingDomains] = useState<Set<string>>(new Set());
+
+  // Constants for DNS configuration
+  const CNAME_RECORD = 'backlinkoo.netlify.app';
+  const NAMESERVERS = [
+    'dns1.p05.nsone.net',
+    'dns2.p05.nsone.net',
+    'dns3.p05.nsone.net',
+    'dns4.p05.nsone.net'
+  ];
 
   // Real-time subscription
   useEffect(() => {
@@ -124,7 +136,13 @@ const EnhancedDomainsPage = () => {
     try {
       const { data, error } = await supabase
         .from('domains')
-        .select('*')
+        .select(`
+          id, domain, status, user_id, netlify_verified, dns_verified,
+          txt_record_value, error_message, created_at, updated_at, last_sync,
+          custom_domain, ssl_status, dns_records, selected_theme, theme_name,
+          blog_enabled, netlify_site_id, netlify_domain_id, ssl_enabled,
+          custom_dns_configured, last_validation_at, pages_published
+        `)
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
