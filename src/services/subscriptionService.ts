@@ -179,6 +179,7 @@ export class SubscriptionService {
 
       const requestBody = {
         priceId,
+        plan: planType, // 'monthly' or 'yearly' - matches Netlify function expectations
         tier: planType === 'yearly' ? 'premium-annual' : 'premium-monthly',
         isGuest,
         guestEmail: isGuest ? guestEmail : undefined
