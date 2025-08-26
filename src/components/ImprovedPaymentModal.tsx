@@ -71,12 +71,6 @@ export const ImprovedPaymentModal = ({
     { icon: <Shield className="h-4 w-4" />, text: "Priority Support" },
   ];
 
-  // Check Stripe configuration status
-  const [stripeStatus, setStripeStatus] = useState(stripePaymentService.getStatus());
-
-  useEffect(() => {
-    setStripeStatus(stripePaymentService.getStatus());
-  }, []);
 
   // Update state when modal opens
   useEffect(() => {
@@ -183,9 +177,7 @@ export const ImprovedPaymentModal = ({
     try {
       toast({
         title: "🚀 Opening Checkout",
-        description: stripeStatus.demoMode 
-          ? "Opening demo subscription checkout (development mode)"
-          : "Redirecting to secure Stripe subscription checkout...",
+        description: "Redirecting to secure Stripe subscription checkout...",
       });
 
       const result = await stripePaymentService.createSubscription({
@@ -197,12 +189,10 @@ export const ImprovedPaymentModal = ({
       });
 
       if (result.success) {
-        if (result.isDemoMode) {
-          toast({
-            title: "✅ Demo Subscription Complete!",
-            description: `Premium ${selectedPlan} plan would be activated.`,
-          });
-        }
+        toast({
+          title: "✅ Subscription Processing",
+          description: `Your premium ${selectedPlan} plan is being activated.`,
+        });
         onClose();
       } else {
         throw new Error(result.error || 'Subscription failed');
