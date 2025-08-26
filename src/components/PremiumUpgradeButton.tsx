@@ -167,3 +167,37 @@ export function PremiumCallToActionButton(props: Omit<PremiumUpgradeButtonProps,
     </PremiumUpgradeButton>
   );
 }
+
+// Header specific upgrade button
+export function HeaderUpgradeButton(props: Omit<PremiumUpgradeButtonProps, 'plan'>) {
+  return (
+    <PremiumUpgradeButton
+      plan="monthly"
+      variant="outline"
+      size="sm"
+      {...props}
+    >
+      <div className="flex items-center gap-1">
+        <Crown className="h-3 w-3" />
+        Upgrade
+      </div>
+    </PremiumUpgradeButton>
+  );
+}
+
+// Tools header specific upgrade button
+export function ToolsHeaderUpgradeButton(props: Omit<PremiumUpgradeButtonProps, 'plan'>) {
+  return (
+    <PremiumUpgradeButton
+      plan="yearly"
+      variant="default"
+      size="sm"
+      {...props}
+    >
+      <div className="flex items-center gap-1">
+        <Sparkles className="h-3 w-3" />
+        Premium
+      </div>
+    </PremiumUpgradeButton>
+  );
+}
