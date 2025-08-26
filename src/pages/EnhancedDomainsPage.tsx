@@ -879,51 +879,103 @@ const EnhancedDomainsPage = () => {
                       </TableCell>
                       <TableCell>
                         <div className="max-w-32">
-                          {domain.txt_record_value ? (
-                            <div className="text-xs">
-                              <code className="bg-gray-100 px-1 py-0.5 rounded text-xs break-all">
-                                {domain.txt_record_value.length > 20
-                                  ? `${domain.txt_record_value.substring(0, 20)}...`
-                                  : domain.txt_record_value}
+                          <div className="text-xs space-y-1">
+                            <div className="flex items-center gap-1">
+                              <span className="font-medium">CNAME:</span>
+                              <code className="bg-blue-50 text-blue-700 px-1 py-0.5 rounded text-xs">
+                                {CNAME_RECORD}
                               </code>
                             </div>
-                          ) : (
-                            <span className="text-xs text-gray-400">Not set</span>
+                            {domain.txt_record_value && (
+                              <div className="flex items-center gap-1">
+                                <span className="font-medium">TXT:</span>
+                                <code className="bg-gray-100 px-1 py-0.5 rounded text-xs">
+                                  {domain.txt_record_value.substring(0, 12)}...
+                                </code>
+                              </div>
+                            )}
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-xs h-6 px-2"
+                              onClick={() => openDnsModal(domain)}
+                            >
+                              DNS Setup
+                            </Button>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-xs space-y-1">
+                          {domain.selected_theme && (
+                            <div className="flex items-center gap-1">
+                              <Badge variant="outline" className="text-xs">
+                                {domain.theme_name || domain.selected_theme}
+                              </Badge>
+                            </div>
+                          )}
+                          {domain.blog_enabled && (
+                            <Badge className="bg-purple-100 text-purple-800 text-xs">
+                              📝 Blog Enabled
+                            </Badge>
+                          )}
+                          {domain.pages_published && domain.pages_published > 0 && (
+                            <div className="text-xs text-gray-500">
+                              {domain.pages_published} pages
+                            </div>
                           )}
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="max-w-32">
-                          {domain.dns_records && domain.dns_records.length > 0 ? (
-                            <div className="text-xs">
-                              <Badge variant="outline" className="text-xs">
-                                {domain.dns_records.length} record{domain.dns_records.length !== 1 ? 's' : ''}
+                        <div className="text-xs space-y-1">
+                          {domain.netlify_site_id && (
+                            <div className="flex items-center gap-1">
+                              <Badge className="bg-green-100 text-green-800 text-xs">
+                                Site: {domain.netlify_site_id.substring(0, 8)}...
                               </Badge>
-                              <div className="text-xs text-gray-500 mt-1">
-                                {domain.dns_records.slice(0, 2).map((record: any, idx: number) => (
-                                  <div key={idx} className="truncate">
-                                    {record.type || 'Record'}: {record.value ? record.value.substring(0, 15) + '...' : 'N/A'}
-                                  </div>
-                                ))}
-                                {domain.dns_records.length > 2 && (
-                                  <div className="text-xs text-gray-400">+{domain.dns_records.length - 2} more</div>
-                                )}
+                            </div>
+                          )}
+                          {domain.dns_records && domain.dns_records.length > 0 && (
+                            <Badge variant="outline" className="text-xs">
+                              {domain.dns_records.length} DNS records
+                            </Badge>
+                          )}
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-xs h-6 px-2"
+                            onClick={() => validateDomainWithNetlify(domain)}
+                            disabled={validatingDomains.has(domain.id)}
+                          >
+                            {validatingDomains.has(domain.id) ? (
+                              <>
+                                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                Validating
+                              </>
+                            ) : (
+                              'Validate'
+                            )}
+                          </Button>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-xs">
+                          {domain.last_validation_at ? (
+                            <div>
+                              <div className="font-medium text-gray-700">
+                                {new Date(domain.last_validation_at).toLocaleDateString()}
+                              </div>
+                              <div className="text-gray-500">
+                                {new Date(domain.last_validation_at).toLocaleTimeString()}
                               </div>
                             </div>
                           ) : (
-                            <span className="text-xs text-gray-400">No records</span>
+                            <span className="text-gray-400">Never validated</span>
                           )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-sm text-gray-600">
-                          {new Date(domain.created_at).toLocaleDateString()}
-                        </span>
-                        {domain.last_sync && (
-                          <div className="text-xs text-gray-500">
-                            Synced: {new Date(domain.last_sync).toLocaleTimeString()}
+                          <div className="text-gray-500 mt-1">
+                            Added: {new Date(domain.created_at).toLocaleDateString()}
                           </div>
-                        )}
+                        </div>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
