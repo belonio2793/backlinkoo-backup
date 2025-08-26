@@ -305,14 +305,6 @@ const App = () => (
               }
             />
 
-            <Route
-              path="/payment-test"
-              element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <LazyPaymentTest />
-                </Suspense>
-              }
-            />
 
             <Route
               path="/domains-test"
