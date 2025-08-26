@@ -87,55 +87,50 @@ export function PremiumCheckoutModal({ isOpen, onClose, onSuccess }: PremiumChec
     setPaymentMethod(method);
 
     try {
-
-      // Use subscription service with checkout redirect manager
+      // Create subscription and get checkout URL
       const result = await SubscriptionService.createSubscription(
         user,
         !user, // isGuest if no user
         !user ? formData.email : undefined, // guestEmail if no user
-        selectedPlan, // Use selected plan instead of default
-        {
-          preferNewWindow: true,
-          fallbackToCurrentWindow: true,
-          onPopupBlocked: () => {
-            toast({
-              title: "Popup Blocked",
-              description: "Opening checkout in current window instead...",
-            });
-          },
-          onRedirectSuccess: () => {
-            toast({
-              title: "✅ Checkout Opened",
-              description: "Complete your payment in the Stripe window.",
-            });
-            // Close modal after successful redirect
-            onClose();
-          },
-          onRedirectError: (error) => {
-            toast({
-              title: "Redirect Failed",
-              description: "Unable to open checkout window. Please try again.",
-              variant: "destructive"
-            });
-          }
-        }
+        selectedPlan // Use selected plan instead of default
       );
 
-      if (result.success) {
-        if (result.usedFallback) {
-          // Fallback was used - handle locally
-          toast({
-            title: "✅ Premium Activated!",
-            description: "Your account has been upgraded to Premium (development mode).",
-          });
+      if (result.success && result.url) {
+        // Open checkout in new window
+        const checkoutWindow = window.open(
+          result.url,
+          'stripe-checkout',
+          'width=800,height=600,scrollbars=yes,resizable=yes,location=yes,status=yes'
+        );
 
-          // Close modal and trigger success callback
+        if (!checkoutWindow) {
+          // Popup was blocked - fallback to current window
+          toast({
+            title: "Popup Blocked",
+            description: "Opening checkout in current window instead...",
+          });
+          window.location.href = result.url;
+        } else {
+          // Popup opened successfully
+          toast({
+            title: "✅ Checkout Opened",
+            description: "Complete your payment in the Stripe window.",
+          });
+          // Close modal after successful redirect
           onClose();
-          if (onSuccess) {
-            onSuccess();
-          }
         }
-        // If checkout redirect manager handled the redirect, we don't need to do anything else
+      } else if (result.success && result.usedFallback) {
+        // Fallback was used - handle locally
+        toast({
+          title: "✅ Premium Activated!",
+          description: "Your account has been upgraded to Premium (development mode).",
+        });
+
+        // Close modal and trigger success callback
+        onClose();
+        if (onSuccess) {
+          onSuccess();
+        }
       } else {
         throw new Error(result.error || 'Failed to create subscription');
       }
