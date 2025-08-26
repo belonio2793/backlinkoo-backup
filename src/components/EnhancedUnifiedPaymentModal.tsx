@@ -848,18 +848,7 @@ export function EnhancedUnifiedPaymentModal({
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-4xl max-h-[85vh] sm:max-h-[90vh] overflow-y-auto p-4 sm:p-6">
         <DialogHeader className="pb-2">
-          <div className="flex items-center justify-between">
-            <DialogTitle className="sr-only">Enhanced Payment Modal</DialogTitle>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleClose}
-              className="h-6 w-6 p-0 absolute top-2 right-2 z-10"
-              disabled={isProcessing}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
+          <DialogTitle className="sr-only">Enhanced Payment Modal</DialogTitle>
         </DialogHeader>
 
         <div className="overflow-y-auto">
