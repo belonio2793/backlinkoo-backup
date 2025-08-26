@@ -49,6 +49,7 @@ const LazyPrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const LazyNotFound = lazy(() => import("./pages/NotFound"));
 const LazyTwitterAdGenerator = lazy(() => import("./pages/TwitterAdGenerator"));
 const LazyAffiliate = lazy(() => import("./pages/Affiliate"));
+const LazyTestPayments = lazy(() => import("./pages/TestPayments"));
 const LazyDomainsPage = lazy(() => import("./pages/DomainsPage"));
 const LazyEnhancedDomainsPage = lazy(() => import("./pages/EnhancedDomainsPage"));
 const LazyNetlifyTest = lazy(() => import("./pages/NetlifyTest"));
@@ -304,11 +305,21 @@ const App = () => (
               }
             />
 
+
             <Route
               path="/domains-test"
               element={
                 <Suspense fallback={<LoadingSpinner />}>
                   {React.createElement(React.lazy(() => import('./pages/DomainsTestPage')))}
+                </Suspense>
+              }
+            />
+
+            <Route
+              path="/test-payments"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyTestPayments />
                 </Suspense>
               }
             />
@@ -414,14 +425,6 @@ const App = () => (
               element={
                 <Suspense fallback={<LoadingSpinner />}>
                   {React.createElement(React.lazy(() => import('./pages/PaymentErrorDebug')))}
-                </Suspense>
-              }
-            />
-            <Route
-              path="/payment-test"
-              element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  {React.createElement(React.lazy(() => import('./pages/PaymentSystemTest')))}
                 </Suspense>
               }
             />
