@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserFlow } from '@/contexts/UserFlowContext';
 import { useState } from 'react';
-import { Infinity, Trash2, Home } from 'lucide-react';
+import { Infinity, Trash2, Home, CreditCard } from 'lucide-react';
 import { LoginModal } from './LoginModal';
 import { AuthService } from '@/services/authService';
 import { supabase } from '@/integrations/supabase/client';
