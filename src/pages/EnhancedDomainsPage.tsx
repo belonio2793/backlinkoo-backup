@@ -954,6 +954,16 @@ const EnhancedDomainsPage = () => {
                                 <span>Last synced: {new Date(domain.last_sync).toLocaleString()}</span>
                               )}
                               <span>Added: {new Date(domain.created_at).toLocaleDateString()}</span>
+                              {domain.netlify_site_id && (
+                                <span className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded">
+                                  Site ID: {domain.netlify_site_id.substring(0, 8)}...
+                                </span>
+                              )}
+                              {domain.dns_records && domain.dns_records.length > 0 && (
+                                <span className="text-xs bg-green-50 text-green-700 px-2 py-1 rounded">
+                                  {domain.dns_records.length} DNS records
+                                </span>
+                              )}
                             </div>
                           </div>
                         </div>
