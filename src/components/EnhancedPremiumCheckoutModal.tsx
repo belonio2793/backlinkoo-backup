@@ -128,10 +128,6 @@ export function EnhancedPremiumCheckoutModal({
 
       if (result.success && result.url) {
         // Open Stripe checkout in new window
-        toast({
-          title: "Opening Secure Checkout",
-          description: "Complete your payment in the new window that just opened.",
-        });
 
         // Open in new window with proper features
         const checkoutWindow = window.open(

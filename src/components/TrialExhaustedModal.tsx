@@ -66,10 +66,6 @@ export function TrialExhaustedModal({
     setIsProcessingUpgrade(true);
     try {
       // Show processing message
-      toast({
-        title: "🚀 Opening Secure Checkout!",
-        description: "Preparing your Stripe payment session...",
-      });
 
       // Create real subscription using SubscriptionService with checkout redirect manager
       const result = await SubscriptionService.createSubscription(

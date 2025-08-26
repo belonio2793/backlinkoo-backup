@@ -87,10 +87,6 @@ export function PremiumCheckoutModal({ isOpen, onClose, onSuccess }: PremiumChec
     setPaymentMethod(method);
 
     try {
-      toast({
-        title: "🚀 Opening Secure Checkout",
-        description: "Preparing your Stripe payment session...",
-      });
 
       // Use subscription service with checkout redirect manager
       const result = await SubscriptionService.createSubscription(
