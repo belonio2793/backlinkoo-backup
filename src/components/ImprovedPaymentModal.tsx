@@ -133,9 +133,7 @@ export const ImprovedPaymentModal = ({
     try {
       toast({
         title: "🚀 Opening Checkout",
-        description: stripeStatus.demoMode 
-          ? "Opening demo checkout (development mode)"
-          : "Redirecting to secure Stripe checkout...",
+        description: "Redirecting to secure Stripe checkout...",
       });
 
       const result = await stripePaymentService.createPayment({
