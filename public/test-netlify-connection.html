@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Netlify Connection Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+        .result { background: #f5f5f5; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .error { background: #ffe6e6; border: 1px solid #ff9999; }
+        .success { background: #e6ffe6; border: 1px solid #99ff99; }
+        .warning { background: #fff3cd; border: 1px solid #ffd700; }
+        button { padding: 10px 20px; margin: 5px; background: #007cba; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #005a84; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        pre { background: #f8f8f8; padding: 10px; border-radius: 3px; overflow-x: auto; font-size: 12px; }
+        .token-display { background: #fff; border: 1px solid #ddd; padding: 10px; border-radius: 5px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>🌐 Netlify Connection & Domain Sync Test</h1>
+    
+    <div class="token-display">
+        <h3>🔑 Configuration</h3>
+        <p><strong>Token:</strong> nfp_Xngqzk...U8b967 ✅</p>
+        <p><strong>Site ID:</strong> ca6261e6-0a59-40b5-a2bc-5b5481ac8809 ✅</p>
+        <p><strong>Expected URL:</strong> https://app.netlify.com/projects/backlinkoo/domain-management</p>
+    </div>
+    
+    <div>
+        <button onclick="testDirectApi()">🔄 Test Direct Netlify API</button>
+        <button onclick="testViaFunction()">⚡ Test via Netlify Function</button>
+        <button onclick="syncAllDomains()">🌐 Sync ALL Domains</button>
+        <button onclick="clearResults()">🗑️ Clear Results</button>
+    </div>
+
+    <div id="results"></div>
+
+    <script>
+        const NETLIFY_TOKEN = 'nfp_Xngqzk9sydkiKUvfdrqHLSnBCZiH33U8b967';
+        const SITE_ID = 'ca6261e6-0a59-40b5-a2bc-5b5481ac8809';
+
+        function log(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `result ${type}`;
+            div.innerHTML = `<strong>[${new Date().toLocaleTimeString()}]</strong> ${message}`;
+            results.appendChild(div);
+            results.scrollTop = results.scrollHeight;
+            console.log(message);
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        async function testDirectApi() {
+            log('🔄 Testing direct Netlify API access...');
+            
+            try {
+                const response = await fetch(`https://api.netlify.com/api/v1/sites/${SITE_ID}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${NETLIFY_TOKEN}`,
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                log(`Response status: ${response.status}`);
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    log(`❌ Netlify API error: ${response.status} - ${errorText}`, 'error');
+                    return false;
+                }
+
+                const siteData = await response.json();
+                log('✅ Success! Netlify API connection working!', 'success');
+                log(`<strong>Site:</strong> ${siteData.name}`, 'success');
+                log(`<strong>URL:</strong> ${siteData.url}`, 'success');
+                log(`<strong>Custom domain:</strong> ${siteData.custom_domain || 'None'}`, 'success');
+                log(`<strong>Domain aliases:</strong> ${siteData.domain_aliases?.join(', ') || 'None'}`, 'success');
+
+                const domains = [];
+                if (siteData.custom_domain) domains.push(siteData.custom_domain);
+                if (siteData.domain_aliases) domains.push(...siteData.domain_aliases);
+
+                log(`🌐 <strong>Total domains found: ${domains.length}</strong>`, 'success');
+                if (domains.length > 0) {
+                    log(`Domains: ${domains.join(', ')}`, 'success');
+                }
+
+                log(`<pre>${JSON.stringify(siteData, null, 2)}</pre>`, 'success');
+                return true;
+
+            } catch (error) {
+                log(`❌ Error: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        async function testViaFunction() {
+            log('⚡ Testing via Netlify function...');
+            
+            try {
+                // Test the function endpoint that should now have the token
+                const response = await fetch('/.netlify/functions/add-domain-to-netlify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'get_site_info'
+                    }),
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    log('✅ Netlify function working!', 'success');
+                    log(`<strong>Site:</strong> ${data.siteInfo?.name} (${data.domainCount} domains)`, 'success');
+                    if (data.domains && data.domains.length > 0) {
+                        log(`<strong>Domains:</strong> ${data.domains.join(', ')}`, 'success');
+                    }
+                    log(`<pre>${JSON.stringify(data, null, 2)}</pre>`, 'success');
+                } else {
+                    log(`❌ Function failed: ${data.error}`, 'error');
+                    log(`<pre>${JSON.stringify(data, null, 2)}</pre>`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Function request failed: ${error.message}`, 'error');
+                log('This is expected if running on Vite dev server instead of netlify dev', 'warning');
+            }
+        }
+
+        async function syncAllDomains() {
+            const confirmed = confirm('This will sync ALL domains from Netlify to Supabase. Continue?');
+            if (!confirmed) return;
+
+            log('🌐 Starting domain sync...');
+            
+            try {
+                const response = await fetch('/.netlify/functions/sync-domains-from-netlify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        userId: '00000000-0000-0000-0000-000000000000', // Admin user ID
+                        syncMode: 'force'
+                    }),
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    log('✅ Domain sync completed!', 'success');
+                    
+                    if (data.syncResult) {
+                        const { summary, netlifyCount, siteInfo } = data.syncResult;
+                        log(`<strong>Sync Summary:</strong>`, 'success');
+                        log(`• Found on Netlify: ${netlifyCount}`, 'success');
+                        log(`• Added to Supabase: ${summary.added}`, 'success');
+                        log(`• Updated in Supabase: ${summary.updated}`, 'success');
+                        log(`• Skipped: ${summary.skipped}`, 'success');
+                        log(`• Errors: ${summary.errors}`, summary.errors > 0 ? 'warning' : 'success');
+                    }
+                    
+                    log(`<pre>${JSON.stringify(data, null, 2)}</pre>`, 'success');
+                } else {
+                    log(`❌ Sync failed: ${data.error}`, 'error');
+                    log(`<pre>${JSON.stringify(data, null, 2)}</pre>`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Sync request failed: ${error.message}`, 'error');
+                log('Functions may not be available in local dev server', 'warning');
+            }
+        }
+
+        // Auto-test on load
+        log('🚀 Netlify Connection Test Ready');
+        log('Token configured: nfp_Xngqzk...U8b967 ✅');
+        log('Click "Test Direct Netlify API" to verify the connection works.');
+    </script>
+</body>
+</html>
