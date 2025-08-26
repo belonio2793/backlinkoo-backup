@@ -71,7 +71,6 @@ import {
   LazyAdminCampaignManager,
   LazyOpenAITest,
   LazySystemTest,
-  LazyPaymentTest,
   LazyWebhookTest,
   LazyPaymentDiagnostic,
   LazyEdgeFunctionDiagnostic,
@@ -197,11 +196,6 @@ export const OptimizedAppWrapper = () => {
             </Suspense>
           } />
 
-          <Route path="/admin/payment-test" element={
-            <Suspense fallback={<PageLoader />}>
-              <LazyPaymentTest />
-            </Suspense>
-          } />
 
           {/* Emergency fix routes - accessible in all environments */}
           <Route path="/emergency/rls-fix" element={
@@ -309,11 +303,6 @@ export const OptimizedAppWrapper = () => {
           <Route path="/system-test" element={
             <Suspense fallback={<PageLoader />}>
               <LazySystemTest />
-            </Suspense>
-          } />
-          <Route path="/test-payment" element={
-            <Suspense fallback={<PageLoader />}>
-              <LazyPaymentTest />
             </Suspense>
           } />
           <Route path="/test-webhooks" element={
