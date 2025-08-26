@@ -30,20 +30,27 @@ class StripePaymentService {
   }
 
   private checkConfiguration(): void {
-    const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
-    
-    // Check if we have real Stripe keys or placeholder keys
-    this.isConfigured = !!(publishableKey && 
-      publishableKey.startsWith('pk_') && 
-      !publishableKey.includes('Placeholder'));
-      
-    this.isDemoMode = !this.isConfigured || publishableKey?.includes('Placeholder');
-    
+    const config = getStripeConfig();
+    const validation = validateStripeSetup();
+
+    this.isConfigured = config.isConfigured;
+    this.isDemoMode = config.mode === 'demo';
+
     console.log('🔧 Stripe Configuration:', {
+      mode: config.mode,
       configured: this.isConfigured,
       demoMode: this.isDemoMode,
-      hasPublishableKey: !!publishableKey
+      isProduction: config.isProduction
     });
+
+    if (validation.warnings.length > 0) {
+      console.warn('⚠️ Stripe Warnings:', validation.warnings);
+    }
+
+    if (!this.isConfigured) {
+      console.error('❌ Stripe Configuration Error:', validation.errors);
+      console.info('📋 Setup Instructions:', validation.instructions);
+    }
   }
 
   /**
@@ -169,25 +176,40 @@ class StripePaymentService {
   /**
    * Try different endpoints to find working one
    */
-  private async getWorkingEndpoint(functionName: string): Promise<string> {
-    const endpoints = [
+  private async getWorkingEndpoint(functionName: 'create-payment' | 'create-subscription' | 'verify-payment'): Promise<string> {
+    const endpoints = getStripeEndpoints();
+    const targetEndpoint = endpoints[functionName];
+
+    // Try primary endpoint first
+    try {
+      const response = await fetch(targetEndpoint, { method: 'OPTIONS' });
+      if (response.ok || response.status === 405) { // 405 is fine, means endpoint exists
+        console.log(`✅ Using endpoint: ${targetEndpoint}`);
+        return targetEndpoint;
+      }
+    } catch (error) {
+      console.warn(`❌ Primary endpoint ${targetEndpoint} failed:`, error);
+    }
+
+    // Try fallback endpoints
+    const fallbacks = [
       `/api/${functionName}`,
       `/.netlify/functions/${functionName}`
     ];
 
-    for (const endpoint of endpoints) {
+    for (const endpoint of fallbacks) {
       try {
         const response = await fetch(endpoint, { method: 'OPTIONS' });
-        if (response.ok || response.status === 405) { // 405 is fine, means endpoint exists
-          console.log(`✅ Using working endpoint: ${endpoint}`);
+        if (response.ok || response.status === 405) {
+          console.log(`✅ Using fallback endpoint: ${endpoint}`);
           return endpoint;
         }
       } catch (error) {
-        console.warn(`❌ Endpoint ${endpoint} failed:`, error);
+        console.warn(`❌ Fallback ${endpoint} failed:`, error);
       }
     }
 
-    throw new Error(`No working endpoints found for ${functionName}`);
+    throw new Error(`No working endpoints found for ${functionName}. Check Netlify deployment.`);
   }
 
   /**
