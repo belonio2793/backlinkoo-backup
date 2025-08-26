@@ -294,6 +294,53 @@ const EnhancedDomainsPage = () => {
         await loadDomains();
         await checkNetlifyConnection(); // Refresh sync stats
         toast.success('✅ Domains synced from Netlify successfully');
+
+        // Show detailed sync results
+        if (result.syncResult) {
+          const { summary } = result.syncResult;
+          toast.info(
+            `📊 Sync Summary: Added ${summary.added}, Updated ${summary.updated}, Skipped ${summary.skipped}, Errors ${summary.errors}`,
+            { duration: 8000 }
+          );
+        }
+      } else {
+        toast.error(`Sync failed: ${result.error}`);
+      }
+    } catch (error: any) {
+      console.error('Netlify sync error:', error);
+      toast.error(`Sync failed: ${error.message}`);
+    } finally {
+      setSyncing(false);
+    }
+  };
+
+  const syncAllFromNetlify = async () => {
+    if (!user?.id) return;
+
+    const confirmed = window.confirm(
+      'This will fetch ALL domains from your Netlify account and add them to your Supabase database. Continue?'
+    );
+
+    if (!confirmed) return;
+
+    setSyncing(true);
+    try {
+      // Force sync mode to add all domains
+      const result = await NetlifyDomainSyncService.syncDomainsFromNetlify(user.id, 'force');
+
+      if (result.success) {
+        await loadDomains();
+        await checkNetlifyConnection();
+
+        if (result.syncResult) {
+          const { summary, netlifyCount } = result.syncResult;
+          toast.success(
+            `✅ Successfully synced ${netlifyCount} domains from Netlify!\n• Added: ${summary.added}\n• Updated: ${summary.updated}\n• Errors: ${summary.errors}`,
+            { duration: 10000 }
+          );
+        } else {
+          toast.success('✅ All domains synced from Netlify successfully!');
+        }
       } else {
         toast.error(`Sync failed: ${result.error}`);
       }
@@ -491,6 +538,20 @@ const EnhancedDomainsPage = () => {
               <RefreshCw className="h-5 w-5 mr-2" />
             )}
             {netlifyConnected === false ? 'Netlify Unavailable' : 'Sync from Netlify'}
+          </Button>
+
+          <Button
+            onClick={syncAllFromNetlify}
+            disabled={syncing || netlifyConnected === false}
+            size="lg"
+            className={`${netlifyConnected === false ? 'opacity-50' : ''} bg-blue-600 hover:bg-blue-700`}
+          >
+            {syncing ? (
+              <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+            ) : (
+              <Zap className="h-5 w-5 mr-2" />
+            )}
+            {netlifyConnected === false ? 'Netlify Unavailable' : 'Sync ALL Domains'}
           </Button>
 
           <Button 
