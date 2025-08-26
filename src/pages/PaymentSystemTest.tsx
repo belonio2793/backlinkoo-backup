@@ -340,12 +340,14 @@ export default function PaymentSystemTest() {
         </Card>
 
         {/* Payment Modals */}
-        <UniversalPaymentComponent 
-          showTrigger={false}
-          trigger={<div />}
-          defaultType="credits"
-          defaultCredits={100}
-        />
+        {showUniversalModal && (
+          <UniversalPaymentComponent
+            showTrigger={false}
+            trigger={<div />}
+            defaultType="credits"
+            defaultCredits={100}
+          />
+        )}
 
         <EnhancedUnifiedPaymentModal
           isOpen={showEnhancedModal}
