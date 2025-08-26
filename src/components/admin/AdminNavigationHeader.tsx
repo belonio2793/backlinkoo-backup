@@ -78,12 +78,6 @@ export function AdminNavigationHeader({
       description: "APIs, deployment & infrastructure"
     },
     {
-      id: "payment-testing",
-      name: "Payment Test",
-      icon: CreditCard,
-      description: "Payment integration testing & verification"
-    },
-    {
       id: "communications",
       name: "Communications",
       icon: Mail,
