@@ -196,6 +196,12 @@ export const OptimizedAppWrapper = () => {
             </Suspense>
           } />
 
+          <Route path="/admin/stripe-test" element={
+            <Suspense fallback={<PageLoader />}>
+              <LazyStripeTestPage />
+            </Suspense>
+          } />
+
 
           {/* Emergency fix routes - accessible in all environments */}
           <Route path="/emergency/rls-fix" element={
