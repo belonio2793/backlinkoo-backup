@@ -359,14 +359,21 @@ const EnhancedDomainsPage = () => {
     if (!user?.id) return;
 
     const confirmed = window.confirm(
-      'This will use the Supabase edge function to fetch ALL domains from Netlify and sync them to your domains table. Continue?'
+      '🚀 Smart Domain Discovery & Sync\n\n' +
+      'This will automatically:\n' +
+      '✅ Discover all domains from your Netlify account\n' +
+      '✅ Validate and store them in your domains database\n' +
+      '✅ Update verification status and SSL information\n' +
+      '✅ Sync DNS records and configuration\n\n' +
+      'Continue with domain discovery?'
     );
 
     if (!confirmed) return;
 
     setEdgeFunctionSyncing(true);
     try {
-      console.log('🚀 Calling Supabase netlify-domains edge function...');
+      console.log('🚀 Starting Smart Domain Discovery...');
+      toast.info('🔍 Discovering domains from Netlify...', { duration: 3000 });
 
       const { data, error } = await supabase.functions.invoke('netlify-domains', {
         body: {
@@ -376,27 +383,42 @@ const EnhancedDomainsPage = () => {
       });
 
       if (error) {
-        console.error('❌ Edge function error:', error);
-        toast.error(`Edge function failed: ${error.message}`);
+        console.error('❌ Domain discovery failed:', error);
+        toast.error(`❌ Discovery failed: ${error.message}`);
         return;
       }
 
       if (data?.success) {
-        console.log('✅ Edge function sync completed:', data);
+        console.log('✅ Smart domain discovery completed:', data);
 
-        // Refresh domains list
+        // Refresh domains list to show newly discovered domains
         await loadDomains();
         await checkNetlifyConnection();
 
         const results = data.sync_results;
+        const discoveredDomains = data.netlify_domains || [];
+
+        // Show detailed success message with discovered domains
         toast.success(
-          `✅ Edge Function Sync Complete!\n` +
-          `• Netlify domains: ${results.total_netlify}\n` +
-          `• Supabase domains: ${results.total_supabase}\n` +
-          `• Updated: ${results.updated_in_supabase}\n` +
-          `• In sync: ${results.in_sync}`,
-          { duration: 10000 }
+          `🎉 Domain Discovery Complete!\n\n` +
+          `📊 Discovery Results:\n` +
+          `• Found ${results.total_netlify} Netlify domains\n` +
+          `• Database has ${results.total_supabase} domains\n` +
+          `• Updated ${results.updated_in_supabase} domains\n` +
+          `• ${results.in_sync} already synced\n\n` +
+          `${discoveredDomains.length > 0 ? `🌐 Domains: ${discoveredDomains.slice(0, 3).join(', ')}${discoveredDomains.length > 3 ? ' +more' : ''}` : ''}`,
+          { duration: 12000 }
         );
+
+        // Additional toast for discovered domains
+        if (discoveredDomains.length > 0) {
+          setTimeout(() => {
+            toast.info(
+              `✨ ${discoveredDomains.length} domains are now stored in your database with full verification status!`,
+              { duration: 5000 }
+            );
+          }, 1000);
+        }
 
         // Show individual domain info
         if (data.netlify_domains && data.netlify_domains.length > 0) {
@@ -656,21 +678,51 @@ const EnhancedDomainsPage = () => {
             onClick={syncViaEdgeFunction}
             disabled={edgeFunctionSyncing}
             size="lg"
-            className="relative overflow-hidden bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 hover:from-indigo-700 hover:via-purple-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 border-0 group"
+            className="relative overflow-hidden bg-gradient-to-r from-emerald-500 via-cyan-500 to-blue-500 hover:from-emerald-600 hover:via-cyan-600 hover:to-blue-600 text-white shadow-2xl hover:shadow-emerald-500/25 transition-all duration-500 transform hover:scale-105 border-0 group min-w-[200px]"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            <div className="relative flex items-center">
-              {edgeFunctionSyncing ? (
-                <Loader2 className="h-5 w-5 mr-2 animate-spin text-white" />
-              ) : (
-                <Database className="h-5 w-5 mr-2 text-white group-hover:animate-pulse" />
-              )}
-              <span className="font-medium">
-                {edgeFunctionSyncing ? 'Syncing via Edge Function...' : 'Sync via Edge Function'}
-              </span>
-              {!edgeFunctionSyncing && (
-                <div className="ml-2 w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-              )}
+            {/* Animated background */}
+            <div className="absolute inset-0 bg-gradient-to-r from-white/30 via-transparent to-white/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-emerald-400 via-cyan-400 to-blue-400 rounded-lg opacity-0 group-hover:opacity-75 blur transition-all duration-500" />
+
+            {/* Main content */}
+            <div className="relative flex items-center justify-center">
+              <div className="flex items-center">
+                {edgeFunctionSyncing ? (
+                  <>
+                    <Loader2 className="h-5 w-5 mr-3 animate-spin text-white" />
+                    <div className="flex space-x-1 mr-3">
+                      <div className="w-1 h-1 bg-white rounded-full animate-pulse" style={{animationDelay: '0ms'}} />
+                      <div className="w-1 h-1 bg-white rounded-full animate-pulse" style={{animationDelay: '200ms'}} />
+                      <div className="w-1 h-1 bg-white rounded-full animate-pulse" style={{animationDelay: '400ms'}} />
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="relative mr-3">
+                      <Database className="h-5 w-5 text-white group-hover:scale-110 transition-transform duration-300" />
+                      <div className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full opacity-75 group-hover:animate-ping" />
+                    </div>
+                    <div className="h-4 w-px bg-white/30 mr-3" />
+                  </>
+                )}
+
+                <div className="flex flex-col items-start">
+                  <span className="font-semibold text-sm leading-tight">
+                    {edgeFunctionSyncing ? 'Discovering Domains...' : 'Smart Domain Sync'}
+                  </span>
+                  <span className="text-xs text-emerald-100 opacity-90">
+                    {edgeFunctionSyncing ? 'Fetching from Netlify' : 'Auto-discover & store'}
+                  </span>
+                </div>
+
+                {!edgeFunctionSyncing && (
+                  <div className="ml-3 flex items-center space-x-1">
+                    <div className="w-2 h-2 bg-green-300 rounded-full animate-pulse" style={{animationDelay: '0ms'}} />
+                    <div className="w-2 h-2 bg-yellow-300 rounded-full animate-pulse" style={{animationDelay: '500ms'}} />
+                    <div className="w-2 h-2 bg-blue-300 rounded-full animate-pulse" style={{animationDelay: '1000ms'}} />
+                  </div>
+                )}
+              </div>
             </div>
           </Button>
 
