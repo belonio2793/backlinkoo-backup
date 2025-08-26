@@ -1,4 +1,4 @@
-import type { Context, Config } from "@netlify/functions";
+import type { Context } from "@netlify/functions";
 import Stripe from "stripe";
 import { createClient } from '@supabase/supabase-js';
 
@@ -242,5 +242,3 @@ export default async (req: Request, context: Context) => {
     );
   }
 };
-
-// Removed conflicting path configuration to fix 404 errors
