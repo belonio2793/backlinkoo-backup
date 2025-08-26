@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { stripePaymentService } from '@/services/stripePaymentService';
+import { DirectStripeCheckout } from '@/services/directStripeCheckout';
 import { ImprovedPaymentModal } from '@/components/ImprovedPaymentModal';
 import { Crown, Star, Sparkles } from 'lucide-react';
 
@@ -42,30 +42,20 @@ export function PremiumUpgradeButton({
 
     try {
       toast({
-        title: "🚀 Processing Upgrade",
-        description: "Opening secure checkout...",
+        title: "🚀 Opening Stripe Checkout",
+        description: "Redirecting to secure subscription checkout...",
       });
 
-      const result = await stripePaymentService.createSubscription({
-        plan,
-        amount: currentPlan.price,
-        type: 'subscription',
-        isGuest: true,
-        guestEmail: 'guest@backlinkoo.com' // This would normally come from user input
-      });
+      await DirectStripeCheckout.upgradeToPremium(plan);
 
-      if (result.success) {
-        toast({
-          title: "✅ Upgrade Processing",
-          description: `Premium ${plan} plan is being activated.`,
-        });
-      } else {
-        throw new Error(result.error || 'Upgrade failed');
-      }
+      toast({
+        title: "✅ Checkout Opened",
+        description: `Premium ${plan} subscription checkout opened in new window`,
+      });
     } catch (error) {
       toast({
         title: "Upgrade Error",
-        description: error instanceof Error ? error.message : 'Failed to process upgrade',
+        description: error instanceof Error ? error.message : 'Failed to open checkout',
         variant: "destructive",
       });
     } finally {
