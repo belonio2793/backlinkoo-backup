@@ -17,6 +17,7 @@ import { User } from '@supabase/supabase-js';
 import { LoginModal } from "@/components/LoginModal";
 import { useToast } from "@/hooks/use-toast";
 import { ToolsHeaderUpgradeButton } from "@/components/PremiumUpgradeButton";
+import { UniversalPaymentComponent } from "@/components/UniversalPaymentComponent";
 
 interface ToolsHeaderProps {
   user: User | null;
