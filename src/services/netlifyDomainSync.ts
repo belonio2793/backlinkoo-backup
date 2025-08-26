@@ -39,7 +39,7 @@ export class NetlifyDomainSyncService {
     try {
       console.log('🔄 Starting Netlify-to-Supabase domain sync...');
 
-      const response = await fetch('/netlify/functions/sync-domains-from-netlify', {
+      const response = await fetch('/.netlify/functions/sync-domains-from-netlify', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -101,7 +101,7 @@ export class NetlifyDomainSyncService {
     error?: string;
   }> {
     try {
-      const response = await fetch('/netlify/functions/add-domain-to-netlify', {
+      const response = await fetch('/.netlify/functions/add-domain-to-netlify', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -158,7 +158,7 @@ export class NetlifyDomainSyncService {
     error?: string;
   }> {
     try {
-      const response = await fetch('/netlify/functions/add-domain-to-netlify', {
+      const response = await fetch('/.netlify/functions/add-domain-to-netlify', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -284,7 +284,7 @@ Sync Results:
       }
 
       // Get Supabase domains (you'll need to implement this endpoint)
-      const response = await fetch('/netlify/functions/sync-domains-from-netlify', {
+      const response = await fetch('/.netlify/functions/sync-domains-from-netlify', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
