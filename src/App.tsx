@@ -402,6 +402,14 @@ const App = () => (
 
             {/* Debug and test routes */}
             <Route
+              path="/dev-status"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  {React.createElement(React.lazy(() => import('./pages/DevEnvironmentStatus')))}
+                </Suspense>
+              }
+            />
+            <Route
               path="/payment-test"
               element={
                 <Suspense fallback={<LoadingSpinner />}>
