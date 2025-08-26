@@ -48,6 +48,7 @@ const LazyTermsOfService = lazy(() => import("./pages/TermsOfService"));
 const LazyPrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const LazyNotFound = lazy(() => import("./pages/NotFound"));
 const LazyTwitterAdGenerator = lazy(() => import("./pages/TwitterAdGenerator"));
+const LazyPaymentTest = lazy(() => import("./pages/PaymentTest"));
 const LazyAffiliate = lazy(() => import("./pages/Affiliate"));
 const LazyDomainsPage = lazy(() => import("./pages/DomainsPage"));
 const LazyEnhancedDomainsPage = lazy(() => import("./pages/EnhancedDomainsPage"));
