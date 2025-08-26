@@ -61,6 +61,9 @@ export const LazySystemTest = lazy(() => import('@/components/SystemTest').then(
 // Webhook Testing component
 export const LazyWebhookTest = lazy(() => import('@/pages/WebhookTest'));
 
+// Stripe Testing component
+export const LazyStripeTestPage = lazy(() => import('@/pages/StripeTestPage'));
+
 // Payment Diagnostic component
 export const LazyPaymentDiagnostic = lazy(() => import('@/pages/PaymentDiagnostic'));
 

@@ -72,6 +72,7 @@ import {
   LazyOpenAITest,
   LazySystemTest,
   LazyWebhookTest,
+  LazyStripeTestPage,
   LazyPaymentDiagnostic,
   LazyEdgeFunctionDiagnostic,
   LazyRouteSyncTest,
