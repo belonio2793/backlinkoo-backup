@@ -225,8 +225,8 @@ export const ImprovedPaymentModal = ({
               </p>
             </div>
 
-            <Button 
-              onClick={handleCreditPurchase} 
+            <Button
+              onClick={handleCreditPurchase}
               disabled={loading || !credits || parseFloat(credits) <= 0}
               className="w-full h-12"
               size="lg"
@@ -234,12 +234,23 @@ export const ImprovedPaymentModal = ({
               {loading ? (
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Processing...
+                  Opening Checkout...
                 </div>
               ) : (
-                `Buy ${credits || 0} Credits for $${amount || "0.00"}`
+                <div className="flex items-center gap-2">
+                  <CreditCard className="h-4 w-4" />
+                  Buy {credits || 0} Credits for ${amount || "0.00"}
+                </div>
               )}
             </Button>
+
+            {/* New Window Notice */}
+            <div className="text-center text-sm text-muted-foreground">
+              <div className="flex items-center justify-center gap-2">
+                <Shield className="h-4 w-4" />
+                <span>Opens secure Stripe checkout in new window</span>
+              </div>
+            </div>
           </div>
         </div>
 
