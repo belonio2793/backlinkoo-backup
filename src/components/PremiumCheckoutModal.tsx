@@ -104,12 +104,16 @@ export function PremiumCheckoutModal({ isOpen, onClose, onSuccess }: PremiumChec
         );
 
         if (!checkoutWindow) {
-          // Popup was blocked - fallback to current window
-          toast({
-            title: "Popup Blocked",
-            description: "Opening checkout in current window instead...",
-          });
+          // Popup was blocked - try alternative new window approach first
+        toast({
+          title: "Popup Blocked",
+          description: "Trying alternative window opening...",
+        });
+        const fallbackWindow = window.open(result.url, 'stripe-checkout-fallback', 'width=800,height=600,scrollbars=yes,resizable=yes');
+        if (!fallbackWindow) {
+          // Only use current window as last resort
           window.location.href = result.url;
+        }
         } else {
           // Popup opened successfully
           toast({
