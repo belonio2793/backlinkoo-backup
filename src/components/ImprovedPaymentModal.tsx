@@ -16,25 +16,23 @@ interface ImprovedPaymentModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialCredits?: number;
-  defaultTab?: 'credits' | 'premium';
 }
 
-export const ImprovedPaymentModal = ({ 
-  isOpen, 
-  onClose, 
-  initialCredits, 
-  defaultTab = 'credits' 
+export const ImprovedPaymentModal = ({
+  isOpen,
+  onClose,
+  initialCredits
 }: ImprovedPaymentModalProps) => {
   const CREDIT_PRICE = 1.40;
   const { toast } = useToast();
   const { user } = useAuth();
   
-  const [paymentType, setPaymentType] = useState<"credits" | "premium">(defaultTab);
+  // Removed paymentType state - this is now credits-only
   const [isGuest, setIsGuest] = useState(!user);
   const [guestEmail, setGuestEmail] = useState("");
   const [amount, setAmount] = useState(() => initialCredits ? (initialCredits * CREDIT_PRICE).toFixed(2) : "");
   const [credits, setCredits] = useState(() => initialCredits ? initialCredits.toString() : "");
-  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('monthly');
+  // Removed selectedPlan state - no premium plans
   const [loading, setLoading] = useState(false);
 
   // Credit packages
@@ -45,31 +43,7 @@ export const ImprovedPaymentModal = ({
     { credits: 500, price: 700, popular: false, savings: 0 }
   ];
 
-  // Premium plans
-  const premiumPlans = {
-    monthly: {
-      price: 29,
-      originalPrice: 49,
-      period: 'month',
-      discount: 41,
-      popular: false
-    },
-    yearly: {
-      price: 290,
-      originalPrice: 588,
-      period: 'year',
-      discount: 51,
-      savings: 298,
-      popular: true
-    }
-  };
-
-  const premiumFeatures = [
-    { icon: <Infinity className="h-4 w-4" />, text: "Unlimited Backlinks" },
-    { icon: <Star className="h-4 w-4" />, text: "Complete SEO Academy" },
-    { icon: <Zap className="h-4 w-4" />, text: "Advanced Analytics" },
-    { icon: <Shield className="h-4 w-4" />, text: "Priority Support" },
-  ];
+  // Removed premium plans and features - credits-only modal
 
 
   // Update state when modal opens
@@ -79,7 +53,6 @@ export const ImprovedPaymentModal = ({
       if (initialCredits && initialCredits > 0) {
         setCredits(initialCredits.toString());
         setAmount((initialCredits * CREDIT_PRICE).toFixed(2));
-        setPaymentType('credits');
       }
     }
   }, [isOpen, initialCredits, user]);
