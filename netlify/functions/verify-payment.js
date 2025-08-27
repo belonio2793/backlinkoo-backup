@@ -58,43 +58,17 @@ exports.handler = async (event, context) => {
 
     const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
-    if (!stripeSecretKey) {
+    if (!stripeSecretKey || !stripeSecretKey.startsWith('sk_')) {
       return {
         statusCode: 500,
         headers,
         body: JSON.stringify({
           verified: false,
-          error: 'Stripe configuration missing'
+          error: 'Valid Stripe secret key is required for live payments'
         })
       };
     }
 
-    // Check for mock session ID from development
-    const isMockSession = sessionId.startsWith('cs_test_mock_');
-    const isPlaceholderKey = stripeSecretKey.includes('123456789') || stripeSecretKey.length < 50;
-
-    if (isMockSession || isPlaceholderKey) {
-      console.log('⚠️ Using mock payment verification for development');
-
-      // Return mock successful verification
-      const mockResult = {
-        verified: true,
-        sessionId: sessionId,
-        amount: 19, // Mock amount
-        currency: 'usd',
-        customerEmail: 'authenticated-user@backlinkoo.com',
-        credits: 50, // Mock credits
-        mock: true
-      };
-
-      console.log(`✅ Mock payment verified: ${sessionId} - ${mockResult.customerEmail} - $${mockResult.amount}`);
-
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify(mockResult)
-      };
-    }
 
     if (!Stripe) {
       return {
