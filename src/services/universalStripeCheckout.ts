@@ -176,6 +176,7 @@ export class UniversalStripeCheckout {
 
   /**
    * Quick buy credits with predefined amounts
+   * Auto-detects authentication status and handles appropriately
    */
   public async quickBuyCredits(creditAmount: 50 | 100 | 250 | 500 | number): Promise<PaymentResult> {
     const pricing = {
@@ -187,11 +188,16 @@ export class UniversalStripeCheckout {
 
     const amount = pricing[creditAmount as keyof typeof pricing] || creditAmount * 1.40;
 
+    // Check authentication status
+    const { data: { session }, error } = await supabase.auth.getSession();
+    const isAuthenticated = !!session?.user && !error;
+
     return this.purchaseCredits({
       credits: creditAmount,
       amount: amount,
       productName: `${creditAmount} Premium Backlink Credits`,
-      isGuest: false
+      isGuest: !isAuthenticated,
+      guestEmail: isAuthenticated ? undefined : undefined // Will be handled by caller if needed
     });
   }
 
@@ -213,12 +219,16 @@ export class UniversalStripeCheckout {
   }
 
   /**
-   * Premium upgrade for existing users
+   * Premium upgrade - auto-detects authentication status
    */
   public async upgradeToPremium(plan: 'monthly' | 'yearly'): Promise<PaymentResult> {
+    // Check authentication status
+    const { data: { session }, error } = await supabase.auth.getSession();
+    const isAuthenticated = !!session?.user && !error;
+
     return this.purchaseSubscription({
       plan: plan,
-      isGuest: false
+      isGuest: !isAuthenticated
     });
   }
 

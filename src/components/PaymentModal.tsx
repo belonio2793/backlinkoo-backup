@@ -160,36 +160,29 @@ export const PaymentModal = ({ isOpen, onClose, initialCredits }: PaymentModalPr
         </DialogHeader>
 
         <div className="space-y-4">
-          {/* Guest/User Toggle */}
-          <div className="space-y-2">
-            <Label>Checkout Type</Label>
-            <RadioGroup
-              value={isGuest ? "guest" : "user"}
-              onValueChange={(value) => setIsGuest(value === "guest")}
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="user" id="user" />
-                <Label htmlFor="user">User Account</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="guest" id="guest" />
-                <Label htmlFor="guest">Guest Checkout</Label>
-              </div>
-            </RadioGroup>
-          </div>
-
-          {/* Guest Email */}
-          {isGuest && (
+          {/* User Info Display */}
+          {user ? (
             <div className="space-y-2">
-              <Label htmlFor="guestEmail">Email Address</Label>
+              <Label className="text-sm text-gray-600">Purchasing as:</Label>
+              <div className="p-2 bg-green-50 border border-green-200 rounded">
+                <p className="text-sm font-medium text-green-800">{user.email}</p>
+                <p className="text-xs text-green-600">Authenticated user</p>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <Label htmlFor="guestEmail">Email Address *</Label>
               <Input
                 id="guestEmail"
                 type="email"
                 value={guestEmail}
                 onChange={(e) => setGuestEmail(e.target.value)}
-                placeholder="Enter your email for receipt"
+                placeholder="your.email@example.com"
                 required
               />
+              <p className="text-xs text-gray-500">
+                Required for payment processing and receipt delivery
+              </p>
             </div>
           )}
 

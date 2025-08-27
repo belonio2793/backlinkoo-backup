@@ -93,13 +93,13 @@ export const ImprovedPaymentModal = ({
 
       const result = await CreditPaymentService.createCreditPayment(
         user,
-        false, // not guest since we have user
+        !user, // Set guest status based on user authentication
         user?.email,
         {
           amount: parseFloat(amount),
           credits: parseInt(credits),
           productName: `${credits} Premium Backlink Credits`,
-          isGuest: false,
+          isGuest: !user,
           guestEmail: user?.email
         }
       );
