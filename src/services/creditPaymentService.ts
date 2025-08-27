@@ -239,7 +239,7 @@ export class CreditPaymentService {
 
         for (const endpoint of endpoints) {
           try {
-            console.log(`�� Trying credit payment endpoint: ${endpoint}`);
+            console.log(`🔄 Trying credit payment endpoint: ${endpoint}`);
             console.log(`📤 Request body:`, {
               ...requestBody,
               guestEmail: finalGuestEmail ? '***masked***' : undefined
@@ -314,7 +314,7 @@ export class CreditPaymentService {
           shouldUseFallback: environment.isLocalhost || environment.hostname.includes('localhost')
         });
 
-        if (environment.isLocalhost || environment.hostname.includes('localhost')) {
+        if (environment.isDevelopment) {
           console.log('🏠 Development environment detected - creating Stripe test checkout');
 
           // For development, create a real Stripe test checkout URL
