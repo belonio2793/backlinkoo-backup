@@ -140,6 +140,8 @@ const App = () => {
                 <Toaster />
                 <GlobalErrorHandler />
                 <UnifiedModalManager />
+                {/* Resume pending checkouts after authentication */}
+                {React.createElement(require('./components/CheckoutIntentHandler').default)}
                 <BrowserRouter>
                   <PremiumUpgradeProvider>
                     <ReportSyncProvider>
