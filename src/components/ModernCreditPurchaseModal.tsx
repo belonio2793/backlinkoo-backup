@@ -200,7 +200,7 @@ export function ModernCreditPurchaseModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] max-w-6xl max-h-[90vh] overflow-y-auto">
         <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <DialogTitle className="text-xl font-semibold">Buy Credits</DialogTitle>
           <Button
@@ -226,7 +226,7 @@ export function ModernCreditPurchaseModal({
           {/* Select Credit Package */}
           <div className="space-y-3">
             <Label className="text-sm font-semibold text-gray-700">Select Credit Package</Label>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-4 gap-4">
               {creditPackages.map((pkg, index) => (
                 <Card
                   key={index}
@@ -259,7 +259,7 @@ export function ModernCreditPurchaseModal({
           {/* Custom Amount */}
           <div className="space-y-4">
             <Label className="text-sm font-semibold text-gray-700">Custom Amount</Label>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="customCredits" className="text-sm font-medium text-gray-700">
                   Number of Credits
@@ -293,7 +293,7 @@ export function ModernCreditPurchaseModal({
           {/* What's Included */}
           <div className="space-y-3">
             <Label className="text-sm font-semibold text-gray-700">What's Included</Label>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-3 gap-3">
               {featuresIncluded.map((feature, index) => (
                 <div key={index} className="flex items-center gap-2">
                   <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
