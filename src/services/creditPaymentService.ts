@@ -112,8 +112,17 @@ export class CreditPaymentService {
       if (environment.hasSupabaseFunctions) {
         console.log('🔄 Trying Supabase Edge Function for credit payment...');
         try {
+          // Get auth session for Supabase edge functions
+          const { data: session } = await supabase.auth.getSession();
+          const headers: Record<string, string> = {};
+
+          if (!finalIsGuest && session?.session?.access_token) {
+            headers['Authorization'] = `Bearer ${session.session.access_token}`;
+          }
+
           const { data: result, error: edgeError } = await supabase.functions.invoke('create-payment', {
-            body: requestBody
+            body: requestBody,
+            headers
           });
           data = result;
           error = edgeError;
