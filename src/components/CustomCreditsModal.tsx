@@ -168,6 +168,29 @@ export const CustomCreditsModal = ({
         </DialogHeader>
 
         <div className="space-y-6">
+          {/* Domain Warning */}
+          {showDomainWarning && (
+            <Alert className="border-amber-200 bg-amber-50">
+              <AlertTriangle className="h-4 w-4 text-amber-600" />
+              <AlertDescription className="text-amber-800">
+                <div className="space-y-2">
+                  <div className="font-medium">Development Server Warning</div>
+                  <div className="text-sm">
+                    You're purchasing credits on a development server. For production use, please visit{' '}
+                    <a
+                      href="https://backlinkoo.com"
+                      className="underline font-medium hover:text-amber-900"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      backlinkoo.com
+                    </a>
+                  </div>
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
+
           {/* Account Info */}
           {user && (
             <div className="space-y-2">
