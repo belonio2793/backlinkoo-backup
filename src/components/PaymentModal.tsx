@@ -112,8 +112,12 @@ export const PaymentModal = ({ isOpen, onClose, initialCredits }: PaymentModalPr
               description: "Trying alternative redirect method...",
               variant: "destructive",
             });
-            // Fallback to basic redirect
-            window.location.href = data.url;
+            // Fallback to new window
+            const fallbackWindow = window.open(data.url, 'stripe-checkout-fallback', 'width=800,height=600,scrollbars=yes,resizable=yes');
+            if (!fallbackWindow) {
+              // Only use current window redirect as last resort if popup is completely blocked
+              window.location.href = data.url;
+            }
           }
         });
       } else {
