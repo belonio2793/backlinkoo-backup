@@ -148,8 +148,8 @@ exports.handler = async (event, context) => {
     const body = JSON.parse(event.body);
     
     // Input validation
-    if (!body.amount || body.amount <= 0 || body.amount > 100000) {
-      throw new Error('Invalid amount. Must be between $0.01 and $100,000');
+    if (!body.amount || body.amount <= 0 || body.amount > 10000) {
+      throw new Error('Invalid amount. Must be between $0.01 and $10,000');
     }
     
     if (!body.productName || body.productName.length > 200) {

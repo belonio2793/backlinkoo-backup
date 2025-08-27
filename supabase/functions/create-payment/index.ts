@@ -74,8 +74,8 @@ serve(async (req) => {
     console.log("Request body:", { ...body, guestEmail: body.guestEmail ? '[REDACTED]' : undefined });
     
     // Input validation
-    if (!body.amount || body.amount <= 0 || body.amount > 1000000) {
-      throw new Error('Invalid amount');
+    if (!body.amount || body.amount <= 0 || body.amount > 10000) {
+      throw new Error('Invalid amount. Must be between $0.01 and $10,000');
     }
     
     if (!body.productName || body.productName.length > 200) {
@@ -151,7 +151,7 @@ serve(async (req) => {
             price_data: {
               currency: "usd",
               product_data: { name: productName },
-              unit_amount: amount * 100, // Convert to cents
+              unit_amount: Math.round(amount * 100), // Convert to cents
             },
             quantity: 1,
           },
@@ -166,7 +166,7 @@ serve(async (req) => {
         user_id: user?.id || null,
         email,
         stripe_session_id: session.id,
-        amount: amount * 100,
+        amount: Math.round(amount * 100),
         status: "pending",
         payment_method: "stripe",
         product_name: productName,
@@ -229,7 +229,7 @@ serve(async (req) => {
         user_id: user?.id || null,
         email,
         paypal_order_id: orderData.id,
-        amount: amount * 100,
+        amount: Math.round(amount * 100),
         status: "pending",
         payment_method: "paypal",
         product_name: productName,
