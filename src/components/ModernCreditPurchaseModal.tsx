@@ -151,26 +151,33 @@ export function ModernCreditPurchaseModal({
 
       if (result.success) {
         if (result.url) {
+          console.log('🚀 Opening checkout window:', result.url);
           CreditPaymentService.openCheckoutWindow(result.url, result.sessionId);
 
           toast({
-            title: "�� Checkout Opened Successfully",
-            description: "Complete your payment in the new window. This modal will close shortly.",
+            title: "✅ Checkout Opened Successfully",
+            description: "Complete your payment in the new window.",
           });
+
+          // Don't auto-close the modal immediately - let user complete payment first
+          if (onSuccess) {
+            onSuccess();
+          }
         } else if (result.usedFallback) {
           toast({
-            title: "�� Development Mode",
-            description: "Credit purchase simulated in development mode.",
+            title: "🧪 Development Mode",
+            description: "Test checkout opened in new window.",
           });
+
+          if (onSuccess) {
+            onSuccess();
+          }
         }
 
-        if (onSuccess) {
-          onSuccess();
-        }
-
+        // Only close the modal after a delay to let the checkout window open
         setTimeout(() => {
           onClose();
-        }, 2500);
+        }, 1000);
       } else {
         throw new Error(result.error || 'Failed to create payment session');
       }
