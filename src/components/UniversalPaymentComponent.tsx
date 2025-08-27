@@ -17,15 +17,17 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { stripeCheckout } from '@/services/universalStripeCheckout';
-import { 
-  CreditCard, 
-  Zap, 
-  ShoppingCart, 
+import { EnvironmentDetector, getPaymentMode } from '@/utils/environmentDetection';
+import {
+  CreditCard,
+  Zap,
+  ShoppingCart,
   ExternalLink,
   Loader2,
   Check,
   Star,
-  Shield
+  Shield,
+  Code
 } from 'lucide-react';
 
 interface UniversalPaymentComponentProps {
@@ -88,9 +90,9 @@ export const UniversalPaymentComponent: React.FC<UniversalPaymentComponentProps>
   ];
 
   const handleCreditPurchase = async () => {
-
     const creditsToUse = customCredits ? parseInt(customCredits) : selectedCredits;
-    
+    const paymentMode = getPaymentMode();
+
     if (!creditsToUse || creditsToUse <= 0) {
       toast({
         title: "Invalid Credits",
@@ -103,15 +105,22 @@ export const UniversalPaymentComponent: React.FC<UniversalPaymentComponentProps>
     setLoading(true);
 
     try {
+      const amount = customCredits
+        ? parseInt(customCredits) * 1.40
+        : (creditOptions.find(o => o.credits === creditsToUse)?.price || creditsToUse * 1.40);
+
       const result = await stripeCheckout.purchaseCredits({
         credits: creditsToUse,
+        amount: amount,
         isGuest: false
       });
 
       if (result.success) {
         toast({
-          title: "✅ Checkout Opened",
-          description: "Complete your purchase in the new window",
+          title: paymentMode === 'mock' ? "🎭 Mock Checkout Opened" : "✅ Checkout Opened",
+          description: paymentMode === 'mock'
+            ? "Development mode: Simulated payment window opened"
+            : "Complete your purchase in the new window",
         });
       } else {
         throw new Error(result.error || 'Failed to open checkout');
@@ -147,9 +156,18 @@ export const UniversalPaymentComponent: React.FC<UniversalPaymentComponentProps>
           <DialogTitle className="flex items-center gap-2">
             <CreditCard className="h-5 w-5" />
             Buy Credits
+            {getPaymentMode() === 'mock' && (
+              <Badge variant="secondary" className="bg-orange-100 text-orange-700 border-orange-200">
+                <Code className="h-3 w-3 mr-1" />
+                Dev Mode
+              </Badge>
+            )}
           </DialogTitle>
           <DialogDescription>
-            Purchase credits for high-quality backlink campaigns
+            {getPaymentMode() === 'mock'
+              ? "Development mode: Payments are simulated for testing"
+              : "Purchase credits for high-quality backlink campaigns"
+            }
           </DialogDescription>
         </DialogHeader>
 

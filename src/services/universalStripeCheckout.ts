@@ -2,10 +2,13 @@
  * Universal Stripe Checkout Service
  * Handles all Stripe payment flows with new window checkout
  * Supports credits, subscriptions, and premium upgrades
+ * Environment-aware: uses mock payments in development, real Stripe in production
  */
 
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { EnvironmentDetector, getPaymentEndpoint, getSubscriptionEndpoint, getPaymentMode } from '@/utils/environmentDetection';
+import { mockPaymentService } from '@/services/mockPaymentService';
 
 export interface PaymentOptions {
   amount?: number;
@@ -38,6 +41,7 @@ export class UniversalStripeCheckout {
 
   /**
    * Open Stripe checkout in a new window for credit purchases
+   * Environment-aware: uses mock payments in development
    */
   public async purchaseCredits(options: {
     credits: number;
@@ -47,6 +51,35 @@ export class UniversalStripeCheckout {
     guestEmail?: string;
   }): Promise<PaymentResult> {
     try {
+      const paymentMode = getPaymentMode();
+
+      console.log('💳 Payment Request:', {
+        mode: paymentMode,
+        environment: EnvironmentDetector.getConfig().environment,
+        credits: options.credits,
+        amount: options.amount
+      });
+
+      // Use mock service in development
+      if (paymentMode === 'mock') {
+        console.log('🎭 Using mock payment service for development');
+        const mockResult = await mockPaymentService.purchaseCredits({
+          amount: options.amount,
+          credits: options.credits,
+          productName: options.productName || `${options.credits} Backlink Credits`,
+          isGuest: options.isGuest || false,
+          guestEmail: options.guestEmail
+        });
+
+        return {
+          success: mockResult.success,
+          url: mockResult.url,
+          sessionId: mockResult.sessionId,
+          error: mockResult.error
+        };
+      }
+
+      // Use real Stripe for production/preview
       const paymentData = {
         amount: options.amount,
         credits: options.credits,
@@ -56,7 +89,10 @@ export class UniversalStripeCheckout {
         paymentMethod: 'stripe'
       };
 
-      const response = await fetch('/.netlify/functions/create-payment', {
+      const endpoint = getPaymentEndpoint();
+      console.log(`🌍 Using payment endpoint: ${endpoint}`);
+
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -74,7 +110,7 @@ export class UniversalStripeCheckout {
       if (!response.ok) {
         throw new Error(`Payment creation failed: ${response.status} - ${result.error || response.statusText}`);
       }
-      
+
       if (result.url) {
         // Open Stripe checkout in new window
         const checkoutWindow = window.open(
@@ -109,6 +145,7 @@ export class UniversalStripeCheckout {
 
   /**
    * Open Stripe checkout in a new window for subscription purchases
+   * Environment-aware: uses mock payments in development
    */
   public async purchaseSubscription(options: {
     plan: 'monthly' | 'yearly';
@@ -116,6 +153,33 @@ export class UniversalStripeCheckout {
     guestEmail?: string;
   }): Promise<PaymentResult> {
     try {
+      const paymentMode = getPaymentMode();
+
+      console.log('💳 Subscription Request:', {
+        mode: paymentMode,
+        environment: EnvironmentDetector.getConfig().environment,
+        plan: options.plan
+      });
+
+      // Use mock service in development
+      if (paymentMode === 'mock') {
+        console.log('🎭 Using mock subscription service for development');
+        const mockResult = await mockPaymentService.purchaseSubscription({
+          plan: options.plan,
+          amount: options.plan === 'yearly' ? 290 : 29,
+          isGuest: options.isGuest || false,
+          guestEmail: options.guestEmail
+        });
+
+        return {
+          success: mockResult.success,
+          url: mockResult.url,
+          sessionId: mockResult.sessionId,
+          error: mockResult.error
+        };
+      }
+
+      // Use real Stripe for production/preview
       const subscriptionData = {
         plan: options.plan,
         isGuest: options.isGuest || false,
@@ -123,7 +187,10 @@ export class UniversalStripeCheckout {
         paymentMethod: 'stripe'
       };
 
-      const response = await fetch('/.netlify/functions/create-subscription', {
+      const endpoint = getSubscriptionEndpoint();
+      console.log(`🌍 Using subscription endpoint: ${endpoint}`);
+
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -141,7 +208,7 @@ export class UniversalStripeCheckout {
       if (!response.ok) {
         throw new Error(`Subscription creation failed: ${response.status} - ${result.error || response.statusText}`);
       }
-      
+
       if (result.url) {
         // Open Stripe checkout in new window
         const checkoutWindow = window.open(
@@ -302,18 +369,24 @@ export class UniversalStripeCheckout {
 
   /**
    * Handle successful payment
+   * Environment-aware: different messages for mock vs real payments
    */
   private handlePaymentSuccess(sessionId: string): void {
+    const paymentMode = getPaymentMode();
+
     // Trigger custom event for components to listen to
     window.dispatchEvent(new CustomEvent('stripe-payment-success', {
-      detail: { sessionId }
+      detail: { sessionId, mode: paymentMode }
     }));
 
     // Show success notification
     if (typeof window !== 'undefined' && 'toast' in window) {
+      const isMock = paymentMode === 'mock';
       (window as any).toast({
-        title: 'Payment Successful!',
-        description: 'Your purchase has been completed. Credits will be added to your account shortly.',
+        title: isMock ? '🎭 Mock Payment Successful!' : 'Payment Successful!',
+        description: isMock
+          ? 'Development mode: Payment simulated successfully. In production, real credits would be added.'
+          : 'Your purchase has been completed. Credits will be added to your account shortly.',
         duration: 5000
       });
     }
@@ -342,14 +415,30 @@ export class UniversalStripeCheckout {
   }
 
   /**
-   * Test if Stripe is properly configured
+   * Test if payment system is properly configured
+   * Environment-aware: always returns true for mock mode
    */
   public async testConfiguration(): Promise<{
     configured: boolean;
     error?: string;
+    mode?: string;
   }> {
     try {
-      const response = await fetch('/.netlify/functions/create-payment', {
+      const paymentMode = getPaymentMode();
+      const config = EnvironmentDetector.getConfig();
+
+      // Mock mode is always configured
+      if (paymentMode === 'mock') {
+        return {
+          configured: true,
+          mode: 'mock',
+          error: undefined
+        };
+      }
+
+      // Test real Stripe endpoints
+      const endpoint = getPaymentEndpoint();
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -364,17 +453,22 @@ export class UniversalStripeCheckout {
       });
 
       if (response.ok) {
-        return { configured: true };
+        return {
+          configured: true,
+          mode: paymentMode
+        };
       } else {
         const errorText = await response.text();
-        return { 
-          configured: false, 
-          error: `Configuration test failed: ${response.status} - ${errorText}` 
+        return {
+          configured: false,
+          mode: paymentMode,
+          error: `Configuration test failed: ${response.status} - ${errorText}`
         };
       }
     } catch (error) {
       return {
         configured: false,
+        mode: getPaymentMode(),
         error: error instanceof Error ? error.message : 'Configuration test failed'
       };
     }
