@@ -56,20 +56,6 @@ async function createStripePayment(paymentData, email, originUrl) {
     throw new Error("STRIPE_SECRET_KEY is required and must be a valid Stripe secret key");
   }
 
-  // Check if we're using a placeholder/invalid key for development
-  const isPlaceholderKey = stripeSecretKey.includes('123456789') || stripeSecretKey.length < 50;
-
-  if (isPlaceholderKey) {
-    console.log('⚠️ Using mock Stripe response for placeholder key in development');
-    // Return mock successful payment session for development
-    const mockSessionId = `cs_test_mock_${Date.now()}_${Math.random().toString(36).substr(2, 8)}`;
-    const mockUrl = `${originUrl}/payment-success?session_id=${mockSessionId}&credits=${paymentData.credits || 0}&mock=true`;
-
-    return {
-      url: mockUrl,
-      sessionId: mockSessionId
-    };
-  }
 
   const Stripe = require('stripe');
   const stripe = new Stripe(stripeSecretKey, {
