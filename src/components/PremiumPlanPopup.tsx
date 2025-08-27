@@ -240,7 +240,12 @@ export function PremiumPlanPopup({
               title: "Popup Blocked",
               description: "Redirecting in current window...",
             });
-            window.location.href = result.url;
+            // Open Stripe checkout in new window as fallback
+            const fallbackWindow = window.open(result.url, 'stripe-checkout-fallback', 'width=800,height=600,scrollbars=yes,resizable=yes');
+            if (!fallbackWindow) {
+              // Only use current window as last resort
+              window.location.href = result.url;
+            }
           } else {
             // Close modal since checkout is opening
             onClose();
