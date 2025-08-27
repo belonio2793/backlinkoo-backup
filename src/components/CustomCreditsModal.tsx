@@ -27,9 +27,13 @@ export const CustomCreditsModal = ({
   const CREDIT_PRICE = 1.40;
   const { toast } = useToast();
   const { user } = useAuth();
-  
+
   const [credits, setCredits] = useState(() => initialCredits ? initialCredits.toString() : "");
   const [loading, setLoading] = useState(false);
+
+  // Check if we're on the production domain
+  const isProductionDomain = typeof window !== 'undefined' && window.location.hostname === 'backlinkoo.com';
+  const showDomainWarning = !isProductionDomain;
 
   // Quick credit options
   const quickOptions = [
