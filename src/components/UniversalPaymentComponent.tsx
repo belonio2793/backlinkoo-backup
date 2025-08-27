@@ -148,7 +148,7 @@ export const UniversalPaymentComponent: React.FC<UniversalPaymentComponentProps>
         </DialogTrigger>
       )}
       
-      <DialogContent className="w-[95vw] max-w-5xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] max-w-7xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <CreditCard className="h-5 w-5" />
