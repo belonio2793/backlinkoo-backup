@@ -238,9 +238,18 @@ class PaymentIntegrationService {
           };
         }
 
+        let errorMessage = data.error || `Payment creation failed: ${response.status} ${response.statusText}`;
+
+        // Handle specific Stripe account limit errors
+        if (errorMessage.includes('Must be between') && errorMessage.includes('$1') && errorMessage.includes('.00')) {
+          errorMessage = 'Your Stripe account has transaction limits. Please try a smaller amount or contact support to increase your limits.';
+        } else if (errorMessage.includes('Invalid amount')) {
+          errorMessage = 'Payment amount is invalid. Please check your selection and try again.';
+        }
+
         return {
           success: false,
-          error: data.error || `Payment creation failed: ${response.status} ${response.statusText}`
+          error: errorMessage
         };
       }
 
