@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { SEOAcademyTab } from '@/components/SEOAcademyTab';
 import { PremiumCheckoutModal } from '@/components/PremiumCheckoutModal';
 import { CompleteCourseExperience } from '@/components/CompleteCourseExperience';
+import { UniversalPaymentComponent } from '@/components/UniversalPaymentComponent';
 import {
   Crown,
   Star,
@@ -25,7 +26,8 @@ import {
   MessageSquare,
   Calendar,
   Lock,
-  Unlock
+  Unlock,
+  CreditCard
 } from 'lucide-react';
 
 interface PremiumPlanTabProps {
@@ -145,7 +147,7 @@ export function PremiumPlanTab({ isSubscribed, onUpgrade }: PremiumPlanTabProps)
               </div>
             </div>
 
-            <div className="flex gap-4">
+            <div className="flex flex-wrap gap-4">
               <Button
                 onClick={() => setActiveFeature('seo-academy')}
                 size="lg"
@@ -163,6 +165,26 @@ export function PremiumPlanTab({ isSubscribed, onUpgrade }: PremiumPlanTabProps)
                 <Infinity className="mr-2 h-5 w-5" />
                 Create Campaigns
               </Button>
+              <UniversalPaymentComponent
+                trigger={
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="border-green-300 text-green-700 bg-green-50 hover:bg-green-100 hover:text-green-800 font-semibold px-6 py-3"
+                  >
+                    <CreditCard className="mr-2 h-5 w-5" />
+                    Buy Credits
+                  </Button>
+                }
+                defaultType="credits"
+                showTrigger={true}
+                onPaymentSuccess={() => {
+                  toast({
+                    title: "Payment Successful!",
+                    description: "Your credits have been added to your account."
+                  });
+                }}
+              />
             </div>
           </div>
         </div>
@@ -205,15 +227,37 @@ export function PremiumPlanTab({ isSubscribed, onUpgrade }: PremiumPlanTabProps)
               </div>
             </div>
 
-            <Button
-              onClick={handleUpgrade}
-              size="lg"
-              className="bg-yellow-400 hover:bg-yellow-300 text-purple-900 font-semibold px-8 py-4 text-lg"
-            >
-              <Crown className="mr-2 h-5 w-5" />
-              Upgrade to Premium
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
+            <div className="flex flex-wrap gap-4">
+              <Button
+                onClick={handleUpgrade}
+                size="lg"
+                className="bg-yellow-400 hover:bg-yellow-300 text-purple-900 font-semibold px-8 py-4 text-lg"
+              >
+                <Crown className="mr-2 h-5 w-5" />
+                Upgrade to Premium
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+              <UniversalPaymentComponent
+                trigger={
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="border-green-300 text-green-700 bg-green-50 hover:bg-green-100 hover:text-green-800 font-semibold px-8 py-4 text-lg"
+                  >
+                    <CreditCard className="mr-2 h-5 w-5" />
+                    Buy Credits
+                  </Button>
+                }
+                defaultType="credits"
+                showTrigger={true}
+                onPaymentSuccess={() => {
+                  toast({
+                    title: "Payment Successful!",
+                    description: "Your credits have been added to your account."
+                  });
+                }}
+              />
+            </div>
           </div>
         </div>
       )}
