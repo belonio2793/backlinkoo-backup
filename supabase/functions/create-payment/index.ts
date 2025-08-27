@@ -253,14 +253,22 @@ serve(async (req) => {
       cause: error.cause
     });
 
-    // Provide more specific error messages
+    // Provide user-friendly error messages
     let errorMessage = error.message;
     if (error.message?.includes("STRIPE_SECRET_KEY")) {
       errorMessage = "Payment system configuration error. Please contact support.";
+    } else if (error.message?.includes("Invalid amount")) {
+      if (error.message?.includes('Must be between')) {
+        errorMessage = "Payment amount exceeds limit. Please try a smaller amount or contact support.";
+      }
+    } else if (error.message?.includes('Your account cannot currently make live charges')) {
+      errorMessage = "Account verification required. Please contact support to enable payments.";
     } else if (error.message?.includes("rate limit")) {
       errorMessage = "Too many requests. Please wait a moment and try again.";
     } else if (error.message?.includes("network") || error.message?.includes("fetch")) {
       errorMessage = "Network error. Please check your connection and try again.";
+    } else if (error.message?.includes('card') || error.message?.includes('payment_method')) {
+      errorMessage = "Payment method error. Please check your card details or try a different payment method.";
     }
 
     return new Response(JSON.stringify({
