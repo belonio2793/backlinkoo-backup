@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { CreditPaymentService } from '@/services/creditPaymentService';
-import { ImprovedPaymentModal } from '@/components/ImprovedPaymentModal';
+import { ModernCreditPurchaseModal } from '@/components/ModernCreditPurchaseModal';
 import { CreditCard, Zap } from 'lucide-react';
 
 interface BuyCreditsButtonProps {
@@ -144,7 +144,7 @@ export function BuyCreditsButton({
       </Button>
 
       {/* Payment Modal */}
-      <ImprovedPaymentModal
+      <ModernCreditPurchaseModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         initialCredits={credits}
