@@ -6,7 +6,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
@@ -16,18 +15,12 @@ import { CheckoutAuthForm } from '@/components/CheckoutAuthForm';
 import { paymentConfigService } from '@/services/paymentConfigService';
 import { paymentIntegrationService } from '@/services/paymentIntegrationService';
 import {
-  Crown,
   CreditCard,
   Shield,
   CheckCircle,
   X,
   Lock,
   Star,
-  Infinity,
-  BookOpen,
-  TrendingUp,
-  Users,
-  Target,
   Sparkles,
   Zap,
   ArrowRight,
@@ -35,36 +28,20 @@ import {
   Wallet,
   Calculator,
   DollarSign,
-  Info,
-  Calendar,
-  Clock,
-  Repeat
+  Info
 } from 'lucide-react';
 
 interface EnhancedUnifiedPaymentModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
-  defaultTab?: 'credits' | 'premium';
   initialCredits?: number;
   redirectAfterSuccess?: string;
 }
 
 type FlowStep = 'selection' | 'auth' | 'payment' | 'processing' | 'success';
-type PaymentType = 'credits' | 'premium';
 type PaymentMethod = 'stripe';
 type CheckoutType = 'user' | 'guest';
-
-interface PremiumPlan {
-  id: 'monthly' | 'yearly';
-  name: string;
-  price: number;
-  originalPrice?: number;
-  period: string;
-  savings?: number;
-  discount?: number;
-  popular?: boolean;
-}
 
 interface CreditPlan {
   id: string;
@@ -80,7 +57,6 @@ export function EnhancedUnifiedPaymentModal({
   isOpen, 
   onClose, 
   onSuccess,
-  defaultTab = 'premium',
   initialCredits,
   redirectAfterSuccess = '/dashboard'
 }: EnhancedUnifiedPaymentModalProps) {
@@ -93,12 +69,8 @@ export function EnhancedUnifiedPaymentModal({
   const [isProcessing, setIsProcessing] = useState(false);
   
   // Payment configuration
-  const [paymentType, setPaymentType] = useState<PaymentType>(defaultTab);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('stripe');
   const [checkoutType, setCheckoutType] = useState<CheckoutType>('user');
-  
-  // Premium subscription state
-  const [selectedPremiumPlan, setSelectedPremiumPlan] = useState<'monthly' | 'yearly'>('monthly');
   
   // Credits state
   const [selectedCreditPlan, setSelectedCreditPlan] = useState<string>('');
@@ -112,29 +84,6 @@ export function EnhancedUnifiedPaymentModal({
   const [availablePaymentMethods, setAvailablePaymentMethods] = useState<'stripe'[]>(['stripe']);
 
   const CREDIT_PRICE = 1.40;
-
-  // Premium plans configuration
-  const premiumPlans: Record<'monthly' | 'yearly', PremiumPlan> = {
-    monthly: {
-      id: 'monthly',
-      name: 'Monthly Plan',
-      price: 29,
-      originalPrice: 49,
-      period: 'month',
-      discount: 41,
-      popular: true
-    },
-    yearly: {
-      id: 'yearly',
-      name: 'Yearly Plan',
-      price: 290,
-      originalPrice: 588,
-      period: 'year',
-      savings: 298,
-      discount: 51,
-      popular: false
-    }
-  };
 
   // Credit plans configuration
   const creditPlans: CreditPlan[] = [
@@ -152,174 +101,56 @@ export function EnhancedUnifiedPaymentModal({
       price: 280,
       pricePerCredit: 1.40,
       popular: true,
-      savings: 'Most Popular'
+      savings: 'Best Value'
     },
     {
-      id: 'starter_300',
-      name: 'Starter 300',
-      credits: 300,
-      price: 420,
+      id: 'starter_500',
+      name: 'Starter 500',
+      credits: 500,
+      price: 700,
       pricePerCredit: 1.40,
-      savings: 'Best Value'
+      savings: 'For Agencies'
     }
-  ];
-
-  const premiumFeatures = [
-    { icon: <Infinity className="h-4 w-4" />, text: "Unlimited Backlinks" },
-    { icon: <BookOpen className="h-4 w-4" />, text: "Complete SEO Academy (50+ Lessons)" },
-    { icon: <TrendingUp className="h-4 w-4" />, text: "Advanced Analytics & Reports" },
-    { icon: <Users className="h-4 w-4" />, text: "Priority 24/7 Support" },
-    { icon: <Shield className="h-4 w-4" />, text: "White-Hat Guarantee" },
-    { icon: <Target className="h-4 w-4" />, text: "Custom Campaign Strategies" },
-    { icon: <Star className="h-4 w-4" />, text: "Professional Certifications" },
-    { icon: <Zap className="h-4 w-4" />, text: "API Access & Integrations" }
   ];
 
   const creditFeatures = [
-    'High DA backlinks',
-    'Competitive analysis', 
-    'Real-time reporting',
-    'Campaign management',
-    'Advanced targeting',
-    'Quality assurance'
+    'High-quality backlinks from DA 50+ sites',
+    'Automated content generation and placement',
+    'Real-time campaign tracking',
+    'Detailed performance reports',
+    'White-hat SEO practices guaranteed',
+    'Multi-platform content distribution'
   ];
 
-  // Reset state when modal opens/closes
-  useEffect(() => {
-    if (isOpen) {
-      setCurrentStep(isAuthenticated ? 'selection' : 'selection');
-      setIsProcessing(false);
-      setCheckoutType(isAuthenticated ? 'user' : 'user');
-
-      // Initialize available payment methods
-      const methods = paymentIntegrationService.getAvailablePaymentMethods();
-      setAvailablePaymentMethods(methods);
-
-      // Set default payment method to first available
-      if (methods.length > 0 && !methods.includes(paymentMethod)) {
-        setPaymentMethod(methods[0]);
-      }
-
-      if (initialCredits) {
-        setCustomCredits(initialCredits);
-        setShowCustomCredits(true);
-        setPaymentType('credits');
-      }
-    }
-  }, [isOpen, isAuthenticated, initialCredits, paymentMethod]);
-
-  // Helper functions
-  const calculateCustomPrice = (credits: number) => (credits * CREDIT_PRICE).toFixed(2);
-
-  const getFinalSelection = () => {
-    if (paymentType === 'premium') {
-      return {
-        type: 'premium',
-        plan: premiumPlans[selectedPremiumPlan],
-        price: premiumPlans[selectedPremiumPlan].price
-      };
-    } else {
-      if (showCustomCredits) {
-        return {
-          type: 'credits',
-          credits: customCredits,
-          price: parseFloat(calculateCustomPrice(customCredits))
-        };
-      } else {
-        const plan = creditPlans.find(p => p.id === selectedCreditPlan);
-        return plan ? {
-          type: 'credits',
-          credits: plan.credits,
-          price: plan.price
-        } : null;
-      }
-    }
+  // Calculate custom credits price
+  const calculateCustomPrice = (credits: number) => {
+    return (credits * CREDIT_PRICE).toFixed(2);
   };
 
-  // Payment processing
-  const handlePayment = async () => {
-    const selection = getFinalSelection();
-    if (!selection) {
-      toast({
-        title: "Selection Required",
-        description: "Please select a plan to continue.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (checkoutType === 'guest' && !guestEmail) {
-      toast({
-        title: "Email Required",
-        description: "Please provide an email address for guest checkout.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setIsProcessing(true);
-    setCurrentStep('processing');
-
-    try {
-      const isGuest = checkoutType === 'guest';
-      const email = isGuest ? guestEmail : user?.email;
-
-      let result;
-
-      if (selection.type === 'premium') {
-        // Handle premium subscription
-        result = await paymentIntegrationService.createSubscription(
-          selection.plan.id,
-          isGuest,
-          isGuest ? guestEmail : undefined
-        );
-      } else {
-        // Handle credit purchase
-        result = await paymentIntegrationService.createPayment(
-          selection.price,
-          selection.credits,
-          paymentMethod,
-          isGuest,
-          isGuest ? guestEmail : undefined
-        );
-      }
-
-      if (result.success && result.url) {
-        // Open payment provider in new window
-        window.open(result.url, '_blank');
-        onClose(); // Close the modal
-        return;
-      } else if (!result.success) {
-        throw new Error(result.error || 'Payment processing failed');
-      }
-
-      setCurrentStep('success');
-
-    } catch (error: any) {
-      console.error('Payment error:', {
-        message: error instanceof Error ? error.message : 'Unknown error',
-        stack: error instanceof Error ? error.stack : undefined,
-        name: error instanceof Error ? error.name : undefined,
-        code: error.code
-      });
-      toast({
-        title: "Payment Error",
-        description: error.message || "Payment processing failed. Please try again.",
-        variant: "destructive"
-      });
-      setCurrentStep('payment');
-    } finally {
-      setIsProcessing(false);
-    }
+  // Reset modal state
+  const resetModal = () => {
+    setCurrentStep('selection');
+    setSelectedCreditPlan('');
+    setShowCustomCredits(false);
+    setCustomCredits(initialCredits || 200);
+    setCheckoutType('user');
+    setGuestEmail('');
+    setIsProcessing(false);
   };
 
+  // Handle modal close
+  const handleClose = () => {
+    resetModal();
+    onClose();
+  };
+
+  // Handle continue from selection
   const handleContinue = () => {
-    const selection = getFinalSelection();
-    if (!selection) {
+    if (!getFinalSelection()) {
       toast({
-        title: "Selection Required",
-        description: "Please select a plan to continue.",
-        variant: "destructive"
+        title: 'Selection Required',
+        description: 'Please select a credit package or configure custom credits',
+        variant: 'destructive'
       });
       return;
     }
@@ -331,242 +162,264 @@ export function EnhancedUnifiedPaymentModal({
     }
   };
 
-  const handleAuthSuccess = (authenticatedUser: any) => {
+  // Handle auth success
+  const handleAuthSuccess = (user: any) => {
     setCurrentStep('payment');
   };
 
-  const handleClose = () => {
-    setCurrentStep('selection');
-    setIsProcessing(false);
-    setSelectedCreditPlan('');
-    setShowCustomCredits(false);
-    setCustomCredits(initialCredits || 200);
-    setGuestEmail('');
-    onClose();
+  // Get final selection
+  const getFinalSelection = () => {
+    if (showCustomCredits && customCredits > 0) {
+      return {
+        type: 'credits' as const,
+        credits: customCredits,
+        price: customCredits * CREDIT_PRICE,
+        plan: { name: `Custom ${customCredits} Credits`, id: 'custom' }
+      };
+    }
+
+    const plan = creditPlans.find(p => p.id === selectedCreditPlan);
+    if (plan) {
+      return {
+        type: 'credits' as const,
+        credits: plan.credits,
+        price: plan.price,
+        plan: { name: plan.name, id: plan.id }
+      };
+    }
+
+    return null;
   };
 
-  // Render functions
+  // Handle payment
+  const handlePayment = async () => {
+    const selection = getFinalSelection();
+    if (!selection) {
+      toast({
+        title: 'Error',
+        description: 'Please select a valid credit package',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    if (checkoutType === 'guest' && !guestEmail) {
+      toast({
+        title: 'Email Required',
+        description: 'Please enter your email for guest checkout',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    setCurrentStep('processing');
+    setIsProcessing(true);
+
+    try {
+      const result = await paymentIntegrationService.createPayment({
+        amount: selection.price,
+        credits: selection.credits,
+        productName: `${selection.credits} Premium Backlink Credits`,
+        type: 'credits',
+        isGuest: checkoutType === 'guest',
+        guestEmail: checkoutType === 'guest' ? guestEmail : undefined
+      });
+
+      if (result.success) {
+        setCurrentStep('success');
+        if (onSuccess) {
+          onSuccess();
+        }
+        
+        // Redirect after success
+        setTimeout(() => {
+          handleClose();
+          navigate(redirectAfterSuccess);
+        }, 2000);
+      } else {
+        throw new Error(result.error || 'Payment failed');
+      }
+    } catch (error) {
+      console.error('Payment error:', error);
+      toast({
+        title: 'Payment Error',
+        description: error instanceof Error ? error.message : 'Payment processing failed',
+        variant: 'destructive'
+      });
+      setCurrentStep('payment');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // Render selection step
   const renderSelection = () => (
     <div className="space-y-6">
       <div className="text-center space-y-3">
-        <div className="flex items-center justify-center gap-2">
-          <Sparkles className="h-8 w-8 text-primary" />
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-            Choose Your Plan
-          </h2>
-        </div>
+        <h3 className="text-2xl font-bold">Select Your Credit Package</h3>
         <p className="text-muted-foreground">
-          Select premium subscription or purchase credits for your campaigns
+          Purchase credits for high-quality backlink campaigns
         </p>
-        {user && (
-          <div className="bg-green-50 p-3 rounded-lg border border-green-200">
-            <p className="text-sm text-green-700">
-              ✅ Signed in as <strong>{user.email}</strong>
-            </p>
-          </div>
-        )}
       </div>
 
-      <Tabs value={paymentType} onValueChange={(value) => setPaymentType(value as PaymentType)}>
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="premium" className="flex items-center gap-2">
-            <Crown className="w-4 h-4" />
-            Premium Subscription
-          </TabsTrigger>
-          <TabsTrigger value="credits" className="flex items-center gap-2">
-            <CreditCard className="w-4 h-4" />
-            Credits Purchase
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="premium" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {Object.entries(premiumPlans).map(([key, plan]) => (
-              <Card 
-                key={key}
-                className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${
-                  selectedPremiumPlan === key ? 'ring-2 ring-blue-500 bg-blue-50' : ''
-                }`}
-                onClick={() => setSelectedPremiumPlan(key as 'monthly' | 'yearly')}
-              >
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg">{plan.name}</CardTitle>
-                    {plan.popular && (
-                      <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white">
-                        🔥 Popular
-                      </Badge>
-                    )}
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-bold">${plan.price}</span>
-                    <span className="text-muted-foreground">per {plan.period}</span>
-                    {plan.originalPrice && (
-                      <span className="text-sm text-muted-foreground line-through">
-                        ${plan.originalPrice}
-                      </span>
-                    )}
-                  </div>
-                  
-                  {plan.savings && (
-                    <div className="text-sm text-green-600 font-medium">
-                      Save ${plan.savings} per year ({plan.discount}% off)
-                    </div>
-                  )}
-                  
-                  {key === 'yearly' && (
-                    <div className="text-sm text-blue-600">
-                      That's just ${(plan.price / 12).toFixed(0)}/month!
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
+      {/* Checkout Type Selection */}
+      <div className="space-y-3">
+        <Label className="text-base font-medium">Checkout Type</Label>
+        <RadioGroup
+          value={checkoutType}
+          onValueChange={(value) => setCheckoutType(value as CheckoutType)}
+        >
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="user" id="user" />
+            <Label htmlFor="user">Account Checkout</Label>
+            {user && <Badge variant="secondary">{user.email}</Badge>}
           </div>
-
-          <div className="space-y-3">
-            <h3 className="font-semibold">Premium Features:</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              {premiumFeatures.map((feature, index) => (
-                <div key={index} className="flex items-center gap-2 text-sm">
-                  <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
-                  <span>{feature.text}</span>
-                </div>
-              ))}
-            </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="guest" id="guest" />
+            <Label htmlFor="guest">Guest Checkout</Label>
           </div>
-        </TabsContent>
+        </RadioGroup>
+      </div>
 
-        <TabsContent value="credits" className="space-y-4">
-          {/* Predefined Credit Plans */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {creditPlans.map((plan) => (
-              <Card 
-                key={plan.id}
-                className={`cursor-pointer transition-all border-2 ${
-                  selectedCreditPlan === plan.id 
-                    ? 'border-primary shadow-lg' 
-                    : 'border-gray-200 hover:border-primary/50'
-                } ${plan.popular ? 'ring-2 ring-primary/20' : ''}`}
-                onClick={() => {
-                  setSelectedCreditPlan(plan.id);
-                  setShowCustomCredits(false);
-                }}
-              >
-                <CardHeader className="text-center pb-4">
-                  <div className="flex items-center justify-center gap-2 mb-2">
-                    <CardTitle className="text-lg">{plan.name}</CardTitle>
-                    {plan.popular && (
-                      <Badge className="bg-primary text-white">
-                        <Star className="h-3 w-3 mr-1" />
-                        Popular
-                      </Badge>
-                    )}
-                    {plan.savings && !plan.popular && (
-                      <Badge variant="outline" className="text-green-600 border-green-300">
-                        {plan.savings}
-                      </Badge>
-                    )}
-                  </div>
-                  <div className="space-y-1">
-                    <div className="text-3xl font-bold text-primary">
-                      ${plan.price}
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      ${`${plan.pricePerCredit} per credit`}
-                    </div>
-                    <div className="text-2xl font-semibold">
-                      {`${plan.credits} Credits`}
-                    </div>
-                  </div>
-                </CardHeader>
-              </Card>
-            ))}
-          </div>
+      {/* Guest Email */}
+      {checkoutType === 'guest' && (
+        <div className="space-y-2">
+          <Label htmlFor="guestEmail">Email Address</Label>
+          <Input
+            id="guestEmail"
+            type="email"
+            value={guestEmail}
+            onChange={(e) => setGuestEmail(e.target.value)}
+            placeholder="Enter your email"
+            required
+          />
+        </div>
+      )}
 
-          <Separator />
-
-          {/* Custom Credits */}
+      {/* Predefined Credit Plans */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {creditPlans.map((plan) => (
           <Card 
+            key={plan.id}
             className={`cursor-pointer transition-all border-2 ${
-              showCustomCredits 
+              selectedCreditPlan === plan.id 
                 ? 'border-primary shadow-lg' 
                 : 'border-gray-200 hover:border-primary/50'
-            }`}
+            } ${plan.popular ? 'ring-2 ring-primary/20' : ''}`}
             onClick={() => {
-              setShowCustomCredits(true);
-              setSelectedCreditPlan('');
+              setSelectedCreditPlan(plan.id);
+              setShowCustomCredits(false);
             }}
           >
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center space-x-2">
-                  <RadioGroup value={showCustomCredits ? "custom" : ""} onValueChange={() => {}}>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="custom" id="custom" />
-                      <Label htmlFor="custom" className="sr-only">Select custom credits</Label>
-                    </div>
-                  </RadioGroup>
+            <CardHeader className="text-center pb-4">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <CardTitle className="text-lg">{plan.name}</CardTitle>
+                {plan.popular && (
+                  <Badge className="bg-primary text-white">
+                    <Star className="h-3 w-3 mr-1" />
+                    Popular
+                  </Badge>
+                )}
+                {plan.savings && !plan.popular && (
+                  <Badge variant="outline" className="text-green-600 border-green-300">
+                    {plan.savings}
+                  </Badge>
+                )}
+              </div>
+              <div className="space-y-1">
+                <div className="text-3xl font-bold text-primary">
+                  ${plan.price}
                 </div>
-                <div className="flex-1">
-                  <CardTitle className="flex items-center gap-2">
-                    <Calculator className="h-5 w-5" />
-                    Custom Credits
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground">Choose your exact credit amount</p>
+                <div className="text-sm text-muted-foreground">
+                  ${`${plan.pricePerCredit} per credit`}
+                </div>
+                <div className="text-2xl font-semibold">
+                  {`${plan.credits} Credits`}
                 </div>
               </div>
             </CardHeader>
-            
-            {showCustomCredits && (
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-3">
-                    <Label htmlFor="customCredits">Number of Credits</Label>
-                    <Input
-                      id="customCredits"
-                      type="number"
-                      min="1"
-                      max="10000"
-                      value={customCredits}
-                      onChange={(e) => setCustomCredits(parseInt(e.target.value) || 0)}
-                      placeholder="Enter credits"
-                      className="text-lg font-semibold text-center"
-                    />
-                  </div>
-                  
-                  <div className="space-y-3">
-                    <Label>Total Price</Label>
-                    <div className="p-3 bg-primary/10 rounded-lg text-center">
-                      <div className="text-2xl font-bold text-primary">
-                        ${calculateCustomPrice(customCredits)}
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        {`${customCredits} × $1.40 = $${calculateCustomPrice(customCredits)}`}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            )}
           </Card>
+        ))}
+      </div>
 
-          <div className="space-y-3">
-            <h3 className="font-semibold">Credit Features:</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              {creditFeatures.map((feature, index) => (
-                <div key={index} className="flex items-center gap-2 text-sm">
-                  <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
-                  <span>{feature}</span>
+      <Separator />
+
+      {/* Custom Credits */}
+      <Card 
+        className={`cursor-pointer transition-all border-2 ${
+          showCustomCredits 
+            ? 'border-primary shadow-lg' 
+            : 'border-gray-200 hover:border-primary/50'
+        }`}
+        onClick={() => {
+          setShowCustomCredits(true);
+          setSelectedCreditPlan('');
+        }}
+      >
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center space-x-2">
+              <RadioGroup value={showCustomCredits ? "custom" : ""} onValueChange={() => {}}>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="custom" id="custom" />
+                  <Label htmlFor="custom" className="sr-only">Select custom credits</Label>
                 </div>
-              ))}
+              </RadioGroup>
+            </div>
+            <div className="flex-1">
+              <CardTitle className="flex items-center gap-2">
+                <Calculator className="h-5 w-5" />
+                Custom Credits
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">Choose your exact credit amount</p>
             </div>
           </div>
-        </TabsContent>
-      </Tabs>
+        </CardHeader>
+        
+        {showCustomCredits && (
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-3">
+                <Label htmlFor="customCredits">Number of Credits</Label>
+                <Input
+                  id="customCredits"
+                  type="number"
+                  min="1"
+                  max="10000"
+                  value={customCredits}
+                  onChange={(e) => setCustomCredits(parseInt(e.target.value) || 0)}
+                  placeholder="Enter credits"
+                  className="text-lg font-semibold text-center"
+                />
+              </div>
+              
+              <div className="space-y-3">
+                <Label>Total Price</Label>
+                <div className="p-3 bg-primary/10 rounded-lg text-center">
+                  <div className="text-2xl font-bold text-primary">
+                    ${calculateCustomPrice(customCredits)}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {`${customCredits} × $1.40 = $${calculateCustomPrice(customCredits)}`}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        )}
+      </Card>
 
+      <div className="space-y-3">
+        <h3 className="font-semibold">Credit Features:</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          {creditFeatures.map((feature, index) => (
+            <div key={index} className="flex items-center gap-2 text-sm">
+              <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
+              <span>{feature}</span>
+            </div>
+          ))}
+        </div>
+      </div>
 
       {/* Continue Button */}
       <Button
@@ -575,21 +428,13 @@ export function EnhancedUnifiedPaymentModal({
         size="lg"
         disabled={!getFinalSelection() || (checkoutType === 'guest' && !guestEmail)}
       >
-        {paymentType === 'premium' ? (
-          <>
-            <Crown className="mr-2 h-4 w-4" />
-            Upgrade to Premium
-          </>
-        ) : (
-          <>
-            Purchase Credits
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </>
-        )}
+        Purchase Credits
+        <ArrowRight className="ml-2 h-4 w-4" />
       </Button>
     </div>
   );
 
+  // Render auth step
   const renderAuth = () => {
     const selection = getFinalSelection();
     return (
@@ -598,11 +443,10 @@ export function EnhancedUnifiedPaymentModal({
           onAuthSuccess={handleAuthSuccess}
           defaultTab="signup"
           orderSummary={selection ? {
-            credits: selection.type === 'credits' ? selection.credits : undefined,
+            credits: selection.credits,
             price: selection.price,
-            planName: selection.type === 'premium' ? selection.plan.name :
-                     (showCustomCredits ? `Custom ${customCredits} Credits` :
-                      creditPlans.find(p => p.id === selectedCreditPlan)?.name)
+            planName: showCustomCredits ? `Custom ${customCredits} Credits` :
+                     creditPlans.find(p => p.id === selectedCreditPlan)?.name
           } : undefined}
         />
 
@@ -620,6 +464,7 @@ export function EnhancedUnifiedPaymentModal({
     );
   };
 
+  // Render payment step
   const renderPayment = () => {
     const selection = getFinalSelection();
     if (!selection) return null;
@@ -629,7 +474,7 @@ export function EnhancedUnifiedPaymentModal({
         <div className="text-center space-y-3">
           <h3 className="text-2xl font-bold">Complete Your Purchase</h3>
           <p className="text-muted-foreground">
-            Review your selection and choose payment method
+            Review your selection and complete payment
           </p>
         </div>
 
@@ -643,31 +488,14 @@ export function EnhancedUnifiedPaymentModal({
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {selection.type === 'premium' ? (
-                <>
-                  <div className="flex justify-between">
-                    <span>Premium Plan ({selection.plan.name}):</span>
-                    <span className="font-semibold">${selection.plan.price}</span>
-                  </div>
-                  {selection.plan.savings && (
-                    <div className="flex justify-between text-green-600">
-                      <span>Annual Savings:</span>
-                      <span>-${selection.plan.savings}</span>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <>
-                  <div className="flex justify-between">
-                    <span>Credits:</span>
-                    <span className="font-semibold">{selection.credits}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Price per credit:</span>
-                    <span>$1.40</span>
-                  </div>
-                </>
-              )}
+              <div className="flex justify-between">
+                <span>Credits:</span>
+                <span className="font-semibold">{selection.credits}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Price per credit:</span>
+                <span>$1.40</span>
+              </div>
               <Separator />
               <div className="flex justify-between text-lg font-bold">
                 <span>Total:</span>
@@ -677,186 +505,90 @@ export function EnhancedUnifiedPaymentModal({
           </CardContent>
         </Card>
 
-        {/* Payment Method */}
-        <div className="space-y-4">
-          <Label className="text-base font-medium">Payment Method</Label>
-          {availablePaymentMethods.length === 0 ? (
-            <div className="bg-red-50 p-4 rounded-lg border border-red-200">
-              <div className="flex items-center gap-2 text-red-800">
-                <Info className="h-5 w-5" />
-                <span className="font-medium">Payment methods not configured</span>
-              </div>
-              <p className="text-sm text-red-600 mt-1">
-                Please contact support to enable payment processing.
-              </p>
-            </div>
+        {/* Payment Button */}
+        <Button
+          onClick={handlePayment}
+          className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
+          size="lg"
+          disabled={isProcessing}
+        >
+          {isProcessing ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Processing Payment...
+            </>
           ) : (
-            <RadioGroup value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as PaymentMethod)}>
-              <div className="space-y-3">
-                {availablePaymentMethods.includes('stripe') && (
-                  <div className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer"
-                       onClick={() => setPaymentMethod('stripe')}>
-                    <RadioGroupItem value="stripe" id="stripe" />
-                    <Label htmlFor="stripe" className="flex items-center gap-3 cursor-pointer flex-1">
-                      <CreditCard className="w-5 h-5" />
-                      <div>
-                        <div className="font-medium">Credit Card (Stripe)</div>
-                        <div className="text-sm text-gray-500">Secure payment with cards, Apple Pay, Google Pay</div>
-                      </div>
-                    </Label>
-                  </div>
-                )}
-
-              </div>
-            </RadioGroup>
+            <>
+              <CreditCard className="mr-2 h-4 w-4" />
+              Pay ${selection.price.toFixed(2)}
+            </>
           )}
-        </div>
+        </Button>
 
-        {/* Security Notice */}
-        <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-          <div className="flex items-center gap-3">
-            <Shield className="h-5 w-5 text-blue-600" />
-            <div>
-              <div className="font-medium text-blue-900">Secure Payment Processing</div>
-              <div className="text-sm text-blue-700">
-                Your payment is processed securely with 256-bit SSL encryption
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="space-y-3">
+        <div className="flex justify-center pt-4 border-t">
           <Button
-            onClick={handlePayment}
-            disabled={isProcessing || availablePaymentMethods.length === 0}
-            className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
-            size="lg"
-          >
-            {isProcessing ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Processing...
-              </>
-            ) : availablePaymentMethods.length === 0 ? (
-              <>
-                <X className="mr-2 h-4 w-4" />
-                Payment Not Available
-              </>
-            ) : (
-              <>
-                <Lock className="mr-2 h-4 w-4" />
-                Complete Secure Payment - ${selection.price.toFixed(2)}
-              </>
-            )}
-          </Button>
-          
-          <Button 
-            onClick={() => setCurrentStep('selection')}
             variant="outline"
-            className="w-full"
-            disabled={isProcessing}
+            onClick={() => setCurrentStep(isAuthenticated ? 'selection' : 'auth')}
+            className="flex items-center gap-2"
           >
-            Back to Selection
+            <ArrowRight className="h-4 w-4 rotate-180" />
+            Back
           </Button>
         </div>
       </div>
     );
   };
 
+  // Render processing step
   const renderProcessing = () => (
-    <div className="text-center space-y-6 py-8">
-      <div className="flex justify-center">
-        <div className="relative">
-          <Loader2 className="h-16 w-16 animate-spin text-blue-600" />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <CreditCard className="h-6 w-6 text-blue-600" />
-          </div>
-        </div>
+    <div className="text-center space-y-6 py-12">
+      <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
+        <Loader2 className="h-8 w-8 text-primary animate-spin" />
       </div>
-      
       <div className="space-y-2">
-        <h3 className="text-xl font-semibold">Processing Your Payment</h3>
+        <h3 className="text-xl font-bold">Processing Your Payment</h3>
         <p className="text-muted-foreground">
           Please wait while we process your payment...
         </p>
       </div>
-      
-      <div className="text-sm text-muted-foreground">
-        This may take a few moments. Please don't close this window.
-      </div>
     </div>
   );
 
+  // Render success step
   const renderSuccess = () => (
-    <div className="text-center space-y-6 py-8">
-      <div className="flex justify-center">
-        <div className="relative">
-          <CheckCircle className="h-16 w-16 text-green-600" />
-          <div className="absolute -top-2 -right-2">
-            <Crown className="h-8 w-8 text-yellow-500" />
-          </div>
-        </div>
+    <div className="text-center space-y-6 py-12">
+      <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+        <CheckCircle className="h-8 w-8 text-green-600" />
       </div>
-      
       <div className="space-y-2">
-        <h3 className="text-2xl font-bold text-green-600">Payment Successful!</h3>
+        <h3 className="text-xl font-bold">Payment Successful!</h3>
         <p className="text-muted-foreground">
-          Your purchase has been completed successfully.
+          Your credits have been added to your account.
         </p>
       </div>
-      
-      <div className="bg-green-50 p-4 rounded-lg space-y-2">
-        <h4 className="font-medium text-green-900">What's Next?</h4>
-        <p className="text-sm text-green-700">
-          Your account has been updated and you can now access your features.
-        </p>
-      </div>
-      
-      <Button
-        onClick={() => {
-          navigate(redirectAfterSuccess);
-          handleClose();
-          onSuccess?.();
-        }}
-        className="bg-green-600 hover:bg-green-700"
-      >
-        Go to Dashboard
-        <ArrowRight className="ml-2 h-4 w-4" />
-      </Button>
     </div>
   );
-
-  const getStepContent = () => {
-    switch (currentStep) {
-      case 'selection':
-        return renderSelection();
-      case 'auth':
-        return renderAuth();
-      case 'payment':
-        return renderPayment();
-      case 'processing':
-        return renderProcessing();
-      case 'success':
-        return renderSuccess();
-      default:
-        return renderSelection();
-    }
-  };
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-4xl max-h-[85vh] sm:max-h-[90vh] overflow-y-auto p-4 sm:p-6">
-        <DialogHeader className="pb-2">
-          <DialogTitle className="sr-only">Enhanced Payment Modal</DialogTitle>
+      <DialogContent className="w-[95vw] max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Sparkles className="h-6 w-6 text-primary" />
+            {currentStep === 'selection' && 'Buy Credits'}
+            {currentStep === 'auth' && 'Sign In or Create Account'}
+            {currentStep === 'payment' && 'Complete Purchase'}
+            {currentStep === 'processing' && 'Processing Payment'}
+            {currentStep === 'success' && 'Payment Complete'}
+          </DialogTitle>
         </DialogHeader>
 
-        <div className="overflow-y-auto">
-          {getStepContent()}
-        </div>
+        {currentStep === 'selection' && renderSelection()}
+        {currentStep === 'auth' && renderAuth()}
+        {currentStep === 'payment' && renderPayment()}
+        {currentStep === 'processing' && renderProcessing()}
+        {currentStep === 'success' && renderSuccess()}
       </DialogContent>
     </Dialog>
   );
 }
-
-export default EnhancedUnifiedPaymentModal;
