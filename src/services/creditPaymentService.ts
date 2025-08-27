@@ -392,8 +392,8 @@ export class CreditPaymentService {
       }
 
       if (error) {
-        const errorMessage = this.extractErrorMessage(error);
-        console.error('❌ Final payment error:', errorMessage);
+        const extractedErrorMessage = this.extractErrorMessage(error);
+        console.error('❌ Final payment error:', extractedErrorMessage);
         console.error('❌ Full error object:', error);
         ErrorLogger.logError('Credit payment error', error);
 
