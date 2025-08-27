@@ -29,6 +29,9 @@ export default function StripeTest() {
         {/* Integration Test */}
         <StripeIntegrationTest />
 
+        {/* Quick Payment Test */}
+        <QuickPaymentTest />
+
         {/* Debug Helper */}
         <PaymentDebugHelper />
 
