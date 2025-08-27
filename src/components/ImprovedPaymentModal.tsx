@@ -6,7 +6,8 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CreditCard, Wallet, Shield, ExternalLink } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { CreditCard, Wallet, Shield, ExternalLink, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { CreditPaymentService } from "@/services/creditPaymentService";
 import { useAuth } from "@/hooks/useAuth";
@@ -29,6 +30,10 @@ export const ImprovedPaymentModal = ({
   const [amount, setAmount] = useState(() => initialCredits ? (initialCredits * CREDIT_PRICE).toFixed(2) : "");
   const [credits, setCredits] = useState(() => initialCredits ? initialCredits.toString() : "");
   const [loading, setLoading] = useState(false);
+
+  // Check if we're on the production domain
+  const isProductionDomain = typeof window !== 'undefined' && window.location.hostname === 'backlinkoo.com';
+  const showDomainWarning = !isProductionDomain;
 
   // Credit packages
   const creditPackages = [
