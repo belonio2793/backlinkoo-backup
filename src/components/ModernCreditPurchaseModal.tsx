@@ -10,6 +10,8 @@ import { Shield, CheckCircle, CreditCard } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { CreditPaymentService } from "@/services/creditPaymentService";
+import { useAuthModal } from "@/contexts/ModalContext";
+import { setCheckoutIntent } from "@/utils/checkoutIntent";
 
 interface ModernCreditPurchaseModalProps {
   isOpen: boolean;
@@ -32,7 +34,8 @@ export function ModernCreditPurchaseModal({
 }: ModernCreditPurchaseModalProps) {
   const { toast } = useToast();
   const { user } = useAuth();
-  
+  const { openLoginModal } = useAuthModal();
+
   const [selectedPackage, setSelectedPackage] = useState<number | null>(null);
   const [customCredits, setCustomCredits] = useState("");
   const [totalPrice, setTotalPrice] = useState(0);
@@ -128,6 +131,14 @@ export function ModernCreditPurchaseModal({
       return;
     }
 
+    // Require authentication: if not signed in, store intent and open login
+    if (!user) {
+      setCheckoutIntent({ type: 'credits', credits: selection.credits, price: selection.price });
+      openLoginModal({ pendingAction: `${selection.credits} credits` });
+      toast({ title: 'Sign in required', description: 'Please sign in to continue to secure checkout.' });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -138,14 +149,13 @@ export function ModernCreditPurchaseModal({
 
       const result = await CreditPaymentService.createCreditPayment(
         user,
-        !user,
-        user?.email,
+        false,
+        undefined,
         {
           amount: selection.price,
           credits: selection.credits,
           productName: `${selection.credits} Premium Backlink Credits`,
-          isGuest: !user,
-          guestEmail: user?.email
+          isGuest: false
         }
       );
 
