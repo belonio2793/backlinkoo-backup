@@ -4,10 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CreditCard, Repeat, Wallet, Crown, Zap, Infinity, Shield, Star } from "lucide-react";
+import { CreditCard, Wallet, Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { stripePaymentService } from "@/services/stripePaymentService";
 import { useAuth } from "@/hooks/useAuth";
@@ -27,12 +26,10 @@ export const ImprovedPaymentModal = ({
   const { toast } = useToast();
   const { user } = useAuth();
   
-  // Removed paymentType state - this is now credits-only
   const [isGuest, setIsGuest] = useState(!user);
   const [guestEmail, setGuestEmail] = useState("");
   const [amount, setAmount] = useState(() => initialCredits ? (initialCredits * CREDIT_PRICE).toFixed(2) : "");
   const [credits, setCredits] = useState(() => initialCredits ? initialCredits.toString() : "");
-  // Removed selectedPlan state - no premium plans
   const [loading, setLoading] = useState(false);
 
   // Credit packages
@@ -42,9 +39,6 @@ export const ImprovedPaymentModal = ({
     { credits: 250, price: 350, popular: false, savings: 0 },
     { credits: 500, price: 700, popular: false, savings: 0 }
   ];
-
-  // Removed premium plans and features - credits-only modal
-
 
   // Update state when modal opens
   useEffect(() => {
@@ -134,62 +128,13 @@ export const ImprovedPaymentModal = ({
     }
   };
 
-  // Handle premium subscription
-  const handlePremiumPurchase = async () => {
-    if (isGuest && !guestEmail) {
-      toast({
-        title: "Error",
-        description: "Email is required for guest checkout", 
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      toast({
-        title: "🚀 Opening Checkout",
-        description: "Redirecting to secure Stripe subscription checkout...",
-      });
-
-      const result = await stripePaymentService.createSubscription({
-        plan: selectedPlan,
-        amount: premiumPlans[selectedPlan].price,
-        type: 'subscription',
-        isGuest,
-        guestEmail: isGuest ? guestEmail : undefined
-      });
-
-      if (result.success) {
-        toast({
-          title: "✅ Subscription Processing",
-          description: `Your premium ${selectedPlan} plan is being activated.`,
-        });
-        onClose();
-      } else {
-        throw new Error(result.error || 'Subscription failed');
-      }
-    } catch (error) {
-      console.error('Subscription error:', error);
-      
-      toast({
-        title: "Subscription Error",
-        description: error instanceof Error ? error.message : 'Failed to create subscription',
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <CreditCard className="h-6 w-6" />
-            Choose Your Plan
+            Buy Credits
           </DialogTitle>
         </DialogHeader>
 
@@ -206,218 +151,124 @@ export const ImprovedPaymentModal = ({
           </div>
         )}
 
-        <Tabs value={paymentType} onValueChange={(value) => setPaymentType(value as "credits" | "premium")}>
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="credits" className="flex items-center gap-2">
-              <Wallet className="w-4 h-4" />
-              Buy Credits
-            </TabsTrigger>
-            <TabsTrigger value="premium" className="flex items-center gap-2">
-              <Crown className="w-4 h-4" />
-              Premium Subscription
-            </TabsTrigger>
-          </TabsList>
+        <div className="space-y-6">
+          {/* User/Guest Toggle */}
+          <div className="space-y-3">
+            <Label className="text-base font-medium">Account Type</Label>
+            <RadioGroup
+              value={isGuest ? "guest" : "user"}
+              onValueChange={(value) => setIsGuest(value === "guest")}
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="user" id="user" />
+                <Label htmlFor="user">Logged in account</Label>
+                {user && <Badge variant="secondary">{user.email}</Badge>}
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="guest" id="guest" />
+                <Label htmlFor="guest">Guest checkout</Label>
+              </div>
+            </RadioGroup>
+          </div>
 
-          <div className="space-y-6 mt-6">
-            {/* User/Guest Toggle */}
-            <div className="space-y-3">
-              <Label className="text-base font-medium">Account Type</Label>
-              <RadioGroup
-                value={isGuest ? "guest" : "user"}
-                onValueChange={(value) => setIsGuest(value === "guest")}
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="user" id="user" />
-                  <Label htmlFor="user">Logged in account</Label>
-                  {user && <Badge variant="secondary">{user.email}</Badge>}
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="guest" id="guest" />
-                  <Label htmlFor="guest">Guest checkout</Label>
-                </div>
-              </RadioGroup>
+          {/* Guest Email */}
+          {isGuest && (
+            <div className="space-y-2">
+              <Label htmlFor="guestEmail">Email Address</Label>
+              <Input
+                id="guestEmail"
+                type="email"
+                value={guestEmail}
+                onChange={(e) => setGuestEmail(e.target.value)}
+                placeholder="Enter your email"
+                required
+              />
+            </div>
+          )}
+
+          {/* Credits Purchase Section */}
+          <div className="space-y-6">
+            {/* Credit Packages */}
+            <div className="space-y-4">
+              <Label className="text-base font-medium">Popular Packages</Label>
+              <div className="grid grid-cols-2 gap-3">
+                {creditPackages.map((pkg) => (
+                  <Card 
+                    key={pkg.credits}
+                    className={`cursor-pointer transition-all hover:shadow-md ${
+                      parseInt(credits) === pkg.credits ? 'ring-2 ring-primary' : ''
+                    } ${pkg.popular ? 'border-primary' : ''}`}
+                    onClick={() => handlePackageSelect(pkg)}
+                  >
+                    <CardHeader className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <CardTitle className="text-lg">{pkg.credits} Credits</CardTitle>
+                          <p className="text-sm text-muted-foreground">
+                            ${(pkg.price / pkg.credits).toFixed(2)} per credit
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-2xl font-bold">${pkg.price}</div>
+                          {pkg.popular && (
+                            <Badge className="mt-1">Most Popular</Badge>
+                          )}
+                        </div>
+                      </div>
+                    </CardHeader>
+                  </Card>
+                ))}
+              </div>
             </div>
 
-            {/* Guest Email */}
-            {isGuest && (
-              <div className="space-y-2">
-                <Label htmlFor="guestEmail">Email Address</Label>
-                <Input
-                  id="guestEmail"
-                  type="email"
-                  value={guestEmail}
-                  onChange={(e) => setGuestEmail(e.target.value)}
-                  placeholder="Enter your email"
-                  required
-                />
-              </div>
-            )}
-
-            <TabsContent value="credits" className="space-y-6">
-              {/* Credit Packages */}
-              <div className="space-y-4">
-                <Label className="text-base font-medium">Popular Packages</Label>
-                <div className="grid grid-cols-2 gap-3">
-                  {creditPackages.map((pkg) => (
-                    <Card 
-                      key={pkg.credits}
-                      className={`cursor-pointer transition-all hover:shadow-md ${
-                        parseInt(credits) === pkg.credits ? 'ring-2 ring-primary' : ''
-                      } ${pkg.popular ? 'border-primary' : ''}`}
-                      onClick={() => handlePackageSelect(pkg)}
-                    >
-                      <CardHeader className="p-4">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <CardTitle className="text-lg">{pkg.credits} Credits</CardTitle>
-                            <p className="text-sm text-muted-foreground">
-                              ${(pkg.price / pkg.credits).toFixed(2)} per credit
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-2xl font-bold">${pkg.price}</div>
-                            {pkg.popular && (
-                              <Badge className="mt-1">Most Popular</Badge>
-                            )}
-                          </div>
-                        </div>
-                      </CardHeader>
-                    </Card>
-                  ))}
+            {/* Custom Amount */}
+            <div className="space-y-4">
+              <Label className="text-base font-medium">Custom Amount</Label>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="credits">Number of Credits</Label>
+                  <Input
+                    id="credits"
+                    type="number"
+                    min="1"
+                    step="1"
+                    value={credits}
+                    onChange={(e) => handleCreditsChange(e.target.value)}
+                    placeholder="Enter credits"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="total">Total Amount</Label>
+                  <Input
+                    id="total"
+                    value={`$${amount}`}
+                    readOnly
+                    className="bg-muted"
+                  />
                 </div>
               </div>
+              <p className="text-sm text-muted-foreground">
+                $1.40 per credit • 1 credit = 1 premium backlink opportunity
+              </p>
+            </div>
 
-              {/* Custom Amount */}
-              <div className="space-y-4">
-                <Label className="text-base font-medium">Custom Amount</Label>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="credits">Number of Credits</Label>
-                    <Input
-                      id="credits"
-                      type="number"
-                      min="1"
-                      step="1"
-                      value={credits}
-                      onChange={(e) => handleCreditsChange(e.target.value)}
-                      placeholder="Enter credits"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="total">Total Amount</Label>
-                    <Input
-                      id="total"
-                      value={`$${amount}`}
-                      readOnly
-                      className="bg-muted"
-                    />
-                  </div>
+            <Button 
+              onClick={handleCreditPurchase} 
+              disabled={loading || !credits || parseFloat(credits) <= 0}
+              className="w-full h-12"
+              size="lg"
+            >
+              {loading ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Processing...
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  $1.40 per credit • 1 credit = 1 premium backlink opportunity
-                </p>
-              </div>
-
-              <Button 
-                onClick={handleCreditPurchase} 
-                disabled={loading || !credits || parseFloat(credits) <= 0}
-                className="w-full h-12"
-                size="lg"
-              >
-                {loading ? (
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    Processing...
-                  </div>
-                ) : (
-                  `Buy ${credits || 0} Credits for $${amount || "0.00"}`
-                )}
-              </Button>
-            </TabsContent>
-
-            <TabsContent value="premium" className="space-y-6">
-              {/* Plan Selection */}
-              <div className="space-y-4">
-                <Label className="text-base font-medium">Choose Your Plan</Label>
-                <div className="space-y-3">
-                  {Object.entries(premiumPlans).map(([key, plan]) => (
-                    <Card 
-                      key={key}
-                      className={`cursor-pointer transition-all hover:shadow-md ${
-                        selectedPlan === key ? 'ring-2 ring-primary' : ''
-                      } ${plan.popular ? 'border-primary' : ''}`}
-                      onClick={() => setSelectedPlan(key as 'monthly' | 'yearly')}
-                    >
-                      <CardHeader className="p-4">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <CardTitle className="text-lg capitalize">{key} Plan</CardTitle>
-                              {plan.popular && (
-                                <Badge className="bg-primary">Most Popular</Badge>
-                              )}
-                            </div>
-                            <p className="text-sm text-muted-foreground">
-                              Billed {plan.period}ly
-                            </p>
-                            {plan.savings && (
-                              <p className="text-sm text-green-600 font-medium">
-                                Save ${plan.savings} per year!
-                              </p>
-                            )}
-                          </div>
-                          <div className="text-right">
-                            <div className="text-2xl font-bold">${plan.price}</div>
-                            <div className="text-sm text-muted-foreground">
-                              per {plan.period}
-                            </div>
-                            {key === 'yearly' && (
-                              <div className="text-sm text-green-600">
-                                (${Math.round(plan.price / 12)}/month)
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </CardHeader>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-
-              {/* Features */}
-              <div className="space-y-3">
-                <Label className="text-base font-medium">Premium Features</Label>
-                <div className="grid grid-cols-2 gap-3">
-                  {premiumFeatures.map((feature, index) => (
-                    <div key={index} className="flex items-center gap-2">
-                      <div className="text-primary">{feature.icon}</div>
-                      <span className="text-sm">{feature.text}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <Button 
-                onClick={handlePremiumPurchase} 
-                disabled={loading}
-                className="w-full h-12"
-                size="lg"
-              >
-                {loading ? (
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    Processing...
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <Crown className="h-4 w-4" />
-                    Get Premium {selectedPlan} - ${premiumPlans[selectedPlan].price}
-                  </div>
-                )}
-              </Button>
-            </TabsContent>
+              ) : (
+                `Buy ${credits || 0} Credits for $${amount || "0.00"}`
+              )}
+            </Button>
           </div>
-        </Tabs>
+        </div>
 
         {/* Security Notice */}
         <div className="text-center text-sm text-muted-foreground border-t pt-4">
