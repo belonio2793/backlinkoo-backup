@@ -110,9 +110,14 @@ export function GuestPremiumUpsellModal({
 
           // For demo, just navigate to success page
           onOpenChange(false);
-          if (result.url) {
+        if (result.url) {
+          // Open Stripe checkout in new window
+          const checkoutWindow = window.open(result.url, 'stripe-checkout', 'width=800,height=600,scrollbars=yes,resizable=yes');
+          if (!checkoutWindow) {
+            // Fallback to current window if popup blocked
             window.location.href = result.url;
           }
+        }
 
           if (onUpgrade) {
             onUpgrade();
