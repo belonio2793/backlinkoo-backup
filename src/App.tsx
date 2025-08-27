@@ -314,11 +314,6 @@ const App = () => (
               }
             />
 
-            <Route
-              path="/test-payments"
-              element={
-              }
-            />
 
             <Route
               path="/test"
