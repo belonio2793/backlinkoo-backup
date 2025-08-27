@@ -89,7 +89,7 @@ export default function DevStripeCheckout() {
                 <div className="space-y-3">
                   <div className="text-center">
                     <h3 className="text-lg font-semibold">{productName}</h3>
-                    <p className="text-gray-600">Backlink∞ Credits</p>
+                    <p className="text-gray-600">Backlink ∞ Credits</p>
                   </div>
                   
                   <div className="flex justify-between items-center py-3 border-t border-b">

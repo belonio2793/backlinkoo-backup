@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { DirectStripeCheckout } from '@/services/directStripeCheckout';
-import { ImprovedPaymentModal } from '@/components/ImprovedPaymentModal';
+import { ModernCreditPurchaseModal } from '@/components/ModernCreditPurchaseModal';
 import { 
   CreditCard, 
   Crown, 
@@ -314,10 +314,10 @@ export function PaymentDashboard() {
       </div>
 
       {/* Payment Modal */}
-      <ImprovedPaymentModal
+      <ModernCreditPurchaseModal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        defaultTab="credits"
+        initialCredits={100}
       />
     </div>
   );
