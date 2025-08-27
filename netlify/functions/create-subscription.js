@@ -206,8 +206,9 @@ exports.handler = async (event, context) => {
     
     const { plan, isGuest = false } = body;
     let guestEmail = body.guestEmail ? sanitizeInput(body.guestEmail) : '';
+    let userEmail = body.userEmail ? sanitizeInput(body.userEmail) : '';
 
-    let email = guestEmail;
+    let email = guestEmail || userEmail;
 
     // For authenticated users, get email from Supabase auth token
     if (!isGuest && !email) {
