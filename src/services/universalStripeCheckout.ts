@@ -56,15 +56,21 @@ export class UniversalStripeCheckout {
         paymentMethod: 'stripe'
       };
 
+      console.log('🔄 Attempting Supabase Edge Function payment creation...');
       const { data: result, error } = await supabase.functions.invoke('create-payment', {
         body: paymentData
       });
 
+      console.log('📥 Supabase response:', { hasData: !!result, hasError: !!error });
+
       if (error) {
-        throw new Error(`Payment creation failed: ${error.message || JSON.stringify(error)}`);
+        const errorMessage = this.extractErrorMessage(error);
+        console.error('❌ Supabase Edge Function error:', errorMessage);
+        throw new Error(`Payment creation failed: ${errorMessage}`);
       }
 
       if (!result) {
+        console.error('❌ No result from Supabase Edge Function');
         throw new Error(`Invalid response from payment service`);
       }
       
