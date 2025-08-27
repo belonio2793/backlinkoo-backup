@@ -54,6 +54,19 @@ export function BuyCreditsButton({
     setIsLoading(true);
 
     try {
+      // If no user, prompt for email for guest checkout
+      let guestEmail = user?.email;
+      if (!user) {
+        guestEmail = window.prompt('Please enter your email address for the purchase:');
+        if (!guestEmail || !guestEmail.includes('@')) {
+          toast({
+            title: "Email Required",
+            description: "A valid email address is required to purchase credits.",
+            variant: "destructive",
+          });
+          return;
+        }
+      }
 
       const result = await CreditPaymentService.createCreditPayment(
         user, // Pass current user (can be null)
