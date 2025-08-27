@@ -10,7 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { navigateToSection, NAVIGATION_CONFIGS } from '@/utils/navigationUtils';
 import { HeaderUpgradeButton } from '@/components/PremiumUpgradeButton';
-import { UniversalPaymentComponent } from '@/components/UniversalPaymentComponent';
+import { SimpleBuyCreditsButton } from '@/components/SimpleBuyCreditsButton';
 
 interface HeaderProps {
   showHomeLink?: boolean;
@@ -177,7 +177,7 @@ export function Header({ showHomeLink = true }: HeaderProps) {
               // Authenticated user buttons
               <>
                 <HeaderUpgradeButton />
-                <UniversalPaymentComponent
+                <SimpleBuyCreditsButton
                   trigger={
                     <Button
                       variant="outline"
@@ -189,7 +189,6 @@ export function Header({ showHomeLink = true }: HeaderProps) {
                       <span className="sm:hidden">Credits</span>
                     </Button>
                   }
-                  defaultType="credits"
                   defaultCredits={100}
                 />
                 <Button
