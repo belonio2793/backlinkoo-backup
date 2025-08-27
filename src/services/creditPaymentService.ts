@@ -94,8 +94,8 @@ export class CreditPaymentService {
       amount: options.amount,
       credits: options.credits,
       productName: options.productName || `${options.credits} Premium Backlink Credits`,
-      isGuest,
-      guestEmail,
+      isGuest: finalIsGuest,
+      guestEmail: finalGuestEmail,
       paymentMethod: 'stripe'
     };
 
