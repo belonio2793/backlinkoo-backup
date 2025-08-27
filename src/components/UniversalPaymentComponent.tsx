@@ -110,7 +110,8 @@ export const UniversalPaymentComponent: React.FC<UniversalPaymentComponentProps>
         credits: creditsToUse,
         amount: amount,
         productName: `${creditsToUse} Premium Backlink Credits`,
-        isGuest: false
+        isGuest: false,
+        paymentMethod: 'stripe'
       });
 
       if (result.success) {
