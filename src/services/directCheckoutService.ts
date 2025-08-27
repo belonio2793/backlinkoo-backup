@@ -97,8 +97,10 @@ class DirectCheckoutService {
       body: JSON.stringify({
         amount,
         credits,
+        paymentMethod: 'stripe', // Required by the Netlify function
+        productName: `${credits} Backlink Credits`, // Required by the Netlify function
         isGuest: !user,
-        guestEmail: options.email || user?.email,
+        guestEmail: !user ? (options.email || 'guest@example.com') : undefined,
         successUrl: `${window.location.origin}/payment-success?type=credits&credits=${credits}`,
         cancelUrl: `${window.location.origin}${window.location.pathname}`
       })
