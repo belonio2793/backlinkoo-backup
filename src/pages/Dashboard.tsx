@@ -12,7 +12,8 @@ import { PremiumPopupProvider } from "@/components/PremiumPopupProvider";
 import { PremiumService } from "@/services/premiumService";
 import { PremiumCheckoutModal } from "@/components/PremiumCheckoutModal";
 import { PricingModal } from "@/components/PricingModal";
-import { UniversalPaymentComponent, QuickCreditButton, PremiumUpgradeButton } from "@/components/UniversalPaymentComponent";
+import { QuickCreditButton, PremiumUpgradeButton } from "@/components/UniversalPaymentComponent";
+import { SimpleBuyCreditsButton } from "@/components/SimpleBuyCreditsButton";
 import { setPremiumStatus } from "@/utils/setPremiumStatus";
 import {
   DropdownMenu,
