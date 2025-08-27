@@ -71,13 +71,13 @@ export function BuyCreditsButton({
       const result = await CreditPaymentService.createCreditPayment(
         user, // Pass current user (can be null)
         false, // Let service determine guest status
-        user?.email, // Use user email if available
+        guestEmail, // Use collected email
         {
           amount: finalAmount,
           credits,
           productName: `${credits} Premium Backlink Credits`,
-          isGuest: false,
-          guestEmail: user?.email
+          isGuest: !user,
+          guestEmail: guestEmail
         }
       );
 
