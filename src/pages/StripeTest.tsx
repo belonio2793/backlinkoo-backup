@@ -28,6 +28,9 @@ export default function StripeTest() {
         {/* Integration Test */}
         <StripeIntegrationTest />
 
+        {/* Debug Helper */}
+        <PaymentDebugHelper />
+
         {/* Payment Component Demos */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Universal Payment Component */}
