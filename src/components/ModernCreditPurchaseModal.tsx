@@ -42,7 +42,7 @@ export function ModernCreditPurchaseModal({
 
   const creditPackages: CreditPackage[] = [
     { credits: 50, price: 70, pricePerCredit: 1.40 },
-    { credits: 100, price: 140, pricePerCredit: 1.40, popular: true },
+    { credits: 100, price: 140, pricePerCredit: 1.40 },
     { credits: 250, price: 350, pricePerCredit: 1.40 },
     { credits: 500, price: 700, pricePerCredit: 1.40 }
   ];
@@ -231,19 +231,12 @@ export function ModernCreditPurchaseModal({
                 <Card
                   key={index}
                   className={`cursor-pointer transition-all border-2 ${
-                    selectedPackage === index 
-                      ? 'border-blue-500 bg-blue-50' 
+                    selectedPackage === index
+                      ? 'border-blue-500 bg-blue-50'
                       : 'border-gray-200 hover:border-blue-300'
-                  } ${pkg.popular ? 'relative' : ''}`}
+                  }`}
                   onClick={() => handlePackageSelect(index)}
                 >
-                  {pkg.popular && (
-                    <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
-                      <Badge className="bg-blue-600 text-white px-2 py-1 text-xs">
-                        🔥 Popular
-                      </Badge>
-                    </div>
-                  )}
                   <CardContent className="p-4 text-center">
                     <div className="font-semibold text-gray-900">{pkg.credits} Credits</div>
                     <div className="text-2xl font-bold text-blue-600">${pkg.price}</div>
