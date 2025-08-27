@@ -142,11 +142,17 @@ export class CreditPaymentService {
       if (error || !data) {
         console.log('🔄 Trying alternative credit payment endpoints...');
 
-        const endpoints = [
-          '/api/create-payment',
-          '/.netlify/functions/create-payment',
-          '/functions/create-payment'
-        ];
+        // Only use Netlify functions if we're actually on Netlify
+        const endpoints = environment.isNetlify
+          ? [
+              '/api/create-payment',
+              '/.netlify/functions/create-payment',
+              '/functions/create-payment'
+            ]
+          : [
+              '/api/create-payment',
+              '/functions/create-payment'
+            ];
 
         for (const endpoint of endpoints) {
           try {
