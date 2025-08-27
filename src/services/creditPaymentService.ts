@@ -101,7 +101,9 @@ export class CreditPaymentService {
 
     console.log('💳 Creating credit payment with data:', {
       ...requestBody,
-      guestEmail: guestEmail ? '***' : undefined
+      guestEmail: finalGuestEmail ? '***' : undefined,
+      user: user ? { id: user.id, email: '***' } : null,
+      finalIsGuest
     });
 
     let data = null;
