@@ -77,13 +77,12 @@ export const ImprovedPaymentModal = ({
       return;
     }
 
-
     setLoading(true);
 
     try {
       toast({
         title: "🚀 Opening Checkout",
-        description: "Redirecting to secure Stripe checkout...",
+        description: "Opening secure Stripe checkout in new window...",
       });
 
       const result = await stripePaymentService.createPayment({
@@ -96,21 +95,33 @@ export const ImprovedPaymentModal = ({
 
       if (result.success) {
         toast({
-          title: "✅ Payment Processing",
-          description: "Your payment is being processed. Credits will be added shortly.",
+          title: "✅ Checkout Opened",
+          description: "Complete your payment in the new window. This modal will close automatically.",
         });
-        onClose();
+
+        // Close modal after successful checkout window opening
+        setTimeout(() => {
+          onClose();
+        }, 2000);
       } else {
         throw new Error(result.error || 'Payment failed');
       }
     } catch (error) {
       console.error('Credit purchase error:', error);
-      
-      toast({
-        title: "Payment Error",
-        description: error instanceof Error ? error.message : 'Failed to create payment session',
-        variant: "destructive",
-      });
+
+      if (error instanceof Error && error.message.includes('popup')) {
+        toast({
+          title: "Popup Blocked",
+          description: "Please allow popups for this site and try again.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Payment Error",
+          description: error instanceof Error ? error.message : 'Failed to create payment session',
+          variant: "destructive",
+        });
+      }
     } finally {
       setLoading(false);
     }
