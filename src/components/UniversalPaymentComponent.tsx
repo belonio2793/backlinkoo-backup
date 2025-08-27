@@ -114,9 +114,26 @@ export const UniversalPaymentComponent: React.FC<UniversalPaymentComponentProps>
       });
 
       if (result.success) {
+        console.log('🚀 Universal component opening checkout:', result.url);
+
+        // Open the checkout window
+        if (result.url) {
+          const checkoutWindow = window.open(
+            result.url,
+            'stripe-checkout',
+            'width=800,height=600,scrollbars=yes,resizable=yes,toolbar=no,menubar=no'
+          );
+
+          if (!checkoutWindow) {
+            throw new Error('Failed to open checkout window. Please allow popups for this site.');
+          }
+        }
+
         toast({
           title: "✅ Checkout Opened",
-          description: "Complete your purchase in the new window",
+          description: result.usedFallback ?
+            "Development checkout opened in new window" :
+            "Complete your purchase in the new window",
         });
       } else {
         throw new Error(result.error || 'Failed to open checkout');
