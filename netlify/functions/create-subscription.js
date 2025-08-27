@@ -1,4 +1,5 @@
 const Stripe = require("stripe");
+const { createClient } = require('@supabase/supabase-js');
 
 // Rate limiting map
 const rateLimitMap = new Map();
