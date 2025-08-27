@@ -22,7 +22,6 @@ interface CreditPackage {
   credits: number;
   price: number;
   pricePerCredit: number;
-  popular?: boolean;
 }
 
 export function ModernCreditPurchaseModal({
