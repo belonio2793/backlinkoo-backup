@@ -28,6 +28,7 @@ export function BuyCreditsButton({
   showModal = true
 }: BuyCreditsButtonProps) {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
