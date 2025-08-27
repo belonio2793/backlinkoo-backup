@@ -184,7 +184,7 @@ const ToolsHeader = ({ user, currentTool }: ToolsHeaderProps) => {
 
             {/* Buy Credits Button */}
             {user && (
-              <UniversalPaymentComponent
+              <SimpleBuyCreditsButton
                 trigger={
                   <Button
                     variant="outline"
@@ -196,7 +196,6 @@ const ToolsHeader = ({ user, currentTool }: ToolsHeaderProps) => {
                     <span className="sm:hidden">Credits</span>
                   </Button>
                 }
-                defaultType="credits"
                 defaultCredits={100}
               />
             )}
