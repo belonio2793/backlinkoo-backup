@@ -119,17 +119,17 @@ class PaymentIntegrationService {
       }
 
       // Validate input
-      if (amount <= 0 || amount > 100000) {
+      if (amount <= 0 || amount > 10000) {
         return {
           success: false,
-          error: 'Invalid amount. Must be between $0.01 and $100,000'
+          error: 'Invalid amount. Must be between $0.01 and $10,000'
         };
       }
 
-      if (credits <= 0 || credits > 100000) {
+      if (credits <= 0 || credits > 7142) {
         return {
           success: false,
-          error: 'Invalid credit amount'
+          error: 'Invalid credit amount. Maximum 7,142 credits per purchase.'
         };
       }
 
