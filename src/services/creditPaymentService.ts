@@ -63,8 +63,21 @@ export class CreditPaymentService {
       return { success: false, error: 'Invalid payment amount' };
     }
 
-    if (isGuest && !guestEmail) {
-      return { success: false, error: 'Guest email required for guest payments' };
+    // Determine if this should be a guest checkout or authenticated user checkout
+    let finalIsGuest = isGuest;
+    let finalGuestEmail = guestEmail;
+
+    if (user && user.email) {
+      // If we have an authenticated user, use authenticated checkout
+      finalIsGuest = false;
+      finalGuestEmail = user.email; // Pass email as backup
+    } else if (!user && guestEmail) {
+      // If no user but we have guest email, use guest checkout
+      finalIsGuest = true;
+      finalGuestEmail = guestEmail;
+    } else {
+      // No user and no guest email - error
+      return { success: false, error: 'Email is required for payment processing' };
     }
 
     // Check Stripe configuration
