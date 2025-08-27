@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CreditCard, Wallet, Shield } from "lucide-react";
+import { CreditCard, Wallet, Shield, ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { stripePaymentService } from "@/services/stripePaymentService";
 import { useAuth } from "@/hooks/useAuth";
@@ -255,10 +255,14 @@ export const ImprovedPaymentModal = ({
         </div>
 
         {/* Security Notice */}
-        <div className="text-center text-sm text-muted-foreground border-t pt-4">
+        <div className="text-center text-sm text-muted-foreground border-t pt-4 space-y-2">
           <div className="flex items-center justify-center gap-2">
             <Shield className="h-4 w-4" />
             <span>Secured by Stripe • 256-bit SSL encryption</span>
+          </div>
+          <div className="flex items-center justify-center gap-2">
+            <ExternalLink className="h-4 w-4" />
+            <span>Checkout opens in new window for security</span>
           </div>
         </div>
       </DialogContent>
