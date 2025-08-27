@@ -351,8 +351,8 @@ export class CreditPaymentService {
 
         // If all endpoints failed, use the last error for debugging
         if (!data && lastError) {
-          const errorMessage = this.extractErrorMessage(lastError);
-          console.error('❌ All payment endpoints failed. Last error:', errorMessage);
+          const lastErrorMessage = this.extractErrorMessage(lastError);
+          console.error('❌ All payment endpoints failed. Last error:', lastErrorMessage);
           console.error('❌ Full error details:', lastError);
           error = lastError;
         }
