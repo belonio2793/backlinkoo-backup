@@ -54,33 +54,26 @@ export function BuyCreditsButton({
       }
     }
 
+    // If not authenticated, store intent and open login modal
+    if (!user) {
+      setCheckoutIntent({ type: 'credits', credits, price: finalAmount });
+      openLoginModal({ pendingAction: `${credits} credits` });
+      toast({ title: 'Sign in required', description: 'Please sign in to continue to secure checkout.' });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      // If no user, prompt for email for guest checkout
-      let guestEmail = user?.email;
-      if (!user) {
-        guestEmail = window.prompt('Please enter your email address for the purchase:');
-        if (!guestEmail || !guestEmail.includes('@')) {
-          toast({
-            title: "Email Required",
-            description: "A valid email address is required to purchase credits.",
-            variant: "destructive",
-          });
-          return;
-        }
-      }
-
       const result = await CreditPaymentService.createCreditPayment(
-        user, // Pass current user (can be null)
-        false, // Let service determine guest status
-        guestEmail, // Use collected email
+        user,
+        false,
+        undefined,
         {
           amount: finalAmount,
           credits,
           productName: `${credits} Premium Backlink Credits`,
-          isGuest: !user,
-          guestEmail: guestEmail
+          isGuest: false
         }
       );
 
