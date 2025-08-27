@@ -54,14 +54,14 @@ export function BuyCreditsButton({
     try {
 
       const result = await CreditPaymentService.createCreditPayment(
-        null, // user will be determined inside the service
-        false, // not guest for now
-        undefined,
+        null, // No user - this will be guest checkout
+        true, // isGuest since no user
+        undefined, // No guest email yet - will prompt for it
         {
           amount: finalAmount,
           credits,
           productName: `${credits} Premium Backlink Credits`,
-          isGuest: false
+          isGuest: true
         }
       );
 
