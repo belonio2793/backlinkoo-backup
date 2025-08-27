@@ -49,12 +49,14 @@ export const UniversalPaymentComponent: React.FC<UniversalPaymentComponentProps>
   const [loading, setLoading] = useState(false);
   const [selectedCredits, setSelectedCredits] = useState(defaultCredits);
   const [customCredits, setCustomCredits] = useState('');
-  const [isGuest, setIsGuest] = useState(!user);
-  const [guestEmail, setGuestEmail] = useState('');
 
+  // Auto-update pricing when credits change
   useEffect(() => {
-    setIsGuest(!user);
-  }, [user]);
+    const creditsToUse = customCredits ? parseInt(customCredits) : selectedCredits;
+    if (creditsToUse > 0) {
+      // Pricing automatically calculated and displayed
+    }
+  }, [selectedCredits, customCredits]);
 
   useEffect(() => {
     // Listen for payment success/cancel events
@@ -86,14 +88,6 @@ export const UniversalPaymentComponent: React.FC<UniversalPaymentComponentProps>
   ];
 
   const handleCreditPurchase = async () => {
-    if (isGuest && !guestEmail) {
-      toast({
-        title: "Email Required",
-        description: "Please enter your email for guest checkout",
-        variant: "destructive"
-      });
-      return;
-    }
 
     const creditsToUse = customCredits ? parseInt(customCredits) : selectedCredits;
     
@@ -111,8 +105,7 @@ export const UniversalPaymentComponent: React.FC<UniversalPaymentComponentProps>
     try {
       const result = await stripeCheckout.purchaseCredits({
         credits: creditsToUse,
-        isGuest,
-        guestEmail: isGuest ? guestEmail : undefined
+        isGuest: false
       });
 
       if (result.success) {
@@ -161,37 +154,13 @@ export const UniversalPaymentComponent: React.FC<UniversalPaymentComponentProps>
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Account Type Selection */}
-          <div className="space-y-3">
-            <Label className="text-base font-medium">Account Type</Label>
-            <RadioGroup
-              value={isGuest ? "guest" : "user"}
-              onValueChange={(value) => setIsGuest(value === "guest")}
-            >
+          {/* Account Info */}
+          {user && (
+            <div className="space-y-3">
+              <Label className="text-base font-medium">Account</Label>
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="user" id="user" />
-                <Label htmlFor="user">Account Checkout</Label>
-                {user && <Badge variant="secondary">{user.email}</Badge>}
+                <Badge variant="secondary">{user.email}</Badge>
               </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="guest" id="guest" />
-                <Label htmlFor="guest">Guest Checkout</Label>
-              </div>
-            </RadioGroup>
-          </div>
-
-          {/* Guest Email */}
-          {isGuest && (
-            <div className="space-y-2">
-              <Label htmlFor="guestEmail">Email Address</Label>
-              <Input
-                id="guestEmail"
-                type="email"
-                value={guestEmail}
-                onChange={(e) => setGuestEmail(e.target.value)}
-                placeholder="Enter your email"
-                required
-              />
             </div>
           )}
 
@@ -290,7 +259,7 @@ export const UniversalPaymentComponent: React.FC<UniversalPaymentComponentProps>
           {/* Purchase Button */}
           <Button
             onClick={handleCreditPurchase}
-            disabled={loading || (isGuest && !guestEmail) || (!selectedCredits && !customCredits)}
+            disabled={loading || (!selectedCredits && !customCredits)}
             className="w-full"
             size="lg"
           >
