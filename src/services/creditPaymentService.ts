@@ -360,7 +360,7 @@ export class CreditPaymentService {
 
       // Final fallback - use development mode credits
       if (error || !data) {
-        console.log('��� All credit payment endpoints failed, using development fallback...');
+        console.log('🔄 All credit payment endpoints failed, using development fallback...');
         console.log('🌍 Environment check:', {
           isLocalhost: environment.isLocalhost,
           hostname: environment.hostname,
@@ -392,7 +392,9 @@ export class CreditPaymentService {
       }
 
       if (error) {
-        console.error('❌ Final payment error:', error);
+        const errorMessage = this.extractErrorMessage(error);
+        console.error('❌ Final payment error:', errorMessage);
+        console.error('❌ Full error object:', error);
         ErrorLogger.logError('Credit payment error', error);
 
         // Provide more specific error messages based on the error type
