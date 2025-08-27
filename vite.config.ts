@@ -18,6 +18,5 @@ export default defineConfig({
   },
   optimizeDeps: {
     entries: ["./src/main.tsx"],
-    exclude: ["*.html", "**/test-*.html", "**/debug-*.html", "**/fix-*.html", "**/emergency-*.html"],
   },
 });
