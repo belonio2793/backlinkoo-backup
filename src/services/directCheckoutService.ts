@@ -1,7 +1,7 @@
 /**
  * Direct Checkout Service
  * Simplified payment flow that opens Stripe checkout in a new window
- * No modals, loading states, or notifications - just direct checkout
+ * Uses Supabase Edge Functions - works on all deployment platforms
  */
 
 import { supabase } from '@/integrations/supabase/client';
@@ -80,7 +80,7 @@ class DirectCheckoutService {
   }
   
   /**
-   * Create credits checkout session
+   * Create credits checkout session using Supabase Edge Functions
    */
   private static async createCreditsCheckout(
     options: DirectCheckoutOptions, 
@@ -89,54 +89,46 @@ class DirectCheckoutService {
     const credits = options.credits || 50;
     const amount = options.amount || this.getCreditsPrice(credits);
     
-    const response = await fetch('/.netlify/functions/create-payment', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
+    console.log('💳 Creating credits checkout via Supabase Edge Function');
+    
+    const { data, error } = await supabase.functions.invoke('create-payment', {
+      body: {
         amount,
         credits,
-        paymentMethod: 'stripe', // Required by the Netlify function
-        productName: `${credits} Backlink Credits`, // Required by the Netlify function
+        paymentMethod: 'stripe',
+        productName: `${credits} Backlink Credits`,
         isGuest: !user,
         guestEmail: !user ? (options.email || 'guest@example.com') : undefined,
         successUrl: `${window.location.origin}/payment-success?type=credits&credits=${credits}`,
         cancelUrl: `${window.location.origin}${window.location.pathname}`
-      })
+      }
     });
     
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Credits checkout failed:', {
-        status: response.status,
-        statusText: response.statusText,
-        error: errorText
-      });
-      throw new Error(`Failed to create credits checkout session: ${response.status} ${response.statusText} - ${errorText}`);
+    if (error) {
+      console.error('❌ Credits checkout failed:', error);
+      throw new Error(`Failed to create credits checkout session: ${error.message || JSON.stringify(error)}`);
     }
 
-    const data = await response.json();
-
-    if (!data.url) {
-      console.error('No checkout URL in response:', data);
+    if (!data || !data.url) {
+      console.error('❌ No checkout URL in response:', data);
       throw new Error('No checkout URL received from server');
     }
     
+    console.log('✅ Credits checkout URL created successfully');
     return data.url;
   }
   
   /**
-   * Create premium subscription checkout session
+   * Create premium subscription checkout session using Supabase Edge Functions
    */
   private static async createPremiumCheckout(
     options: DirectCheckoutOptions,
     user: any
   ): Promise<string> {
-    // Convert 'annual' to 'yearly' for Netlify function compatibility
+    // Convert 'annual' to 'yearly' for function compatibility
     const plan = options.plan === 'annual' ? 'yearly' : (options.plan || 'monthly');
 
-    console.log('📝 Creating premium checkout for plan:', plan);
+    console.log('💳 Creating premium checkout via Supabase Edge Function for plan:', plan);
     console.log('👤 User:', user ? 'authenticated' : 'guest');
 
     const requestBody = {
@@ -149,42 +141,21 @@ class DirectCheckoutService {
 
     console.log('📤 Request body:', requestBody);
 
-    const response = await fetch('/.netlify/functions/create-subscription', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(requestBody)
+    const { data, error } = await supabase.functions.invoke('create-subscription', {
+      body: requestBody
     });
 
-    console.log('📡 Response status:', response.status);
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('❌ Premium checkout failed:', {
-        status: response.status,
-        statusText: response.statusText,
-        error: errorText,
-        url: '/.netlify/functions/create-subscription'
-      });
-
-      // Throw a more specific error
-      if (response.status === 404) {
-        throw new Error('Payment service not available. Please try again later.');
-      }
-
-      throw new Error(`Failed to create premium checkout session: ${response.status} ${response.statusText} - ${errorText}`);
+    if (error) {
+      console.error('❌ Premium checkout failed:', error);
+      throw new Error(`Failed to create premium checkout session: ${error.message || JSON.stringify(error)}`);
     }
 
-    const data = await response.json();
-    console.log('📄 Response data:', data);
-
-    if (!data.url) {
+    if (!data || !data.url) {
       console.error('❌ No checkout URL in response:', data);
       throw new Error('No checkout URL received from server');
     }
 
-    console.log('✅ Checkout URL created successfully');
+    console.log('✅ Premium checkout URL created successfully');
     return data.url;
   }
   
@@ -192,11 +163,11 @@ class DirectCheckoutService {
    * Get price for credits (simplified pricing)
    */
   private static getCreditsPrice(credits: number): number {
-    if (credits <= 50) return 19;
-    if (credits <= 100) return 29;
-    if (credits <= 250) return 49;
-    if (credits <= 500) return 79;
-    return 99;
+    if (credits <= 50) return 70;
+    if (credits <= 100) return 140;
+    if (credits <= 250) return 350;
+    if (credits <= 500) return 700;
+    return credits * 1.40; // $1.40 per credit default
   }
   
   /**

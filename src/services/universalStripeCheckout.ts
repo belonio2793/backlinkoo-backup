@@ -56,18 +56,15 @@ export class UniversalStripeCheckout {
         paymentMethod: 'stripe'
       };
 
-      const response = await fetch('/.netlify/functions/create-payment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(paymentData)
+      const { data: result, error } = await supabase.functions.invoke('create-payment', {
+        body: paymentData
       });
 
-      let result;
-      try {
-        result = await response.json();
-      } catch (parseError) {
+      if (error) {
+        throw new Error(`Payment creation failed: ${error.message || JSON.stringify(error)}`);
+      }
+
+      if (!result) {
         throw new Error(`Invalid response from payment service: ${response.status} ${response.statusText}`);
       }
 

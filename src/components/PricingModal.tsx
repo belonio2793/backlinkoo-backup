@@ -170,28 +170,21 @@ export const PricingModal = ({
     setLoading(true);
 
     try {
-      const response = await fetch('/.netlify/functions/create-payment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      const { data, error } = await supabase.functions.invoke('create-payment', {
+        body: {
           amount: price,
           productName: `${credits} Backlink Credits`,
           credits: credits,
           isGuest: false,
           paymentMethod
-        })
+        }
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+      if (error) {
+        throw new Error(error.message || JSON.stringify(error));
       }
 
-      const data = await response.json();
-
-      if (data.url) {
+      if (data && data.url) {
         await MobilePaymentHandler.handlePaymentRedirect({
           url: data.url,
           onSuccess: () => {

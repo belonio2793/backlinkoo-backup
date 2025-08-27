@@ -1,7 +1,9 @@
 /**
  * Production Stripe Payment Service
- * Real Stripe payments only - no demo mode or fallbacks
+ * Uses Supabase Edge Functions - works on all deployment platforms
  */
+
+import { supabase } from '@/integrations/supabase/client';
 
 export interface StripePaymentOptions {
   amount: number;
@@ -34,107 +36,96 @@ class StripePaymentService {
   }
 
   /**
-   * Create payment session for credits
+   * Create payment session for credits using Supabase Edge Functions
    */
   async createPayment(options: StripePaymentOptions): Promise<StripePaymentResult> {
     try {
-      const endpoint = '/.netlify/functions/create-payment';
+      console.log('💳 Creating Stripe payment via Supabase Edge Function');
       
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      const { data, error } = await supabase.functions.invoke('create-payment', {
+        body: {
           amount: options.amount,
           productName: options.productName || `${options.credits || 0} Backlink Credits`,
-          credits: options.credits || 0,
+          credits: options.credits,
+          paymentMethod: 'stripe',
           isGuest: options.isGuest || false,
-          guestEmail: options.guestEmail,
-          paymentMethod: 'stripe'
-        })
+          guestEmail: options.guestEmail
+        }
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: `HTTP ${response.status}` }));
-        throw new Error(errorData.error || `Payment creation failed: ${response.status}`);
+      if (error) {
+        console.error('❌ Payment creation failed:', error);
+        throw new Error(`Payment API error: ${error.message || JSON.stringify(error)}`);
       }
 
-      const result = await response.json();
-      
-      if (!result.url) {
-        throw new Error('No payment URL received from server');
+      if (!data || !data.url) {
+        throw new Error('No checkout URL received from payment service');
       }
 
-      // Open checkout in new window
-      this.openCheckoutWindow(result.url, result.sessionId, 'payment');
+      console.log('✅ Payment session created successfully');
       
       return {
         success: true,
-        url: result.url,
-        sessionId: result.sessionId
+        url: data.url,
+        sessionId: data.sessionId || data.session_id
       };
-    } catch (error) {
-      console.error('Payment creation error:', error);
+
+    } catch (error: any) {
+      console.error('❌ Payment creation error:', error);
+      
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Payment creation failed'
+        error: error.message || 'Failed to create payment session'
       };
     }
   }
 
   /**
-   * Create subscription session
+   * Create subscription session using Supabase Edge Functions
    */
   async createSubscription(options: StripePaymentOptions): Promise<StripePaymentResult> {
     try {
-      const endpoint = '/.netlify/functions/create-subscription';
+      console.log('💳 Creating Stripe subscription via Supabase Edge Function');
       
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      const { data, error } = await supabase.functions.invoke('create-subscription', {
+        body: {
           plan: options.plan,
           isGuest: options.isGuest || false,
-          guestEmail: options.guestEmail,
-          paymentMethod: 'stripe'
-        })
+          guestEmail: options.guestEmail
+        }
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: `HTTP ${response.status}` }));
-        throw new Error(errorData.error || `Subscription creation failed: ${response.status}`);
+      if (error) {
+        console.error('❌ Subscription creation failed:', error);
+        throw new Error(`Subscription API error: ${error.message || JSON.stringify(error)}`);
       }
 
-      const result = await response.json();
-      
-      if (!result.url) {
-        throw new Error('No subscription URL received from server');
+      if (!data || !data.url) {
+        throw new Error('No checkout URL received from subscription service');
       }
 
-      // Open checkout in new window
-      this.openCheckoutWindow(result.url, result.sessionId, 'subscription');
+      console.log('✅ Subscription session created successfully');
       
       return {
         success: true,
-        url: result.url,
-        sessionId: result.sessionId
+        url: data.url,
+        sessionId: data.sessionId || data.session_id
       };
-    } catch (error) {
-      console.error('Subscription creation error:', error);
+
+    } catch (error: any) {
+      console.error('❌ Subscription creation error:', error);
+      
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Subscription creation failed'
+        error: error.message || 'Failed to create subscription session'
       };
     }
   }
 
   /**
-   * Open Stripe checkout in new window
+   * Open payment in new window
    */
-  private openCheckoutWindow(url: string, sessionId: string, type: 'payment' | 'subscription'): void {
+  openCheckoutWindow(url: string, sessionId?: string): void {
     const checkoutWindow = window.open(
       url,
       'stripe-checkout',
@@ -142,148 +133,76 @@ class StripePaymentService {
     );
 
     if (!checkoutWindow) {
-      // Fallback to current window if popup blocked
+      console.warn('⚠️ Popup blocked, redirecting current window');
       window.location.href = url;
-      return;
-    }
-
-    // Monitor window for completion
-    this.monitorCheckoutWindow(checkoutWindow, sessionId, type);
-  }
-
-  /**
-   * Monitor checkout window for completion
-   */
-  private monitorCheckoutWindow(checkoutWindow: Window, sessionId: string, type: 'payment' | 'subscription'): void {
-    const checkInterval = setInterval(() => {
-      if (checkoutWindow.closed) {
-        clearInterval(checkInterval);
-        
-        // Check payment status
-        setTimeout(() => {
-          this.handleCheckoutComplete(sessionId, type);
-        }, 1000);
-      }
-    }, 1000);
-
-    // Auto-cleanup after 30 minutes
-    setTimeout(() => {
-      clearInterval(checkInterval);
-      if (!checkoutWindow.closed) {
-        checkoutWindow.close();
-      }
-    }, 30 * 60 * 1000);
-  }
-
-  /**
-   * Handle checkout completion
-   */
-  private async handleCheckoutComplete(sessionId: string, type: 'payment' | 'subscription'): Promise<void> {
-    try {
-      // Verify payment status
-      const response = await fetch(`/.netlify/functions/verify-payment?session_id=${sessionId}`);
-      
-      if (response.ok) {
-        const result = await response.json();
-        if (result.success) {
-          this.showSuccessNotification(type);
-          // Refresh page to show updated status
-          setTimeout(() => window.location.reload(), 2000);
-        } else {
-          this.showCancelledNotification();
-        }
-      } else {
-        this.showCancelledNotification();
-      }
-    } catch (error) {
-      console.error('Payment verification failed:', error);
-      this.showCancelledNotification();
-    }
-  }
-
-  /**
-   * Show success notification
-   */
-  private showSuccessNotification(type: 'payment' | 'subscription'): void {
-    const message = type === 'payment' 
-      ? 'Payment successful! Credits will be added to your account.'
-      : 'Subscription activated! Premium features are now available.';
-
-    // Use toast if available
-    if (typeof window !== 'undefined' && 'toast' in window) {
-      (window as any).toast({
-        title: '✅ Success!',
-        description: message,
-        duration: 5000
-      });
     } else {
-      alert(message);
+      console.log('✅ Checkout window opened');
     }
-
-    // Dispatch custom event
-    window.dispatchEvent(new CustomEvent(`stripe-${type}-success`, {
-      detail: { type, timestamp: Date.now() }
-    }));
   }
 
   /**
-   * Show cancelled notification
-   */
-  private showCancelledNotification(): void {
-    // Use toast if available
-    if (typeof window !== 'undefined' && 'toast' in window) {
-      (window as any).toast({
-        title: 'Payment Cancelled',
-        description: 'Your payment was cancelled. No charges were made.',
-        variant: 'secondary'
-      });
-    }
-
-    // Dispatch custom event
-    window.dispatchEvent(new CustomEvent('stripe-payment-cancelled'));
-  }
-
-  /**
-   * Quick credit purchase presets
+   * Quick purchase with preset amounts
    */
   async quickPurchase(credits: 50 | 100 | 250 | 500, guestEmail?: string): Promise<StripePaymentResult> {
-    const pricing = {
-      50: 70,    // $1.40 per credit
-      100: 140,  // $1.40 per credit
-      250: 350,  // $1.40 per credit
-      500: 700   // $1.40 per credit
-    };
-
-    return this.createPayment({
-      amount: pricing[credits],
+    const amount = this.getCreditsPrice(credits);
+    
+    const result = await this.createPayment({
+      amount,
       credits,
-      productName: `${credits} Premium Backlink Credits`,
+      productName: `${credits} Backlink Credits`,
       type: 'credits',
-      isGuest: !!guestEmail,
+      isGuest: !guestEmail,
       guestEmail
     });
+
+    if (result.success && result.url) {
+      this.openCheckoutWindow(result.url, result.sessionId);
+    }
+
+    return result;
   }
 
   /**
-   * Premium subscription purchase
+   * Purchase premium subscription
    */
   async purchasePremium(plan: 'monthly' | 'yearly', guestEmail?: string): Promise<StripePaymentResult> {
-    return this.createSubscription({
+    const result = await this.createSubscription({
       plan,
-      amount: plan === 'monthly' ? 29 : 290,
       type: 'subscription',
-      isGuest: !!guestEmail,
+      amount: plan === 'monthly' ? 29 : 290,
+      isGuest: !guestEmail,
       guestEmail
     });
+
+    if (result.success && result.url) {
+      this.openCheckoutWindow(result.url, result.sessionId);
+    }
+
+    return result;
+  }
+
+  /**
+   * Get pricing for credit packages
+   */
+  private getCreditsPrice(credits: number): number {
+    switch (credits) {
+      case 50: return 70;
+      case 100: return 140;
+      case 250: return 350;
+      case 500: return 700;
+      default: return credits * 1.40; // $1.40 per credit
+    }
   }
 
   /**
    * Get service status
    */
-  getStatus(): { configured: boolean; mode: string } {
+  getStatus() {
     return {
-      configured: !!this.publishableKey && this.publishableKey.startsWith('pk_'),
-      mode: 'production'
+      configured: !!this.publishableKey,
+      publishableKey: this.publishableKey ? `${this.publishableKey.substring(0, 20)}...` : null,
+      isLive: this.publishableKey?.includes('live') || false,
+      isTest: this.publishableKey?.includes('test') || false
     };
   }
 }
@@ -291,13 +210,14 @@ class StripePaymentService {
 // Export singleton instance
 export const stripePaymentService = new StripePaymentService();
 
-// Export convenience functions
+// Convenience methods
 export const buyCredits = (credits: number, amount: number, guestEmail?: string) =>
   stripePaymentService.createPayment({ 
     amount, 
     credits, 
-    type: 'credits', 
-    isGuest: !!guestEmail, 
+    type: 'credits',
+    productName: `${credits} Backlink Credits`,
+    isGuest: !!guestEmail,
     guestEmail 
   });
 

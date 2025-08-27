@@ -49,6 +49,7 @@ const LazyPrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const LazyNotFound = lazy(() => import("./pages/NotFound"));
 const LazyTwitterAdGenerator = lazy(() => import("./pages/TwitterAdGenerator"));
 const LazyAffiliate = lazy(() => import("./pages/Affiliate"));
+const LazyPaymentTest = lazy(() => import("./pages/PaymentTest"));
 const LazyDomainsPage = lazy(() => import("./pages/DomainsPage"));
 const LazyEnhancedDomainsPage = lazy(() => import("./pages/EnhancedDomainsPage"));
 const LazyNetlifyTest = lazy(() => import("./pages/NetlifyTest"));
@@ -388,6 +389,14 @@ const App = () => {
               element={
                 <Suspense fallback={<LoadingSpinner />}>
                   <LazySubscriptionCancelled />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/payment-test"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyPaymentTest />
                 </Suspense>
               }
             />
