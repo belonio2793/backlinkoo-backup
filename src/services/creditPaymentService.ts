@@ -191,9 +191,15 @@ export class CreditPaymentService {
               '/functions/create-payment'
             ];
 
+        let lastError = null;
+
         for (const endpoint of endpoints) {
           try {
             console.log(`🔄 Trying credit payment endpoint: ${endpoint}`);
+            console.log(`📤 Request body:`, {
+              ...requestBody,
+              guestEmail: finalGuestEmail ? '***masked***' : undefined
+            });
 
             // Prepare headers
             const headers: Record<string, string> = {
@@ -205,6 +211,7 @@ export class CreditPaymentService {
               const { data: session } = await supabase.auth.getSession();
               if (session?.session?.access_token) {
                 headers['Authorization'] = `Bearer ${session.session.access_token}`;
+                console.log('🔐 Added authorization header');
               }
             }
 
@@ -214,20 +221,43 @@ export class CreditPaymentService {
               body: JSON.stringify(requestBody)
             });
 
+            console.log(`📥 Response status: ${response.status} ${response.statusText}`);
+
             if (response.ok) {
               const result = await response.json();
+              console.log(`✅ Success response from ${endpoint}:`, {
+                hasUrl: !!result.url,
+                hasSessionId: !!result.sessionId,
+                keys: Object.keys(result)
+              });
               data = result;
               error = null;
-              console.log(`✅ Credit payment endpoint succeeded: ${endpoint}`);
               break;
             } else {
               const errorText = await response.text();
-              console.warn(`⚠️ Endpoint ${endpoint} returned ${response.status}: ${errorText}`);
+              lastError = {
+                endpoint,
+                status: response.status,
+                statusText: response.statusText,
+                body: errorText
+              };
+              console.warn(`⚠️ Endpoint ${endpoint} failed:`, lastError);
             }
           } catch (fetchError) {
-            console.warn(`⚠️ Endpoint ${endpoint} failed:`, fetchError);
+            lastError = {
+              endpoint,
+              error: fetchError instanceof Error ? fetchError.message : String(fetchError),
+              type: 'fetch_error'
+            };
+            console.warn(`⚠️ Network error for ${endpoint}:`, lastError);
             continue;
           }
+        }
+
+        // If all endpoints failed, use the last error for debugging
+        if (!data && lastError) {
+          console.error('❌ All payment endpoints failed. Last error:', lastError);
+          error = lastError;
         }
       }
 
