@@ -3,6 +3,7 @@ import { StripeIntegrationTest } from '@/components/StripeIntegrationTest';
 import { PaymentDebugHelper } from '@/components/PaymentDebugHelper';
 import { QuickPaymentTest } from '@/components/QuickPaymentTest';
 import { ErrorDebugger } from '@/components/ErrorDebugger';
+import { ErrorSerializationTest } from '@/components/ErrorSerializationTest';
 import { UniversalPaymentComponent } from '@/components/UniversalPaymentComponent';
 import { ModernCreditPurchaseModal } from '@/components/ModernCreditPurchaseModal';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
