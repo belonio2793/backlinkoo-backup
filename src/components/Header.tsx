@@ -177,7 +177,7 @@ export function Header({ showHomeLink = true }: HeaderProps) {
               // Authenticated user buttons
               <>
                 <HeaderUpgradeButton />
-                <UniversalPaymentComponent
+                <SimpleBuyCreditsButton
                   trigger={
                     <Button
                       variant="outline"
@@ -189,7 +189,6 @@ export function Header({ showHomeLink = true }: HeaderProps) {
                       <span className="sm:hidden">Credits</span>
                     </Button>
                   }
-                  defaultType="credits"
                   defaultCredits={100}
                 />
                 <Button
