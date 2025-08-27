@@ -144,12 +144,17 @@ export function StreamlinedPremiumCheckout({
         );
 
         if (!checkoutWindow) {
-          // Popup blocked - fallback to current window
+          // Popup blocked - try alternative new window approach first
           toast({
             title: "Popup Blocked",
-            description: "Redirecting in current window...",
+            description: "Opening in new window...",
           });
-          window.location.href = result.url;
+          // Open Stripe checkout in new window as fallback
+          const fallbackWindow = window.open(result.url, 'stripe-checkout-fallback', 'width=800,height=600,scrollbars=yes,resizable=yes');
+          if (!fallbackWindow) {
+            // Only use current window as last resort
+            window.location.href = result.url;
+          }
         } else {
           // Close modal since checkout is opening
           onClose();
@@ -173,7 +178,11 @@ export function StreamlinedPremiumCheckout({
             );
 
             if (!fallbackWindow) {
-              window.location.href = fallbackResult.url;
+              // Try one more new window attempt before current window
+              const lastResortWindow = window.open(fallbackResult.url, 'stripe-checkout-last', 'width=800,height=600,scrollbars=yes,resizable=yes');
+              if (!lastResortWindow) {
+                window.location.href = fallbackResult.url;
+              }
             } else {
               onClose();
             }

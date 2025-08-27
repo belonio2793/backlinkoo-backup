@@ -123,27 +123,63 @@ serve(async (req) => {
     const { priceId, isGuest = false } = body;
     const tier = sanitizeInput(body.tier);
     let guestEmail = body.guestEmail ? sanitizeInput(body.guestEmail) : '';
-    
-    let user = null;
-    let email = guestEmail;
+    let userEmail = body.userEmail ? sanitizeInput(body.userEmail) : '';
 
+    let user = null;
+    let email = '';
+
+    // For non-guest users, try to get email from auth token
     if (!isGuest) {
       const authHeader = req.headers.get("Authorization");
-      if (!authHeader) throw new Error("No authorization header provided");
-      
-      const token = authHeader.replace("Bearer ", "");
-      const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
-      if (userError || !userData.user?.email) {
-        throw new Error("User not authenticated");
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        try {
+          const token = authHeader.replace("Bearer ", "");
+          const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
+          if (!userError && userData.user?.email) {
+            user = userData.user;
+            email = user.email;
+            console.log('✅ Extracted email from auth token:', email);
+          } else {
+            console.warn('⚠️ Failed to get user from auth token:', userError?.message);
+          }
+        } catch (authError) {
+          console.warn('⚠️ Auth token processing failed:', authError);
+        }
       }
-      user = userData.user;
-      email = user.email;
+
+      // Fallback to provided userEmail if auth failed
+      if (!email && userEmail) {
+        email = userEmail;
+        console.log('📧 Using provided userEmail:', email);
+      }
+    } else {
+      // For guest users, use the provided guest email
+      email = guestEmail;
+      console.log('👤 Using guest email:', email);
     }
 
+    // Final validation
     if (!email) {
-      console.error("Email is required for subscription");
+      console.error("❌ Email is required for subscription. isGuest:", isGuest, "guestEmail:", guestEmail, "userEmail:", userEmail);
       return new Response(
-        JSON.stringify({ error: "Email is required for subscription" }),
+        JSON.stringify({
+          error: "Email is required for subscription",
+          details: {
+            isGuest,
+            hasGuestEmail: !!guestEmail,
+            hasUserEmail: !!userEmail,
+            hasAuthHeader: !!req.headers.get("Authorization")
+          }
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Validate email format
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      console.error("❌ Invalid email format:", email);
+      return new Response(
+        JSON.stringify({ error: "Invalid email format" }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
