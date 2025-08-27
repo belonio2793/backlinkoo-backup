@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,9 +7,10 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CreditCard, Wallet, Shield } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { CreditCard, Wallet, Shield, ExternalLink, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { stripePaymentService } from "@/services/stripePaymentService";
+import { CreditPaymentService } from "@/services/creditPaymentService";
 import { useAuth } from "@/hooks/useAuth";
 
 interface ImprovedPaymentModalProps {
@@ -29,6 +31,10 @@ export const ImprovedPaymentModal = ({
   const [amount, setAmount] = useState(() => initialCredits ? (initialCredits * CREDIT_PRICE).toFixed(2) : "");
   const [credits, setCredits] = useState(() => initialCredits ? initialCredits.toString() : "");
   const [loading, setLoading] = useState(false);
+
+  // Check if we're on the production domain
+  const isProductionDomain = typeof window !== 'undefined' && window.location.hostname === 'backlinkoo.com';
+  const showDomainWarning = !isProductionDomain;
 
   // Credit packages
   const creditPackages = [
@@ -77,40 +83,66 @@ export const ImprovedPaymentModal = ({
       return;
     }
 
-
     setLoading(true);
 
     try {
       toast({
         title: "🚀 Opening Checkout",
-        description: "Redirecting to secure Stripe checkout...",
+        description: "Opening secure Stripe checkout in new window...",
       });
 
-      const result = await stripePaymentService.createPayment({
-        amount: parseFloat(amount),
-        credits: parseInt(credits),
-        productName: `${credits} Premium Backlink Credits`,
-        type: 'credits',
-        isGuest: false
-      });
+      const result = await CreditPaymentService.createCreditPayment(
+        user,
+        false, // not guest since we have user
+        user?.email,
+        {
+          amount: parseFloat(amount),
+          credits: parseInt(credits),
+          productName: `${credits} Premium Backlink Credits`,
+          isGuest: false,
+          guestEmail: user?.email
+        }
+      );
 
       if (result.success) {
-        toast({
-          title: "✅ Payment Processing",
-          description: "Your payment is being processed. Credits will be added shortly.",
-        });
-        onClose();
+        if (result.url) {
+          // Open checkout in new window
+          CreditPaymentService.openCheckoutWindow(result.url, result.sessionId);
+
+          toast({
+            title: "✅ Checkout Opened",
+            description: "Complete your payment in the new window. This modal will close automatically.",
+          });
+        } else if (result.usedFallback) {
+          toast({
+            title: "✅ Development Mode",
+            description: "Credit purchase simulated in development mode.",
+          });
+        }
+
+        // Close modal after successful checkout window opening
+        setTimeout(() => {
+          onClose();
+        }, 2000);
       } else {
         throw new Error(result.error || 'Payment failed');
       }
     } catch (error) {
       console.error('Credit purchase error:', error);
-      
-      toast({
-        title: "Payment Error",
-        description: error instanceof Error ? error.message : 'Failed to create payment session',
-        variant: "destructive",
-      });
+
+      if (error instanceof Error && error.message.includes('popup')) {
+        toast({
+          title: "Popup Blocked",
+          description: "Please allow popups for this site and try again.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Payment Error",
+          description: error instanceof Error ? error.message : 'Failed to create payment session',
+          variant: "destructive",
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -126,8 +158,31 @@ export const ImprovedPaymentModal = ({
           </DialogTitle>
         </DialogHeader>
 
+        {/* Domain Warning */}
+        {showDomainWarning && (
+          <Alert className="border-amber-200 bg-amber-50">
+            <AlertTriangle className="h-4 w-4 text-amber-600" />
+            <AlertDescription className="text-amber-800">
+              <div className="space-y-2">
+                <div className="font-medium">Development Server Warning</div>
+                <div className="text-sm">
+                  You're purchasing credits on a development server. For production use, please visit{' '}
+                  <a
+                    href="https://backlinkoo.com"
+                    className="underline font-medium hover:text-amber-900"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    backlinkoo.com
+                  </a>
+                </div>
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Configuration Status */}
-        {!stripePaymentService.getStatus().configured && (
+        {!import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY?.startsWith('pk_') && (
           <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
             <div className="flex items-center gap-2 text-yellow-800">
               <Shield className="h-4 w-4" />
@@ -214,8 +269,8 @@ export const ImprovedPaymentModal = ({
               </p>
             </div>
 
-            <Button 
-              onClick={handleCreditPurchase} 
+            <Button
+              onClick={handleCreditPurchase}
               disabled={loading || !credits || parseFloat(credits) <= 0}
               className="w-full h-12"
               size="lg"
@@ -223,20 +278,35 @@ export const ImprovedPaymentModal = ({
               {loading ? (
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Processing...
+                  Opening Checkout...
                 </div>
               ) : (
-                `Buy ${credits || 0} Credits for $${amount || "0.00"}`
+                <div className="flex items-center gap-2">
+                  <CreditCard className="h-4 w-4" />
+                  Buy {credits || 0} Credits for ${amount || "0.00"}
+                </div>
               )}
             </Button>
+
+            {/* New Window Notice */}
+            <div className="text-center text-sm text-muted-foreground">
+              <div className="flex items-center justify-center gap-2">
+                <Shield className="h-4 w-4" />
+                <span>Opens secure Stripe checkout in new window</span>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Security Notice */}
-        <div className="text-center text-sm text-muted-foreground border-t pt-4">
+        <div className="text-center text-sm text-muted-foreground border-t pt-4 space-y-2">
           <div className="flex items-center justify-center gap-2">
             <Shield className="h-4 w-4" />
             <span>Secured by Stripe • 256-bit SSL encryption</span>
+          </div>
+          <div className="flex items-center justify-center gap-2">
+            <ExternalLink className="h-4 w-4" />
+            <span>Checkout opens in new window for security</span>
           </div>
         </div>
       </DialogContent>

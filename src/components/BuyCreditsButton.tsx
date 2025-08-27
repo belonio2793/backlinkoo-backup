@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { stripePaymentService } from '@/services/stripePaymentService';
+import { useAuth } from '@/hooks/useAuth';
+import { CreditPaymentService } from '@/services/creditPaymentService';
 import { ImprovedPaymentModal } from '@/components/ImprovedPaymentModal';
 import { CreditCard, Zap } from 'lucide-react';
 
@@ -27,31 +28,74 @@ export function BuyCreditsButton({
   showModal = true
 }: BuyCreditsButtonProps) {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   // Calculate amount if not provided
   const finalAmount = amount || credits * 1.40;
 
+  // Check if we're on production domain
+  const isProductionDomain = typeof window !== 'undefined' && window.location.hostname === 'backlinkoo.com';
+
   // Handle direct purchase (quick buy)
   const handleQuickBuy = async () => {
+    // Show warning if not on production domain
+    if (!isProductionDomain) {
+      const proceed = window.confirm(
+        `Development Server Warning\n\nYou're purchasing credits on a development server. For production use, please visit backlinkoo.com\n\nDo you want to continue with the test purchase?`
+      );
+
+      if (!proceed) {
+        return;
+      }
+    }
+
     setIsLoading(true);
 
     try {
+      // If no user, prompt for email for guest checkout
+      let guestEmail = user?.email;
+      if (!user) {
+        guestEmail = window.prompt('Please enter your email address for the purchase:');
+        if (!guestEmail || !guestEmail.includes('@')) {
+          toast({
+            title: "Email Required",
+            description: "A valid email address is required to purchase credits.",
+            variant: "destructive",
+          });
+          return;
+        }
+      }
 
-      const result = await stripePaymentService.createPayment({
-        amount: finalAmount,
-        credits,
-        productName: `${credits} Premium Backlink Credits`,
-        type: 'credits',
-        isGuest: false
-      });
+      const result = await CreditPaymentService.createCreditPayment(
+        user, // Pass current user (can be null)
+        false, // Let service determine guest status
+        guestEmail, // Use collected email
+        {
+          amount: finalAmount,
+          credits,
+          productName: `${credits} Premium Backlink Credits`,
+          isGuest: !user,
+          guestEmail: guestEmail
+        }
+      );
 
       if (result.success) {
-        toast({
-          title: "✅ Purchase Processing",
-          description: `${credits} credits will be added to your account.`,
-        });
+        if (result.url) {
+          // Open checkout in new window
+          CreditPaymentService.openCheckoutWindow(result.url, result.sessionId);
+
+          toast({
+            title: "✅ Checkout Opened",
+            description: `Complete your payment for ${credits} credits in the new window.`,
+          });
+        } else if (result.usedFallback) {
+          toast({
+            title: "✅ Development Mode",
+            description: `${credits} credit purchase simulated in development mode.`,
+          });
+        }
       } else {
         throw new Error(result.error || 'Purchase failed');
       }
@@ -103,7 +147,6 @@ export function BuyCreditsButton({
       <ImprovedPaymentModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        defaultTab="credits"
         initialCredits={credits}
       />
     </>
