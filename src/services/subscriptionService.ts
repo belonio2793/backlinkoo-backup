@@ -182,7 +182,8 @@ export class SubscriptionService {
         plan: planType, // 'monthly' or 'yearly' - matches Netlify function expectations
         tier: planType === 'yearly' ? 'premium-annual' : 'premium-monthly',
         isGuest,
-        guestEmail: isGuest ? guestEmail : undefined
+        guestEmail: isGuest ? guestEmail : undefined,
+        userEmail: !isGuest && user ? user.email : undefined // Include user email for authenticated users
       };
 
       // Check environment and determine best approach
