@@ -17,14 +17,13 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { stripeCheckout } from '@/services/universalStripeCheckout';
-import { 
-  CreditCard, 
-  Zap, 
-  ShoppingCart, 
+import {
+  CreditCard,
+  Zap,
+  ShoppingCart,
   ExternalLink,
   Loader2,
   Check,
-  Star,
   Shield
 } from 'lucide-react';
 
@@ -81,10 +80,10 @@ export const UniversalPaymentComponent: React.FC<UniversalPaymentComponentProps>
   }, [onPaymentSuccess, onPaymentCancel]);
 
   const creditOptions = [
-    { credits: 50, price: 70, popular: false },
-    { credits: 100, price: 140, popular: true },
-    { credits: 250, price: 350, popular: false },
-    { credits: 500, price: 700, popular: false }
+    { credits: 50, price: 70 },
+    { credits: 100, price: 140 },
+    { credits: 250, price: 350 },
+    { credits: 500, price: 700 }
   ];
 
   const handleCreditPurchase = async () => {
@@ -115,9 +114,26 @@ export const UniversalPaymentComponent: React.FC<UniversalPaymentComponentProps>
       });
 
       if (result.success) {
+        console.log('🚀 Universal component opening checkout:', result.url);
+
+        // Open the checkout window
+        if (result.url) {
+          const checkoutWindow = window.open(
+            result.url,
+            'stripe-checkout',
+            'width=800,height=600,scrollbars=yes,resizable=yes,toolbar=no,menubar=no'
+          );
+
+          if (!checkoutWindow) {
+            throw new Error('Failed to open checkout window. Please allow popups for this site.');
+          }
+        }
+
         toast({
           title: "✅ Checkout Opened",
-          description: "Complete your purchase in the new window",
+          description: result.usedFallback ?
+            "Development checkout opened in new window" :
+            "Complete your purchase in the new window",
         });
       } else {
         throw new Error(result.error || 'Failed to open checkout');
@@ -148,7 +164,7 @@ export const UniversalPaymentComponent: React.FC<UniversalPaymentComponentProps>
         </DialogTrigger>
       )}
       
-      <DialogContent className="w-[95vw] max-w-5xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] max-w-7xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <CreditCard className="h-5 w-5" />
@@ -175,13 +191,13 @@ export const UniversalPaymentComponent: React.FC<UniversalPaymentComponentProps>
             <Label className="text-base font-medium">Select Credit Package</Label>
             
             {/* Predefined Options */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="grid grid-cols-4 gap-4">
               {creditOptions.map((option) => (
                 <Card
                   key={option.credits}
                   className={`cursor-pointer transition-all hover:shadow-md ${
                     selectedCredits === option.credits && !customCredits ? 'ring-2 ring-primary' : ''
-                  } ${option.popular ? 'border-primary' : ''}`}
+                  }`}
                   onClick={() => {
                     setSelectedCredits(option.credits);
                     setCustomCredits('');
@@ -190,12 +206,6 @@ export const UniversalPaymentComponent: React.FC<UniversalPaymentComponentProps>
                   <CardHeader className="p-3 text-center">
                     <div className="flex items-center justify-center gap-1 mb-1">
                       <CardTitle className="text-base">{option.credits} Credits</CardTitle>
-                      {option.popular && (
-                        <Badge className="bg-primary text-white text-xs">
-                          <Star className="h-2 w-2 mr-1" />
-                          Popular
-                        </Badge>
-                      )}
                     </div>
                     <div className="text-xl font-bold text-primary">${option.price}</div>
                     <div className="text-xs text-muted-foreground">
@@ -211,7 +221,7 @@ export const UniversalPaymentComponent: React.FC<UniversalPaymentComponentProps>
             {/* Custom Amount */}
             <div className="space-y-3">
               <Label className="text-base font-medium">Custom Amount</Label>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-3 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="customCredits">Number of Credits</Label>
                   <Input
@@ -252,7 +262,7 @@ export const UniversalPaymentComponent: React.FC<UniversalPaymentComponentProps>
           {/* Features */}
           <div className="space-y-3">
             <Label className="text-base font-medium">What's Included</Label>
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
+            <div className="grid grid-cols-3 gap-3">
               {[
                 'High DA backlinks',
                 'Automated content generation',

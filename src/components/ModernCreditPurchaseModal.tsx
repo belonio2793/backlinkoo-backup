@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Shield, CheckCircle, CreditCard, X } from "lucide-react";
+import { Shield, CheckCircle, CreditCard } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { CreditPaymentService } from "@/services/creditPaymentService";
@@ -22,7 +22,6 @@ interface CreditPackage {
   credits: number;
   price: number;
   pricePerCredit: number;
-  popular?: boolean;
 }
 
 export function ModernCreditPurchaseModal({
@@ -42,7 +41,7 @@ export function ModernCreditPurchaseModal({
 
   const creditPackages: CreditPackage[] = [
     { credits: 50, price: 70, pricePerCredit: 1.40 },
-    { credits: 100, price: 140, pricePerCredit: 1.40, popular: true },
+    { credits: 100, price: 140, pricePerCredit: 1.40 },
     { credits: 250, price: 350, pricePerCredit: 1.40 },
     { credits: 500, price: 700, pricePerCredit: 1.40 }
   ];
@@ -152,45 +151,79 @@ export function ModernCreditPurchaseModal({
 
       if (result.success) {
         if (result.url) {
+          console.log('🚀 Opening checkout window:', result.url);
           CreditPaymentService.openCheckoutWindow(result.url, result.sessionId);
 
           toast({
             title: "✅ Checkout Opened Successfully",
-            description: "Complete your payment in the new window. This modal will close shortly.",
+            description: "Complete your payment in the new window.",
           });
+
+          // Don't auto-close the modal immediately - let user complete payment first
+          if (onSuccess) {
+            onSuccess();
+          }
         } else if (result.usedFallback) {
           toast({
-            title: "�� Development Mode",
-            description: "Credit purchase simulated in development mode.",
+            title: "🧪 Development Mode",
+            description: "Test checkout opened in new window.",
           });
+
+          if (onSuccess) {
+            onSuccess();
+          }
         }
 
-        if (onSuccess) {
-          onSuccess();
-        }
-
+        // Only close the modal after a delay to let the checkout window open
         setTimeout(() => {
           onClose();
-        }, 2500);
+        }, 1000);
       } else {
         throw new Error(result.error || 'Failed to create payment session');
       }
     } catch (error) {
       console.error('Credit purchase error:', error);
-      
-      if (error instanceof Error && error.message.includes('popup')) {
-        toast({
-          title: "Popup Blocked",
-          description: "Please allow popups for this site and try again.",
-          variant: "destructive",
-        });
+
+      // Get user-friendly error message
+      let errorMessage = 'Failed to create payment session';
+      let errorTitle = 'Payment Error';
+
+      if (error instanceof Error) {
+        if (error.message.includes('popup') || error.message.includes('blocked')) {
+          errorTitle = 'Popup Blocked';
+          errorMessage = 'Please allow popups for this site and try again.';
+        } else if (error.message.includes('configuration') || error.message.includes('not configured')) {
+          errorTitle = 'Configuration Error';
+          errorMessage = 'Payment system is not properly configured. Please contact support.';
+        } else if (error.message.includes('network') || error.message.includes('fetch')) {
+          errorTitle = 'Network Error';
+          errorMessage = 'Please check your internet connection and try again.';
+        } else if (error.message.includes('authentication') || error.message.includes('sign in')) {
+          errorTitle = 'Authentication Required';
+          errorMessage = 'Please sign in to your account and try again.';
+        } else {
+          errorMessage = error.message;
+        }
       } else {
-        toast({
-          title: "Payment Error",
-          description: error instanceof Error ? error.message : 'Failed to create payment session',
-          variant: "destructive",
-        });
+        // Handle non-Error objects
+        errorMessage = String(error);
       }
+
+      // Log detailed error for debugging
+      console.error('Detailed error info:', {
+        error,
+        errorType: typeof error,
+        errorConstructor: error?.constructor?.name,
+        userAgent: navigator.userAgent,
+        url: window.location.href,
+        timestamp: new Date().toISOString()
+      });
+
+      toast({
+        title: errorTitle,
+        description: errorMessage,
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -200,18 +233,9 @@ export function ModernCreditPurchaseModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-        <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+      <DialogContent className="w-[95vw] max-w-6xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
           <DialogTitle className="text-xl font-semibold">Buy Credits</DialogTitle>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onClose}
-            className="h-6 w-6 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-          >
-            <X className="h-4 w-4" />
-            <span className="sr-only">Close</span>
-          </Button>
         </DialogHeader>
 
         <div className="space-y-6">
@@ -226,24 +250,17 @@ export function ModernCreditPurchaseModal({
           {/* Select Credit Package */}
           <div className="space-y-3">
             <Label className="text-sm font-semibold text-gray-700">Select Credit Package</Label>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-4 gap-4">
               {creditPackages.map((pkg, index) => (
                 <Card
                   key={index}
                   className={`cursor-pointer transition-all border-2 ${
-                    selectedPackage === index 
-                      ? 'border-blue-500 bg-blue-50' 
+                    selectedPackage === index
+                      ? 'border-blue-500 bg-blue-50'
                       : 'border-gray-200 hover:border-blue-300'
-                  } ${pkg.popular ? 'relative' : ''}`}
+                  }`}
                   onClick={() => handlePackageSelect(index)}
                 >
-                  {pkg.popular && (
-                    <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
-                      <Badge className="bg-blue-600 text-white px-2 py-1 text-xs">
-                        🔥 Popular
-                      </Badge>
-                    </div>
-                  )}
                   <CardContent className="p-4 text-center">
                     <div className="font-semibold text-gray-900">{pkg.credits} Credits</div>
                     <div className="text-2xl font-bold text-blue-600">${pkg.price}</div>
@@ -259,7 +276,7 @@ export function ModernCreditPurchaseModal({
           {/* Custom Amount */}
           <div className="space-y-4">
             <Label className="text-sm font-semibold text-gray-700">Custom Amount</Label>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="customCredits" className="text-sm font-medium text-gray-700">
                   Number of Credits
@@ -281,11 +298,12 @@ export function ModernCreditPurchaseModal({
                   ${totalPrice.toFixed(2)}
                 </div>
               </div>
-            </div>
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-700">Rate</Label>
-              <div className="text-sm text-gray-600">
-                ${rate.toFixed(2)} per credit
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-gray-700">Rate</Label>
+                <div className="h-10 px-3 py-2 border border-gray-200 rounded-md bg-gray-50 flex items-center justify-center text-lg font-semibold text-gray-700">
+                  ${rate.toFixed(2)}
+                </div>
+                <div className="text-xs text-gray-500 text-center">per credit</div>
               </div>
             </div>
           </div>
@@ -293,7 +311,7 @@ export function ModernCreditPurchaseModal({
           {/* What's Included */}
           <div className="space-y-3">
             <Label className="text-sm font-semibold text-gray-700">What's Included</Label>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-3 gap-3">
               {featuresIncluded.map((feature, index) => (
                 <div key={index} className="flex items-center gap-2">
                   <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />

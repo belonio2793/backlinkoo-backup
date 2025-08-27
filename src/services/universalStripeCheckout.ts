@@ -37,6 +37,103 @@ export class UniversalStripeCheckout {
   }
 
   /**
+   * Try fallback endpoints when Supabase Edge Functions fail
+   */
+  private async tryFallbackEndpoints(paymentData: any): Promise<PaymentResult> {
+    const endpoints = [
+      '/.netlify/functions/create-payment',
+      '/api/create-payment',
+      '/functions/create-payment'
+    ];
+
+    for (const endpoint of endpoints) {
+      try {
+        console.log(`🔄 Trying fallback endpoint: ${endpoint}`);
+
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(paymentData)
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          console.log(`✅ Fallback endpoint succeeded: ${endpoint}`);
+
+          if (result.url) {
+            return {
+              success: true,
+              url: result.url,
+              sessionId: result.sessionId || result.session_id
+            };
+          }
+        } else {
+          const errorText = await response.text();
+          console.warn(`⚠️ Endpoint ${endpoint} returned ${response.status}: ${errorText}`);
+        }
+      } catch (fetchError) {
+        console.warn(`⚠️ Endpoint ${endpoint} failed:`, this.extractErrorMessage(fetchError));
+        continue;
+      }
+    }
+
+    throw new Error('All fallback endpoints failed');
+  }
+
+  /**
+   * Extract meaningful error message from any error object
+   */
+  private extractErrorMessage(error: unknown): string {
+    if (error instanceof Error) {
+      return error.message;
+    }
+
+    if (typeof error === 'string') {
+      return error;
+    }
+
+    if (error && typeof error === 'object') {
+      const errorObj = error as any;
+
+      // Try multiple common error properties
+      const message = errorObj.message ||
+                     errorObj.error ||
+                     errorObj.details ||
+                     errorObj.description ||
+                     errorObj.msg ||
+                     errorObj.statusText;
+
+      if (message && typeof message === 'string') {
+        return message;
+      }
+
+      // Create a descriptive message from available properties
+      const parts = [];
+      if (errorObj.status) parts.push(`Status: ${errorObj.status}`);
+      if (errorObj.endpoint) parts.push(`Endpoint: ${errorObj.endpoint}`);
+      if (errorObj.type) parts.push(`Type: ${errorObj.type}`);
+
+      if (parts.length > 0) {
+        return parts.join(', ');
+      }
+
+      // Last resort - try to stringify safely
+      try {
+        const jsonStr = JSON.stringify(errorObj);
+        if (jsonStr && jsonStr !== '{}' && jsonStr.length < 200) {
+          return `Error: ${jsonStr}`;
+        }
+      } catch {
+        // Failed to stringify
+      }
+    }
+
+    return 'Unknown error (unable to extract details)';
+  }
+
+  /**
    * Open Stripe checkout in a new window for credit purchases
    */
   public async purchaseCredits(options: {
@@ -56,15 +153,21 @@ export class UniversalStripeCheckout {
         paymentMethod: 'stripe'
       };
 
+      console.log('🔄 Attempting Supabase Edge Function payment creation...');
       const { data: result, error } = await supabase.functions.invoke('create-payment', {
         body: paymentData
       });
 
+      console.log('📥 Supabase response:', { hasData: !!result, hasError: !!error });
+
       if (error) {
-        throw new Error(`Payment creation failed: ${error.message || JSON.stringify(error)}`);
+        const supabaseErrorMessage = this.extractErrorMessage(error);
+        console.error('❌ Supabase Edge Function error:', supabaseErrorMessage);
+        throw new Error(`Payment creation failed: ${supabaseErrorMessage}`);
       }
 
       if (!result) {
+        console.error('❌ No result from Supabase Edge Function');
         throw new Error(`Invalid response from payment service`);
       }
       
@@ -92,10 +195,26 @@ export class UniversalStripeCheckout {
         throw new Error('No payment URL received from server');
       }
     } catch (error) {
-      console.error('Credit purchase error:', error);
+      console.error('❌ Supabase Edge Function failed, trying fallback endpoints...');
+      console.error('Original error:', this.extractErrorMessage(error));
+
+      // Try fallback endpoints similar to CreditPaymentService
+      try {
+        const fallbackResult = await this.tryFallbackEndpoints(paymentData);
+        if (fallbackResult.success) {
+          return fallbackResult;
+        }
+      } catch (fallbackError) {
+        console.error('❌ Fallback endpoints also failed:', this.extractErrorMessage(fallbackError));
+      }
+
+      // If everything fails, return clear error
+      const finalErrorMessage = this.extractErrorMessage(error);
+      console.error('💥 All payment methods failed:', finalErrorMessage);
+
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Credit purchase failed'
+        error: `Payment failed: ${finalErrorMessage}`
       };
     }
   }

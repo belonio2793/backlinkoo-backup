@@ -30,16 +30,97 @@ export class CreditPaymentService {
     const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
     const isNetlify = hostname.includes('netlify.app') || hostname.includes('netlify.com');
     const isFlyDev = hostname.includes('fly.dev');
-    const hasSupabaseFunctions = !isLocalhost; // Edge functions more likely to work in production
+
+    // Treat fly.dev as development environment (Builder.io development servers)
+    const isDevelopment = isLocalhost || isFlyDev;
+    const hasSupabaseFunctions = !isDevelopment; // Edge functions more likely to work in production
 
     return {
       isLocalhost,
       isNetlify,
       isFlyDev,
-      isProduction: !isLocalhost,
+      isDevelopment,
+      isProduction: !isDevelopment,
       hasSupabaseFunctions,
       hostname
     };
+  }
+
+  /**
+   * Extract meaningful error message from any error object
+   */
+  private static extractErrorMessage(error: unknown): string {
+    if (error instanceof Error) {
+      return error.message;
+    }
+
+    if (typeof error === 'string') {
+      return error;
+    }
+
+    if (error && typeof error === 'object') {
+      const errorObj = error as any;
+
+      // Try multiple common error properties
+      const message = errorObj.message ||
+                     errorObj.error ||
+                     errorObj.details ||
+                     errorObj.description ||
+                     errorObj.msg ||
+                     errorObj.statusText;
+
+      if (message && typeof message === 'string') {
+        return message;
+      }
+
+      // Create a descriptive message from available properties
+      const parts = [];
+      if (errorObj.endpoint) parts.push(`Endpoint: ${errorObj.endpoint}`);
+      if (errorObj.status) parts.push(`Status: ${errorObj.status}`);
+      if (errorObj.type) parts.push(`Type: ${errorObj.type}`);
+
+      if (parts.length > 0) {
+        return parts.join(', ');
+      }
+
+      // Last resort - try to stringify safely
+      try {
+        const jsonStr = JSON.stringify(errorObj);
+        if (jsonStr && jsonStr !== '{}' && jsonStr.length < 200) {
+          return `Error object: ${jsonStr}`;
+        }
+      } catch {
+        // Failed to stringify
+      }
+    }
+
+    return 'Unknown error (unable to extract details)';
+  }
+
+  /**
+   * Create development Stripe URL for testing
+   */
+  private static createDevStripeUrl(options: CreditPaymentOptions): string {
+    // Check if we have Stripe test keys for development
+    const stripePublishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+
+    if (stripePublishableKey && stripePublishableKey.startsWith('pk_test_')) {
+      console.log('🧪 Using Stripe test environment for development');
+      // Create a mock Stripe checkout page that will open in new window
+      const params = new URLSearchParams({
+        credits: options.credits.toString(),
+        amount: options.amount.toString(),
+        productName: options.productName || `${options.credits} Credits`,
+        testMode: 'true'
+      });
+
+      // Return a local test page that simulates Stripe checkout
+      return `/dev-stripe-checkout?${params.toString()}`;
+    } else {
+      console.log('🔧 No valid Stripe test keys - using demo URL');
+      // Fallback to a demo URL that will at least open a new window
+      return `https://js.stripe.com/v3/?credits=${options.credits}&amount=${options.amount}`;
+    }
   }
 
   /**
@@ -82,12 +163,35 @@ export class CreditPaymentService {
 
     // Check Stripe configuration
     const stripePublishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+    console.log('🔧 Stripe Configuration Check:', {
+      hasPublishableKey: !!stripePublishableKey,
+      keyFormat: stripePublishableKey ? stripePublishableKey.substring(0, 12) + '...' : 'missing',
+      isValidFormat: stripePublishableKey?.startsWith('pk_'),
+      isTestKey: stripePublishableKey?.startsWith('pk_test_'),
+      isLiveKey: stripePublishableKey?.startsWith('pk_live_'),
+      environment: environment.isLocalhost ? 'development' : 'production'
+    });
+
     if (!stripePublishableKey || !stripePublishableKey.startsWith('pk_')) {
-      console.warn('⚠️ Stripe not configured for credit payments');
-      return { 
-        success: false, 
-        error: 'Payment system not configured. Please contact support.' 
+      console.error('❌ Stripe configuration error:', {
+        publishableKey: stripePublishableKey ? 'present but invalid format' : 'missing',
+        expectedFormat: 'pk_test_... or pk_live_...',
+        currentValue: stripePublishableKey ? `"${stripePublishableKey.substring(0, 12)}..."` : 'undefined',
+        envVariable: 'VITE_STRIPE_PUBLISHABLE_KEY'
+      });
+      return {
+        success: false,
+        error: environment.isDevelopment ?
+          'Stripe test keys not configured for development. Please set VITE_STRIPE_PUBLISHABLE_KEY with a pk_test_ key.' :
+          'Payment system not configured. Please contact support.'
       };
+    }
+
+    // Log successful configuration
+    if (stripePublishableKey.startsWith('pk_test_')) {
+      console.log('✅ Stripe test keys configured - development mode active');
+    } else if (stripePublishableKey.startsWith('pk_live_')) {
+      console.log('✅ Stripe live keys configured - production mode active');
     }
 
     const requestBody = {
@@ -182,9 +286,15 @@ export class CreditPaymentService {
               '/functions/create-payment'
             ];
 
+        let lastError = null;
+
         for (const endpoint of endpoints) {
           try {
             console.log(`🔄 Trying credit payment endpoint: ${endpoint}`);
+            console.log(`📤 Request body:`, {
+              ...requestBody,
+              guestEmail: finalGuestEmail ? '***masked***' : undefined
+            });
 
             // Prepare headers
             const headers: Record<string, string> = {
@@ -196,6 +306,7 @@ export class CreditPaymentService {
               const { data: session } = await supabase.auth.getSession();
               if (session?.session?.access_token) {
                 headers['Authorization'] = `Bearer ${session.session.access_token}`;
+                console.log('🔐 Added authorization header');
               }
             }
 
@@ -205,70 +316,143 @@ export class CreditPaymentService {
               body: JSON.stringify(requestBody)
             });
 
+            console.log(`📥 Response status: ${response.status} ${response.statusText}`);
+
             if (response.ok) {
               const result = await response.json();
+              console.log(`✅ Success response from ${endpoint}:`, {
+                hasUrl: !!result.url,
+                hasSessionId: !!result.sessionId,
+                keys: Object.keys(result)
+              });
               data = result;
               error = null;
-              console.log(`✅ Credit payment endpoint succeeded: ${endpoint}`);
               break;
             } else {
               const errorText = await response.text();
-              console.warn(`⚠️ Endpoint ${endpoint} returned ${response.status}: ${errorText}`);
+              lastError = {
+                endpoint,
+                status: response.status,
+                statusText: response.statusText,
+                body: errorText
+              };
+              console.warn(`⚠️ Endpoint ${endpoint} failed:`, lastError);
             }
           } catch (fetchError) {
-            console.warn(`⚠️ Endpoint ${endpoint} failed:`, fetchError);
+            lastError = {
+              endpoint,
+              error: fetchError instanceof Error ? fetchError.message : String(fetchError),
+              type: 'fetch_error'
+            };
+            console.warn(`⚠️ Network error for ${endpoint}:`, lastError);
             continue;
           }
+        }
+
+        // If all endpoints failed, use the last error for debugging
+        if (!data && lastError) {
+          const lastErrorMessage = this.extractErrorMessage(lastError);
+          console.error('❌ All payment endpoints failed. Last error:', lastErrorMessage);
+          console.error('❌ Full error details:', lastError);
+          error = lastError;
         }
       }
 
       // Final fallback - use development mode credits
       if (error || !data) {
         console.log('🔄 All credit payment endpoints failed, using development fallback...');
-        
-        if (environment.isLocalhost) {
+        console.log('🌍 Environment check:', {
+          isLocalhost: environment.isLocalhost,
+          hostname: environment.hostname,
+          shouldUseFallback: environment.isLocalhost || environment.hostname.includes('localhost')
+        });
+
+        if (environment.isDevelopment) {
+          console.log('🏠 Development environment detected - creating Stripe test checkout');
+
+          // For development, create a real Stripe test checkout URL
+          const testCheckoutUrl = this.createDevStripeUrl(options);
+
           return {
             success: true,
             usedFallback: true,
-            url: `https://demo-stripe-checkout.com/credits/${options.credits}`
+            url: testCheckoutUrl
           };
         } else {
-          error = { message: 'All credit payment methods failed' };
+          console.error('💥 Production environment - all payment methods failed');
+          const prodErrorMessage = this.extractErrorMessage(error);
+          console.error('💥 Last error was:', prodErrorMessage);
+          error = {
+            message: 'All credit payment methods failed',
+            lastError: error,
+            environment,
+            timestamp: new Date().toISOString()
+          };
         }
       }
 
       if (error) {
+        const extractedErrorMessage = this.extractErrorMessage(error);
+        console.error('❌ Final payment error:', extractedErrorMessage);
+        console.error('❌ Full error object:', error);
         ErrorLogger.logError('Credit payment error', error);
 
-        // Provide more specific error messages
+        // Provide more specific error messages based on the error type
         let errorMessage = 'Failed to create credit payment';
 
         // Handle different error object structures
         if (error && typeof error === 'object') {
-          if (error.error && typeof error.error === 'string') {
-            errorMessage = error.error;
-          } else if (error.message) {
-            errorMessage = error.message;
-          } else if (error.details) {
-            errorMessage = error.details;
-          } else if (error.msg) {
-            errorMessage = error.msg;
+          const errorObj = error as any;
+
+          // Check for specific error types first
+          if (errorObj.status === 404) {
+            errorMessage = 'Payment service not found. Please check your configuration.';
+          } else if (errorObj.status === 401 || errorObj.status === 403) {
+            errorMessage = 'Authentication required. Please sign in and try again.';
+          } else if (errorObj.status === 500) {
+            errorMessage = 'Server error. Please try again in a moment.';
+          } else if (errorObj.body && typeof errorObj.body === 'string') {
+            try {
+              const parsed = JSON.parse(errorObj.body);
+              errorMessage = parsed.error || parsed.message || errorMessage;
+            } catch {
+              errorMessage = errorObj.body;
+            }
+          } else if (errorObj.error && typeof errorObj.error === 'string') {
+            errorMessage = errorObj.error;
+          } else if (errorObj.message && typeof errorObj.message === 'string') {
+            errorMessage = errorObj.message;
+          } else if (errorObj.details) {
+            errorMessage = errorObj.details;
+          } else if (errorObj.msg) {
+            errorMessage = errorObj.msg;
           } else {
-            errorMessage = `Credit Payment API Error: ${JSON.stringify(error)}`;
+            // Try to extract meaningful info from the error
+            const errorInfo = [
+              errorObj.endpoint && `Endpoint: ${errorObj.endpoint}`,
+              errorObj.status && `Status: ${errorObj.status}`,
+              errorObj.type && `Type: ${errorObj.type}`
+            ].filter(Boolean).join(', ');
+
+            errorMessage = errorInfo ?
+              `Payment service error (${errorInfo})` :
+              'Payment service temporarily unavailable';
           }
         } else if (typeof error === 'string') {
           errorMessage = error;
         }
 
-        // Handle specific error cases
-        if (errorMessage.includes('Rate limit')) {
+        // Handle specific error cases with user-friendly messages
+        if (errorMessage.includes('Rate limit') || errorMessage.includes('429')) {
           errorMessage = 'Too many requests. Please wait a moment and try again.';
-        } else if (errorMessage.includes('Authentication') || errorMessage.includes('auth')) {
-          errorMessage = 'Authentication required. Please sign in and try again.';
-        } else if (errorMessage.includes('network') || errorMessage.includes('Network')) {
+        } else if (errorMessage.includes('Authentication') || errorMessage.includes('auth') || errorMessage.includes('401')) {
+          errorMessage = 'Please sign in to your account and try again.';
+        } else if (errorMessage.includes('network') || errorMessage.includes('Network') || errorMessage.includes('fetch')) {
           errorMessage = 'Network error. Please check your connection and try again.';
-        } else if (errorMessage.includes('configuration') || errorMessage.includes('not configured')) {
-          errorMessage = 'Payment system not configured. Please contact support.';
+        } else if (errorMessage.includes('configuration') || errorMessage.includes('not configured') || errorMessage.includes('404')) {
+          errorMessage = 'Payment system configuration error. Please contact support.';
+        } else if (errorMessage.includes('STRIPE') || errorMessage.includes('stripe')) {
+          errorMessage = 'Payment processor error. Please try again or contact support.';
         }
 
         return { success: false, error: errorMessage };
@@ -289,12 +473,12 @@ export class CreditPaymentService {
       }
 
     } catch (error: any) {
-      const errorMessage = getErrorMessage(error);
+      const catchErrorMessage = getErrorMessage(error);
       logFormattedError('Credit payment creation failed', error);
-      
-      return { 
-        success: false, 
-        error: `Credit payment failed: ${errorMessage}` 
+
+      return {
+        success: false,
+        error: `Credit payment failed: ${catchErrorMessage}`
       };
     }
   }
