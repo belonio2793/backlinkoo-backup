@@ -53,7 +53,7 @@ const Affiliate: React.FC = () => {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'Join Backlink∞ - Get Free Credits',
+          title: 'Join Backlink ∞ - Get Free Credits',
           text: 'Join the best link building platform and get free credits to start!',
           url: referralLink,
         });
