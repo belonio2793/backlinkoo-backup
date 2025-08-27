@@ -117,9 +117,14 @@ export class CreditPaymentService {
       // Return a local test page that simulates Stripe checkout
       return `/dev-stripe-checkout?${params.toString()}`;
     } else {
-      console.log('🔧 No valid Stripe test keys - using demo URL');
-      // Fallback to a demo URL that will at least open a new window
-      return `https://js.stripe.com/v3/?credits=${options.credits}&amount=${options.amount}`;
+      console.log('🔧 No valid Stripe test keys - using local dev checkout');
+      const params = new URLSearchParams({
+        credits: options.credits.toString(),
+        amount: options.amount.toString(),
+        productName: options.productName || `${options.credits} Credits`,
+        testMode: 'false'
+      });
+      return `/dev-stripe-checkout?${params.toString()}`;
     }
   }
 
