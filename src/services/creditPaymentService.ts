@@ -473,12 +473,12 @@ export class CreditPaymentService {
       }
 
     } catch (error: any) {
-      const errorMessage = getErrorMessage(error);
+      const catchErrorMessage = getErrorMessage(error);
       logFormattedError('Credit payment creation failed', error);
-      
-      return { 
-        success: false, 
-        error: `Credit payment failed: ${errorMessage}` 
+
+      return {
+        success: false,
+        error: `Credit payment failed: ${catchErrorMessage}`
       };
     }
   }
