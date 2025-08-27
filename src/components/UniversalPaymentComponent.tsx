@@ -142,7 +142,7 @@ export const UniversalPaymentComponent: React.FC<UniversalPaymentComponentProps>
         </DialogTrigger>
       )}
       
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] max-w-5xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <CreditCard className="h-5 w-5" />
@@ -169,7 +169,7 @@ export const UniversalPaymentComponent: React.FC<UniversalPaymentComponentProps>
             <Label className="text-base font-medium">Select Credit Package</Label>
             
             {/* Predefined Options */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
               {creditOptions.map((option) => (
                 <Card
                   key={option.credits}
@@ -181,18 +181,18 @@ export const UniversalPaymentComponent: React.FC<UniversalPaymentComponentProps>
                     setCustomCredits('');
                   }}
                 >
-                  <CardHeader className="p-4 text-center">
-                    <div className="flex items-center justify-center gap-2 mb-2">
-                      <CardTitle className="text-lg">{option.credits} Credits</CardTitle>
+                  <CardHeader className="p-3 text-center">
+                    <div className="flex items-center justify-center gap-1 mb-1">
+                      <CardTitle className="text-base">{option.credits} Credits</CardTitle>
                       {option.popular && (
-                        <Badge className="bg-primary text-white">
-                          <Star className="h-3 w-3 mr-1" />
+                        <Badge className="bg-primary text-white text-xs">
+                          <Star className="h-2 w-2 mr-1" />
                           Popular
                         </Badge>
                       )}
                     </div>
-                    <div className="text-2xl font-bold text-primary">${option.price}</div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-xl font-bold text-primary">${option.price}</div>
+                    <div className="text-xs text-muted-foreground">
                       ${(option.price / option.credits).toFixed(2)} per credit
                     </div>
                   </CardHeader>
@@ -205,7 +205,7 @@ export const UniversalPaymentComponent: React.FC<UniversalPaymentComponentProps>
             {/* Custom Amount */}
             <div className="space-y-3">
               <Label className="text-base font-medium">Custom Amount</Label>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="customCredits">Number of Credits</Label>
                   <Input
@@ -232,6 +232,13 @@ export const UniversalPaymentComponent: React.FC<UniversalPaymentComponentProps>
                     </div>
                   </div>
                 </div>
+                <div className="space-y-2">
+                  <Label>Rate</Label>
+                  <div className="p-3 bg-gray-50 rounded-lg text-center">
+                    <div className="text-lg font-semibold text-gray-700">$1.40</div>
+                    <div className="text-xs text-muted-foreground">per credit</div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -239,7 +246,7 @@ export const UniversalPaymentComponent: React.FC<UniversalPaymentComponentProps>
           {/* Features */}
           <div className="space-y-3">
             <Label className="text-base font-medium">What's Included</Label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
               {[
                 'High DA backlinks',
                 'Automated content generation',
