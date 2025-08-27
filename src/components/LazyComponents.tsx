@@ -58,11 +58,6 @@ export const LazyAdminCampaignManager = lazy(() => import('@/pages/AdminCampaign
 export const LazyOpenAITest = lazy(() => import('@/pages/OpenAITest'));
 export const LazySystemTest = lazy(() => import('@/components/SystemTest').then(module => ({ default: module.SystemTest })));
 
-// Webhook Testing component
-export const LazyWebhookTest = lazy(() => import('@/pages/WebhookTest'));
-
-// Stripe Testing component
-export const LazyStripeTestPage = lazy(() => import('@/pages/StripeTestPage'));
 
 // Payment Diagnostic component
 export const LazyPaymentDiagnostic = lazy(() => import('@/pages/PaymentDiagnostic'));
