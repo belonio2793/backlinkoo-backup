@@ -74,30 +74,22 @@ export const PaymentModal = ({ isOpen, onClose, initialCredits }: PaymentModalPr
     setLoading(true);
 
     try {
-      const response = await fetch('/.netlify/functions/create-payment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      const { data, error } = await supabase.functions.invoke('create-payment', {
+        body: {
           amount: parseFloat(amount),
           productName: `${credits} Backlink Credits`,
           credits: parseInt(credits),
           isGuest,
           guestEmail: isGuest ? guestEmail : undefined,
           paymentMethod
-        })
+        }
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        const errorMessage = errorData.error || `HTTP ${response.status}: ${response.statusText}`;
-        throw new Error(errorMessage);
+      if (error) {
+        throw new Error(error.message || JSON.stringify(error));
       }
 
-      const data = await response.json();
-
-      if (data.url) {
+      if (data && data.url) {
         // Use mobile-optimized payment handler
         await MobilePaymentHandler.handlePaymentRedirect({
           url: data.url,
