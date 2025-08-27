@@ -65,11 +65,7 @@ export class UniversalStripeCheckout {
       }
 
       if (!result) {
-        throw new Error(`Invalid response from payment service: ${response.status} ${response.statusText}`);
-      }
-
-      if (!response.ok) {
-        throw new Error(`Payment creation failed: ${response.status} - ${result.error || response.statusText}`);
+        throw new Error(`Invalid response from payment service`);
       }
       
       if (result.url) {
