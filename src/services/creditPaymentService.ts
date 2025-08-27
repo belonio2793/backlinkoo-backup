@@ -110,19 +110,33 @@ export class CreditPaymentService {
     const stripePublishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
     console.log('🔧 Stripe Configuration Check:', {
       hasPublishableKey: !!stripePublishableKey,
-      keyFormat: stripePublishableKey ? stripePublishableKey.substring(0, 8) + '...' : 'missing',
-      isValidFormat: stripePublishableKey?.startsWith('pk_')
+      keyFormat: stripePublishableKey ? stripePublishableKey.substring(0, 12) + '...' : 'missing',
+      isValidFormat: stripePublishableKey?.startsWith('pk_'),
+      isTestKey: stripePublishableKey?.startsWith('pk_test_'),
+      isLiveKey: stripePublishableKey?.startsWith('pk_live_'),
+      environment: environment.isLocalhost ? 'development' : 'production'
     });
 
     if (!stripePublishableKey || !stripePublishableKey.startsWith('pk_')) {
       console.error('❌ Stripe configuration error:', {
         publishableKey: stripePublishableKey ? 'present but invalid format' : 'missing',
-        expectedFormat: 'pk_test_... or pk_live_...'
+        expectedFormat: 'pk_test_... or pk_live_...',
+        currentValue: stripePublishableKey ? `"${stripePublishableKey.substring(0, 12)}..."` : 'undefined',
+        envVariable: 'VITE_STRIPE_PUBLISHABLE_KEY'
       });
       return {
         success: false,
-        error: 'Payment system not configured. Please contact support.'
+        error: environment.isLocalhost ?
+          'Stripe test keys not configured for development. Please set VITE_STRIPE_PUBLISHABLE_KEY.' :
+          'Payment system not configured. Please contact support.'
       };
+    }
+
+    // Log successful configuration
+    if (stripePublishableKey.startsWith('pk_test_')) {
+      console.log('✅ Stripe test keys configured - development mode active');
+    } else if (stripePublishableKey.startsWith('pk_live_')) {
+      console.log('✅ Stripe live keys configured - production mode active');
     }
 
     const requestBody = {
