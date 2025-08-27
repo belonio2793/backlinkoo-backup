@@ -17,14 +17,13 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { stripeCheckout } from '@/services/universalStripeCheckout';
-import { 
-  CreditCard, 
-  Zap, 
-  ShoppingCart, 
+import {
+  CreditCard,
+  Zap,
+  ShoppingCart,
   ExternalLink,
   Loader2,
   Check,
-  Star,
   Shield
 } from 'lucide-react';
 
