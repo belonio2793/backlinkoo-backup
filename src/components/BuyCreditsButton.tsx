@@ -5,6 +5,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { CreditPaymentService } from '@/services/creditPaymentService';
 import { ModernCreditPurchaseModal } from '@/components/ModernCreditPurchaseModal';
 import { CreditCard, Zap } from 'lucide-react';
+import { setCheckoutIntent } from '@/utils/checkoutIntent';
+import { useAuthModal } from '@/contexts/ModalContext';
 
 interface BuyCreditsButtonProps {
   credits?: number;
