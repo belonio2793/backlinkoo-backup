@@ -117,7 +117,6 @@ export function BuyCreditsButton({
       <ImprovedPaymentModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        defaultTab="credits"
         initialCredits={credits}
       />
     </>
