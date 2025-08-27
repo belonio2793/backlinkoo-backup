@@ -1,12 +1,13 @@
 import React from 'react';
 import { StripeIntegrationTest } from '@/components/StripeIntegrationTest';
 import { PaymentDebugHelper } from '@/components/PaymentDebugHelper';
+import { QuickPaymentTest } from '@/components/QuickPaymentTest';
 import { UniversalPaymentComponent } from '@/components/UniversalPaymentComponent';
 import { ModernCreditPurchaseModal } from '@/components/ModernCreditPurchaseModal';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
-import { CreditCard, TestTube, ShoppingCart, Bug } from 'lucide-react';
+import { CreditCard, TestTube, ShoppingCart, Bug, Zap } from 'lucide-react';
 
 export default function StripeTest() {
   const [modernModalOpen, setModernModalOpen] = useState(false);
