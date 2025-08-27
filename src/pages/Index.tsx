@@ -262,7 +262,7 @@ const Index = () => {
                 <div className="w-24 h-9 bg-gray-200 animate-pulse rounded"></div>
               ) : user ? (
                 <>
-                  <UniversalPaymentComponent
+                  <SimpleBuyCreditsButton
                     trigger={
                       <Button
                         variant="outline"
@@ -273,7 +273,6 @@ const Index = () => {
                         Buy Credits
                       </Button>
                     }
-                    defaultType="credits"
                     defaultCredits={100}
                   />
                   <Button
