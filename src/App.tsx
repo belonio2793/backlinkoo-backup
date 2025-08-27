@@ -124,23 +124,22 @@ const SupabaseErrorMonitor = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-const App = () => (
-  <EmergencyErrorBoundary>
-    <QueryClientProvider client={queryClient}>
-    <SupabaseErrorBoundary>
-      <SupabaseErrorMonitor>
-        <TooltipProvider>
-      <ModalProvider>
-        <UserFlowProvider>
-          <SymbolCleanerProvider>
-            <TextCleanerProvider>
-              <Toaster />
-            <Sonner />
-            <GlobalErrorHandler />
-            <UnifiedModalManager />
-            <BrowserRouter>
-              <PremiumUpgradeProvider>
-                <ReportSyncProvider>
+const App = () => {
+  console.log('🚀 Main App starting...');
+
+  try {
+    return (
+      <EmergencyErrorBoundary>
+        <QueryClientProvider client={queryClient}>
+          <TooltipProvider>
+            <ModalProvider>
+              <UserFlowProvider>
+                <Toaster />
+                <GlobalErrorHandler />
+                <UnifiedModalManager />
+                <BrowserRouter>
+                  <PremiumUpgradeProvider>
+                    <ReportSyncProvider>
             <Routes>
             <Route path="/" element={<Index />} />
             <Route
@@ -462,18 +461,25 @@ const App = () => (
               }
             />
             </Routes>
-                </ReportSyncProvider>
-              </PremiumUpgradeProvider>
-            </BrowserRouter>
-            </TextCleanerProvider>
-          </SymbolCleanerProvider>
-        </UserFlowProvider>
-      </ModalProvider>
-        </TooltipProvider>
-      </SupabaseErrorMonitor>
-    </SupabaseErrorBoundary>
-    </QueryClientProvider>
-  </EmergencyErrorBoundary>
-);
+                    </ReportSyncProvider>
+                  </PremiumUpgradeProvider>
+                </BrowserRouter>
+              </UserFlowProvider>
+            </ModalProvider>
+          </TooltipProvider>
+        </QueryClientProvider>
+      </EmergencyErrorBoundary>
+    );
+  } catch (error) {
+    console.error('❌ App Error:', error);
+    return (
+      <div className="min-h-screen bg-red-100 p-8">
+        <h1 className="text-2xl font-bold text-red-800">App Loading Error</h1>
+        <p className="mt-2">There was an error loading the application.</p>
+        <pre className="mt-4 text-sm bg-white p-4 rounded">{String(error)}</pre>
+      </div>
+    );
+  }
+};
 
 export default App;
