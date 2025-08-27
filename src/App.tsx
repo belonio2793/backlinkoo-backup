@@ -24,6 +24,7 @@ import { DomainErrorBoundary } from "@/components/DomainErrorBoundary";
 import SupabaseErrorRecovery from "@/components/SupabaseErrorRecovery";
 import { SupabaseConnectionFixer } from "@/utils/supabaseConnectionFixer";
 import Index from "./pages/Index";
+import CheckoutIntentHandler from "./components/CheckoutIntentHandler";
 
 const LazyEmergencyBlogPost = lazy(() => import("./components/EmergencyBlogPost"));
 
