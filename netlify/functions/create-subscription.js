@@ -34,7 +34,7 @@ const PRICING_CONFIG = {
     originalPrice: 49,
     interval: 'month',
     discount: 41,
-    priceId: process.env.STRIPE_MONTHLY_PRICE_ID || 'price_monthly_fallback',
+    priceId: process.env.STRIPE_PREMIUM_PLAN_MONTHLY || 'price_monthly_fallback',
     productName: 'Premium SEO Tools - Monthly',
     description: 'Access to unlimited backlinks, SEO academy, analytics, and priority support - monthly billing'
   },
@@ -44,7 +44,7 @@ const PRICING_CONFIG = {
     interval: 'year',
     discount: 51,
     savings: 298,
-    priceId: process.env.STRIPE_YEARLY_PRICE_ID || 'price_yearly_fallback',
+    priceId: process.env.STRIPE_PREMIUM_PLAN_ANNUAL || 'price_yearly_fallback',
     productName: 'Premium SEO Tools - Yearly',
     description: 'Access to unlimited backlinks, SEO academy, analytics, and priority support - yearly billing (save $298!)'
   }

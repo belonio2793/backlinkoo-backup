@@ -26,8 +26,6 @@ export const ImprovedPaymentModal = ({
   const { toast } = useToast();
   const { user } = useAuth();
   
-  const [isGuest, setIsGuest] = useState(!user);
-  const [guestEmail, setGuestEmail] = useState("");
   const [amount, setAmount] = useState(() => initialCredits ? (initialCredits * CREDIT_PRICE).toFixed(2) : "");
   const [credits, setCredits] = useState(() => initialCredits ? initialCredits.toString() : "");
   const [loading, setLoading] = useState(false);
@@ -43,7 +41,6 @@ export const ImprovedPaymentModal = ({
   // Update state when modal opens
   useEffect(() => {
     if (isOpen) {
-      setIsGuest(!user);
       if (initialCredits && initialCredits > 0) {
         setCredits(initialCredits.toString());
         setAmount((initialCredits * CREDIT_PRICE).toFixed(2));
@@ -80,14 +77,6 @@ export const ImprovedPaymentModal = ({
       return;
     }
 
-    if (isGuest && !guestEmail) {
-      toast({
-        title: "Error", 
-        description: "Email is required for guest checkout",
-        variant: "destructive",
-      });
-      return;
-    }
 
     setLoading(true);
 
@@ -102,8 +91,7 @@ export const ImprovedPaymentModal = ({
         credits: parseInt(credits),
         productName: `${credits} Premium Backlink Credits`,
         type: 'credits',
-        isGuest,
-        guestEmail: isGuest ? guestEmail : undefined
+        isGuest: false
       });
 
       if (result.success) {
@@ -152,37 +140,11 @@ export const ImprovedPaymentModal = ({
         )}
 
         <div className="space-y-6">
-          {/* User/Guest Toggle */}
-          <div className="space-y-3">
-            <Label className="text-base font-medium">Account Type</Label>
-            <RadioGroup
-              value={isGuest ? "guest" : "user"}
-              onValueChange={(value) => setIsGuest(value === "guest")}
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="user" id="user" />
-                <Label htmlFor="user">Logged in account</Label>
-                {user && <Badge variant="secondary">{user.email}</Badge>}
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="guest" id="guest" />
-                <Label htmlFor="guest">Guest checkout</Label>
-              </div>
-            </RadioGroup>
-          </div>
-
-          {/* Guest Email */}
-          {isGuest && (
+          {/* Account Info */}
+          {user && (
             <div className="space-y-2">
-              <Label htmlFor="guestEmail">Email Address</Label>
-              <Input
-                id="guestEmail"
-                type="email"
-                value={guestEmail}
-                onChange={(e) => setGuestEmail(e.target.value)}
-                placeholder="Enter your email"
-                required
-              />
+              <Label className="text-base font-medium">Account</Label>
+              <Badge variant="secondary">{user.email}</Badge>
             </div>
           )}
 

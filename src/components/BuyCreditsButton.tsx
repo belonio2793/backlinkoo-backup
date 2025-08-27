@@ -44,8 +44,7 @@ export function BuyCreditsButton({
         credits,
         productName: `${credits} Premium Backlink Credits`,
         type: 'credits',
-        isGuest: true,
-        guestEmail: 'guest@backlinkoo.com' // This would normally come from user input
+        isGuest: false
       });
 
       if (result.success) {

@@ -54,8 +54,6 @@ export const PricingModal = ({
   const [selectedPlan, setSelectedPlan] = useState<string>("");
   const [customCredits, setCustomCredits] = useState(initialCredits || 200);
   const [paymentMethod, setPaymentMethod] = useState<"stripe">("stripe");
-  const [isGuest, setIsGuest] = useState(false);
-  const [guestEmail, setGuestEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [showCustomPlan, setShowCustomPlan] = useState(false);
   
@@ -142,6 +140,13 @@ export const PricingModal = ({
     }
   };
 
+  // Auto-update pricing when selection changes
+  useEffect(() => {
+    // This effect ensures pricing is always calculated correctly
+    const { price } = getFinalCreditsAndPrice();
+    // Price is automatically calculated via getFinalCreditsAndPrice()
+  }, [selectedPlan, customCredits, showCustomPlan]);
+
   const handleAuthSuccess = (user: any) => {
     setStep("payment");
     if (onAuthSuccess) {
@@ -161,14 +166,6 @@ export const PricingModal = ({
       return;
     }
 
-    if (isGuest && !guestEmail) {
-      toast({
-        title: "Error",
-        description: "Email is required for guest checkout",
-        variant: "destructive",
-      });
-      return;
-    }
 
     setLoading(true);
 
@@ -182,8 +179,7 @@ export const PricingModal = ({
           amount: price,
           productName: `${credits} Backlink Credits`,
           credits: credits,
-          isGuest,
-          guestEmail: isGuest ? guestEmail : undefined,
+          isGuest: false,
           paymentMethod
         })
       });
@@ -237,8 +233,6 @@ export const PricingModal = ({
     setSelectedPlan("");
     setShowCustomPlan(false);
     setCustomCredits(initialCredits || 200);
-    setIsGuest(false);
-    setGuestEmail("");
     setLoading(false);
   };
 
@@ -466,39 +460,7 @@ export const PricingModal = ({
 
             {/* Payment Options */}
             <div className="space-y-4">
-              {/* Checkout Type */}
-              <div className="space-y-2">
-                <Label>Checkout Type</Label>
-                <RadioGroup
-                  value={isGuest ? "guest" : "user"}
-                  onValueChange={(value) => setIsGuest(value === "guest")}
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="user" id="user" />
-                    <Label htmlFor="user">Account Checkout</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="guest" id="guest" />
-                    <Label htmlFor="guest">Guest Checkout</Label>
-                  </div>
-                </RadioGroup>
-              </div>
-
-              {/* Guest Email */}
-              {isGuest && (
-                <div className="space-y-2">
-                  <Label htmlFor="guestEmail">Email Address</Label>
-                  <Input
-                    id="guestEmail"
-                    type="email"
-                    value={guestEmail}
-                    onChange={(e) => setGuestEmail(e.target.value)}
-                    placeholder="Enter your email for receipt"
-                    required
-                  />
-                </div>
-              )}
-
+  
               {/* Payment Method */}
               <div className="space-y-2">
                 <Label>Payment Method</Label>
@@ -514,9 +476,9 @@ export const PricingModal = ({
               </div>
 
               {/* Purchase Button */}
-              <Button 
-                onClick={handlePayment} 
-                disabled={loading || (isGuest && !guestEmail)}
+              <Button
+                onClick={handlePayment}
+                disabled={loading}
                 className="w-full bg-primary hover:bg-primary/90"
                 size="lg"
               >

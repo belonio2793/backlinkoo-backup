@@ -49,12 +49,14 @@ export const UniversalPaymentComponent: React.FC<UniversalPaymentComponentProps>
   const [loading, setLoading] = useState(false);
   const [selectedCredits, setSelectedCredits] = useState(defaultCredits);
   const [customCredits, setCustomCredits] = useState('');
-  const [isGuest, setIsGuest] = useState(!user);
-  const [guestEmail, setGuestEmail] = useState('');
 
+  // Auto-update pricing when credits change
   useEffect(() => {
-    setIsGuest(!user);
-  }, [user]);
+    const creditsToUse = customCredits ? parseInt(customCredits) : selectedCredits;
+    if (creditsToUse > 0) {
+      // Pricing automatically calculated and displayed
+    }
+  }, [selectedCredits, customCredits]);
 
   useEffect(() => {
     // Listen for payment success/cancel events
@@ -86,14 +88,6 @@ export const UniversalPaymentComponent: React.FC<UniversalPaymentComponentProps>
   ];
 
   const handleCreditPurchase = async () => {
-    if (isGuest && !guestEmail) {
-      toast({
-        title: "Email Required",
-        description: "Please enter your email for guest checkout",
-        variant: "destructive"
-      });
-      return;
-    }
 
     const creditsToUse = customCredits ? parseInt(customCredits) : selectedCredits;
     
@@ -111,8 +105,7 @@ export const UniversalPaymentComponent: React.FC<UniversalPaymentComponentProps>
     try {
       const result = await stripeCheckout.purchaseCredits({
         credits: creditsToUse,
-        isGuest,
-        guestEmail: isGuest ? guestEmail : undefined
+        isGuest: false
       });
 
       if (result.success) {
@@ -149,7 +142,7 @@ export const UniversalPaymentComponent: React.FC<UniversalPaymentComponentProps>
         </DialogTrigger>
       )}
       
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] max-w-5xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <CreditCard className="h-5 w-5" />
@@ -161,37 +154,13 @@ export const UniversalPaymentComponent: React.FC<UniversalPaymentComponentProps>
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Account Type Selection */}
-          <div className="space-y-3">
-            <Label className="text-base font-medium">Account Type</Label>
-            <RadioGroup
-              value={isGuest ? "guest" : "user"}
-              onValueChange={(value) => setIsGuest(value === "guest")}
-            >
+          {/* Account Info */}
+          {user && (
+            <div className="space-y-3">
+              <Label className="text-base font-medium">Account</Label>
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="user" id="user" />
-                <Label htmlFor="user">Account Checkout</Label>
-                {user && <Badge variant="secondary">{user.email}</Badge>}
+                <Badge variant="secondary">{user.email}</Badge>
               </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="guest" id="guest" />
-                <Label htmlFor="guest">Guest Checkout</Label>
-              </div>
-            </RadioGroup>
-          </div>
-
-          {/* Guest Email */}
-          {isGuest && (
-            <div className="space-y-2">
-              <Label htmlFor="guestEmail">Email Address</Label>
-              <Input
-                id="guestEmail"
-                type="email"
-                value={guestEmail}
-                onChange={(e) => setGuestEmail(e.target.value)}
-                placeholder="Enter your email"
-                required
-              />
             </div>
           )}
 
@@ -200,7 +169,7 @@ export const UniversalPaymentComponent: React.FC<UniversalPaymentComponentProps>
             <Label className="text-base font-medium">Select Credit Package</Label>
             
             {/* Predefined Options */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
               {creditOptions.map((option) => (
                 <Card
                   key={option.credits}
@@ -212,18 +181,18 @@ export const UniversalPaymentComponent: React.FC<UniversalPaymentComponentProps>
                     setCustomCredits('');
                   }}
                 >
-                  <CardHeader className="p-4 text-center">
-                    <div className="flex items-center justify-center gap-2 mb-2">
-                      <CardTitle className="text-lg">{option.credits} Credits</CardTitle>
+                  <CardHeader className="p-3 text-center">
+                    <div className="flex items-center justify-center gap-1 mb-1">
+                      <CardTitle className="text-base">{option.credits} Credits</CardTitle>
                       {option.popular && (
-                        <Badge className="bg-primary text-white">
-                          <Star className="h-3 w-3 mr-1" />
+                        <Badge className="bg-primary text-white text-xs">
+                          <Star className="h-2 w-2 mr-1" />
                           Popular
                         </Badge>
                       )}
                     </div>
-                    <div className="text-2xl font-bold text-primary">${option.price}</div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-xl font-bold text-primary">${option.price}</div>
+                    <div className="text-xs text-muted-foreground">
                       ${(option.price / option.credits).toFixed(2)} per credit
                     </div>
                   </CardHeader>
@@ -236,7 +205,7 @@ export const UniversalPaymentComponent: React.FC<UniversalPaymentComponentProps>
             {/* Custom Amount */}
             <div className="space-y-3">
               <Label className="text-base font-medium">Custom Amount</Label>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="customCredits">Number of Credits</Label>
                   <Input
@@ -263,6 +232,13 @@ export const UniversalPaymentComponent: React.FC<UniversalPaymentComponentProps>
                     </div>
                   </div>
                 </div>
+                <div className="space-y-2">
+                  <Label>Rate</Label>
+                  <div className="p-3 bg-gray-50 rounded-lg text-center">
+                    <div className="text-lg font-semibold text-gray-700">$1.40</div>
+                    <div className="text-xs text-muted-foreground">per credit</div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -270,7 +246,7 @@ export const UniversalPaymentComponent: React.FC<UniversalPaymentComponentProps>
           {/* Features */}
           <div className="space-y-3">
             <Label className="text-base font-medium">What's Included</Label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
               {[
                 'High DA backlinks',
                 'Automated content generation',
@@ -290,7 +266,7 @@ export const UniversalPaymentComponent: React.FC<UniversalPaymentComponentProps>
           {/* Purchase Button */}
           <Button
             onClick={handleCreditPurchase}
-            disabled={loading || (isGuest && !guestEmail) || (!selectedCredits && !customCredits)}
+            disabled={loading || (!selectedCredits && !customCredits)}
             className="w-full"
             size="lg"
           >

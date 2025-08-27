@@ -21,11 +21,11 @@ export interface SubscriptionResult {
 export class EnhancedSubscriptionService {
   private static readonly PRICE_IDS = {
     monthly: {
-      stripe: import.meta.env.VITE_STRIPE_MONTHLY_PRICE_ID || 'price_premium_monthly',
+      stripe: import.meta.env.VITE_STRIPE_PREMIUM_PLAN_MONTHLY || 'price_premium_monthly',
       amount: 29
     },
     yearly: {
-      stripe: import.meta.env.VITE_STRIPE_YEARLY_PRICE_ID || 'price_premium_yearly',
+      stripe: import.meta.env.VITE_STRIPE_PREMIUM_PLAN_ANNUAL || 'price_premium_yearly',
       amount: 290
     }
   };

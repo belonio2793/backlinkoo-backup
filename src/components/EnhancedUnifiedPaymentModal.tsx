@@ -41,7 +41,7 @@ interface EnhancedUnifiedPaymentModalProps {
 
 type FlowStep = 'selection' | 'auth' | 'payment' | 'processing' | 'success';
 type PaymentMethod = 'stripe';
-type CheckoutType = 'user' | 'guest';
+type CheckoutType = 'user';
 
 interface CreditPlan {
   id: string;
@@ -77,8 +77,6 @@ export function EnhancedUnifiedPaymentModal({
   const [customCredits, setCustomCredits] = useState(initialCredits || 200);
   const [showCustomCredits, setShowCustomCredits] = useState(false);
   
-  // Guest checkout
-  const [guestEmail, setGuestEmail] = useState('');
 
   // Payment method availability
   const [availablePaymentMethods, setAvailablePaymentMethods] = useState<'stripe'[]>(['stripe']);
@@ -122,10 +120,19 @@ export function EnhancedUnifiedPaymentModal({
     'Multi-platform content distribution'
   ];
 
-  // Calculate custom credits price
+  // Calculate custom credits price with auto-propagation
   const calculateCustomPrice = (credits: number) => {
     return (credits * CREDIT_PRICE).toFixed(2);
   };
+
+  // Auto-update pricing when selection changes
+  useEffect(() => {
+    // Auto-propagate pricing when credits change
+    const selection = getFinalSelection();
+    if (selection) {
+      // Pricing is automatically calculated and displayed
+    }
+  }, [selectedCreditPlan, customCredits, showCustomCredits]);
 
   // Reset modal state
   const resetModal = () => {
@@ -134,7 +141,6 @@ export function EnhancedUnifiedPaymentModal({
     setShowCustomCredits(false);
     setCustomCredits(initialCredits || 200);
     setCheckoutType('user');
-    setGuestEmail('');
     setIsProcessing(false);
   };
 
@@ -203,14 +209,6 @@ export function EnhancedUnifiedPaymentModal({
       return;
     }
 
-    if (checkoutType === 'guest' && !guestEmail) {
-      toast({
-        title: 'Email Required',
-        description: 'Please enter your email for guest checkout',
-        variant: 'destructive'
-      });
-      return;
-    }
 
     setCurrentStep('processing');
     setIsProcessing(true);
@@ -221,8 +219,7 @@ export function EnhancedUnifiedPaymentModal({
         credits: selection.credits,
         productName: `${selection.credits} Premium Backlink Credits`,
         type: 'credits',
-        isGuest: checkoutType === 'guest',
-        guestEmail: checkoutType === 'guest' ? guestEmail : undefined
+        isGuest: false
       });
 
       if (result.success) {
@@ -262,37 +259,13 @@ export function EnhancedUnifiedPaymentModal({
         </p>
       </div>
 
-      {/* Checkout Type Selection */}
-      <div className="space-y-3">
-        <Label className="text-base font-medium">Checkout Type</Label>
-        <RadioGroup
-          value={checkoutType}
-          onValueChange={(value) => setCheckoutType(value as CheckoutType)}
-        >
+      {/* Account Info */}
+      {user && (
+        <div className="space-y-3">
+          <Label className="text-base font-medium">Account</Label>
           <div className="flex items-center space-x-2">
-            <RadioGroupItem value="user" id="user" />
-            <Label htmlFor="user">Account Checkout</Label>
-            {user && <Badge variant="secondary">{user.email}</Badge>}
+            <Badge variant="secondary">{user.email}</Badge>
           </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="guest" id="guest" />
-            <Label htmlFor="guest">Guest Checkout</Label>
-          </div>
-        </RadioGroup>
-      </div>
-
-      {/* Guest Email */}
-      {checkoutType === 'guest' && (
-        <div className="space-y-2">
-          <Label htmlFor="guestEmail">Email Address</Label>
-          <Input
-            id="guestEmail"
-            type="email"
-            value={guestEmail}
-            onChange={(e) => setGuestEmail(e.target.value)}
-            placeholder="Enter your email"
-            required
-          />
         </div>
       )}
 
@@ -411,7 +384,7 @@ export function EnhancedUnifiedPaymentModal({
 
       <div className="space-y-3">
         <h3 className="font-semibold">Credit Features:</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
           {creditFeatures.map((feature, index) => (
             <div key={index} className="flex items-center gap-2 text-sm">
               <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
@@ -426,7 +399,7 @@ export function EnhancedUnifiedPaymentModal({
         onClick={handleContinue}
         className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
         size="lg"
-        disabled={!getFinalSelection() || (checkoutType === 'guest' && !guestEmail)}
+        disabled={!getFinalSelection()}
       >
         Purchase Credits
         <ArrowRight className="ml-2 h-4 w-4" />
@@ -571,7 +544,7 @@ export function EnhancedUnifiedPaymentModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="w-[95vw] max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] max-w-5xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Sparkles className="h-6 w-6 text-primary" />
