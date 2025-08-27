@@ -323,6 +323,14 @@ const App = () => {
               }
             />
 
+            <Route
+              path="/stripe-test"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyStripeTest />
+                </Suspense>
+              }
+            />
 
             <Route
               path="/test"
