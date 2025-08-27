@@ -1,4 +1,5 @@
 import { PaymentTestButton } from '@/components/PaymentTestButton';
+import { PaymentDebugger } from '@/components/PaymentDebugger';
 import { BuyCreditsButton } from '@/components/BuyCreditsButton';
 import { DirectPaymentButtons } from '@/components/DirectPaymentButtons';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -81,6 +82,9 @@ export default function PaymentTest() {
 
       {/* Integration Test */}
       <PaymentTestButton />
+
+      {/* Payment Debugger */}
+      <PaymentDebugger />
 
       {/* Actual Payment Components */}
       <Card>
