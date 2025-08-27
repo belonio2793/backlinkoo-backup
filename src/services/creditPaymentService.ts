@@ -43,6 +43,32 @@ export class CreditPaymentService {
   }
 
   /**
+   * Create development Stripe URL for testing
+   */
+  private static createDevStripeUrl(options: CreditPaymentOptions): string {
+    // Check if we have Stripe test keys for development
+    const stripePublishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+
+    if (stripePublishableKey && stripePublishableKey.startsWith('pk_test_')) {
+      console.log('🧪 Using Stripe test environment for development');
+      // Create a mock Stripe checkout page that will open in new window
+      const params = new URLSearchParams({
+        credits: options.credits.toString(),
+        amount: options.amount.toString(),
+        productName: options.productName || `${options.credits} Credits`,
+        testMode: 'true'
+      });
+
+      // Return a local test page that simulates Stripe checkout
+      return `/dev-stripe-checkout?${params.toString()}`;
+    } else {
+      console.log('🔧 No valid Stripe test keys - using demo URL');
+      // Fallback to a demo URL that will at least open a new window
+      return `https://js.stripe.com/v3/?credits=${options.credits}&amount=${options.amount}`;
+    }
+  }
+
+  /**
    * Create credit payment session
    */
   static async createCreditPayment(
