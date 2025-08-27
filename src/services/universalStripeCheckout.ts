@@ -149,10 +149,26 @@ export class UniversalStripeCheckout {
         throw new Error('No payment URL received from server');
       }
     } catch (error) {
-      console.error('Credit purchase error:', error);
+      console.error('❌ Supabase Edge Function failed, trying fallback endpoints...');
+      console.error('Original error:', this.extractErrorMessage(error));
+
+      // Try fallback endpoints similar to CreditPaymentService
+      try {
+        const fallbackResult = await this.tryFallbackEndpoints(paymentData);
+        if (fallbackResult.success) {
+          return fallbackResult;
+        }
+      } catch (fallbackError) {
+        console.error('❌ Fallback endpoints also failed:', this.extractErrorMessage(fallbackError));
+      }
+
+      // If everything fails, return clear error
+      const errorMessage = this.extractErrorMessage(error);
+      console.error('💥 All payment methods failed:', errorMessage);
+
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Credit purchase failed'
+        error: `Payment failed: ${errorMessage}`
       };
     }
   }
