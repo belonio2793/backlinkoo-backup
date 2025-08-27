@@ -209,12 +209,12 @@ export class UniversalStripeCheckout {
       }
 
       // If everything fails, return clear error
-      const errorMessage = this.extractErrorMessage(error);
-      console.error('💥 All payment methods failed:', errorMessage);
+      const finalErrorMessage = this.extractErrorMessage(error);
+      console.error('💥 All payment methods failed:', finalErrorMessage);
 
       return {
         success: false,
-        error: `Payment failed: ${errorMessage}`
+        error: `Payment failed: ${finalErrorMessage}`
       };
     }
   }
