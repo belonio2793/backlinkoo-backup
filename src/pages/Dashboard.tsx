@@ -1167,15 +1167,13 @@ const Dashboard = () => {
                     <span className="xs:hidden">{credits}</span>
                     <span className="hidden sm:inline">Credits</span>
                   </Badge>
-                  <UniversalPaymentComponent
+                  <SimpleBuyCreditsButton
                     trigger={
                       <Button variant="outline" size="sm" className="px-2 sm:px-4 bg-green-50 hover:bg-green-100 border-green-200 text-green-700 hover:text-green-800">
                         <CreditCard className="h-4 w-4 sm:mr-1" />
                         <span className="hidden sm:inline">Buy Credits</span>
                       </Button>
                     }
-                    defaultType="credits"
-                    showTrigger={true}
                     onPaymentSuccess={() => {
                       fetchDashboardData();
                       toast({
