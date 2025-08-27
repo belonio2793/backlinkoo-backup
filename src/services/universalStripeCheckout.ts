@@ -37,6 +37,52 @@ export class UniversalStripeCheckout {
   }
 
   /**
+   * Try fallback endpoints when Supabase Edge Functions fail
+   */
+  private async tryFallbackEndpoints(paymentData: any): Promise<PaymentResult> {
+    const endpoints = [
+      '/.netlify/functions/create-payment',
+      '/api/create-payment',
+      '/functions/create-payment'
+    ];
+
+    for (const endpoint of endpoints) {
+      try {
+        console.log(`🔄 Trying fallback endpoint: ${endpoint}`);
+
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(paymentData)
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          console.log(`✅ Fallback endpoint succeeded: ${endpoint}`);
+
+          if (result.url) {
+            return {
+              success: true,
+              url: result.url,
+              sessionId: result.sessionId || result.session_id
+            };
+          }
+        } else {
+          const errorText = await response.text();
+          console.warn(`⚠️ Endpoint ${endpoint} returned ${response.status}: ${errorText}`);
+        }
+      } catch (fetchError) {
+        console.warn(`⚠️ Endpoint ${endpoint} failed:`, this.extractErrorMessage(fetchError));
+        continue;
+      }
+    }
+
+    throw new Error('All fallback endpoints failed');
+  }
+
+  /**
    * Extract meaningful error message from any error object
    */
   private extractErrorMessage(error: unknown): string {
