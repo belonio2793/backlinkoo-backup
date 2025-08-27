@@ -264,13 +264,22 @@ export class CreditPaymentService {
       // Final fallback - use development mode credits
       if (error || !data) {
         console.log('🔄 All credit payment endpoints failed, using development fallback...');
+        console.log('🌍 Environment check:', {
+          isLocalhost: environment.isLocalhost,
+          hostname: environment.hostname,
+          shouldUseFallback: environment.isLocalhost || environment.hostname.includes('localhost')
+        });
 
-        if (environment.isLocalhost) {
-          console.log('🏠 Localhost detected - returning demo URL');
+        if (environment.isLocalhost || environment.hostname.includes('localhost')) {
+          console.log('🏠 Development environment detected - creating Stripe test checkout');
+
+          // For development, create a real Stripe test checkout URL
+          const testCheckoutUrl = this.createDevStripeUrl(options);
+
           return {
             success: true,
             usedFallback: true,
-            url: `https://demo-stripe-checkout.com/credits/${options.credits}`
+            url: testCheckoutUrl
           };
         } else {
           console.error('💥 Production environment - all payment methods failed');
