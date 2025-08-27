@@ -113,24 +113,52 @@ export class CreditPaymentService {
       // Try Supabase Edge Functions first (if available)
       if (environment.hasSupabaseFunctions) {
         console.log('🔄 Trying Supabase Edge Function for credit payment...');
+        console.log('Environment details:', environment);
+
         try {
           // Get auth session for Supabase edge functions
           const { data: session } = await supabase.auth.getSession();
-          const headers: Record<string, string> = {};
+          const headers: Record<string, string> = {
+            'Content-Type': 'application/json'
+          };
 
           if (!finalIsGuest && session?.session?.access_token) {
             headers['Authorization'] = `Bearer ${session.session.access_token}`;
           }
 
+          console.log('📤 Calling Supabase Edge Function with:', {
+            function: 'create-payment',
+            hasAuth: !!headers['Authorization'],
+            requestBody: { ...requestBody, guestEmail: finalGuestEmail ? '***' : undefined }
+          });
+
           const { data: result, error: edgeError } = await supabase.functions.invoke('create-payment', {
             body: requestBody,
             headers
           });
+
+          console.log('📥 Supabase Edge Function response:', {
+            hasData: !!result,
+            hasError: !!edgeError,
+            error: edgeError,
+            dataKeys: result ? Object.keys(result) : []
+          });
+
           data = result;
           error = edgeError;
 
-          if (!error && data) {
+          if (!error && data && data.url) {
             console.log('✅ Supabase Edge Function succeeded for credits');
+            // Exit early on success
+            return {
+              success: true,
+              url: data.url,
+              sessionId: data.sessionId || data.session_id
+            };
+          } else if (error) {
+            console.warn('⚠️ Supabase Edge Function error:', error);
+          } else {
+            console.warn('⚠️ Supabase Edge Function returned no URL');
           }
         } catch (edgeError) {
           console.warn('⚠️ Supabase Edge Function failed for credits:', edgeError);
