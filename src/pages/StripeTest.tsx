@@ -33,6 +33,9 @@ export default function StripeTest() {
         {/* Quick Payment Test */}
         <QuickPaymentTest />
 
+        {/* Error Debugger */}
+        <ErrorDebugger />
+
         {/* Debug Helper */}
         <PaymentDebugHelper />
 
