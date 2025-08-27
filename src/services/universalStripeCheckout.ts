@@ -161,9 +161,9 @@ export class UniversalStripeCheckout {
       console.log('📥 Supabase response:', { hasData: !!result, hasError: !!error });
 
       if (error) {
-        const errorMessage = this.extractErrorMessage(error);
-        console.error('❌ Supabase Edge Function error:', errorMessage);
-        throw new Error(`Payment creation failed: ${errorMessage}`);
+        const supabaseErrorMessage = this.extractErrorMessage(error);
+        console.error('❌ Supabase Edge Function error:', supabaseErrorMessage);
+        throw new Error(`Payment creation failed: ${supabaseErrorMessage}`);
       }
 
       if (!result) {
