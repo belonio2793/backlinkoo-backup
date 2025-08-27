@@ -384,7 +384,7 @@ export function EnhancedUnifiedPaymentModal({
 
       <div className="space-y-3">
         <h3 className="font-semibold">Credit Features:</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
           {creditFeatures.map((feature, index) => (
             <div key={index} className="flex items-center gap-2 text-sm">
               <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
@@ -544,7 +544,7 @@ export function EnhancedUnifiedPaymentModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="w-[95vw] max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] max-w-5xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Sparkles className="h-6 w-6 text-primary" />
