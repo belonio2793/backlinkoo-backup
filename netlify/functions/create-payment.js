@@ -189,7 +189,7 @@ exports.handler = async (event, context) => {
           .insert({
             stripe_session_id: result.sessionId,
             email,
-            amount: body.amount * 100, // Convert to cents
+            amount: Math.round(body.amount * 100), // Convert to cents
             status: 'pending',
             payment_method: 'stripe',
             product_name: body.productName || `${body.credits || 0} Backlink Credits`,
