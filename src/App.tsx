@@ -334,6 +334,15 @@ const App = () => {
             />
 
             <Route
+              path="/dev-stripe-checkout"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyDevStripeCheckout />
+                </Suspense>
+              }
+            />
+
+            <Route
               path="/test"
               element={
                 <Suspense fallback={<div>Loading...</div>}>
