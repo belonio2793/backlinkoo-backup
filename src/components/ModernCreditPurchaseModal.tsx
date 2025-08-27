@@ -154,7 +154,7 @@ export function ModernCreditPurchaseModal({
           CreditPaymentService.openCheckoutWindow(result.url, result.sessionId);
 
           toast({
-            title: "✅ Checkout Opened Successfully",
+            title: "�� Checkout Opened Successfully",
             description: "Complete your payment in the new window. This modal will close shortly.",
           });
         } else if (result.usedFallback) {
@@ -176,20 +176,47 @@ export function ModernCreditPurchaseModal({
       }
     } catch (error) {
       console.error('Credit purchase error:', error);
-      
-      if (error instanceof Error && error.message.includes('popup')) {
-        toast({
-          title: "Popup Blocked",
-          description: "Please allow popups for this site and try again.",
-          variant: "destructive",
-        });
+
+      // Get user-friendly error message
+      let errorMessage = 'Failed to create payment session';
+      let errorTitle = 'Payment Error';
+
+      if (error instanceof Error) {
+        if (error.message.includes('popup') || error.message.includes('blocked')) {
+          errorTitle = 'Popup Blocked';
+          errorMessage = 'Please allow popups for this site and try again.';
+        } else if (error.message.includes('configuration') || error.message.includes('not configured')) {
+          errorTitle = 'Configuration Error';
+          errorMessage = 'Payment system is not properly configured. Please contact support.';
+        } else if (error.message.includes('network') || error.message.includes('fetch')) {
+          errorTitle = 'Network Error';
+          errorMessage = 'Please check your internet connection and try again.';
+        } else if (error.message.includes('authentication') || error.message.includes('sign in')) {
+          errorTitle = 'Authentication Required';
+          errorMessage = 'Please sign in to your account and try again.';
+        } else {
+          errorMessage = error.message;
+        }
       } else {
-        toast({
-          title: "Payment Error",
-          description: error instanceof Error ? error.message : 'Failed to create payment session',
-          variant: "destructive",
-        });
+        // Handle non-Error objects
+        errorMessage = String(error);
       }
+
+      // Log detailed error for debugging
+      console.error('Detailed error info:', {
+        error,
+        errorType: typeof error,
+        errorConstructor: error?.constructor?.name,
+        userAgent: navigator.userAgent,
+        url: window.location.href,
+        timestamp: new Date().toISOString()
+      });
+
+      toast({
+        title: errorTitle,
+        description: errorMessage,
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
