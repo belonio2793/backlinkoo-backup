@@ -82,11 +82,20 @@ export class CreditPaymentService {
 
     // Check Stripe configuration
     const stripePublishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+    console.log('🔧 Stripe Configuration Check:', {
+      hasPublishableKey: !!stripePublishableKey,
+      keyFormat: stripePublishableKey ? stripePublishableKey.substring(0, 8) + '...' : 'missing',
+      isValidFormat: stripePublishableKey?.startsWith('pk_')
+    });
+
     if (!stripePublishableKey || !stripePublishableKey.startsWith('pk_')) {
-      console.warn('⚠️ Stripe not configured for credit payments');
-      return { 
-        success: false, 
-        error: 'Payment system not configured. Please contact support.' 
+      console.error('❌ Stripe configuration error:', {
+        publishableKey: stripePublishableKey ? 'present but invalid format' : 'missing',
+        expectedFormat: 'pk_test_... or pk_live_...'
+      });
+      return {
+        success: false,
+        error: 'Payment system not configured. Please contact support.'
       };
     }
 
