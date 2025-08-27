@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { stripePaymentService } from '@/services/stripePaymentService';
+import { CreditPaymentService } from '@/services/creditPaymentService';
 import { ImprovedPaymentModal } from '@/components/ImprovedPaymentModal';
 import { CreditCard, Zap } from 'lucide-react';
 
@@ -39,19 +39,33 @@ export function BuyCreditsButton({
 
     try {
 
-      const result = await stripePaymentService.createPayment({
-        amount: finalAmount,
-        credits,
-        productName: `${credits} Premium Backlink Credits`,
-        type: 'credits',
-        isGuest: false
-      });
+      const result = await CreditPaymentService.createCreditPayment(
+        null, // user will be determined inside the service
+        false, // not guest for now
+        undefined,
+        {
+          amount: finalAmount,
+          credits,
+          productName: `${credits} Premium Backlink Credits`,
+          isGuest: false
+        }
+      );
 
       if (result.success) {
-        toast({
-          title: "✅ Purchase Processing",
-          description: `${credits} credits will be added to your account.`,
-        });
+        if (result.url) {
+          // Open checkout in new window
+          CreditPaymentService.openCheckoutWindow(result.url, result.sessionId);
+
+          toast({
+            title: "✅ Checkout Opened",
+            description: `Complete your payment for ${credits} credits in the new window.`,
+          });
+        } else if (result.usedFallback) {
+          toast({
+            title: "✅ Development Mode",
+            description: `${credits} credit purchase simulated in development mode.`,
+          });
+        }
       } else {
         throw new Error(result.error || 'Purchase failed');
       }
