@@ -181,8 +181,8 @@ export class CreditPaymentService {
       });
       return {
         success: false,
-        error: environment.isLocalhost ?
-          'Stripe test keys not configured for development. Please set VITE_STRIPE_PUBLISHABLE_KEY.' :
+        error: environment.isDevelopment ?
+          'Stripe test keys not configured for development. Please set VITE_STRIPE_PUBLISHABLE_KEY with a pk_test_ key.' :
           'Payment system not configured. Please contact support.'
       };
     }
