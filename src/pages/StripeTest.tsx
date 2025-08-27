@@ -37,6 +37,9 @@ export default function StripeTest() {
         {/* Error Debugger */}
         <ErrorDebugger />
 
+        {/* Error Serialization Test */}
+        <ErrorSerializationTest />
+
         {/* Debug Helper */}
         <PaymentDebugHelper />
 
