@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Zap, CreditCard, ExternalLink } from "lucide-react";
-import { CustomCreditsModal } from "./CustomCreditsModal";
+import { ModernCreditPurchaseModal } from "./ModernCreditPurchaseModal";
 
 interface CustomCreditsButtonProps {
   variant?: 'default' | 'outline' | 'secondary' | 'ghost' | 'link' | 'destructive';
@@ -56,7 +56,7 @@ export const CustomCreditsButton = ({
         )}
       </Button>
 
-      <CustomCreditsModal
+      <ModernCreditPurchaseModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         initialCredits={initialCredits}
