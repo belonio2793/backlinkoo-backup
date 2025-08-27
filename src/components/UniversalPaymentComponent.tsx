@@ -17,6 +17,8 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { stripeCheckout } from '@/services/universalStripeCheckout';
+import { useAuthModal } from '@/contexts/ModalContext';
+import { setCheckoutIntent } from '@/utils/checkoutIntent';
 import {
   CreditCard,
   Zap,
@@ -44,6 +46,7 @@ export const UniversalPaymentComponent: React.FC<UniversalPaymentComponentProps>
 }) => {
   const { toast } = useToast();
   const { user } = useAuth();
+  const { openLoginModal } = useAuthModal();
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [selectedCredits, setSelectedCredits] = useState(defaultCredits);
@@ -96,6 +99,15 @@ export const UniversalPaymentComponent: React.FC<UniversalPaymentComponentProps>
         description: "Please select a valid number of credits",
         variant: "destructive"
       });
+      return;
+    }
+
+    // Require authentication before opening checkout
+    if (!user) {
+      const amount = creditsToUse * 1.40;
+      setCheckoutIntent({ type: 'credits', credits: creditsToUse, price: amount });
+      openLoginModal({ pendingAction: `${creditsToUse} credits` });
+      toast({ title: 'Sign in required', description: 'Please sign in to continue to secure checkout.' });
       return;
     }
 
