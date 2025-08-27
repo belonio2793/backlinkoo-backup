@@ -92,6 +92,7 @@
     "caniuse-lite": "^1.0.30001727",
     "cmdk": "^1.0.0",
     "embla-carousel-react": "^8.3.0",
+    "esbuild": "^0.25.9",
     "eslint": "^9.9.0",
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",
     "eslint-plugin-react-refresh": "^0.4.9",
