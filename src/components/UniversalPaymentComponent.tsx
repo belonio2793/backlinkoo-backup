@@ -81,10 +81,10 @@ export const UniversalPaymentComponent: React.FC<UniversalPaymentComponentProps>
   }, [onPaymentSuccess, onPaymentCancel]);
 
   const creditOptions = [
-    { credits: 50, price: 70, popular: false },
-    { credits: 100, price: 140, popular: true },
-    { credits: 250, price: 350, popular: false },
-    { credits: 500, price: 700, popular: false }
+    { credits: 50, price: 70 },
+    { credits: 100, price: 140 },
+    { credits: 250, price: 350 },
+    { credits: 500, price: 700 }
   ];
 
   const handleCreditPurchase = async () => {
@@ -181,7 +181,7 @@ export const UniversalPaymentComponent: React.FC<UniversalPaymentComponentProps>
                   key={option.credits}
                   className={`cursor-pointer transition-all hover:shadow-md ${
                     selectedCredits === option.credits && !customCredits ? 'ring-2 ring-primary' : ''
-                  } ${option.popular ? 'border-primary' : ''}`}
+                  }`}
                   onClick={() => {
                     setSelectedCredits(option.credits);
                     setCustomCredits('');
@@ -190,12 +190,6 @@ export const UniversalPaymentComponent: React.FC<UniversalPaymentComponentProps>
                   <CardHeader className="p-3 text-center">
                     <div className="flex items-center justify-center gap-1 mb-1">
                       <CardTitle className="text-base">{option.credits} Credits</CardTitle>
-                      {option.popular && (
-                        <Badge className="bg-primary text-white text-xs">
-                          <Star className="h-2 w-2 mr-1" />
-                          Popular
-                        </Badge>
-                      )}
                     </div>
                     <div className="text-xl font-bold text-primary">${option.price}</div>
                     <div className="text-xs text-muted-foreground">
