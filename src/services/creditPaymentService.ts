@@ -149,12 +149,23 @@ export class CreditPaymentService {
         for (const endpoint of endpoints) {
           try {
             console.log(`🔄 Trying credit payment endpoint: ${endpoint}`);
+
+            // Prepare headers
+            const headers: Record<string, string> = {
+              'Content-Type': 'application/json'
+            };
+
+            // Add auth header for non-guest users
+            if (!finalIsGuest) {
+              const { data: session } = await supabase.auth.getSession();
+              if (session?.session?.access_token) {
+                headers['Authorization'] = `Bearer ${session.session.access_token}`;
+              }
+            }
+
             const response = await fetch(endpoint, {
               method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token || ''}`
-              },
+              headers,
               body: JSON.stringify(requestBody)
             });
 
