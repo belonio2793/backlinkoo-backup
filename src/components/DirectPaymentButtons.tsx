@@ -4,10 +4,12 @@
  * No modals, loading states, or notifications
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Crown, CreditCard, Zap, Star } from 'lucide-react';
 import { stripeCheckout } from '@/services/universalStripeCheckout';
+import { useAuthState } from '@/hooks/useAuthState';
+import { toast } from 'sonner';
 
 interface DirectPaymentButtonProps {
   variant?: 'default' | 'outline' | 'destructive' | 'secondary' | 'ghost' | 'link';
@@ -26,9 +28,56 @@ export function DirectBuyCreditsButton({
   className = '',
   disabled = false
 }: DirectPaymentButtonProps & { credits?: 50 | 100 | 250 | 500 }) {
-  
+  const { user, isLoading: authLoading } = useAuthState();
+  const [isLoading, setIsLoading] = useState(false);
+
   const handleClick = async () => {
-    await stripeCheckout.quickBuyCredits(credits);
+    if (authLoading) {
+      toast('Please wait while we verify your account...', { duration: 2000 });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      if (user) {
+        // User is authenticated, proceed with normal flow
+        await stripeCheckout.quickBuyCredits(credits);
+      } else {
+        // User is not authenticated, collect email for guest checkout
+        const email = window.prompt('Please enter your email address to complete your purchase:');
+
+        if (!email || !email.includes('@')) {
+          toast('A valid email address is required to complete your purchase', {
+            duration: 3000
+          });
+          return;
+        }
+
+        // Use guest quick buy with email
+        const pricing = {
+          50: 70,
+          100: 140,
+          250: 350,
+          500: 700
+        };
+
+        const amount = pricing[credits as keyof typeof pricing] || credits * 1.40;
+
+        await stripeCheckout.guestQuickBuy({
+          credits,
+          amount,
+          email
+        });
+      }
+    } catch (error) {
+      console.error('Purchase error:', error);
+      toast('Purchase failed. Please try again.', {
+        duration: 3000
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
   
   const getPrice = () => {
@@ -45,10 +94,19 @@ export function DirectBuyCreditsButton({
       size={size}
       className={className}
       onClick={handleClick}
-      disabled={disabled}
+      disabled={disabled || isLoading || authLoading}
     >
-      <CreditCard className="h-4 w-4 mr-2" />
-      Buy {`${credits} Credits`} - {getPrice()}
+      {isLoading ? (
+        <>
+          <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2"></div>
+          Processing...
+        </>
+      ) : (
+        <>
+          <CreditCard className="h-4 w-4 mr-2" />
+          Buy {`${credits} Credits`} - {getPrice()}
+        </>
+      )}
     </Button>
   );
 }
@@ -63,9 +121,46 @@ export function DirectUpgradeToPremiumButton({
   className = '',
   disabled = false
 }: DirectPaymentButtonProps & { plan?: 'monthly' | 'annual' }) {
-  
+  const { user, isLoading: authLoading } = useAuthState();
+  const [isLoading, setIsLoading] = useState(false);
+
   const handleClick = async () => {
-    await DirectCheckoutService.upgradeToPremium(plan);
+    if (authLoading) {
+      toast('Please wait while we verify your account...', { duration: 2000 });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      if (user) {
+        // User is authenticated, proceed with normal flow
+        await stripeCheckout.upgradeToPremium(plan);
+      } else {
+        // User is not authenticated, collect email for guest checkout
+        const email = window.prompt('Please enter your email address to upgrade to Premium:');
+
+        if (!email || !email.includes('@')) {
+          toast('A valid email address is required to upgrade to Premium', {
+            duration: 3000
+          });
+          return;
+        }
+
+        // Use guest premium upgrade with email
+        await stripeCheckout.guestPremiumUpgrade({
+          plan,
+          email
+        });
+      }
+    } catch (error) {
+      console.error('Premium upgrade error:', error);
+      toast('Premium upgrade failed. Please try again.', {
+        duration: 3000
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
   
   const getPrice = () => {
@@ -78,10 +173,19 @@ export function DirectUpgradeToPremiumButton({
       size={size}
       className={className}
       onClick={handleClick}
-      disabled={disabled}
+      disabled={disabled || isLoading || authLoading}
     >
-      <Crown className="h-4 w-4 mr-2" />
-      Upgrade to Premium - {getPrice()}
+      {isLoading ? (
+        <>
+          <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2"></div>
+          Processing...
+        </>
+      ) : (
+        <>
+          <Crown className="h-4 w-4 mr-2" />
+          Upgrade to Premium - {getPrice()}
+        </>
+      )}
     </Button>
   );
 }
@@ -162,12 +266,69 @@ export function DirectPaymentButton({
   plan?: 'monthly' | 'annual';
   text?: string;
 }) {
-  
+  const { user, isLoading: authLoading } = useAuthState();
+  const [isLoading, setIsLoading] = useState(false);
+
   const handleClick = async () => {
-    if (type === 'credits') {
-      await DirectCheckoutService.buyCredits(credits);
-    } else {
-      await DirectCheckoutService.upgradeToPremium(plan);
+    if (authLoading) {
+      toast('Please wait while we verify your account...', { duration: 2000 });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      if (user) {
+        // User is authenticated, proceed with normal flow
+        if (type === 'credits') {
+          await stripeCheckout.quickBuyCredits(credits || 50);
+        } else {
+          await stripeCheckout.upgradeToPremium(plan || 'monthly');
+        }
+      } else {
+        // User is not authenticated, collect email for guest checkout
+        const email = window.prompt(
+          type === 'credits'
+            ? 'Please enter your email address to purchase credits:'
+            : 'Please enter your email address to upgrade to Premium:'
+        );
+
+        if (!email || !email.includes('@')) {
+          toast('A valid email address is required to complete your purchase', {
+            duration: 3000
+          });
+          return;
+        }
+
+        if (type === 'credits') {
+          const creditAmount = credits || 50;
+          const pricing = {
+            50: 70,
+            100: 140,
+            250: 350,
+            500: 700
+          };
+          const amount = pricing[creditAmount as keyof typeof pricing] || creditAmount * 1.40;
+
+          await stripeCheckout.guestQuickBuy({
+            credits: creditAmount,
+            amount,
+            email
+          });
+        } else {
+          await stripeCheckout.guestPremiumUpgrade({
+            plan: plan || 'monthly',
+            email
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Purchase error:', error);
+      toast('Purchase failed. Please try again.', {
+        duration: 3000
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
   
@@ -193,10 +354,19 @@ export function DirectPaymentButton({
       size={size}
       className={className}
       onClick={handleClick}
-      disabled={disabled}
+      disabled={disabled || isLoading || authLoading}
     >
-      {getIcon()}
-      {text || getDefaultText()}
+      {isLoading ? (
+        <>
+          <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2"></div>
+          Processing...
+        </>
+      ) : (
+        <>
+          {getIcon()}
+          {text || getDefaultText()}
+        </>
+      )}
     </Button>
   );
 }
