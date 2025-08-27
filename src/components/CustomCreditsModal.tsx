@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CreditCard, Shield, ExternalLink, Zap, Calculator } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { stripePaymentService } from "@/services/stripePaymentService";
+import { CreditPaymentService } from "@/services/creditPaymentService";
 import { useAuth } from "@/hooks/useAuth";
 
 interface CustomCreditsModalProps {
@@ -88,26 +88,40 @@ export const CustomCreditsModal = ({
         description: "Secure payment window is opening...",
       });
 
-      const result = await stripePaymentService.createPayment({
-        amount: totalAmount,
-        credits: creditCount,
-        productName: `${creditCount} Premium Backlink Credits`,
-        type: 'credits',
-        isGuest: !user,
-        guestEmail: user?.email
-      });
+      const result = await CreditPaymentService.createCreditPayment(
+        user,
+        !user, // isGuest
+        user?.email,
+        {
+          amount: totalAmount,
+          credits: creditCount,
+          productName: `${creditCount} Premium Backlink Credits`,
+          isGuest: !user,
+          guestEmail: user?.email
+        }
+      );
 
       if (result.success) {
-        toast({
-          title: "✅ Checkout Opened Successfully",
-          description: "Complete your payment in the new window. This modal will close shortly.",
-        });
-        
+        if (result.url) {
+          // Open checkout in new window
+          CreditPaymentService.openCheckoutWindow(result.url, result.sessionId);
+
+          toast({
+            title: "✅ Checkout Opened Successfully",
+            description: "Complete your payment in the new window. This modal will close shortly.",
+          });
+        } else if (result.usedFallback) {
+          toast({
+            title: "✅ Development Mode",
+            description: "Credit purchase simulated in development mode.",
+          });
+        }
+
         // Call success callback if provided
         if (onSuccess) {
           onSuccess();
         }
-        
+
         // Close modal after successful checkout window opening
         setTimeout(() => {
           onClose();
