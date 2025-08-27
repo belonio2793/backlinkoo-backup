@@ -281,11 +281,12 @@ export function ModernCreditPurchaseModal({
                   ${totalPrice.toFixed(2)}
                 </div>
               </div>
-            </div>
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-700">Rate</Label>
-              <div className="text-sm text-gray-600">
-                ${rate.toFixed(2)} per credit
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-gray-700">Rate</Label>
+                <div className="h-10 px-3 py-2 border border-gray-200 rounded-md bg-gray-50 flex items-center justify-center text-lg font-semibold text-gray-700">
+                  ${rate.toFixed(2)}
+                </div>
+                <div className="text-xs text-gray-500 text-center">per credit</div>
               </div>
             </div>
           </div>
