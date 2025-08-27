@@ -178,7 +178,11 @@ export function StreamlinedPremiumCheckout({
             );
 
             if (!fallbackWindow) {
-              window.location.href = fallbackResult.url;
+              // Try one more new window attempt before current window
+              const lastResortWindow = window.open(fallbackResult.url, 'stripe-checkout-last', 'width=800,height=600,scrollbars=yes,resizable=yes');
+              if (!lastResortWindow) {
+                window.location.href = fallbackResult.url;
+              }
             } else {
               onClose();
             }
