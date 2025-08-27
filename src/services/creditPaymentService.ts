@@ -264,50 +264,85 @@ export class CreditPaymentService {
       // Final fallback - use development mode credits
       if (error || !data) {
         console.log('🔄 All credit payment endpoints failed, using development fallback...');
-        
+
         if (environment.isLocalhost) {
+          console.log('🏠 Localhost detected - returning demo URL');
           return {
             success: true,
             usedFallback: true,
             url: `https://demo-stripe-checkout.com/credits/${options.credits}`
           };
         } else {
-          error = { message: 'All credit payment methods failed' };
+          console.error('💥 Production environment - all payment methods failed');
+          error = {
+            message: 'All credit payment methods failed',
+            lastError: error,
+            environment,
+            timestamp: new Date().toISOString()
+          };
         }
       }
 
       if (error) {
+        console.error('❌ Final payment error:', error);
         ErrorLogger.logError('Credit payment error', error);
 
-        // Provide more specific error messages
+        // Provide more specific error messages based on the error type
         let errorMessage = 'Failed to create credit payment';
 
         // Handle different error object structures
         if (error && typeof error === 'object') {
-          if (error.error && typeof error.error === 'string') {
-            errorMessage = error.error;
-          } else if (error.message) {
-            errorMessage = error.message;
-          } else if (error.details) {
-            errorMessage = error.details;
-          } else if (error.msg) {
-            errorMessage = error.msg;
+          const errorObj = error as any;
+
+          // Check for specific error types first
+          if (errorObj.status === 404) {
+            errorMessage = 'Payment service not found. Please check your configuration.';
+          } else if (errorObj.status === 401 || errorObj.status === 403) {
+            errorMessage = 'Authentication required. Please sign in and try again.';
+          } else if (errorObj.status === 500) {
+            errorMessage = 'Server error. Please try again in a moment.';
+          } else if (errorObj.body && typeof errorObj.body === 'string') {
+            try {
+              const parsed = JSON.parse(errorObj.body);
+              errorMessage = parsed.error || parsed.message || errorMessage;
+            } catch {
+              errorMessage = errorObj.body;
+            }
+          } else if (errorObj.error && typeof errorObj.error === 'string') {
+            errorMessage = errorObj.error;
+          } else if (errorObj.message && typeof errorObj.message === 'string') {
+            errorMessage = errorObj.message;
+          } else if (errorObj.details) {
+            errorMessage = errorObj.details;
+          } else if (errorObj.msg) {
+            errorMessage = errorObj.msg;
           } else {
-            errorMessage = `Credit Payment API Error: ${JSON.stringify(error)}`;
+            // Try to extract meaningful info from the error
+            const errorInfo = [
+              errorObj.endpoint && `Endpoint: ${errorObj.endpoint}`,
+              errorObj.status && `Status: ${errorObj.status}`,
+              errorObj.type && `Type: ${errorObj.type}`
+            ].filter(Boolean).join(', ');
+
+            errorMessage = errorInfo ?
+              `Payment service error (${errorInfo})` :
+              'Payment service temporarily unavailable';
           }
         } else if (typeof error === 'string') {
           errorMessage = error;
         }
 
-        // Handle specific error cases
-        if (errorMessage.includes('Rate limit')) {
+        // Handle specific error cases with user-friendly messages
+        if (errorMessage.includes('Rate limit') || errorMessage.includes('429')) {
           errorMessage = 'Too many requests. Please wait a moment and try again.';
-        } else if (errorMessage.includes('Authentication') || errorMessage.includes('auth')) {
-          errorMessage = 'Authentication required. Please sign in and try again.';
-        } else if (errorMessage.includes('network') || errorMessage.includes('Network')) {
+        } else if (errorMessage.includes('Authentication') || errorMessage.includes('auth') || errorMessage.includes('401')) {
+          errorMessage = 'Please sign in to your account and try again.';
+        } else if (errorMessage.includes('network') || errorMessage.includes('Network') || errorMessage.includes('fetch')) {
           errorMessage = 'Network error. Please check your connection and try again.';
-        } else if (errorMessage.includes('configuration') || errorMessage.includes('not configured')) {
-          errorMessage = 'Payment system not configured. Please contact support.';
+        } else if (errorMessage.includes('configuration') || errorMessage.includes('not configured') || errorMessage.includes('404')) {
+          errorMessage = 'Payment system configuration error. Please contact support.';
+        } else if (errorMessage.includes('STRIPE') || errorMessage.includes('stripe')) {
+          errorMessage = 'Payment processor error. Please try again or contact support.';
         }
 
         return { success: false, error: errorMessage };
