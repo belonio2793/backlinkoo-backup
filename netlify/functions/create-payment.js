@@ -1,23 +1,5 @@
+const Stripe = require("stripe");
 const { createClient } = require('@supabase/supabase-js');
-
-// Initialize Supabase client for database operations
-function getSupabaseClient() {
-  const supabaseUrl = process.env.VITE_SUPABASE_URL;
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-  if (!supabaseUrl || !supabaseServiceKey) {
-    console.warn("Supabase configuration missing - order tracking disabled");
-    return null;
-  }
-
-  return createClient(supabaseUrl, supabaseServiceKey, {
-    auth: { persistSession: false }
-  });
-}
-
-function sanitizeInput(input) {
-  return input.replace(/[<>'"&]/g, '').trim();
-}
 
 // Rate limiting map (in production, use Redis or similar)
 const rateLimitMap = new Map();
@@ -41,10 +23,29 @@ function checkRateLimit(identifier) {
   return true;
 }
 
-async function getClientIP(event) {
-  const forwarded = event.headers['x-forwarded-for'];
-  const realIP = event.headers['x-real-ip'];
-  const cfConnectingIP = event.headers['cf-connecting-ip'];
+function sanitizeInput(input) {
+  return input.replace(/[<>'"&]/g, '').trim();
+}
+
+// Initialize Supabase client for database operations
+function getSupabaseClient() {
+  const supabaseUrl = process.env.VITE_SUPABASE_URL;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !supabaseServiceKey) {
+    console.warn("Supabase configuration missing - order tracking disabled");
+    return null;
+  }
+
+  return createClient(supabaseUrl, supabaseServiceKey, {
+    auth: { persistSession: false }
+  });
+}
+
+async function getClientIP(request) {
+  const forwarded = request.headers.get('x-forwarded-for');
+  const realIP = request.headers.get('x-real-ip');
+  const cfConnectingIP = request.headers.get('cf-connecting-ip');
   
   return forwarded?.split(',')[0]?.trim() || realIP || cfConnectingIP || 'unknown';
 }
@@ -56,22 +57,6 @@ async function createStripePayment(paymentData, email, originUrl) {
     throw new Error("STRIPE_SECRET_KEY is required and must be a valid Stripe secret key");
   }
 
-  // Check if we're using a placeholder/invalid key for development
-  const isPlaceholderKey = stripeSecretKey.includes('123456789') || stripeSecretKey.length < 50;
-
-  if (isPlaceholderKey) {
-    console.log('⚠️ Using mock Stripe response for placeholder key in development');
-    // Return mock successful payment session for development
-    const mockSessionId = `cs_test_mock_${Date.now()}_${Math.random().toString(36).substr(2, 8)}`;
-    const mockUrl = `${originUrl}/payment-success?session_id=${mockSessionId}&credits=${paymentData.credits || 0}&mock=true`;
-
-    return {
-      url: mockUrl,
-      sessionId: mockSessionId
-    };
-  }
-
-  const Stripe = require('stripe');
   const stripe = new Stripe(stripeSecretKey, {
     apiVersion: "2023-10-16",
   });
@@ -143,8 +128,12 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    // Rate limiting check
-    const clientIP = await getClientIP(event);
+    // Rate limiting check - use IP from event
+    const clientIP = event.headers['x-forwarded-for']?.split(',')[0]?.trim() || 
+                     event.headers['x-real-ip'] || 
+                     event.headers['cf-connecting-ip'] || 
+                     'unknown';
+    
     if (!checkRateLimit(clientIP)) {
       return {
         statusCode: 429,
@@ -174,24 +163,17 @@ exports.handler = async (event, context) => {
     const { amount, isGuest = false, paymentMethod } = body;
     const productName = sanitizeInput(body.productName);
     let guestEmail = body.guestEmail ? sanitizeInput(body.guestEmail) : '';
-
-    // Use guestEmail for both guest and authenticated users
-    // Client sends user email in guestEmail field for both cases
+    
     let email = guestEmail;
 
-    // For authenticated users, ensure we have an email
+    // For authenticated users, we should get email from auth header in production
+    // For now, we'll use the guest email or require it
     if (!isGuest && !email) {
-      throw new Error('Email is required for authenticated user payments. Please ensure you are logged in and try again.');
+      throw new Error("Email is required for payment processing");
     }
 
-    // Only validate email format for guest users
     if (isGuest && (!guestEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestEmail))) {
-      throw new Error('Valid email address is required for guest checkout');
-    }
-
-    // Ensure we have some email for Stripe
-    if (!email) {
-      throw new Error('Email is required for payment processing');
+      throw new Error('Valid email address is required');
     }
 
     const originUrl = event.headers.origin || event.headers.referer || "https://backlinkoo.com";
@@ -233,14 +215,10 @@ exports.handler = async (event, context) => {
       },
       body: JSON.stringify(result),
     };
-  } catch (error) {
-    console.error("Error in create-payment:", error);
-    console.error("Error details:", {
-      message: error.message,
-      stack: error.stack,
-      name: error.name
-    });
 
+  } catch (error) {
+    console.error("Payment creation error:", error);
+    
     return {
       statusCode: 500,
       headers: { 

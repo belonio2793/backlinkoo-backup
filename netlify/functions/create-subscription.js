@@ -1,108 +1,125 @@
-const { createClient } = require('@supabase/supabase-js');
+const Stripe = require("stripe");
 
-// Initialize Supabase client for database operations
-function getSupabaseClient() {
-  const supabaseUrl = process.env.VITE_SUPABASE_URL;
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+// Rate limiting map
+const rateLimitMap = new Map();
 
-  if (!supabaseUrl || !supabaseServiceKey) {
-    console.warn("Supabase configuration missing - subscription tracking disabled");
-    return null;
+function checkRateLimit(identifier) {
+  const now = Date.now();
+  const windowMs = 60000; // 1 minute
+  const maxRequests = 5; // Lower limit for subscriptions
+  
+  const record = rateLimitMap.get(identifier);
+  if (!record || now > record.resetTime) {
+    rateLimitMap.set(identifier, { count: 1, resetTime: now + windowMs });
+    return true;
   }
-
-  return createClient(supabaseUrl, supabaseServiceKey, {
-    auth: { persistSession: false }
-  });
+  
+  if (record.count >= maxRequests) {
+    return false;
+  }
+  
+  record.count++;
+  return true;
 }
 
 function sanitizeInput(input) {
   return input.replace(/[<>'"&]/g, '').trim();
 }
 
+// Define pricing with predefined Stripe price IDs (use environment variables in production)
+const PRICING_CONFIG = {
+  monthly: {
+    price: 29,
+    originalPrice: 49,
+    interval: 'month',
+    discount: 41,
+    priceId: process.env.STRIPE_MONTHLY_PRICE_ID || 'price_monthly_fallback',
+    productName: 'Premium SEO Tools - Monthly',
+    description: 'Access to unlimited backlinks, SEO academy, analytics, and priority support - monthly billing'
+  },
+  yearly: {
+    price: 290,
+    originalPrice: 588,
+    interval: 'year',
+    discount: 51,
+    savings: 298,
+    priceId: process.env.STRIPE_YEARLY_PRICE_ID || 'price_yearly_fallback',
+    productName: 'Premium SEO Tools - Yearly',
+    description: 'Access to unlimited backlinks, SEO academy, analytics, and priority support - yearly billing (save $298!)'
+  }
+};
+
 async function createStripeSubscription(subscriptionData, email, originUrl) {
   const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
-  if (!stripeSecretKey || stripeSecretKey.includes('placeholder')) {
-    throw new Error("Stripe is not configured for this environment. Please set up your Stripe API keys in Netlify environment variables.");
+  if (!stripeSecretKey || !stripeSecretKey.startsWith('sk_')) {
+    throw new Error("STRIPE_SECRET_KEY is required and must be a valid Stripe secret key");
   }
 
-  // Check if we're using a placeholder/invalid key for development
-  const isPlaceholderKey = stripeSecretKey.includes('123456789') || stripeSecretKey.length < 50;
-
-  if (isPlaceholderKey) {
-    console.log('⚠️ Using mock Stripe subscription response for placeholder key in development');
-    // Return mock successful subscription session for development
-    const mockSessionId = `cs_test_sub_mock_${Date.now()}_${Math.random().toString(36).substr(2, 8)}`;
-    const mockUrl = `${originUrl}/subscription-success?session_id=${mockSessionId}&plan=${subscriptionData.plan || 'monthly'}&mock=true`;
-
-    return {
-      url: mockUrl,
-      sessionId: mockSessionId
-    };
-  }
-
-  // Dynamic import of Stripe for better compatibility
-  const Stripe = (await import('stripe')).default;
   const stripe = new Stripe(stripeSecretKey, {
     apiVersion: "2023-10-16",
   });
 
-  // Get or create customer
+  const planConfig = PRICING_CONFIG[subscriptionData.plan];
+  
+  // Create or find customer
   let customerId;
   if (!subscriptionData.isGuest) {
     const customers = await stripe.customers.list({ email, limit: 1 });
     if (customers.data.length > 0) {
       customerId = customers.data[0].id;
     } else {
-      const customer = await stripe.customers.create({ email });
+      const customer = await stripe.customers.create({
+        email,
+        metadata: { plan: subscriptionData.plan }
+      });
       customerId = customer.id;
     }
   }
 
-  // Price configuration - use environment variables or create dynamic prices
-  let priceId;
-  
-  if (subscriptionData.plan === 'monthly') {
-    priceId = process.env.STRIPE_MONTHLY_PRICE_ID || process.env.VITE_STRIPE_MONTHLY_PRICE_ID;
-  } else if (subscriptionData.plan === 'yearly') {
-    priceId = process.env.STRIPE_YEARLY_PRICE_ID || process.env.VITE_STRIPE_YEARLY_PRICE_ID;
-  } else {
-    // Fallback to provided priceId
-    priceId = subscriptionData.priceId;
-  }
+  // Use predefined price ID or create dynamic price as fallback
+  let priceId = planConfig.priceId;
 
-  // If no price ID is configured, create a dynamic price
-  if (!priceId) {
-    console.log('No predefined price ID found, creating dynamic price');
-    
-    const prices = {
-      monthly: { amount: 2900, interval: 'month' }, // $29/month
-      yearly: { amount: 29000, interval: 'year' }   // $290/year
-    };
-    
-    const priceConfig = prices[subscriptionData.plan] || prices.monthly;
-    
-    // Create or find product
-    let product;
-    const products = await stripe.products.list({ limit: 1 });
-    if (products.data.length > 0) {
-      product = products.data[0];
-    } else {
-      product = await stripe.products.create({
-        name: 'Premium SEO Tools',
-        description: 'Premium subscription with unlimited backlinks and advanced features'
-      });
-    }
+  // If using fallback price IDs, create the product and price
+  if (priceId.includes('fallback')) {
+    console.log('Creating dynamic product and price for', subscriptionData.plan);
 
-    // Create price
-    const price = await stripe.prices.create({
-      currency: 'usd',
-      product: product.id,
-      recurring: { interval: priceConfig.interval },
-      unit_amount: priceConfig.amount,
+    const product = await stripe.products.create({
+      name: planConfig.productName,
+      description: planConfig.description,
+      metadata: {
+        plan: subscriptionData.plan,
+        type: 'subscription',
+        features: JSON.stringify([
+          'Unlimited Backlinks',
+          'Complete SEO Academy (50+ Lessons)',
+          'Advanced Analytics & Reports',
+          'Priority 24/7 Support',
+          'White-Hat Guarantee',
+          'Custom Campaign Strategies',
+          'Professional Certifications',
+          'API Access & Integrations'
+        ])
+      }
     });
-    
+
+    const price = await stripe.prices.create({
+      product: product.id,
+      unit_amount: planConfig.price * 100, // Convert to cents
+      currency: 'usd',
+      recurring: {
+        interval: planConfig.interval,
+      },
+      metadata: {
+        plan: subscriptionData.plan,
+        originalPrice: planConfig.originalPrice.toString(),
+        discount: planConfig.discount.toString()
+      }
+    });
+
     priceId = price.id;
+  } else {
+    console.log('Using predefined price ID:', priceId);
   }
 
   // Create checkout session
@@ -116,13 +133,21 @@ async function createStripeSubscription(subscriptionData, email, originUrl) {
       },
     ],
     mode: "subscription",
-    success_url: `${originUrl}/subscription-success?session_id={CHECKOUT_SESSION_ID}`,
+    success_url: `${originUrl}/subscription-success?session_id={CHECKOUT_SESSION_ID}&plan=${subscriptionData.plan}`,
     cancel_url: `${originUrl}/subscription-cancelled`,
     metadata: {
       email,
-      plan: subscriptionData.plan || 'monthly',
+      plan: subscriptionData.plan,
       isGuest: subscriptionData.isGuest ? 'true' : 'false',
-      tier: subscriptionData.tier || 'premium'
+      priceId: priceId,
+      description: planConfig.description
+    },
+    subscription_data: {
+      metadata: {
+        email,
+        plan: subscriptionData.plan,
+        isGuest: subscriptionData.isGuest ? 'true' : 'false'
+      }
     }
   });
 
@@ -154,67 +179,51 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    const body = JSON.parse(event.body || '{}');
+    // Rate limiting check
+    const clientIP = event.headers['x-forwarded-for']?.split(',')[0]?.trim() || 
+                     event.headers['x-real-ip'] || 
+                     event.headers['cf-connecting-ip'] || 
+                     'unknown';
+                     
+    if (!checkRateLimit(clientIP)) {
+      return {
+        statusCode: 429,
+        headers: { 
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*"
+        },
+        body: JSON.stringify({ error: 'Rate limit exceeded. Please try again in a minute.' }),
+      };
+    }
+
+    const body = JSON.parse(event.body);
     
     // Input validation
-    if (!body.plan && !body.priceId) {
-      throw new Error('Either plan (monthly/yearly) or priceId is required');
-    }
-
-    if (body.plan && !['monthly', 'yearly'].includes(body.plan)) {
-      throw new Error('Invalid plan. Must be monthly or yearly');
+    if (!body.plan || !['monthly', 'yearly'].includes(body.plan)) {
+      throw new Error('Invalid subscription plan. Must be "monthly" or "yearly"');
     }
     
-    const { isGuest = false } = body;
+    const { plan, isGuest = false } = body;
     let guestEmail = body.guestEmail ? sanitizeInput(body.guestEmail) : '';
-
-    // Use guestEmail for both guest and authenticated users
-    // Client sends user email in guestEmail field for both cases
+    
     let email = guestEmail;
 
-    // For authenticated users, ensure we have an email
-    if (!isGuest && !email) {
-      throw new Error('Email is required for authenticated user subscriptions. Please ensure you are logged in and try again.');
-    }
-
-    // Only validate email format for guest users
-    if (isGuest && (!guestEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestEmail))) {
-      throw new Error('Valid email address is required for guest subscription');
-    }
-
-    // Ensure we have some email for Stripe
+    // For authenticated users, we should get email from auth header in production
     if (!email) {
-      throw new Error('Email is required for subscription processing');
+      throw new Error("Email is required for subscription");
+    }
+
+    if (isGuest && (!guestEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestEmail))) {
+      throw new Error('Valid email address is required');
     }
 
     const originUrl = event.headers.origin || event.headers.referer || "https://backlinkoo.com";
-    
+
+    // Currently only supporting Stripe for subscriptions
     const result = await createStripeSubscription(body, email, originUrl);
 
-    // Store subscription in database for tracking
-    try {
-      const supabase = getSupabaseClient();
-      if (supabase && result.sessionId) {
-        await supabase
-          .from('subscriptions')
-          .insert({
-            stripe_session_id: result.sessionId,
-            email,
-            plan: body.plan || 'monthly',
-            status: 'pending',
-            tier: body.tier || 'premium',
-            guest_checkout: body.isGuest || false,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          });
-        console.log(`Subscription created: ${result.sessionId} - ${email} - ${body.plan || 'monthly'}`);
-      }
-    } catch (dbError) {
-      console.error('Database subscription creation failed:', dbError);
-      // Don't fail the subscription creation if database fails
-    }
-
-    console.log(`Subscription initiated: ${email} - ${body.plan || 'monthly'}`);
+    // TODO: Store subscription intent in database for tracking
+    console.log(`Subscription initiated: ${plan} - ${email}`);
 
     return {
       statusCode: 200,

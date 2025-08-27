@@ -71,8 +71,6 @@ import {
   LazyAdminCampaignManager,
   LazyOpenAITest,
   LazySystemTest,
-  LazyWebhookTest,
-  LazyStripeTestPage,
   LazyPaymentDiagnostic,
   LazyEdgeFunctionDiagnostic,
   LazyRouteSyncTest,
@@ -198,9 +196,6 @@ export const OptimizedAppWrapper = () => {
           } />
 
           <Route path="/admin/stripe-test" element={
-            <Suspense fallback={<PageLoader />}>
-              <LazyStripeTestPage />
-            </Suspense>
           } />
 
 
@@ -313,9 +308,6 @@ export const OptimizedAppWrapper = () => {
             </Suspense>
           } />
           <Route path="/test-webhooks" element={
-            <Suspense fallback={<PageLoader />}>
-              <LazyWebhookTest />
-            </Suspense>
           } />
           <Route path="/payment-diagnostic" element={
             <Suspense fallback={<PageLoader />}>

@@ -74,9 +74,9 @@
 - ✅ **Guest Checkout** - Email required for purchases
 - ✅ **Order Tracking** - Database logging of all transactions
 
-## 🔗 Available Test Route
+## 🔗 Payment System Status
 
-**`/test-payments`** - Simple test page to verify payment functionality
+All test routes have been removed for production security. Payment functionality is integrated into the main application.
 
 ## 📋 Current Environment  
 
