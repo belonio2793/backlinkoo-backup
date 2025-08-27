@@ -63,15 +63,57 @@ export class ErrorLogger {
       try {
         // Try to extract meaningful properties
         const errorObj = error as any;
-        return {
-          message: errorObj.message || errorObj.error || errorObj.details,
+
+        // Handle different error object structures
+        let extractedMessage = errorObj.message ||
+                             errorObj.error ||
+                             errorObj.details ||
+                             errorObj.description ||
+                             errorObj.msg ||
+                             errorObj.statusText;
+
+        // If no clear message, try to create a meaningful one
+        if (!extractedMessage) {
+          const parts = [];
+          if (errorObj.status || errorObj.statusCode) {
+            parts.push(`Status: ${errorObj.status || errorObj.statusCode}`);
+          }
+          if (errorObj.endpoint) {
+            parts.push(`Endpoint: ${errorObj.endpoint}`);
+          }
+          if (errorObj.type) {
+            parts.push(`Type: ${errorObj.type}`);
+          }
+          extractedMessage = parts.length > 0 ? parts.join(', ') : 'Unknown error';
+        }
+
+        const serialized = {
+          message: extractedMessage,
           status: errorObj.status || errorObj.statusCode,
-          data: errorObj.data,
-          // Safely stringify the object if needed
-          raw: JSON.stringify(error, null, 2)
+          endpoint: errorObj.endpoint,
+          type: errorObj.type,
+          data: errorObj.data
         };
+
+        // Only add raw if we can safely stringify it
+        try {
+          const jsonStr = JSON.stringify(error, (key, val) => {
+            if (typeof val === 'function') return '[Function]';
+            if (val instanceof Error) return val.message;
+            return val;
+          }, 2);
+
+          if (jsonStr && jsonStr !== '{}' && jsonStr.length < 1000) {
+            serialized.raw = jsonStr;
+          }
+        } catch {
+          // Skip raw if can't stringify
+        }
+
+        return serialized;
       } catch {
-        return String(error);
+        // If all else fails, convert to string
+        return String(error).replace('[object Object]', 'Error object (details unavailable)');
       }
     }
 
