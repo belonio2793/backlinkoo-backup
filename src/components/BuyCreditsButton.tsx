@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 import { CreditPaymentService } from '@/services/creditPaymentService';
 import { ImprovedPaymentModal } from '@/components/ImprovedPaymentModal';
 import { CreditCard, Zap } from 'lucide-react';
