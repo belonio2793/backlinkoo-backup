@@ -209,7 +209,12 @@ export const PricingModal = ({
               description: "Trying alternative redirect method...",
               variant: "destructive",
             });
-            window.location.href = data.url;
+            // Open Stripe checkout in new window as fallback
+            const fallbackWindow = window.open(data.url, 'stripe-checkout-fallback', 'width=800,height=600,scrollbars=yes,resizable=yes');
+            if (!fallbackWindow) {
+              // Only use current window as last resort
+              window.location.href = data.url;
+            }
           }
         });
       } else {
