@@ -30,13 +30,17 @@ export class CreditPaymentService {
     const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
     const isNetlify = hostname.includes('netlify.app') || hostname.includes('netlify.com');
     const isFlyDev = hostname.includes('fly.dev');
-    const hasSupabaseFunctions = !isLocalhost; // Edge functions more likely to work in production
+
+    // Treat fly.dev as development environment (Builder.io development servers)
+    const isDevelopment = isLocalhost || isFlyDev;
+    const hasSupabaseFunctions = !isDevelopment; // Edge functions more likely to work in production
 
     return {
       isLocalhost,
       isNetlify,
       isFlyDev,
-      isProduction: !isLocalhost,
+      isDevelopment,
+      isProduction: !isDevelopment,
       hasSupabaseFunctions,
       hostname
     };
@@ -235,7 +239,7 @@ export class CreditPaymentService {
 
         for (const endpoint of endpoints) {
           try {
-            console.log(`🔄 Trying credit payment endpoint: ${endpoint}`);
+            console.log(`�� Trying credit payment endpoint: ${endpoint}`);
             console.log(`📤 Request body:`, {
               ...requestBody,
               guestEmail: finalGuestEmail ? '***masked***' : undefined
