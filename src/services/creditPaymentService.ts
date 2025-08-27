@@ -380,8 +380,8 @@ export class CreditPaymentService {
           };
         } else {
           console.error('💥 Production environment - all payment methods failed');
-          const errorMessage = this.extractErrorMessage(error);
-          console.error('💥 Last error was:', errorMessage);
+          const prodErrorMessage = this.extractErrorMessage(error);
+          console.error('💥 Last error was:', prodErrorMessage);
           error = {
             message: 'All credit payment methods failed',
             lastError: error,
