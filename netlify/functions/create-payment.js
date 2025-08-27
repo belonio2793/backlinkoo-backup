@@ -148,8 +148,8 @@ exports.handler = async (event, context) => {
     const body = JSON.parse(event.body);
     
     // Input validation
-    if (!body.amount || body.amount <= 0 || body.amount > 100000) {
-      throw new Error('Invalid amount. Must be between $0.01 and $100,000');
+    if (!body.amount || body.amount <= 0 || body.amount > 10000) {
+      throw new Error('Invalid amount. Must be between $0.01 and $10,000');
     }
     
     if (!body.productName || body.productName.length > 200) {
@@ -189,7 +189,7 @@ exports.handler = async (event, context) => {
           .insert({
             stripe_session_id: result.sessionId,
             email,
-            amount: body.amount * 100, // Convert to cents
+            amount: Math.round(body.amount * 100), // Convert to cents
             status: 'pending',
             payment_method: 'stripe',
             product_name: body.productName || `${body.credits || 0} Backlink Credits`,
@@ -218,15 +218,32 @@ exports.handler = async (event, context) => {
 
   } catch (error) {
     console.error("Payment creation error:", error);
-    
+
+    // Provide user-friendly error messages
+    let userMessage = error.message || 'Payment processing failed. Please try again.';
+
+    // Handle specific Stripe errors
+    if (error.message?.includes('Invalid amount')) {
+      if (error.message?.includes('Must be between')) {
+        // This is likely a Stripe account limit
+        userMessage = 'Payment amount exceeds your account limit. Please try a smaller amount or contact support to increase your limit.';
+      }
+    } else if (error.message?.includes('Your account cannot currently make live charges')) {
+      userMessage = 'Account verification required. Please contact support to enable payments.';
+    } else if (error.message?.includes('rate limit') || error.message?.includes('too many requests')) {
+      userMessage = 'Too many payment requests. Please wait a moment and try again.';
+    } else if (error.message?.includes('card') || error.message?.includes('payment_method')) {
+      userMessage = 'Payment method error. Please check your card details or try a different payment method.';
+    }
+
     return {
       statusCode: 500,
-      headers: { 
+      headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*"
       },
-      body: JSON.stringify({ 
-        error: error.message || 'Payment processing failed. Please try again.',
+      body: JSON.stringify({
+        error: userMessage,
         details: process.env.NODE_ENV === 'development' ? error.stack : undefined
       }),
     };

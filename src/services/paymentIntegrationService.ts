@@ -119,17 +119,17 @@ class PaymentIntegrationService {
       }
 
       // Validate input
-      if (amount <= 0 || amount > 100000) {
+      if (amount <= 0 || amount > 10000) {
         return {
           success: false,
-          error: 'Invalid amount. Must be between $0.01 and $100,000'
+          error: 'Invalid amount. Must be between $0.01 and $10,000'
         };
       }
 
-      if (credits <= 0 || credits > 100000) {
+      if (credits <= 0 || credits > 7142) {
         return {
           success: false,
-          error: 'Invalid credit amount'
+          error: 'Invalid credit amount. Maximum 7,142 credits per purchase.'
         };
       }
 
@@ -238,9 +238,18 @@ class PaymentIntegrationService {
           };
         }
 
+        let errorMessage = data.error || `Payment creation failed: ${response.status} ${response.statusText}`;
+
+        // Handle specific Stripe account limit errors
+        if (errorMessage.includes('Must be between') && errorMessage.includes('$1') && errorMessage.includes('.00')) {
+          errorMessage = 'Your Stripe account has transaction limits. Please try a smaller amount or contact support to increase your limits.';
+        } else if (errorMessage.includes('Invalid amount')) {
+          errorMessage = 'Payment amount is invalid. Please check your selection and try again.';
+        }
+
         return {
           success: false,
-          error: data.error || `Payment creation failed: ${response.status} ${response.statusText}`
+          error: errorMessage
         };
       }
 

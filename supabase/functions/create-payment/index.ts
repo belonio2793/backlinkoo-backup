@@ -74,8 +74,8 @@ serve(async (req) => {
     console.log("Request body:", { ...body, guestEmail: body.guestEmail ? '[REDACTED]' : undefined });
     
     // Input validation
-    if (!body.amount || body.amount <= 0 || body.amount > 1000000) {
-      throw new Error('Invalid amount');
+    if (!body.amount || body.amount <= 0 || body.amount > 10000) {
+      throw new Error('Invalid amount. Must be between $0.01 and $10,000');
     }
     
     if (!body.productName || body.productName.length > 200) {
@@ -151,7 +151,7 @@ serve(async (req) => {
             price_data: {
               currency: "usd",
               product_data: { name: productName },
-              unit_amount: amount * 100, // Convert to cents
+              unit_amount: Math.round(amount * 100), // Convert to cents
             },
             quantity: 1,
           },
@@ -166,7 +166,7 @@ serve(async (req) => {
         user_id: user?.id || null,
         email,
         stripe_session_id: session.id,
-        amount: amount * 100,
+        amount: Math.round(amount * 100),
         status: "pending",
         payment_method: "stripe",
         product_name: productName,
@@ -229,7 +229,7 @@ serve(async (req) => {
         user_id: user?.id || null,
         email,
         paypal_order_id: orderData.id,
-        amount: amount * 100,
+        amount: Math.round(amount * 100),
         status: "pending",
         payment_method: "paypal",
         product_name: productName,
@@ -253,14 +253,22 @@ serve(async (req) => {
       cause: error.cause
     });
 
-    // Provide more specific error messages
+    // Provide user-friendly error messages
     let errorMessage = error.message;
     if (error.message?.includes("STRIPE_SECRET_KEY")) {
       errorMessage = "Payment system configuration error. Please contact support.";
+    } else if (error.message?.includes("Invalid amount")) {
+      if (error.message?.includes('Must be between')) {
+        errorMessage = "Payment amount exceeds limit. Please try a smaller amount or contact support.";
+      }
+    } else if (error.message?.includes('Your account cannot currently make live charges')) {
+      errorMessage = "Account verification required. Please contact support to enable payments.";
     } else if (error.message?.includes("rate limit")) {
       errorMessage = "Too many requests. Please wait a moment and try again.";
     } else if (error.message?.includes("network") || error.message?.includes("fetch")) {
       errorMessage = "Network error. Please check your connection and try again.";
+    } else if (error.message?.includes('card') || error.message?.includes('payment_method')) {
+      errorMessage = "Payment method error. Please check your card details or try a different payment method.";
     }
 
     return new Response(JSON.stringify({
