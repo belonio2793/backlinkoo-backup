@@ -47,6 +47,57 @@ export class CreditPaymentService {
   }
 
   /**
+   * Extract meaningful error message from any error object
+   */
+  private static extractErrorMessage(error: unknown): string {
+    if (error instanceof Error) {
+      return error.message;
+    }
+
+    if (typeof error === 'string') {
+      return error;
+    }
+
+    if (error && typeof error === 'object') {
+      const errorObj = error as any;
+
+      // Try multiple common error properties
+      const message = errorObj.message ||
+                     errorObj.error ||
+                     errorObj.details ||
+                     errorObj.description ||
+                     errorObj.msg ||
+                     errorObj.statusText;
+
+      if (message && typeof message === 'string') {
+        return message;
+      }
+
+      // Create a descriptive message from available properties
+      const parts = [];
+      if (errorObj.endpoint) parts.push(`Endpoint: ${errorObj.endpoint}`);
+      if (errorObj.status) parts.push(`Status: ${errorObj.status}`);
+      if (errorObj.type) parts.push(`Type: ${errorObj.type}`);
+
+      if (parts.length > 0) {
+        return parts.join(', ');
+      }
+
+      // Last resort - try to stringify safely
+      try {
+        const jsonStr = JSON.stringify(errorObj);
+        if (jsonStr && jsonStr !== '{}' && jsonStr.length < 200) {
+          return `Error object: ${jsonStr}`;
+        }
+      } catch {
+        // Failed to stringify
+      }
+    }
+
+    return 'Unknown error (unable to extract details)';
+  }
+
+  /**
    * Create development Stripe URL for testing
    */
   private static createDevStripeUrl(options: CreditPaymentOptions): string {
