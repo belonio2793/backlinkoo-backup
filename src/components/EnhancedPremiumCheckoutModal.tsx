@@ -137,13 +137,17 @@ export function EnhancedPremiumCheckoutModal({
         );
 
         if (!checkoutWindow) {
-          // Popup blocked - fallback to current window
+          // Popup blocked - try alternative new window approach first
           toast({
             title: "Popup Blocked",
-            description: "Redirecting in current window...",
+            description: "Opening in new window...",
           });
           setTimeout(() => {
-            window.location.href = result.url;
+            const fallbackWindow = window.open(result.url, 'stripe-checkout-fallback', 'width=800,height=600,scrollbars=yes,resizable=yes');
+            if (!fallbackWindow) {
+              // Only use current window as last resort
+              window.location.href = result.url;
+            }
           }, 1000);
         } else {
           // Close modal since checkout is opening
