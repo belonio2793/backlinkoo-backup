@@ -314,10 +314,10 @@ export function PaymentDashboard() {
       </div>
 
       {/* Payment Modal */}
-      <ImprovedPaymentModal
+      <ModernCreditPurchaseModal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        defaultTab="credits"
+        initialCredits={100}
       />
     </div>
   );
