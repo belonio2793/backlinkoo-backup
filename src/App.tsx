@@ -50,6 +50,7 @@ const LazyNotFound = lazy(() => import("./pages/NotFound"));
 const LazyTwitterAdGenerator = lazy(() => import("./pages/TwitterAdGenerator"));
 const LazyAffiliate = lazy(() => import("./pages/Affiliate"));
 const LazyStripeTest = lazy(() => import("./pages/StripeTest"));
+const LazyDevStripeCheckout = lazy(() => import("./pages/DevStripeCheckout"));
 const LazyPaymentTest = lazy(() => import("./pages/PaymentTest"));
 const LazyDomainsPage = lazy(() => import("./pages/DomainsPage"));
 const LazyEnhancedDomainsPage = lazy(() => import("./pages/EnhancedDomainsPage"));
