@@ -53,6 +53,7 @@ async function getClientIP(request) {
 async function createStripePayment(paymentData, email, originUrl) {
   const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
+  // Validate Stripe configuration
   if (!stripeSecretKey || !stripeSecretKey.startsWith('sk_')) {
     throw new Error("STRIPE_SECRET_KEY is required and must be a valid Stripe secret key");
   }

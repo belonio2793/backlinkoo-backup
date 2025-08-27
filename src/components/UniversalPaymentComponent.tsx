@@ -90,7 +90,7 @@ export const UniversalPaymentComponent: React.FC<UniversalPaymentComponentProps>
   const handleCreditPurchase = async () => {
 
     const creditsToUse = customCredits ? parseInt(customCredits) : selectedCredits;
-    
+
     if (!creditsToUse || creditsToUse <= 0) {
       toast({
         title: "Invalid Credits",
@@ -103,8 +103,13 @@ export const UniversalPaymentComponent: React.FC<UniversalPaymentComponentProps>
     setLoading(true);
 
     try {
+      // Calculate amount at $1.40 per credit
+      const amount = creditsToUse * 1.40;
+
       const result = await stripeCheckout.purchaseCredits({
         credits: creditsToUse,
+        amount: amount,
+        productName: `${creditsToUse} Premium Backlink Credits`,
         isGuest: false
       });
 
