@@ -6,11 +6,18 @@ export default defineConfig({
   server: {
     port: 3001,
     host: "0.0.0.0",
+    fs: {
+      allow: [".."],
+    },
   },
   plugins: [react()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+  },
+  optimizeDeps: {
+    entries: ["./src/main.tsx"],
+    exclude: ["*.html", "**/test-*.html", "**/debug-*.html", "**/fix-*.html", "**/emergency-*.html"],
   },
 });
