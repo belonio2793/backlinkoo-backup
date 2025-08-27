@@ -33,8 +33,22 @@ export function BuyCreditsButton({
   // Calculate amount if not provided
   const finalAmount = amount || credits * 1.40;
 
+  // Check if we're on production domain
+  const isProductionDomain = typeof window !== 'undefined' && window.location.hostname === 'backlinkoo.com';
+
   // Handle direct purchase (quick buy)
   const handleQuickBuy = async () => {
+    // Show warning if not on production domain
+    if (!isProductionDomain) {
+      const proceed = window.confirm(
+        `Development Server Warning\n\nYou're purchasing credits on a development server. For production use, please visit backlinkoo.com\n\nDo you want to continue with the test purchase?`
+      );
+
+      if (!proceed) {
+        return;
+      }
+    }
+
     setIsLoading(true);
 
     try {
