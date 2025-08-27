@@ -57,6 +57,7 @@ const LazyNetlifyConnectionTest = lazy(() => import("./pages/NetlifyConnectionTe
 const LazySupabaseTest = lazy(() => import("./pages/SupabaseTest"));
 const LazyBlogGenerationTest = lazy(() => import("./components/BlogGenerationTest"));
 const LazyAuthFix = lazy(() => import("./pages/AuthFix"));
+const LazyPaymentTest = lazy(() => import("./pages/PaymentTest"));
 import BlogGenerationFixTestPage from "./pages/BlogGenerationFixTest";
 
 const queryClient = new QueryClient({
@@ -304,6 +305,14 @@ const App = () => {
               }
             />
 
+            <Route
+              path="/payment-test"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyPaymentTest />
+                </Suspense>
+              }
+            />
 
             <Route
               path="/domains-test"

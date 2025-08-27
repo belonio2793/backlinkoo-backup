@@ -95,13 +95,13 @@ export const CustomCreditsModal = ({
 
       const result = await CreditPaymentService.createCreditPayment(
         user,
-        false, // Let service determine guest status
+        !user, // Set guest status based on user authentication
         user?.email,
         {
           amount: totalAmount,
           credits: creditCount,
           productName: `${creditCount} Premium Backlink Credits`,
-          isGuest: false,
+          isGuest: !user,
           guestEmail: user?.email
         }
       );
