@@ -1,4 +1,5 @@
 const Stripe = require("stripe");
+const { createClient } = require('@supabase/supabase-js');
 
 // Rate limiting map
 const rateLimitMap = new Map();
@@ -205,10 +206,40 @@ exports.handler = async (event, context) => {
     
     const { plan, isGuest = false } = body;
     let guestEmail = body.guestEmail ? sanitizeInput(body.guestEmail) : '';
-    
-    let email = guestEmail;
+    let userEmail = body.userEmail ? sanitizeInput(body.userEmail) : '';
 
-    // For authenticated users, we should get email from auth header in production
+    let email = guestEmail || userEmail;
+
+    // For authenticated users, get email from Supabase auth token
+    if (!isGuest && !email) {
+      const authHeader = event.headers.authorization || event.headers.Authorization;
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        try {
+          // Initialize Supabase client for auth validation
+          const supabaseUrl = process.env.SUPABASE_URL || 'https://dfhanacsmsvvkpunurnp.supabase.co';
+          const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+          if (supabaseServiceKey) {
+            const supabaseClient = createClient(supabaseUrl, supabaseServiceKey, {
+              auth: { persistSession: false }
+            });
+
+            const token = authHeader.replace('Bearer ', '');
+            const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
+
+            if (!userError && userData.user?.email) {
+              email = userData.user.email;
+              console.log('✅ Extracted email from auth token:', email);
+            } else {
+              console.warn('⚠️ Failed to get user from auth token:', userError?.message);
+            }
+          }
+        } catch (authError) {
+          console.warn('⚠️ Auth token processing failed:', authError.message);
+        }
+      }
+    }
+
     if (!email) {
       throw new Error("Email is required for subscription");
     }

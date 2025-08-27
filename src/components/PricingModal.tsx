@@ -4,24 +4,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { 
   CreditCard, 
-  Repeat, 
   Wallet, 
   Calculator,
   Star,
   CheckCircle,
-  Zap,
-  DollarSign,
   ArrowRight,
-  Info,
-  Sparkles,
-  Shield,
-  Clock
+  DollarSign,
+  Sparkles
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -34,7 +28,6 @@ interface PricingModalProps {
   onClose: () => void;
   initialCredits?: number;
   onAuthSuccess?: (user: any) => void;
-  defaultTab?: "payment" | "subscription";
 }
 
 interface PricingPlan {
@@ -53,15 +46,13 @@ export const PricingModal = ({
   isOpen,
   onClose,
   initialCredits,
-  onAuthSuccess,
-  defaultTab = "payment"
+  onAuthSuccess
 }: PricingModalProps) => {
   const CREDIT_PRICE = 1.40;
   
   const [step, setStep] = useState<"pricing" | "payment" | "auth">("pricing");
   const [selectedPlan, setSelectedPlan] = useState<string>("");
   const [customCredits, setCustomCredits] = useState(initialCredits || 200);
-  const [paymentType, setPaymentType] = useState<"payment" | "subscription">(defaultTab);
   const [paymentMethod, setPaymentMethod] = useState<"stripe">("stripe");
   const [isGuest, setIsGuest] = useState(false);
   const [guestEmail, setGuestEmail] = useState("");
@@ -98,66 +89,29 @@ export const PricingModal = ({
       savings: 'Best Value',
       features: [
         'High DA backlinks',
-        'Advanced analytics',
-        'Priority support',
-        'Campaign optimization'
+        'Competitive analysis',
+        'Real-time reporting',
+        'Campaign management',
+        'Priority support'
       ]
     },
     {
-      id: 'starter_300',
-      name: 'Starter 300',
-      credits: 300,
-      price: 420,
+      id: 'starter_500',
+      name: 'Starter 500',
+      credits: 500,
+      price: 700,
       pricePerLink: 1.40,
-      description: 'Maximum starter value',
-      savings: 'Most Credits',
+      description: 'Perfect for small agencies',
       features: [
         'High DA backlinks',
-        'Full feature access',
-        'Dedicated support',
-        'Custom reporting'
+        'Competitive analysis',
+        'Real-time reporting',
+        'Campaign management',
+        'Priority support',
+        'White-label reporting'
       ]
     }
   ];
-
-  const subscriptionPlans = {
-    "premium-seo-tools": {
-      price: 29,
-      priceId: "price_1QadKgGdMlAQKJXmqzVCyLLZ", // Real Stripe price ID - update with your actual ID
-      name: "Premium SEO Tools",
-      description: "Access to all SEO tools and features"
-    }
-  };
-
-  // Reset state when modal opens
-  useEffect(() => {
-    if (isOpen) {
-      setStep(user ? "pricing" : "pricing");
-      setSelectedPlan("");
-      setShowCustomPlan(false);
-      if (initialCredits) {
-        setCustomCredits(initialCredits);
-      }
-    }
-  }, [isOpen, user, initialCredits]);
-
-  // Calculate total price for custom credits
-  const calculateCustomPrice = (credits: number) => {
-    return (credits * CREDIT_PRICE).toFixed(2);
-  };
-
-  // Get final credits and price based on selection
-  const getFinalCreditsAndPrice = () => {
-    if (showCustomPlan) {
-      return {
-        credits: customCredits,
-        price: parseFloat(calculateCustomPrice(customCredits))
-      };
-    }
-    
-    const plan = pricingPlans.find(p => p.id === selectedPlan);
-    return plan ? { credits: plan.credits, price: plan.price } : { credits: 0, price: 0 };
-  };
 
   const handlePlanSelect = (planId: string) => {
     setSelectedPlan(planId);
@@ -169,18 +123,18 @@ export const PricingModal = ({
     setSelectedPlan("");
   };
 
-  const handleContinueToPayment = () => {
-    const { credits, price } = getFinalCreditsAndPrice();
-    
-    if (credits <= 0 || price <= 0) {
-      toast({
-        title: "Please select a plan",
-        description: "Choose a plan or enter custom credits to continue.",
-        variant: "destructive",
-      });
-      return;
+  const getFinalCreditsAndPrice = () => {
+    if (showCustomPlan) {
+      return {
+        credits: customCredits,
+        price: customCredits * CREDIT_PRICE
+      };
     }
+    const plan = pricingPlans.find(p => p.id === selectedPlan);
+    return plan ? { credits: plan.credits, price: plan.price } : { credits: 0, price: 0 };
+  };
 
+  const handleContinueToCheckout = () => {
     if (!user) {
       setStep("auth");
     } else {
@@ -188,18 +142,20 @@ export const PricingModal = ({
     }
   };
 
-  const handleAuthSuccess = (authenticatedUser: any) => {
-    onAuthSuccess?.(authenticatedUser);
+  const handleAuthSuccess = (user: any) => {
     setStep("payment");
+    if (onAuthSuccess) {
+      onAuthSuccess(user);
+    }
   };
 
   const handlePayment = async () => {
     const { credits, price } = getFinalCreditsAndPrice();
-
-    if (credits <= 0) {
+    
+    if (!credits || credits <= 0) {
       toast({
         title: "Error",
-        description: "Please select a valid plan or enter credits",
+        description: "Please select a valid plan",
         variant: "destructive",
       });
       return;
@@ -207,7 +163,7 @@ export const PricingModal = ({
 
     if (isGuest && !guestEmail) {
       toast({
-        title: "Error", 
+        title: "Error",
         description: "Email is required for guest checkout",
         variant: "destructive",
       });
@@ -225,26 +181,21 @@ export const PricingModal = ({
         body: JSON.stringify({
           amount: price,
           productName: `${credits} Backlink Credits`,
-          credits,
+          credits: credits,
           isGuest,
           guestEmail: isGuest ? guestEmail : undefined,
           paymentMethod
         })
       });
 
-      let data;
-      try {
-        data = await response.json();
-      } catch (parseError) {
-        throw new Error(`Invalid response from payment service: ${response.status} ${response.statusText}`);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
       }
 
-      if (!response.ok) {
-        throw new Error(data.error || `HTTP ${response.status}: ${response.statusText}`);
-      }
+      const data = await response.json();
 
       if (data.url) {
-        // Use mobile-optimized payment handler
         await MobilePaymentHandler.handlePaymentRedirect({
           url: data.url,
           onSuccess: () => {
@@ -258,7 +209,6 @@ export const PricingModal = ({
               description: "Trying alternative redirect method...",
               variant: "destructive",
             });
-            // Fallback to basic redirect
             window.location.href = data.url;
           }
         });
@@ -267,96 +217,9 @@ export const PricingModal = ({
       }
     } catch (error) {
       console.error('Payment error:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-
-      // Provide more specific error messages
-      let userFriendlyMessage = "Failed to create payment session";
-      if (errorMessage.includes('not configured')) {
-        userFriendlyMessage = "Payment system is not configured. Please contact support.";
-      } else if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
-        userFriendlyMessage = "Network error. Please check your connection and try again.";
-      } else if (errorMessage.includes('rate limit')) {
-        userFriendlyMessage = "Too many requests. Please wait a moment and try again.";
-      } else if (errorMessage.includes('Invalid amount')) {
-        userFriendlyMessage = "Invalid payment amount. Please check your selection.";
-      }
-
       toast({
         title: "Payment Error",
-        description: userFriendlyMessage,
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSubscription = async () => {
-    if (isGuest && !guestEmail) {
-      toast({
-        title: "Error",
-        description: "Email is required for guest checkout", 
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const plan = subscriptionPlans["premium-seo-tools"];
-
-      const response = await fetch('/.netlify/functions/create-subscription', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          priceId: plan.priceId,
-          tier: "premium-seo-tools",
-          isGuest,
-          guestEmail: isGuest ? guestEmail : undefined
-        })
-      });
-
-      let data;
-      try {
-        data = await response.json();
-      } catch (parseError) {
-        throw new Error(`Invalid response from subscription service: ${response.status} ${response.statusText}`);
-      }
-
-      if (!response.ok) {
-        throw new Error(data.error || `HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      if (data.url) {
-        // Use mobile-optimized payment handler
-        await MobilePaymentHandler.handlePaymentRedirect({
-          url: data.url,
-          onSuccess: () => {
-            console.log('✅ Subscription redirect successful');
-            onClose();
-          },
-          onError: (error) => {
-            console.error('❌ Subscription redirect failed:', error);
-            toast({
-              title: "Redirect Failed",
-              description: "Trying alternative redirect method...",
-              variant: "destructive",
-            });
-            // Fallback to basic redirect
-            window.location.href = data.url;
-          }
-        });
-      } else {
-        throw new Error('No subscription URL received');
-      }
-    } catch (error) {
-      console.error('Subscription error:', error);
-      toast({
-        title: "Subscription Error",
-        description: "Failed to create subscription",
+        description: "Failed to create payment",
         variant: "destructive",
       });
     } finally {
@@ -369,7 +232,6 @@ export const PricingModal = ({
     setSelectedPlan("");
     setShowCustomPlan(false);
     setCustomCredits(initialCredits || 200);
-    setPaymentType(defaultTab);
     setIsGuest(false);
     setGuestEmail("");
     setLoading(false);
@@ -509,24 +371,17 @@ export const PricingModal = ({
                           placeholder="Enter credits"
                           className="text-lg font-semibold text-center"
                         />
-                        <p className="text-xs text-muted-foreground">
-                          Minimum: 1 credit • Maximum: 10,000 credits
-                        </p>
                       </div>
                       
                       <div className="space-y-3">
                         <Label>Total Price</Label>
                         <div className="p-3 bg-primary/10 rounded-lg text-center">
                           <div className="text-2xl font-bold text-primary">
-                            ${calculateCustomPrice(customCredits)}
+                            ${(customCredits * CREDIT_PRICE).toFixed(2)}
                           </div>
                           <div className="text-sm text-muted-foreground">
-                            {`${customCredits} × $1.40 = $${calculateCustomPrice(customCredits)}`}
+                            {`${customCredits} × $1.40 = $${(customCredits * CREDIT_PRICE).toFixed(2)}`}
                           </div>
-                        </div>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <Info className="h-3 w-3" />
-                          <span>1 credit = 1 premium backlink</span>
                         </div>
                       </div>
                     </div>
@@ -535,26 +390,17 @@ export const PricingModal = ({
               </Card>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex items-center justify-between pt-6 border-t">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Shield className="h-4 w-4" />
-                <span>Secure checkout • Money-back guarantee</span>
-              </div>
-              
-              <div className="flex gap-3">
-                <Button variant="outline" onClick={handleClose}>
-                  Cancel
-                </Button>
-                <Button 
-                  onClick={handleContinueToPayment}
-                  className="bg-primary hover:bg-primary/90"
-                  disabled={!selectedPlan && !showCustomPlan}
-                >
-                  Continue to Checkout
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </div>
+            {/* Continue Button */}
+            <div className="flex justify-center pt-6">
+              <Button
+                onClick={handleContinueToCheckout}
+                size="lg"
+                className="bg-primary hover:bg-primary/90"
+                disabled={!selectedPlan && !showCustomPlan}
+              >
+                Continue to Checkout
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
             </div>
           </div>
         )}
@@ -614,133 +460,86 @@ export const PricingModal = ({
             </Card>
 
             {/* Payment Options */}
-            <Tabs value={paymentType} onValueChange={(value) => setPaymentType(value as "payment" | "subscription")}>
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="payment" className="flex items-center gap-2">
-                  <CreditCard className="w-4 h-4" />
-                  One-time Payment
-                </TabsTrigger>
-                <TabsTrigger value="subscription" className="flex items-center gap-2">
-                  <Repeat className="w-4 h-4" />
-                  Subscription
-                </TabsTrigger>
-              </TabsList>
+            <div className="space-y-4">
+              {/* Checkout Type */}
+              <div className="space-y-2">
+                <Label>Checkout Type</Label>
+                <RadioGroup
+                  value={isGuest ? "guest" : "user"}
+                  onValueChange={(value) => setIsGuest(value === "guest")}
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="user" id="user" />
+                    <Label htmlFor="user">Account Checkout</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="guest" id="guest" />
+                    <Label htmlFor="guest">Guest Checkout</Label>
+                  </div>
+                </RadioGroup>
+              </div>
 
-              <div className="space-y-4 mt-4">
-                {/* Checkout Type */}
+              {/* Guest Email */}
+              {isGuest && (
                 <div className="space-y-2">
-                  <Label>Checkout Type</Label>
-                  <RadioGroup
-                    value={isGuest ? "guest" : "user"}
-                    onValueChange={(value) => setIsGuest(value === "guest")}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="user" id="user" />
-                      <Label htmlFor="user">Account Checkout</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="guest" id="guest" />
-                      <Label htmlFor="guest">Guest Checkout</Label>
-                    </div>
-                  </RadioGroup>
+                  <Label htmlFor="guestEmail">Email Address</Label>
+                  <Input
+                    id="guestEmail"
+                    type="email"
+                    value={guestEmail}
+                    onChange={(e) => setGuestEmail(e.target.value)}
+                    placeholder="Enter your email for receipt"
+                    required
+                  />
                 </div>
+              )}
 
-                {/* Guest Email */}
-                {isGuest && (
-                  <div className="space-y-2">
-                    <Label htmlFor="guestEmail">Email Address</Label>
-                    <Input
-                      id="guestEmail"
-                      type="email"
-                      value={guestEmail}
-                      onChange={(e) => setGuestEmail(e.target.value)}
-                      placeholder="Enter your email"
-                    />
+              {/* Payment Method */}
+              <div className="space-y-2">
+                <Label>Payment Method</Label>
+                <RadioGroup value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as "stripe")}>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="stripe" id="stripe" />
+                    <Label htmlFor="stripe" className="flex items-center gap-2">
+                      <CreditCard className="w-4 h-4" />
+                      Credit Card (Stripe)
+                    </Label>
+                  </div>
+                </RadioGroup>
+              </div>
+
+              {/* Purchase Button */}
+              <Button 
+                onClick={handlePayment} 
+                disabled={loading || (isGuest && !guestEmail)}
+                className="w-full bg-primary hover:bg-primary/90"
+                size="lg"
+              >
+                {loading ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Processing...
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <Wallet className="h-4 w-4" />
+                    Buy {getFinalCreditsAndPrice().credits} Credits for ${getFinalCreditsAndPrice().price.toFixed(2)}
                   </div>
                 )}
+              </Button>
 
-                {/* Payment Method */}
-                <div className="space-y-2">
-                  <Label>Payment Method</Label>
-                  <RadioGroup value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as "stripe")}>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="stripe" id="stripe" />
-                      <Label htmlFor="stripe" className="flex items-center gap-2">
-                        <CreditCard className="w-4 h-4" />
-                        Credit Card (Stripe)
-                      </Label>
-                    </div>
-                  </RadioGroup>
-                </div>
-
-                <TabsContent value="payment" className="space-y-4">
-                  <Button 
-                    onClick={handlePayment} 
-                    disabled={loading || (isGuest && !guestEmail)}
-                    className="w-full bg-primary hover:bg-primary/90"
-                    size="lg"
-                  >
-                    {loading ? (
-                      <>
-                        <Clock className="h-4 w-4 mr-2 animate-spin" />
-                        Processing...
-                      </>
-                    ) : (
-                      <>
-                        <Zap className="h-4 w-4 mr-2" />
-                        Complete Purchase - ${getFinalCreditsAndPrice().price.toFixed(2)}
-                      </>
-                    )}
-                  </Button>
-                </TabsContent>
-
-                <TabsContent value="subscription" className="space-y-4">
-                  <div className="space-y-4">
-                    <Card className="p-4 border border-primary/20">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="font-medium">Premium SEO Tools</div>
-                          <div className="text-sm text-muted-foreground">
-                            Access to all SEO tools and features
-                          </div>
-                        </div>
-                        <div className="text-2xl font-bold text-primary">$29/mo</div>
-                      </div>
-                    </Card>
-                  </div>
-                  <Button 
-                    onClick={handleSubscription} 
-                    disabled={loading || (isGuest && !guestEmail)}
-                    className="w-full bg-primary hover:bg-primary/90"
-                    size="lg"
-                  >
-                    {loading ? (
-                      <>
-                        <Clock className="h-4 w-4 mr-2 animate-spin" />
-                        Processing...
-                      </>
-                    ) : (
-                      <>
-                        <Repeat className="h-4 w-4 mr-2" />
-                        Subscribe for $29/month
-                      </>
-                    )}
-                  </Button>
-                </TabsContent>
-
-                {/* Action Buttons */}
-                <div className="flex gap-3 pt-4">
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setStep(user ? "pricing" : "auth")}
-                    className="flex-1"
-                  >
-                    <ArrowRight className="h-4 w-4 mr-2 rotate-180" />
-                    Back
-                  </Button>
-                </div>
+              {/* Back Button */}
+              <div className="flex justify-center pt-4">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setStep(user ? "pricing" : "auth")}
+                  className="flex items-center gap-2"
+                >
+                  <ArrowRight className="h-4 w-4 rotate-180" />
+                  Back
+                </Button>
               </div>
-            </Tabs>
+            </div>
           </div>
         )}
       </DialogContent>
