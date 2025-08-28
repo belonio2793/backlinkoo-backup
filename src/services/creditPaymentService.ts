@@ -46,6 +46,45 @@ export class CreditPaymentService {
   }
 
   /**
+   * Open Stripe checkout in a new window
+   */
+  static openCheckoutWindow(url: string, sessionId?: string): void {
+    try {
+      console.log('🚀 Opening checkout window:', url);
+
+      // Open checkout in new window
+      const checkoutWindow = window.open(
+        url,
+        'stripe-checkout',
+        'width=600,height=700,scrollbars=yes,resizable=yes'
+      );
+
+      if (!checkoutWindow) {
+        throw new Error('Popup was blocked by browser. Please allow popups and try again.');
+      }
+
+      // Optional: Monitor window close
+      const checkClosed = setInterval(() => {
+        if (checkoutWindow.closed) {
+          clearInterval(checkClosed);
+          console.log('🔄 Checkout window closed');
+          // Could trigger a payment verification here if needed
+        }
+      }, 1000);
+
+      // Clean up interval after 30 minutes
+      setTimeout(() => {
+        clearInterval(checkClosed);
+      }, 30 * 60 * 1000);
+
+    } catch (error) {
+      console.error('❌ Failed to open checkout window:', error);
+      // Fallback: redirect in same window
+      window.location.href = url;
+    }
+  }
+
+  /**
    * Extract meaningful error message from any error object
    */
   private static extractErrorMessage(error: unknown): string {
