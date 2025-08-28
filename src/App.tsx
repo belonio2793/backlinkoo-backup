@@ -52,7 +52,6 @@ const LazyPaymentTest = lazy(() => import("./pages/PaymentTest"));
 const LazyTwitterAdGenerator = lazy(() => import("./pages/TwitterAdGenerator"));
 const LazyAffiliate = lazy(() => import("./pages/Affiliate"));
 const LazyStripeTest = lazy(() => import("./pages/StripeTest"));
-const LazyDevStripeCheckout = lazy(() => import("./pages/DevStripeCheckout"));
 const LazyDomainsPage = lazy(() => import("./pages/DomainsPage"));
 const LazyEnhancedDomainsPage = lazy(() => import("./pages/EnhancedDomainsPage"));
 const LazyNetlifyTest = lazy(() => import("./pages/NetlifyTest"));
@@ -338,14 +337,6 @@ const App = () => {
               }
             />
 
-            <Route
-              path="/dev-stripe-checkout"
-              element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <LazyDevStripeCheckout />
-                </Suspense>
-              }
-            />
 
             <Route
               path="/test"
