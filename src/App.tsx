@@ -311,6 +311,15 @@ const App = () => {
             />
 
             <Route
+              path="/edge-function-debug"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyEdgeFunctionDebugPage />
+                </Suspense>
+              }
+            />
+
+            <Route
               path="/domains-test"
               element={
                 <Suspense fallback={<LoadingSpinner />}>
