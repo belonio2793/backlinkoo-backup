@@ -62,6 +62,7 @@ const LazyBlogGenerationTest = lazy(() => import("./components/BlogGenerationTes
 const LazyAuthFix = lazy(() => import("./pages/AuthFix"));
 const LazyTestPaymentModal = lazy(() => import("./pages/TestPaymentModal"));
 const LazyTestPaymentFunction = lazy(() => import("./pages/TestPaymentFunction"));
+const LazyTestAllPaymentMethods = lazy(() => import("./pages/TestAllPaymentMethods"));
 import BlogGenerationFixTestPage from "./pages/BlogGenerationFixTest";
 
 const queryClient = new QueryClient({
@@ -375,6 +376,14 @@ const App = () => {
               element={
                 <Suspense fallback={<LoadingSpinner />}>
                   <LazyTestPaymentFunction />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/test-all-payments"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyTestAllPaymentMethods />
                 </Suspense>
               }
             />
