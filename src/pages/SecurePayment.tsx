@@ -1,62 +1,72 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, CreditCard, Shield, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Loader2, AlertCircle } from 'lucide-react';
+import { stripeWrapper } from '@/services/stripeWrapper';
 
 function SecurePayment() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  
-  const [paymentDetails, setPaymentDetails] = useState({
-    credits: 0,
-    amount: 0,
-    rate: 0,
-    product: '',
-    email: '',
-    returnUrl: '/dashboard',
-    cancelUrl: '/dashboard'
-  });
+
+  const [isProcessing, setIsProcessing] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Extract payment details from URL parameters
-    const details = {
-      credits: parseInt(searchParams.get('credits') || '0'),
-      amount: parseFloat(searchParams.get('amount') || '0'),
-      rate: parseFloat(searchParams.get('rate') || '0'),
-      product: searchParams.get('product') || '',
-      email: searchParams.get('email') || '',
-      returnUrl: searchParams.get('return_url') || '/dashboard',
-      cancelUrl: searchParams.get('cancel_url') || '/dashboard'
+    const processPayment = async () => {
+      try {
+        // Extract payment details from URL parameters
+        const credits = parseInt(searchParams.get('credits') || '0');
+        const amount = parseFloat(searchParams.get('amount') || '0');
+        const email = searchParams.get('email') || '';
+        const isGuest = searchParams.get('guest') === 'true';
+
+        if (credits <= 0 || amount <= 0) {
+          toast({
+            title: 'Invalid Payment Details',
+            description: 'Please return to the dashboard and try again.',
+            variant: 'destructive'
+          });
+          navigate('/dashboard');
+          return;
+        }
+
+        // Create payment session with stripeWrapper
+        const result = await stripeWrapper.createPayment({
+          amount,
+          credits,
+          productName: `${credits} Backlink Credits`,
+          isGuest,
+          guestEmail: email
+        });
+
+        if (result.success && result.url) {
+          // Redirect directly to Stripe checkout
+          window.location.href = result.url;
+        } else {
+          setError(result.error || 'Failed to create payment session');
+          setIsProcessing(false);
+        }
+      } catch (error: any) {
+        console.error('Payment creation error:', error);
+        setError(error.message || 'Failed to create payment session');
+        setIsProcessing(false);
+      }
     };
 
-    if (details.credits <= 0 || details.amount <= 0) {
-      toast({
-        title: 'Invalid Payment Details',
-        description: 'Please return to the dashboard and try again.',
-        variant: 'destructive'
-      });
-      navigate('/dashboard');
-      return;
-    }
-
-    setPaymentDetails(details);
+    processPayment();
   }, [searchParams, navigate, toast]);
 
-  const handlePayment = () => {
-    // For now, show a message that server configuration is needed
-    toast({
-      title: 'Server Configuration Required',
-      description: 'The payment system requires server-side configuration. Please contact support to complete the setup.',
-      variant: 'destructive',
-      duration: 8000
-    });
+  const handleRetry = () => {
+    setIsProcessing(true);
+    setError(null);
+    window.location.reload();
   };
 
   const handleCancel = () => {
-    navigate(paymentDetails.cancelUrl);
+    navigate('/dashboard');
   };
 
   if (paymentDetails.credits === 0) {
