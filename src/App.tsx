@@ -43,6 +43,7 @@ const LazyEmailConfirmation = lazy(() => import("./pages/EmailConfirmation"));
 const LazyPasswordReset = lazy(() => import("./pages/PasswordReset"));
 const LazyPaymentSuccess = lazy(() => import("./pages/PaymentSuccess"));
 const LazyPaymentCancelled = lazy(() => import("./pages/PaymentCancelled"));
+const LazySecurePayment = lazy(() => import("./pages/SecurePayment"));
 const LazySubscriptionSuccess = lazy(() => import("./pages/SubscriptionSuccess"));
 const LazySubscriptionCancelled = lazy(() => import("./pages/SubscriptionCancelled"));
 const LazyTermsOfService = lazy(() => import("./pages/TermsOfService"));
@@ -411,6 +412,14 @@ const App = () => {
               element={
                 <Suspense fallback={<LoadingSpinner />}>
                   <LazyPaymentCancelled />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/secure-payment"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazySecurePayment />
                 </Suspense>
               }
             />

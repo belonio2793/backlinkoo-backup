@@ -2,6 +2,7 @@ import { supabase } from '@/integrations/supabase/client';
 import type { User } from '@supabase/supabase-js';
 import { logError as logFormattedError, getErrorMessage } from '@/utils/errorFormatter';
 import { ErrorLogger } from '@/utils/errorLogger';
+import { ClientStripeService } from './clientStripeService';
 
 export interface CreditPaymentOptions {
   amount: number;
@@ -23,26 +24,67 @@ export class CreditPaymentService {
    * Detect the current deployment environment
    */
   private static getEnvironment() {
-    if (typeof window === 'undefined') return { isProduction: true, hostname: 'server' };
+    if (typeof window === 'undefined') return { isProduction: true, hostname: 'server', useSupabase: true };
 
     const hostname = window.location.hostname;
     const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
     const isNetlify = hostname.includes('netlify.app') || hostname.includes('netlify.com');
     const isFlyDev = hostname.includes('fly.dev');
 
-    // Treat fly.dev as development environment (Builder.io development servers)
-    const isDevelopment = isLocalhost || isFlyDev;
-    const hasSupabaseFunctions = true; // Always try Supabase edge functions first since Stripe keys are configured there
+    // Fly.dev deployments should use Supabase Edge Functions
+    // Netlify deployments should use Netlify Functions
+    const useSupabase = isFlyDev || isLocalhost || (!isNetlify);
+    const isDevelopment = isLocalhost;
+    const isProduction = !isDevelopment;
 
     return {
       isLocalhost,
       isNetlify,
       isFlyDev,
       isDevelopment,
-      isProduction: !isDevelopment,
-      hasSupabaseFunctions,
+      isProduction,
+      useSupabase,
       hostname
     };
+  }
+
+  /**
+   * Open Stripe checkout in a new window
+   */
+  static openCheckoutWindow(url: string, sessionId?: string): void {
+    try {
+      console.log('🚀 Opening checkout window:', url);
+
+      // Open checkout in new window
+      const checkoutWindow = window.open(
+        url,
+        'stripe-checkout',
+        'width=600,height=700,scrollbars=yes,resizable=yes'
+      );
+
+      if (!checkoutWindow) {
+        throw new Error('Popup was blocked by browser. Please allow popups and try again.');
+      }
+
+      // Optional: Monitor window close
+      const checkClosed = setInterval(() => {
+        if (checkoutWindow.closed) {
+          clearInterval(checkClosed);
+          console.log('🔄 Checkout window closed');
+          // Could trigger a payment verification here if needed
+        }
+      }, 1000);
+
+      // Clean up interval after 30 minutes
+      setTimeout(() => {
+        clearInterval(checkClosed);
+      }, 30 * 60 * 1000);
+
+    } catch (error) {
+      console.error('❌ Failed to open checkout window:', error);
+      // Fallback: redirect in same window
+      window.location.href = url;
+    }
   }
 
   /**
@@ -134,8 +176,8 @@ export class CreditPaymentService {
       return { success: false, error: 'Email is required for payment processing' };
     }
 
-    // Production payment processing - Supabase Edge Functions only
-    console.log('🔧 Using Supabase Edge Functions for live payment processing');
+    // Production payment processing - Using Supabase Edge Functions for Fly.dev deployment
+    console.log('🔧 Using Supabase Edge Functions for live payment processing (Fly.dev deployment)');
 
     const requestBody = {
       amount: options.amount,
@@ -194,9 +236,37 @@ export class CreditPaymentService {
           sessionId: result.sessionId || result.session_id
         };
       } else {
-        // Payment failed - provide detailed error
+        // Edge Function failed - try client-side fallback
         const errorMessage = edgeError ? this.extractErrorMessage(edgeError) : 'No payment URL received from server';
-        console.error('❌ Payment creation failed:', errorMessage);
+        console.warn('⚠️ Edge Function failed, trying client-side fallback:', errorMessage);
+
+        // Check if error indicates configuration issues
+        if (errorMessage.includes('not configured') || errorMessage.includes('configuration error') ||
+            errorMessage.includes('non-2xx status code') || errorMessage.includes('service error')) {
+
+          console.log('🔄 Attempting client-side Stripe fallback...');
+
+          try {
+            const fallbackResult = await ClientStripeService.createClientPayment({
+              amount: options.amount,
+              credits: options.credits,
+              productName: options.productName,
+              userEmail: finalGuestEmail || user?.email
+            });
+
+            if (fallbackResult.success && fallbackResult.url) {
+              console.log('✅ Client-side fallback successful');
+              return {
+                success: true,
+                url: fallbackResult.url,
+                sessionId: 'client-fallback-' + Date.now()
+              };
+            }
+          } catch (fallbackError) {
+            console.error('❌ Client-side fallback also failed:', fallbackError);
+          }
+        }
+
         ErrorLogger.logError('Credit payment error', edgeError || { message: 'No URL returned' });
 
         return {
