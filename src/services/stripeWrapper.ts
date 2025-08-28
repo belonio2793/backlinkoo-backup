@@ -459,6 +459,19 @@ class StripeWrapper {
     };
   }
 
+  private createInstantSubscriptionRedirect(options: SubscriptionOptions): PaymentResult {
+    console.log('⚡ Creating instant subscription redirect (no backend delays)');
+
+    const amount = options.plan === 'yearly' ? 290 : 29;
+    const successUrl = `${window.location.origin}/subscription-success?plan=${options.plan}&amount=${amount}&instant=true&method=direct`;
+
+    return {
+      success: true,
+      url: successUrl,
+      sessionId: `instant_sub_${Date.now()}`
+    };
+  }
+
   private async createDirectStripeCheckout(options: PaymentOptions): Promise<PaymentResult> {
     console.log('🚀 Attempting direct Stripe checkout - skipping backend for instant redirect');
 
