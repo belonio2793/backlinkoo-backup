@@ -1,9 +1,9 @@
 /**
  * Production Stripe Payment Service
- * Uses Supabase Edge Functions - works on all deployment platforms
+ * Now powered by Stripe Wrapper with Supabase integration
  */
 
-import { supabase } from '@/integrations/supabase/client';
+import { stripeWrapper, type PaymentOptions, type SubscriptionOptions, type PaymentResult } from './stripeWrapper';
 
 export interface StripePaymentOptions {
   amount: number;
@@ -20,19 +20,13 @@ export interface StripePaymentResult {
   url?: string;
   sessionId?: string;
   error?: string;
+  method?: string;
+  fallbackUsed?: boolean;
 }
 
 class StripePaymentService {
-  private publishableKey: string;
-
   constructor() {
-    this.publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
-    
-    if (!this.publishableKey || !this.publishableKey.startsWith('pk_')) {
-      throw new Error('VITE_STRIPE_PUBLISHABLE_KEY is required and must be a valid Stripe key');
-    }
-
-    console.log('🔧 Stripe Production Service Initialized');
+    console.log('🔧 Stripe Production Service Initialized (Wrapper-powered)');
   }
 
   /**
