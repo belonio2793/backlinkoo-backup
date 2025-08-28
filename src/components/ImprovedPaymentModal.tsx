@@ -278,24 +278,39 @@ export const ImprovedPaymentModal = ({
               </p>
             </div>
 
-            <Button
-              onClick={handleCreditPurchase}
-              disabled={loading || !credits || parseFloat(credits) <= 0}
-              className="w-full h-12"
-              size="lg"
-            >
-              {loading ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Opening Checkout...
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <CreditCard className="h-4 w-4" />
-                  Buy {credits || 0} Credits for ${amount || "0.00"}
-                </div>
-              )}
-            </Button>
+            {user ? (
+              <Button
+                onClick={handleCreditPurchase}
+                disabled={loading || !credits || parseFloat(credits) <= 0}
+                className="w-full h-12"
+                size="lg"
+              >
+                {loading ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Opening Checkout...
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <CreditCard className="h-4 w-4" />
+                    Buy {credits || 0} Credits for ${amount || "0.00"}
+                  </div>
+                )}
+              </Button>
+            ) : (
+              <Button
+                onClick={() => toast({
+                  title: "Authentication Required",
+                  description: "Please sign in to purchase credits",
+                  variant: "destructive",
+                })}
+                className="w-full h-12"
+                size="lg"
+                variant="outline"
+              >
+                Sign In to Purchase Credits
+              </Button>
+            )}
 
             {/* New Window Notice */}
             <div className="text-center text-sm text-muted-foreground">
