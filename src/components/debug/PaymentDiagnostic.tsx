@@ -9,11 +9,11 @@ export function PaymentDiagnostic() {
     setIsLoading(true);
     setStatus('Testing payment endpoints...\n');
 
-    const results = ['Testing payment endpoints...', ''];
+    const results = ['🔍 Advanced Payment Function Diagnostic', ''];
 
     try {
       // Test Supabase Edge Function (proper method)
-      results.push('🔄 Testing Supabase Edge Function (via SDK)');
+      results.push('🔄 Testing Supabase Edge Function (create-payment)');
       setStatus(results.join('\n'));
 
       // Import Supabase client
@@ -21,81 +21,94 @@ export function PaymentDiagnostic() {
       const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
       if (!supabaseUrl || !supabaseKey) {
-        results.push('❌ Supabase client: Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY');
+        results.push('❌ Supabase client: Missing environment variables');
+        results.push(`   VITE_SUPABASE_URL: ${supabaseUrl ? '✅ Set' : '❌ Missing'}`);
+        results.push(`   VITE_SUPABASE_ANON_KEY: ${supabaseKey ? '✅ Set' : '❌ Missing'}`);
       } else {
+        results.push(`📡 Supabase URL: ${supabaseUrl}`);
+
         // Dynamically import Supabase client
         const { createClient } = await import('@supabase/supabase-js');
         const supabase = createClient(supabaseUrl, supabaseKey);
 
+        const testPayload = {
+          amount: 1000, // $10.00 test amount
+          credits: 100,
+          productName: 'Test Credits',
+          isGuest: true,
+          guestEmail: 'test@example.com'
+        };
+
+        results.push(`📦 Test payload: ${JSON.stringify(testPayload, null, 2)}`);
+        results.push('⏳ Calling supabase.functions.invoke("create-payment")...');
+        setStatus(results.join('\n'));
+
         const { data, error } = await supabase.functions.invoke('create-payment', {
-          body: {
-            amount: 1000, // $10.00 test amount
-            credits: 100,
-            productName: 'Test Credits',
-            isGuest: true,
-            guestEmail: 'test@example.com'
-          }
+          body: testPayload
         });
 
         if (error) {
+          results.push(`❌ Supabase Edge Function Error:`);
+          results.push(`   Error Code: ${error.name || 'Unknown'}`);
+          results.push(`   Error Message: ${error.message || 'No message'}`);
+          results.push(`   Error Details: ${JSON.stringify(error, null, 2)}`);
+
+          // Check specific error types
           if (error.message?.includes('not found') || error.message?.includes('404')) {
-            results.push('❌ Supabase Edge Function: Function not deployed');
-            results.push('💡 Run: supabase functions deploy create-payment');
-          } else {
-            results.push(`❌ Supabase Edge Function: ${error.message}`);
+            results.push('💡 Diagnosis: Function not deployed or wrong function name');
+          } else if (error.message?.includes('CORS')) {
+            results.push('💡 Diagnosis: CORS configuration issue');
+          } else if (error.message?.includes('Environment')) {
+            results.push('💡 Diagnosis: Missing environment variables in Supabase');
+          } else if (error.message?.includes('STRIPE_SECRET_KEY')) {
+            results.push('💡 Diagnosis: Missing or invalid Stripe secret key');
+          } else if (error.message?.includes('SUPABASE_SERVICE_ROLE_KEY')) {
+            results.push('💡 Diagnosis: Missing or invalid Supabase service role key');
           }
-        } else if (data?.sessionId) {
-          results.push(`✅ Supabase Edge Function: Working! Session ID: ${data.sessionId.substring(0, 20)}...`);
         } else {
-          results.push(`❌ Supabase Edge Function: Invalid response format`);
+          results.push('✅ Supabase Edge Function Response:');
+          results.push(`   Data: ${JSON.stringify(data, null, 2)}`);
+
+          if (data?.sessionId) {
+            results.push(`✅ SUCCESS! Session ID: ${data.sessionId.substring(0, 20)}...`);
+            results.push(`   Payment URL: ${data.url ? 'Generated' : 'Missing'}`);
+          } else if (data?.error) {
+            results.push(`❌ Function Error: ${data.error}`);
+          } else {
+            results.push('❌ Unexpected response format');
+          }
         }
       }
 
       results.push(''); // Add spacing
 
-      // Test Netlify Function (fallback)
-      results.push('🔄 Testing Netlify Function (fallback)');
+      // Quick connectivity test
+      results.push('🔄 Testing Supabase connectivity...');
       setStatus(results.join('\n'));
 
-      const response = await fetch('/.netlify/functions/create-payment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          amount: 1000,
-          credits: 100,
-          productName: 'Test Credits',
-          isGuest: true,
-          guestEmail: 'test@example.com'
-        })
-      });
-
-      if (response.ok) {
-        try {
-          const data = await response.json();
-          results.push(`✅ Netlify Function: Working! Session ID: ${data.sessionId?.substring(0, 20)}...`);
-        } catch (parseError) {
-          results.push(`❌ Netlify Function: Response parsing error`);
-        }
-      } else {
-        results.push(`❌ Netlify Function: HTTP ${response.status} (Expected on non-Netlify hosting)`);
+      try {
+        const connectTest = await fetch(`${supabaseUrl}/rest/v1/`, {
+          headers: {
+            'apikey': supabaseKey,
+            'Authorization': `Bearer ${supabaseKey}`
+          }
+        });
+        results.push(`✅ Supabase REST API: ${connectTest.status} ${connectTest.statusText}`);
+      } catch (connectError) {
+        results.push(`❌ Supabase connectivity: ${connectError instanceof Error ? connectError.message : 'Failed'}`);
       }
 
     } catch (error) {
-      results.push(`❌ Test error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      results.push(`❌ Critical test error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      results.push(`   Stack trace: ${error instanceof Error ? error.stack : 'No stack trace'}`);
     }
 
     results.push('');
-    results.push('📋 Next Steps:');
-    results.push('1. Deploy Supabase Edge Functions:');
-    results.push('   supabase functions deploy create-payment');
-    results.push('   supabase functions deploy create-subscription');
-    results.push('   supabase functions deploy verify-payment');
-    results.push('');
-    results.push('2. Set Supabase secrets:');
-    results.push('   supabase secrets set STRIPE_SECRET_KEY=sk_live_...');
-    results.push('   supabase secrets set SUPABASE_SERVICE_ROLE_KEY=...');
+    results.push('🔧 Troubleshooting Checklist:');
+    results.push('1. ✓ Verify Supabase functions are deployed');
+    results.push('2. ✓ Check Supabase secrets are set correctly');
+    results.push('3. ✓ Confirm Stripe secret key is valid');
+    results.push('4. ✓ Ensure SUPABASE_SERVICE_ROLE_KEY has proper permissions');
 
     setStatus(results.join('\n'));
     setIsLoading(false);
