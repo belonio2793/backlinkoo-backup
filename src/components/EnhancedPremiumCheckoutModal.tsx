@@ -107,6 +107,15 @@ export function EnhancedPremiumCheckoutModal({
 
   // Handle checkout process
   const handleCheckout = async () => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to upgrade to Premium",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsProcessing(true);
     setCurrentStep('processing');
 
@@ -124,8 +133,8 @@ export function EnhancedPremiumCheckoutModal({
         result = await stripeWrapper.createSubscription({
           plan: selectedPlan,
           tier: 'premium',
-          isGuest: checkoutMode === 'guest',
-          guestEmail: checkoutMode === 'guest' ? guestEmail : undefined
+          isGuest: false,
+          guestEmail: undefined
         });
 
         if (result.success) {
@@ -135,8 +144,8 @@ export function EnhancedPremiumCheckoutModal({
         console.warn('⚠️ Stripe Wrapper failed, using legacy service:', wrapperError);
         result = await SubscriptionService.createSubscription(
           user,
-          checkoutMode === 'guest',
-          checkoutMode === 'guest' ? guestEmail : undefined,
+          false,
+          undefined,
           selectedPlan
         );
       }
