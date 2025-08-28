@@ -23,24 +23,26 @@ export class CreditPaymentService {
    * Detect the current deployment environment
    */
   private static getEnvironment() {
-    if (typeof window === 'undefined') return { isProduction: true, hostname: 'server' };
+    if (typeof window === 'undefined') return { isProduction: true, hostname: 'server', useSupabase: true };
 
     const hostname = window.location.hostname;
     const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
     const isNetlify = hostname.includes('netlify.app') || hostname.includes('netlify.com');
     const isFlyDev = hostname.includes('fly.dev');
 
-    // Treat fly.dev as development environment (Builder.io development servers)
-    const isDevelopment = isLocalhost || isFlyDev;
-    const hasSupabaseFunctions = true; // Always try Supabase edge functions first since Stripe keys are configured there
+    // Fly.dev deployments should use Supabase Edge Functions
+    // Netlify deployments should use Netlify Functions
+    const useSupabase = isFlyDev || isLocalhost || (!isNetlify);
+    const isDevelopment = isLocalhost;
+    const isProduction = !isDevelopment;
 
     return {
       isLocalhost,
       isNetlify,
       isFlyDev,
       isDevelopment,
-      isProduction: !isDevelopment,
-      hasSupabaseFunctions,
+      isProduction,
+      useSupabase,
       hostname
     };
   }
