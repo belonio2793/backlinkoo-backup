@@ -394,52 +394,41 @@ export function GuestPremiumUpsellModal({
 
           {/* Action Buttons */}
           <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row gap-3">
-              <Button
-                size="lg"
-                className="flex-1 h-14 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-                onClick={handleUpgrade}
-                disabled={isProcessingUpgrade}
-              >
-                {isProcessingUpgrade ? (
-                  <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                    Processing...
-                  </>
-                ) : (
-                  <>
-                    <Crown className="h-5 w-5 mr-2" />
-                    Upgrade to Premium - {selectedPlan === 'monthly' ? '$29/month' : '$17/month (billed yearly)'}
-                    <ArrowRight className="h-5 w-5 ml-2" />
-                  </>
-                )}
-              </Button>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+              <div className="flex items-center gap-2 text-blue-800 mb-2">
+                <UserPlus className="h-5 w-5" />
+                <span className="font-medium">Account Required for Premium</span>
+              </div>
+              <p className="text-blue-700 text-sm">
+                To upgrade to Premium and credit your account properly, you need to create a free account first.
+                This ensures your credits and subscription are tied to your email address.
+              </p>
             </div>
-            
-            <div className="flex flex-col sm:flex-row gap-3">
+
+            <div className="flex flex-col gap-3">
               <Button
                 size="lg"
-                variant="outline"
-                className="flex-1 h-12 border-2 border-blue-600 text-blue-600 hover:bg-blue-50"
+                className="h-14 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                 onClick={handleCreateAccount}
               >
                 <UserPlus className="h-5 w-5 mr-2" />
-                Create Free Account First
+                Create Account & Upgrade to Premium
+                <ArrowRight className="h-5 w-5 ml-2" />
               </Button>
-              
+
               <Button
                 variant="ghost"
                 size="lg"
                 onClick={() => onOpenChange(false)}
                 className="h-12 text-gray-500 hover:text-gray-700"
               >
-                Continue with limits
+                Continue with limits for now
               </Button>
             </div>
 
             <div className="text-center text-xs text-gray-500 space-y-1">
-              <p>By upgrading, you agree to our Terms of Service and Privacy Policy</p>
-              <p>Secure payment processed by Stripe</p>
+              <p>Creating an account is free and takes less than 30 seconds</p>
+              <p>Your current campaign progress will be preserved</p>
             </div>
           </div>
         </DialogContent>
