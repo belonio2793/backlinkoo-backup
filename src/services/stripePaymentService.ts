@@ -30,43 +30,38 @@ class StripePaymentService {
   }
 
   /**
-   * Create payment session for credits using Supabase Edge Functions
+   * Create payment session for credits using Stripe Wrapper
    */
   async createPayment(options: StripePaymentOptions): Promise<StripePaymentResult> {
     try {
-      console.log('💳 Creating Stripe payment via Supabase Edge Function');
-      
-      const { data, error } = await supabase.functions.invoke('create-payment', {
-        body: {
-          amount: options.amount,
-          productName: options.productName || `${options.credits || 0} Backlink Credits`,
-          credits: options.credits,
-          paymentMethod: 'stripe',
-          isGuest: options.isGuest || false,
+      console.log('💳 Creating Stripe payment via Wrapper');
+
+      if (options.type === 'subscription') {
+        const subscriptionOptions: SubscriptionOptions = {
+          plan: options.plan || 'monthly',
+          tier: 'premium',
+          isGuest: options.isGuest,
           guestEmail: options.guestEmail
-        }
-      });
+        };
 
-      if (error) {
-        console.error('❌ Payment creation failed:', error);
-        throw new Error(`Payment API error: ${error.message || JSON.stringify(error)}`);
+        const result = await stripeWrapper.createSubscription(subscriptionOptions);
+        return this.convertResult(result);
+      } else {
+        const paymentOptions: PaymentOptions = {
+          amount: options.amount,
+          credits: options.credits,
+          productName: options.productName,
+          isGuest: options.isGuest,
+          guestEmail: options.guestEmail
+        };
+
+        const result = await stripeWrapper.createPayment(paymentOptions);
+        return this.convertResult(result);
       }
-
-      if (!data || !data.url) {
-        throw new Error('No checkout URL received from payment service');
-      }
-
-      console.log('✅ Payment session created successfully');
-      
-      return {
-        success: true,
-        url: data.url,
-        sessionId: data.sessionId || data.session_id
-      };
 
     } catch (error: any) {
       console.error('❌ Payment creation error:', error);
-      
+
       return {
         success: false,
         error: error.message || 'Failed to create payment session'
