@@ -178,7 +178,11 @@ export function Header({ showHomeLink = true }: HeaderProps) {
             ) : user ? (
               // Authenticated user buttons
               <>
-                <HeaderUpgradeButton />
+                <PremiumUpgradeButton
+                  variant="outline"
+                  size="sm"
+                  className="bg-transparent hover:bg-purple-50/50 border border-purple-200/60 text-purple-600 hover:text-purple-700 hover:border-purple-300/80 transition-all duration-200 font-medium px-4 py-2 backdrop-blur-sm shadow-sm hover:shadow-md"
+                />
                 <Button
                   variant="outline"
                   size="sm"
