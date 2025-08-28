@@ -224,7 +224,22 @@ serve(async (req) => {
       }
     }
 
-    console.log("Creating checkout session for:", { customerId, email, priceId });
+    // Live Stripe product and price configuration
+    const PREMIUM_PRODUCT_ID = "prod_SoVja4018pbOcy";
+
+    // Create dynamic prices for the product based on plan
+    let priceAmount: number;
+    let interval: 'month' | 'year';
+
+    if (plan === 'monthly') {
+      priceAmount = 2900; // $29.00 in cents
+      interval = 'month';
+    } else { // yearly
+      priceAmount = 29000; // $290.00 in cents
+      interval = 'year';
+    }
+
+    console.log("Creating checkout session for:", { customerId, email, plan, priceAmount });
 
     let session;
     try {
@@ -233,10 +248,23 @@ serve(async (req) => {
         customer_email: customerId ? undefined : email,
         line_items: [
           {
-            price: priceId,
+            price_data: {
+              currency: 'usd',
+              product: PREMIUM_PRODUCT_ID,
+              recurring: {
+                interval: interval,
+              },
+              unit_amount: priceAmount,
+            },
             quantity: 1,
           },
         ],
+        metadata: {
+          plan: plan,
+          product_type: "premium_subscription",
+          is_guest: isGuest.toString(),
+          guest_email: isGuest ? email : ""
+        },
         mode: "subscription",
         success_url: `${req.headers.get("origin")}/subscription-success?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${req.headers.get("origin")}/subscription-cancelled`,
