@@ -139,7 +139,7 @@ export class CreditPaymentService {
   }
 
   /**
-   * Create credit payment session - Production Ready (Live Payments Only)
+   * Create credit payment session - Requires Authentication
    */
   static async createCreditPayment(
     user: User | null,
@@ -150,6 +150,14 @@ export class CreditPaymentService {
     const environment = this.getEnvironment();
     console.log('🔧 Credit Payment Environment:', environment);
 
+    // Require authentication for all credit purchases
+    if (!user || !user.email) {
+      return {
+        success: false,
+        error: 'Authentication required. Please sign in to purchase credits.'
+      };
+    }
+
     // Validate inputs
     if (!options.credits || options.credits <= 0) {
       return { success: false, error: 'Invalid credit amount' };
@@ -159,22 +167,9 @@ export class CreditPaymentService {
       return { success: false, error: 'Invalid payment amount' };
     }
 
-    // Determine if this should be a guest checkout or authenticated user checkout
-    let finalIsGuest = isGuest;
-    let finalGuestEmail = guestEmail;
-
-    if (user && user.email) {
-      // If we have an authenticated user, use authenticated checkout
-      finalIsGuest = false;
-      finalGuestEmail = user.email; // Pass email as backup
-    } else if (!user && guestEmail) {
-      // If no user but we have guest email, use guest checkout
-      finalIsGuest = true;
-      finalGuestEmail = guestEmail;
-    } else {
-      // No user and no guest email - error
-      return { success: false, error: 'Email is required for payment processing' };
-    }
+    // Always use authenticated checkout
+    const finalIsGuest = false;
+    const finalGuestEmail = user.email;
 
     // Production payment processing - Using Supabase Edge Functions for Fly.dev deployment
     console.log('🔧 Using Supabase Edge Functions for live payment processing (Fly.dev deployment)');
