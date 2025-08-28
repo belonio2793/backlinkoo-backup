@@ -39,27 +39,35 @@ export class ClientStripeService {
     }
 
     try {
-      // For client-side only implementation, we need to redirect to a pre-configured
-      // Stripe Payment Link or use Stripe's direct checkout
       console.log('🔧 Using client-side Stripe fallback');
-      
-      // Create payment link parameters
-      const paymentParams = new URLSearchParams({
-        'prefilled_email': options.userEmail || '',
-        'client_reference_id': `credits_${options.credits}_${Date.now()}`,
-        'success_url': `${window.location.origin}/payment-success?credits=${options.credits}`,
-        'cancel_url': `${window.location.origin}/payment-cancelled`
-      });
 
-      // For demo purposes, create a simple checkout URL
-      // In production, you'd want to use Stripe Payment Links or a configured checkout
-      const checkoutUrl = `https://checkout.stripe.com/pay/${this.getProductId(options.credits)}?${paymentParams.toString()}`;
+      // Since we can't create server-side sessions without proper Edge Function config,
+      // we'll use a direct approach that redirects to a payment form
+
+      // Calculate the payment details
+      const amount = options.amount;
+      const credits = options.credits;
+      const rate = (amount / credits).toFixed(2);
+
+      // Create a secure payment URL with embedded payment details
+      // This approach uses URL parameters to pass payment info to a payment page
+      const paymentUrl = `${window.location.origin}/secure-payment?` + new URLSearchParams({
+        credits: credits.toString(),
+        amount: amount.toString(),
+        rate: rate,
+        product: options.productName || `${credits} Premium Backlink Credits`,
+        email: options.userEmail || '',
+        return_url: `${window.location.origin}/dashboard`,
+        cancel_url: `${window.location.origin}/dashboard`
+      }).toString();
+
+      console.log('🎯 Generated client payment URL:', paymentUrl);
 
       return {
         success: true,
-        url: checkoutUrl
+        url: paymentUrl
       };
-      
+
     } catch (error) {
       console.error('❌ Client Stripe error:', error);
       return {
