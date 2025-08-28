@@ -220,7 +220,9 @@ export class CreditPaymentService {
             hasData: !!result,
             hasError: !!edgeError,
             error: edgeError,
-            dataKeys: result ? Object.keys(result) : []
+            errorMessage: edgeError?.message,
+            dataKeys: result ? Object.keys(result) : [],
+            resultContent: result ? result : 'no data'
           });
 
           data = result;
