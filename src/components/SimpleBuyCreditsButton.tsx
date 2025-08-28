@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { CreditCard, Loader2 } from 'lucide-react';
+import { CreditCard, Loader2, ExternalLink } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface SimpleBuyCreditsButtonProps {
   trigger?: React.ReactNode;
@@ -26,6 +27,8 @@ export function SimpleBuyCreditsButton({
   isGuest = true
 }: SimpleBuyCreditsButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [showFallbackModal, setShowFallbackModal] = useState(false);
+  const [stripeUrl, setStripeUrl] = useState('');
 
   const handleBuyCredits = async () => {
     if (isLoading) return;
@@ -46,53 +49,107 @@ export function SimpleBuyCreditsButton({
         guestEmail: isGuest ? (guestEmail || 'support@backlinkoo.com') : undefined
       };
 
-      // Call the Stripe payment creation function
-      const response = await fetch('/.netlify/functions/create-payment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(paymentData)
-      });
+      // Try multiple endpoints for redundancy
+      const endpoints = [
+        '/.netlify/functions/create-payment',
+        '/api/create-payment'
+      ];
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Payment initialization failed');
+      let response = null;
+      let lastError = null;
+
+      for (const endpoint of endpoints) {
+        try {
+          console.log(`Trying payment endpoint: ${endpoint}`);
+          response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(paymentData)
+          });
+
+          if (response.ok) {
+            console.log(`✅ Payment endpoint ${endpoint} responded successfully`);
+            break;
+          } else {
+            console.log(`❌ Payment endpoint ${endpoint} failed with status: ${response.status}`);
+            lastError = new Error(`Endpoint ${endpoint} returned ${response.status}`);
+          }
+        } catch (error) {
+          console.log(`❌ Payment endpoint ${endpoint} failed with error:`, error);
+          lastError = error;
+        }
       }
 
-      const result = await response.json();
+      if (!response || !response.ok) {
+        throw lastError || new Error('All payment endpoints failed');
+      }
+
+      let result;
+      try {
+        // Clone the response to avoid "body stream already read" error
+        const responseClone = response.clone();
+        const responseText = await responseClone.text();
+
+        if (!responseText) {
+          throw new Error('Empty response from payment server');
+        }
+
+        result = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('Failed to parse payment response:', parseError);
+        throw new Error('Invalid response from payment server');
+      }
 
       if (result.url) {
-        // Open Stripe checkout in a new window
-        const stripeWindow = window.open(
-          result.url,
-          'stripe-payment',
-          'width=600,height=700,scrollbars=yes,resizable=yes'
-        );
+        setStripeUrl(result.url);
 
-        // Monitor the window for closure to detect completion/cancellation
-        const checkClosed = setInterval(() => {
-          if (stripeWindow?.closed) {
+        // Try to open Stripe checkout in a new window
+        try {
+          const stripeWindow = window.open(
+            result.url,
+            'stripe-payment',
+            'width=600,height=700,scrollbars=yes,resizable=yes,toolbar=no,menubar=no'
+          );
+
+          if (!stripeWindow) {
+            // Popup blocked - show fallback modal
+            console.log('Popup blocked, showing fallback modal');
+            setShowFallbackModal(true);
+            setIsLoading(false);
+            return;
+          }
+
+          // Monitor the window for closure to detect completion/cancellation
+          const checkClosed = setInterval(() => {
+            if (stripeWindow?.closed) {
+              clearInterval(checkClosed);
+              setIsLoading(false);
+
+              // Check URL parameters for success/cancel
+              const urlParams = new URLSearchParams(window.location.search);
+              const sessionId = urlParams.get('session_id');
+
+              if (sessionId) {
+                onPaymentSuccess?.(sessionId);
+              } else {
+                onPaymentCancel?.();
+              }
+            }
+          }, 1000);
+
+          // Fallback: stop loading after 30 seconds if window doesn't close
+          setTimeout(() => {
             clearInterval(checkClosed);
             setIsLoading(false);
+          }, 30000);
 
-            // Check URL parameters for success/cancel
-            const urlParams = new URLSearchParams(window.location.search);
-            const sessionId = urlParams.get('session_id');
-
-            if (sessionId) {
-              onPaymentSuccess?.(sessionId);
-            } else {
-              onPaymentCancel?.();
-            }
-          }
-        }, 1000);
-
-        // Fallback: stop loading after 30 seconds if window doesn't close
-        setTimeout(() => {
-          clearInterval(checkClosed);
+        } catch (windowError) {
+          console.error('Failed to open payment window:', windowError);
+          setShowFallbackModal(true);
           setIsLoading(false);
-        }, 30000);
+        }
 
       } else {
         throw new Error('No payment URL received from server');
@@ -100,8 +157,22 @@ export function SimpleBuyCreditsButton({
     } catch (error) {
       console.error('Payment error:', error);
       setIsLoading(false);
-      alert(`Payment failed: ${error.message}`);
+
+      // Show user-friendly error message
+      const errorMessage = error.message?.includes('404')
+        ? 'Payment system temporarily unavailable. Please try again in a moment.'
+        : error.message?.includes('Network')
+        ? 'Network error. Please check your connection and try again.'
+        : `Payment failed: ${error.message}`;
+
+      alert(errorMessage);
       onPaymentCancel?.();
+    }
+  };
+
+  const handleFallbackPayment = () => {
+    if (stripeUrl) {
+      window.location.href = stripeUrl;
     }
   };
 
@@ -136,6 +207,49 @@ export function SimpleBuyCreditsButton({
       ) : (
         defaultTrigger
       )}
+
+      {/* Fallback Modal for when popup is blocked */}
+      <Dialog open={showFallbackModal} onOpenChange={setShowFallbackModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CreditCard className="h-5 w-5" />
+              Complete Your Purchase
+            </DialogTitle>
+            <DialogDescription>
+              Click the button below to proceed to Stripe checkout and complete your payment for {defaultCredits} credits.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-4 py-4">
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h4 className="font-medium text-blue-900 mb-2">Payment Details</h4>
+              <div className="text-sm text-blue-700 space-y-1">
+                <div>Credits: {defaultCredits}</div>
+                <div>Amount: ${(defaultCredits * 1.40).toFixed(2)}</div>
+                <div>Rate: $1.40 per credit</div>
+              </div>
+            </div>
+            <Button
+              onClick={handleFallbackPayment}
+              className="w-full"
+              size="lg"
+            >
+              <ExternalLink className="h-4 w-4 mr-2" />
+              Continue to Stripe Checkout
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowFallbackModal(false);
+                onPaymentCancel?.();
+              }}
+              className="w-full"
+            >
+              Cancel
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
