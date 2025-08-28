@@ -222,9 +222,17 @@ export class CreditPaymentService {
       console.log('📥 Netlify Function response status:', response.status, response.statusText);
 
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error('❌ Netlify Function failed:', response.status, errorText);
-        throw new Error(`Payment service returned ${response.status}: ${errorText}`);
+        let errorMessage;
+        try {
+          // Try to read as JSON first for structured errors
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorData.message || response.statusText;
+        } catch {
+          // If JSON parsing fails, fall back to status text
+          errorMessage = response.statusText;
+        }
+        console.error('❌ Netlify Function failed:', response.status, errorMessage);
+        throw new Error(`Payment service returned ${response.status}: ${errorMessage}`);
       }
 
       const result = await response.json();
