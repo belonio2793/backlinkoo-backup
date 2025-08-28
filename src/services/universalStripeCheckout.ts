@@ -36,51 +36,6 @@ export class UniversalStripeCheckout {
     return UniversalStripeCheckout.instance;
   }
 
-  /**
-   * Try fallback endpoints when Supabase Edge Functions fail
-   */
-  private async tryFallbackEndpoints(paymentData: any): Promise<PaymentResult> {
-    const endpoints = [
-      '/.netlify/functions/create-payment',
-      '/api/create-payment',
-      '/functions/create-payment'
-    ];
-
-    for (const endpoint of endpoints) {
-      try {
-        console.log(`🔄 Trying fallback endpoint: ${endpoint}`);
-
-        const response = await fetch(endpoint, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(paymentData)
-        });
-
-        if (response.ok) {
-          const result = await response.json();
-          console.log(`✅ Fallback endpoint succeeded: ${endpoint}`);
-
-          if (result.url) {
-            return {
-              success: true,
-              url: result.url,
-              sessionId: result.sessionId || result.session_id
-            };
-          }
-        } else {
-          const errorText = await response.text();
-          console.warn(`⚠️ Endpoint ${endpoint} returned ${response.status}: ${errorText}`);
-        }
-      } catch (fetchError) {
-        console.warn(`⚠️ Endpoint ${endpoint} failed:`, this.extractErrorMessage(fetchError));
-        continue;
-      }
-    }
-
-    throw new Error('All fallback endpoints failed');
-  }
 
   /**
    * Extract meaningful error message from any error object
@@ -195,23 +150,9 @@ export class UniversalStripeCheckout {
         throw new Error('No payment URL received from server');
       }
     } catch (error) {
-      console.error('❌ Supabase Edge Function failed, trying fallback endpoints...');
-      console.error('Original error:', this.extractErrorMessage(error));
+      console.error('❌ Payment creation failed:', this.extractErrorMessage(error));
 
-      // Try fallback endpoints similar to CreditPaymentService
-      try {
-        const fallbackResult = await this.tryFallbackEndpoints(paymentData);
-        if (fallbackResult.success) {
-          return fallbackResult;
-        }
-      } catch (fallbackError) {
-        console.error('❌ Fallback endpoints also failed:', this.extractErrorMessage(fallbackError));
-      }
-
-      // If everything fails, return clear error
       const finalErrorMessage = this.extractErrorMessage(error);
-      console.error('💥 All payment methods failed:', finalErrorMessage);
-
       return {
         success: false,
         error: `Payment failed: ${finalErrorMessage}`
@@ -230,53 +171,44 @@ export class UniversalStripeCheckout {
     try {
       const subscriptionData = {
         plan: options.plan,
+        tier: options.plan === 'yearly' ? 'premium-annual' : 'premium-monthly',
         isGuest: options.isGuest || false,
         guestEmail: options.guestEmail,
-        paymentMethod: 'stripe'
+        userEmail: !options.isGuest ? undefined : undefined
       };
 
-      const response = await fetch('/.netlify/functions/create-subscription', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(subscriptionData)
+      console.log('🔄 Creating subscription via Supabase Edge Function...');
+      const { data: result, error } = await supabase.functions.invoke('create-subscription', {
+        body: subscriptionData
       });
 
-      let result;
-      try {
-        result = await response.json();
-      } catch (parseError) {
-        throw new Error(`Invalid response from subscription service: ${response.status} ${response.statusText}`);
+      if (error) {
+        throw new Error(`Subscription creation failed: ${this.extractErrorMessage(error)}`);
       }
 
-      if (!response.ok) {
-        throw new Error(`Subscription creation failed: ${response.status} - ${result.error || response.statusText}`);
-      }
-      
-      if (result.url) {
-        // Open Stripe checkout in new window
-        const checkoutWindow = window.open(
-          result.url,
-          'stripe-checkout',
-          'width=800,height=600,scrollbars=yes,resizable=yes'
-        );
-
-        if (!checkoutWindow) {
-          throw new Error('Failed to open payment window. Please allow popups for this site.');
-        }
-
-        // Listen for window close to handle completion
-        this.handleCheckoutWindow(checkoutWindow, result.sessionId);
-
-        return {
-          success: true,
-          url: result.url,
-          sessionId: result.sessionId
-        };
-      } else {
+      if (!result || !result.url) {
         throw new Error('No subscription URL received from server');
       }
+
+      // Open Stripe checkout in new window
+      const checkoutWindow = window.open(
+        result.url,
+        'stripe-checkout',
+        'width=800,height=600,scrollbars=yes,resizable=yes'
+      );
+
+      if (!checkoutWindow) {
+        throw new Error('Failed to open payment window. Please allow popups for this site.');
+      }
+
+      // Listen for window close to handle completion
+      this.handleCheckoutWindow(checkoutWindow, result.sessionId);
+
+      return {
+        success: true,
+        url: result.url,
+        sessionId: result.sessionId
+      };
     } catch (error) {
       console.error('Subscription purchase error:', error);
       return {
@@ -463,44 +395,6 @@ export class UniversalStripeCheckout {
     }
   }
 
-  /**
-   * Test if Stripe is properly configured
-   */
-  public async testConfiguration(): Promise<{
-    configured: boolean;
-    error?: string;
-  }> {
-    try {
-      const response = await fetch('/.netlify/functions/create-payment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          amount: 1,
-          productName: 'Test Payment',
-          paymentMethod: 'stripe',
-          isGuest: true,
-          guestEmail: 'test@backlinkoo.com'
-        })
-      });
-
-      if (response.ok) {
-        return { configured: true };
-      } else {
-        const errorText = await response.text();
-        return { 
-          configured: false, 
-          error: `Configuration test failed: ${response.status} - ${errorText}` 
-        };
-      }
-    } catch (error) {
-      return {
-        configured: false,
-        error: error instanceof Error ? error.message : 'Configuration test failed'
-      };
-    }
-  }
 }
 
 // Export singleton instance
