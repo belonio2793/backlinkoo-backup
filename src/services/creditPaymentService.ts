@@ -2,6 +2,7 @@ import { supabase } from '@/integrations/supabase/client';
 import type { User } from '@supabase/supabase-js';
 import { logError as logFormattedError, getErrorMessage } from '@/utils/errorFormatter';
 import { ErrorLogger } from '@/utils/errorLogger';
+import { ClientStripeService } from './clientStripeService';
 
 export interface CreditPaymentOptions {
   amount: number;
