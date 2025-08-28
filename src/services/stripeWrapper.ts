@@ -7,7 +7,6 @@
  * Architecture:
  * 1. Primary: Supabase Edge Functions (create-payment, create-subscription, verify-payment)
  * 2. Fallback: Netlify Functions (if Supabase functions unavailable)
- * 3. Last Resort: Client-side payment flow
  */
 
 import { supabase } from '@/integrations/supabase/client';
@@ -46,7 +45,7 @@ export interface PaymentResult {
   success: boolean;
   url?: string;
   sessionId?: string;
-  method?: 'supabase' | 'netlify' | 'client';
+  method?: 'supabase' | 'netlify';
   error?: string;
   fallbackUsed?: boolean;
 }
@@ -64,7 +63,6 @@ export interface WrapperStatus {
   configured: boolean;
   supabaseAvailable: boolean;
   netlifyAvailable: boolean;
-  clientFallbackAvailable: boolean;
   primaryMethod: string;
   publishableKey: string | null;
   environment: 'live' | 'test' | 'unknown';
@@ -132,28 +130,23 @@ class StripeWrapper {
       console.warn('⚠️ Supabase method error:', error.message);
     }
 
-    // Fallback 1: Netlify Functions
+    // Fallback: Netlify Functions
     try {
       const result = await this.createPaymentViaNetlify(options);
       if (result.success) {
         return { ...result, method: 'netlify', fallbackUsed: true };
       }
-      console.warn('⚠️ Netlify payment failed, trying final fallback:', result.error);
+      console.warn('⚠️ Netlify payment failed:', result.error);
     } catch (error: any) {
       console.warn('⚠️ Netlify method error:', error.message);
     }
 
-    // Fallback 2: Client-side payment
-    try {
-      const result = await this.createPaymentViaClient(options);
-      return { ...result, method: 'client', fallbackUsed: true };
-    } catch (error: any) {
-      console.error('❌ All payment methods failed:', error.message);
-      return {
-        success: false,
-        error: 'All payment methods unavailable. Please try again or contact support.'
-      };
-    }
+    // No client-side fallback - return error if all methods fail
+    console.error('❌ All payment methods failed');
+    return {
+      success: false,
+      error: 'Payment service unavailable. Please try again later or contact support.'
+    };
   }
 
   /**
@@ -187,7 +180,7 @@ class StripeWrapper {
       console.warn('⚠️ Supabase subscription error:', error.message);
     }
 
-    // Fallback 1: Netlify Functions
+    // Fallback: Netlify Functions
     try {
       const result = await this.createSubscriptionViaNetlify({ ...options, plan });
       if (result.success) {
@@ -200,7 +193,7 @@ class StripeWrapper {
 
     return {
       success: false,
-      error: 'Subscription service unavailable. Please try again or contact support.'
+      error: 'Subscription service unavailable. Please try again later or contact support.'
     };
   }
 
@@ -347,7 +340,6 @@ class StripeWrapper {
       configured: this.config.publishableKey.length > 0,
       supabaseAvailable: true, // Assume available, will fail gracefully
       netlifyAvailable: true, // Assume available, will fail gracefully  
-      clientFallbackAvailable: this.config.publishableKey.length > 0,
       primaryMethod: 'supabase',
       publishableKey: this.config.publishableKey ? `${this.config.publishableKey.substring(0, 20)}...` : null,
       environment: this.config.isLive ? 'live' : this.config.isTest ? 'test' : 'unknown',
@@ -415,11 +407,14 @@ class StripeWrapper {
   private async createPaymentViaNetlify(options: PaymentOptions): Promise<PaymentResult> {
     const response = await fetch('/.netlify/functions/create-payment', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({
         amount: options.amount,
         credits: options.credits,
         productName: options.productName || `${options.credits || 0} Backlink Credits`,
+        paymentMethod: 'stripe',
         isGuest: options.isGuest || false,
         guestEmail: options.guestEmail,
         metadata: options.metadata
@@ -442,7 +437,9 @@ class StripeWrapper {
   private async createSubscriptionViaNetlify(options: SubscriptionOptions): Promise<PaymentResult> {
     const response = await fetch('/.netlify/functions/create-subscription', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({
         plan: options.plan,
         tier: options.tier || 'premium',
@@ -463,18 +460,6 @@ class StripeWrapper {
       success: true,
       url: data.url,
       sessionId: data.sessionId || data.session_id
-    };
-  }
-
-  private async createPaymentViaClient(options: PaymentOptions): Promise<PaymentResult> {
-    // Client-side fallback - generate secure payment URL
-    const baseUrl = window.location.origin;
-    const paymentUrl = `${baseUrl}/secure-payment?amount=${options.amount}&credits=${options.credits}&guest=${options.isGuest}&email=${encodeURIComponent(options.guestEmail || '')}`;
-    
-    return {
-      success: true,
-      url: paymentUrl,
-      sessionId: `client_${Date.now()}`
     };
   }
 
@@ -500,5 +485,3 @@ export const openCheckout = (url: string, sessionId?: string) => stripeWrapper.o
 export const quickBuyCredits = (credits: 50 | 100 | 250 | 500, guestEmail?: string) => stripeWrapper.quickBuyCredits(credits, guestEmail);
 export const quickSubscribe = (plan: 'monthly' | 'yearly', guestEmail?: string) => stripeWrapper.quickSubscribe(plan, guestEmail);
 export const getStripeStatus = () => stripeWrapper.getStatus();
-
-export default stripeWrapper;
