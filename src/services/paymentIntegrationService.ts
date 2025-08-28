@@ -63,14 +63,12 @@ class PaymentIntegrationService {
   }
 
   /**
-   * Create a payment for credits
+   * Create a payment for credits - requires authentication
    */
   async createPayment(
     amount: number,
     credits: number,
-    paymentMethod: 'stripe' = 'stripe',
-    isGuest: boolean = false,
-    guestEmail?: string
+    paymentMethod: 'stripe' = 'stripe'
   ): Promise<PaymentResult> {
     try {
       // Validate Stripe is configured
@@ -96,10 +94,12 @@ class PaymentIntegrationService {
         };
       }
 
-      if (isGuest && !guestEmail) {
+      // Check if user is authenticated via Supabase session
+      const { data: session } = await supabase.auth.getSession();
+      if (!session?.session?.user) {
         return {
           success: false,
-          error: 'Email is required for guest checkout'
+          error: 'Authentication required. Please sign in to purchase credits.'
         };
       }
 
@@ -108,15 +108,15 @@ class PaymentIntegrationService {
         amount,
         productName: `${credits} Backlink Credits`,
         credits,
-        isGuest,
-        guestEmail,
+        isGuest: false,
         paymentMethod
       });
 
       const response = await fetch('/api/create-payment', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.session.access_token}`
         },
         body: requestBody
       });
