@@ -210,6 +210,12 @@ export function ModernCreditPurchaseModal({
         } else if (error.message.includes('authentication') || error.message.includes('sign in')) {
           errorTitle = 'Authentication Required';
           errorMessage = 'Please sign in to your account and try again.';
+        } else if (error.message.includes('Payment system error')) {
+          errorTitle = 'Payment System Error';
+          errorMessage = error.message;
+        } else if (error.message.includes('temporarily unavailable')) {
+          errorTitle = 'Service Unavailable';
+          errorMessage = error.message;
         } else {
           errorMessage = error.message;
         }
@@ -225,13 +231,15 @@ export function ModernCreditPurchaseModal({
         errorConstructor: error?.constructor?.name,
         userAgent: navigator.userAgent,
         url: window.location.href,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        selection: selection
       });
 
       toast({
         title: errorTitle,
         description: errorMessage,
         variant: "destructive",
+        duration: 7000 // Show error longer so user can read it
       });
     } finally {
       setIsLoading(false);
