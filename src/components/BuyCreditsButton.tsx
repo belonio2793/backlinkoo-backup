@@ -1,211 +1,78 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/hooks/useAuth';
-import { CreditPaymentService } from '@/services/creditPaymentService';
-import { ModernCreditPurchaseModal } from '@/components/ModernCreditPurchaseModal';
-import { CreditCard, Zap } from 'lucide-react';
-import { setCheckoutIntent } from '@/utils/checkoutIntent';
-import { useAuthModal } from '@/contexts/ModalContext';
+import { CreditCard } from 'lucide-react';
+import { BuyCreditsModal } from './BuyCreditsModal';
 
 interface BuyCreditsButtonProps {
-  credits?: number;
-  amount?: number;
+  trigger?: React.ReactNode;
+  onPaymentSuccess?: (sessionId?: string) => void;
+  onPaymentCancel?: () => void;
   variant?: 'default' | 'outline' | 'secondary' | 'ghost' | 'link';
   size?: 'default' | 'sm' | 'lg' | 'icon';
   className?: string;
+  userEmail?: string;
+  isGuest?: boolean;
   children?: React.ReactNode;
-  quickBuy?: boolean; // If true, bypass modal and buy directly
-  showModal?: boolean; // If true, show modal instead of direct purchase
 }
 
 export function BuyCreditsButton({
-  credits = 100,
-  amount,
-  variant = 'default',
-  size = 'default',
+  trigger,
+  onPaymentSuccess,
+  onPaymentCancel,
+  variant = 'outline',
+  size = 'sm',
   className,
-  children,
-  quickBuy = false,
-  showModal = true
+  userEmail,
+  isGuest = true,
+  children
 }: BuyCreditsButtonProps) {
-  const { toast } = useToast();
-  const { user } = useAuth();
-  const { openLoginModal } = useAuthModal();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
-  // Calculate amount if not provided
-  const finalAmount = amount || credits * 1.40;
-
-  // Check if we're on production domain
-  const isProductionDomain = typeof window !== 'undefined' && window.location.hostname === 'backlinkoo.com';
-
-  // Handle direct purchase (quick buy)
-  const handleQuickBuy = async () => {
-    // Show warning if not on production domain
-    if (!isProductionDomain) {
-      const proceed = window.confirm(
-        `Development Server Warning\n\nYou're purchasing credits on a development server. For production use, please visit backlinkoo.com\n\nDo you want to continue with the test purchase?`
-      );
-
-      if (!proceed) {
-        return;
-      }
-    }
-
-    // If not authenticated, store intent and open login modal
-    if (!user) {
-      setCheckoutIntent({ type: 'credits', credits, price: finalAmount });
-      openLoginModal({ pendingAction: `${credits} credits` });
-      toast({ title: 'Sign in required', description: 'Please sign in to continue to secure checkout.' });
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      const result = await CreditPaymentService.createCreditPayment(
-        user,
-        false,
-        undefined,
-        {
-          amount: finalAmount,
-          credits,
-          productName: `${credits} Premium Backlink Credits`,
-          isGuest: false
-        }
-      );
-
-      if (result.success) {
-        if (result.url) {
-          // Open checkout in new window
-          CreditPaymentService.openCheckoutWindow(result.url, result.sessionId);
-
-          toast({
-            title: "✅ Checkout Opened",
-            description: `Complete your payment for ${credits} credits in the new window.`,
-          });
-        } else if (result.usedFallback) {
-          toast({
-            title: "✅ Development Mode",
-            description: `${credits} credit purchase simulated in development mode.`,
-          });
-        }
-      } else {
-        throw new Error(result.error || 'Purchase failed');
-      }
-    } catch (error) {
-      toast({
-        title: "Purchase Error",
-        description: error instanceof Error ? error.message : 'Failed to process purchase',
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+  const handleSuccess = (sessionId?: string) => {
+    onPaymentSuccess?.(sessionId);
+    setIsModalOpen(false);
   };
 
-  // Handle modal or direct purchase
-  const handleClick = () => {
-    if (quickBuy && !showModal) {
-      handleQuickBuy();
-    } else {
-      setIsModalOpen(true);
-    }
+  const handleCancel = () => {
+    onPaymentCancel?.();
+    setIsModalOpen(false);
   };
+
+  const defaultTrigger = (
+    <Button
+      variant={variant}
+      size={size}
+      className={className}
+      onClick={() => setIsModalOpen(true)}
+    >
+      <CreditCard className="h-4 w-4 mr-1 sm:mr-2" />
+      <span className="hidden sm:inline">Buy Credits</span>
+      <span className="sm:hidden">Credits</span>
+    </Button>
+  );
 
   return (
     <>
-      <Button
-        variant={variant}
-        size={size}
-        className={className}
-        onClick={handleClick}
-        disabled={isLoading}
-      >
-        {isLoading ? (
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
-            Processing...
-          </div>
-        ) : (
-          children || (
-            <div className="flex items-center gap-2">
-              <CreditCard className="h-4 w-4" />
-              Buy {credits} Credits - ${finalAmount}
-            </div>
-          )
-        )}
-      </Button>
+      {trigger ? (
+        <div onClick={() => setIsModalOpen(true)} className="cursor-pointer">
+          {trigger}
+        </div>
+      ) : children ? (
+        <div onClick={() => setIsModalOpen(true)} className="cursor-pointer">
+          {children}
+        </div>
+      ) : (
+        defaultTrigger
+      )}
 
-      {/* Payment Modal */}
-      <ModernCreditPurchaseModal
+      <BuyCreditsModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        initialCredits={credits}
+        onPaymentSuccess={handleSuccess}
+        onPaymentCancel={handleCancel}
+        userEmail={userEmail}
+        isGuest={isGuest}
       />
     </>
-  );
-}
-
-// Preset quick buy buttons
-export function QuickBuy50Button(props: Omit<BuyCreditsButtonProps, 'credits' | 'amount'>) {
-  return (
-    <BuyCreditsButton
-      credits={50}
-      amount={70}
-      {...props}
-    >
-      <div className="flex items-center gap-2">
-        <Zap className="h-4 w-4" />
-        50 Credits - $70
-      </div>
-    </BuyCreditsButton>
-  );
-}
-
-export function QuickBuy100Button(props: Omit<BuyCreditsButtonProps, 'credits' | 'amount'>) {
-  return (
-    <BuyCreditsButton
-      credits={100}
-      amount={140}
-      {...props}
-    >
-      <div className="flex items-center gap-2">
-        <Zap className="h-4 w-4" />
-        100 Credits - $140
-      </div>
-    </BuyCreditsButton>
-  );
-}
-
-export function QuickBuy250Button(props: Omit<BuyCreditsButtonProps, 'credits' | 'amount'>) {
-  return (
-    <BuyCreditsButton
-      credits={250}
-      amount={350}
-      {...props}
-    >
-      <div className="flex items-center gap-2">
-        <Zap className="h-4 w-4" />
-        250 Credits - $350
-      </div>
-    </BuyCreditsButton>
-  );
-}
-
-export function QuickBuy500Button(props: Omit<BuyCreditsButtonProps, 'credits' | 'amount'>) {
-  return (
-    <BuyCreditsButton
-      credits={500}
-      amount={700}
-      {...props}
-    >
-      <div className="flex items-center gap-2">
-        <Zap className="h-4 w-4" />
-        500 Credits - $700
-      </div>
-    </BuyCreditsButton>
   );
 }
