@@ -97,21 +97,24 @@ class StripePaymentService {
   }
 
   /**
-   * Open payment in new window
+   * Open payment in new window using Stripe Wrapper
    */
   openCheckoutWindow(url: string, sessionId?: string): void {
-    const checkoutWindow = window.open(
-      url,
-      'stripe-checkout',
-      'width=800,height=600,scrollbars=yes,resizable=yes,toolbar=no,menubar=no'
-    );
+    stripeWrapper.openCheckoutWindow(url, sessionId);
+  }
 
-    if (!checkoutWindow) {
-      console.warn('⚠️ Popup blocked, redirecting current window');
-      window.location.href = url;
-    } else {
-      console.log('✅ Checkout window opened');
-    }
+  /**
+   * Convert PaymentResult to StripePaymentResult for backward compatibility
+   */
+  private convertResult(result: PaymentResult): StripePaymentResult {
+    return {
+      success: result.success,
+      url: result.url,
+      sessionId: result.sessionId,
+      error: result.error,
+      method: result.method,
+      fallbackUsed: result.fallbackUsed
+    };
   }
 
   /**
