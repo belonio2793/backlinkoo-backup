@@ -37,39 +37,16 @@ export function DirectBuyCreditsButton({
       return;
     }
 
+    if (!user) {
+      toast('Please sign in to purchase credits', { duration: 3000 });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      if (user) {
-        // User is authenticated, proceed with normal flow
-        await stripeCheckout.quickBuyCredits(credits);
-      } else {
-        // User is not authenticated, collect email for guest checkout
-        const email = window.prompt('Please enter your email address to complete your purchase:');
-
-        if (!email || !email.includes('@')) {
-          toast('A valid email address is required to complete your purchase', {
-            duration: 3000
-          });
-          return;
-        }
-
-        // Use guest quick buy with email
-        const pricing = {
-          50: 70,
-          100: 140,
-          250: 350,
-          500: 700
-        };
-
-        const amount = pricing[credits as keyof typeof pricing] || credits * 1.40;
-
-        await stripeCheckout.guestQuickBuy({
-          credits,
-          amount,
-          email
-        });
-      }
+      // User is authenticated, proceed with purchase
+      await stripeCheckout.quickBuyCredits(credits);
     } catch (error) {
       console.error('Purchase error:', error);
       toast('Purchase failed. Please try again.', {
