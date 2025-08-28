@@ -50,93 +50,12 @@ export function GuestPremiumUpsellModal({
     }
   }, [open]);
 
-  const handleUpgrade = async () => {
-    setIsProcessingUpgrade(true);
-    try {
-      const guestData = guestTrackingService.getGuestData();
-      const guestEmail = guestData?.email || '';
-
-      // Show processing message
-      toast({
-        title: "🚀 Creating Secure Checkout!",
-        description: "Opening payment window...",
-      });
-
-      // Create subscription checkout session using payment integration service
-      const result = await paymentIntegrationService.createSubscription(
-        selectedPlan,
-        true, // isGuest
-        guestEmail,
-        {
-          preferNewWindow: true,
-          fallbackToCurrentWindow: true,
-          onPopupBlocked: () => {
-            toast({
-              title: "Popup Blocked",
-              description: "Opening checkout in current window...",
-            });
-          },
-          onRedirectSuccess: () => {
-            // Close modal since checkout opened
-            onOpenChange(false);
-
-            toast({
-              title: "✅ Checkout Opened",
-              description: "Complete your payment in the Stripe window.",
-            });
-
-            if (onUpgrade) {
-              onUpgrade();
-            }
-          },
-          onRedirectError: (error) => {
-            toast({
-              title: "Checkout Error",
-              description: "Unable to open checkout window. Please try again.",
-              variant: "destructive"
-            });
-          }
-        }
-      );
-
-      if (result.success) {
-        if (result.usedFallback) {
-          // Handle demo/mock checkout
-          toast({
-            title: "🚧 Demo Checkout Mode",
-            description: "Payment system is in demo mode. No actual payment will be processed.",
-            duration: 5000,
-          });
-
-          // For demo, just navigate to success page
-          onOpenChange(false);
-        if (result.url) {
-          // Open Stripe checkout in new window
-          const checkoutWindow = window.open(result.url, 'stripe-checkout', 'width=800,height=600,scrollbars=yes,resizable=yes');
-          if (!checkoutWindow) {
-            // Fallback to current window if popup blocked
-            window.location.href = result.url;
-          }
-        }
-
-          if (onUpgrade) {
-            onUpgrade();
-          }
-        }
-        // If using checkout redirect manager, redirect is already handled
-      } else {
-        throw new Error(result.error || 'Failed to create checkout session');
-      }
-    } catch (error) {
-      console.error('Upgrade error:', error);
-      toast({
-        title: "Checkout Error",
-        description: error instanceof Error ? error.message : "Something went wrong. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsProcessingUpgrade(false);
-    }
+  const handleUpgradeAfterLogin = () => {
+    toast({
+      title: "Account Required",
+      description: "Please create an account first to upgrade to Premium",
+    });
+    handleCreateAccount();
   };
 
   const handleCreateAccount = () => {
