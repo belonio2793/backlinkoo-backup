@@ -57,8 +57,7 @@ export function EnhancedPremiumCheckoutModal({
   const [currentStep, setCurrentStep] = useState<FlowStep>('auth');
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('monthly');
-  const [guestEmail, setGuestEmail] = useState('');
-  const [checkoutMode, setCheckoutMode] = useState<'guest' | 'account'>('account');
+  // Removed guest checkout functionality - authentication now required
 
   const plans = {
     monthly: {
