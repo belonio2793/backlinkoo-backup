@@ -175,8 +175,8 @@ export class CreditPaymentService {
       return { success: false, error: 'Email is required for payment processing' };
     }
 
-    // Production payment processing - Using reliable Netlify Functions
-    console.log('🔧 Using Netlify Functions for live payment processing');
+    // Production payment processing - Using Supabase Edge Functions for Fly.dev deployment
+    console.log('🔧 Using Supabase Edge Functions for live payment processing (Fly.dev deployment)');
 
     const requestBody = {
       amount: options.amount,
@@ -195,9 +195,9 @@ export class CreditPaymentService {
     });
 
     try {
-      console.log('🔄 Calling Netlify Function for credit payment...');
+      console.log('🔄 Calling Supabase Edge Function for credit payment...');
 
-      // Get auth session for potential authentication header
+      // Get auth session for Supabase edge functions
       const { data: session } = await supabase.auth.getSession();
       const headers: Record<string, string> = {
         'Content-Type': 'application/json'
@@ -207,19 +207,25 @@ export class CreditPaymentService {
         headers['Authorization'] = `Bearer ${session.session.access_token}`;
       }
 
-      console.log('📤 Calling Netlify Function with:', {
-        endpoint: '/.netlify/functions/create-payment',
+      console.log('📤 Calling Supabase Edge Function with:', {
+        function: 'create-payment',
         hasAuth: !!headers['Authorization'],
         requestBody: { ...requestBody, guestEmail: finalGuestEmail ? '***' : undefined }
       });
 
-      const response = await fetch('/.netlify/functions/create-payment', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(requestBody)
+      const { data: result, error: edgeError } = await supabase.functions.invoke('create-payment', {
+        body: requestBody,
+        headers
       });
 
-      console.log('📥 Netlify Function response status:', response.status, response.statusText);
+      console.log('📥 Supabase Edge Function response:', {
+        hasData: !!result,
+        hasError: !!edgeError,
+        error: edgeError,
+        errorMessage: edgeError?.message,
+        dataKeys: result ? Object.keys(result) : [],
+        resultContent: result ? result : 'no data'
+      });
 
       if (!response.ok) {
         let errorMessage;
