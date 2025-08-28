@@ -1,17 +1,14 @@
 /**
- * Payment Integration Service
- * Handles payment processing coordination and environment validation
+ * Payment Integration Service - Production Ready
+ * Direct Stripe integration for backlinkoo.com
  */
 
-import { mockPaymentService } from './mockPaymentService';
 import { supabase } from '@/integrations/supabase/client';
-import { CheckoutRedirectManager, type CheckoutRedirectOptions } from '@/utils/checkoutRedirectManager';
 
 interface PaymentConfig {
   stripe: {
     enabled: boolean;
     hasPublicKey: boolean;
-    hasSecretKey: boolean;
   };
   environment: 'development' | 'production' | 'preview';
 }
@@ -22,8 +19,6 @@ interface PaymentResult {
   sessionId?: string;
   orderId?: string;
   error?: string;
-  checkoutSessionId?: string;
-  usedFallback?: boolean;
 }
 
 class PaymentIntegrationService {
@@ -31,49 +26,33 @@ class PaymentIntegrationService {
 
   constructor() {
     this.config = this.loadConfiguration();
-
-    // Debug logging in development
-    if (import.meta.env.DEV) {
-      console.log('🔧 Payment Integration Configuration:', this.getConfigurationStatus());
-    }
   }
 
   private loadConfiguration(): PaymentConfig {
     const environment = this.getEnvironment();
-    const isDevelopment = environment === 'development';
-
-    // In development, we enable Stripe if we have pricing configured (indicating setup is complete)
-    const hasStripePricing = !!(import.meta.env.VITE_STRIPE_PREMIUM_PLAN_MONTHLY || import.meta.env.VITE_STRIPE_PREMIUM_PLAN_ANNUAL);
     const stripePublicKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
 
     return {
       stripe: {
-        enabled: !!stripePublicKey || (isDevelopment && hasStripePricing),
-        hasPublicKey: !!stripePublicKey,
-        hasSecretKey: true // We assume secret key is configured on server
+        enabled: !!stripePublicKey,
+        hasPublicKey: !!stripePublicKey
       },
       environment
     };
   }
 
   private getEnvironment(): 'development' | 'production' | 'preview' {
-    const env = import.meta.env.VITE_ENVIRONMENT || 'development';
-    if (env === 'production') return 'production';
+    const env = import.meta.env.VITE_ENVIRONMENT || 'production';
+    if (env === 'development') return 'development';
     if (env === 'preview') return 'preview';
-    return 'development';
+    return 'production';
   }
 
   /**
-   * Get available payment methods based on configuration
+   * Get available payment methods
    */
   getAvailablePaymentMethods(): 'stripe'[] {
-    const methods: 'stripe'[] = [];
-
-    if (this.config.stripe.enabled) {
-      methods.push('stripe');
-    }
-
-    return methods;
+    return this.config.stripe.enabled ? ['stripe'] : [];
   }
 
   /**
@@ -89,32 +68,16 @@ class PaymentIntegrationService {
   async createPayment(
     amount: number,
     credits: number,
-    paymentMethod: 'stripe',
+    paymentMethod: 'stripe' = 'stripe',
     isGuest: boolean = false,
-    guestEmail?: string,
-    redirectOptions?: CheckoutRedirectOptions
+    guestEmail?: string
   ): Promise<PaymentResult> {
     try {
-      // Development mode fallback
-      if (this.config.environment === 'development' && !this.config.stripe.hasPublicKey) {
-        console.warn('🚧 Development mode: Stripe not configured, using demo flow');
-        // Simulate payment processing
-        await new Promise(resolve => setTimeout(resolve, 2000));
-
-        return {
-          success: true,
-          url: `/payment-success?demo=true&credits=${credits}&amount=${amount}`,
-          sessionId: 'demo_session_' + Date.now(),
-          orderId: 'demo_order_' + Date.now()
-        };
-      }
-
-      // Validate payment method is available
-      const availableMethods = this.getAvailablePaymentMethods();
-      if (!availableMethods.includes(paymentMethod)) {
+      // Validate Stripe is configured
+      if (!this.config.stripe.enabled) {
         return {
           success: false,
-          error: `${paymentMethod} is not configured. Available methods: ${availableMethods.join(', ')}`
+          error: 'Payment system is not configured. Please contact support.'
         };
       }
 
@@ -140,8 +103,7 @@ class PaymentIntegrationService {
         };
       }
 
-      // Call Netlify function with fallback
-      let response: Response;
+      // Call payment endpoint
       const requestBody = JSON.stringify({
         amount,
         productName: `${credits} Backlink Credits`,
@@ -151,98 +113,21 @@ class PaymentIntegrationService {
         paymentMethod
       });
 
-      try {
-        // Try primary endpoint first
-        response = await fetch('/api/create-payment', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: requestBody
-        });
-
-        // If 404, try fallback endpoint
-        if (response.status === 404) {
-          console.warn('🔄 Payment endpoint /api/create-payment returned 404, trying fallback /.netlify/functions/create-payment');
-          response = await fetch('/.netlify/functions/create-payment', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: requestBody
-          });
-
-          if (response.status === 404) {
-            console.error('❌ Both payment endpoints failed with 404. Check Netlify function deployment.');
-            // Try waiting a moment and retrying once more in case of deployment delay
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            console.log('🔄 Retrying fallback endpoint after delay...');
-            response = await fetch('/.netlify/functions/create-payment', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              body: requestBody
-            });
-
-            // If still 404, use mock service
-            if (response.status === 404 && mockPaymentService.isAvailable()) {
-              console.log('🔄 All endpoints failed, using mock payment service...');
-              return await mockPaymentService.createPayment(amount, credits, paymentMethod, isGuest, guestEmail);
-            }
-          } else {
-            console.log('✅ Fallback payment endpoint worked');
-          }
-        }
-      } catch (fetchError) {
-        console.error('Payment endpoint fetch error:', fetchError);
-
-        // Use mock service as final fallback
-        if (mockPaymentService.isAvailable()) {
-          console.log('🔄 Network error, falling back to mock payment service...');
-          return await mockPaymentService.createPayment(amount, credits, paymentMethod, isGuest, guestEmail);
-        }
-
-        return {
-          success: false,
-          error: 'Network error: Unable to connect to payment service'
-        };
-      }
-
-      let data;
-      try {
-        data = await response.json();
-      } catch (parseError) {
-        // If it's a 502 error in development, provide helpful message
-        if (response.status === 502 && this.config.environment === 'development') {
-          return {
-            success: false,
-            error: 'Development mode: Stripe configuration required. Using demo mode instead. Set STRIPE_SECRET_KEY environment variable for full functionality.'
-          };
-        }
-
-        return {
-          success: false,
-          error: `Invalid response from payment service: ${response.status} ${response.statusText}. ${response.status === 404 ? 'Payment endpoint not found. Please check deployment.' : ''}`
-        };
-      }
+      const response = await fetch('/api/create-payment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: requestBody
+      });
 
       if (!response.ok) {
-        // Better error handling for 502 errors
-        if (response.status === 502) {
-          return {
-            success: false,
-            error: this.config.environment === 'development'
-              ? 'Development mode: Payment service unavailable. Please check your Stripe configuration or use demo mode.'
-              : 'Payment service temporarily unavailable. Please try again in a moment.'
-          };
-        }
+        const errorData = await response.json().catch(() => ({}));
+        let errorMessage = errorData.error || `Payment creation failed: ${response.status} ${response.statusText}`;
 
-        let errorMessage = data.error || `Payment creation failed: ${response.status} ${response.statusText}`;
-
-        // Handle specific Stripe account limit errors
-        if (errorMessage.includes('Must be between') && errorMessage.includes('$1') && errorMessage.includes('.00')) {
-          errorMessage = 'Your Stripe account has transaction limits. Please try a smaller amount or contact support to increase your limits.';
+        // Handle specific Stripe errors
+        if (errorMessage.includes('Must be between') && errorMessage.includes('$1')) {
+          errorMessage = 'Your Stripe account has transaction limits. Please contact support.';
         } else if (errorMessage.includes('Invalid amount')) {
           errorMessage = 'Payment amount is invalid. Please check your selection and try again.';
         }
@@ -253,6 +138,8 @@ class PaymentIntegrationService {
         };
       }
 
+      const data = await response.json();
+
       return {
         success: true,
         url: data.url,
@@ -262,18 +149,9 @@ class PaymentIntegrationService {
 
     } catch (error: any) {
       console.error('Payment creation error:', error);
-
-      // In development, provide more helpful error messages
-      if (this.config.environment === 'development') {
-        return {
-          success: false,
-          error: 'Development mode: Payment system error. Check console for details or contact support.'
-        };
-      }
-
       return {
         success: false,
-        error: error.message || 'An unexpected error occurred during payment creation'
+        error: 'Payment processing error. Please try again or contact support.'
       };
     }
   }
@@ -284,15 +162,14 @@ class PaymentIntegrationService {
   async createSubscription(
     plan: 'monthly' | 'yearly',
     isGuest: boolean = false,
-    guestEmail?: string,
-    redirectOptions?: CheckoutRedirectOptions
+    guestEmail?: string
   ): Promise<PaymentResult> {
     try {
-      // Validate Stripe is available (subscriptions currently only support Stripe)
+      // Validate Stripe is configured
       if (!this.config.stripe.enabled) {
         return {
           success: false,
-          error: 'Stripe is required for subscriptions but is not configured'
+          error: 'Payment system is not configured. Please contact support.'
         };
       }
 
@@ -311,8 +188,7 @@ class PaymentIntegrationService {
         };
       }
 
-      // Call Netlify function with fallback
-      let response: Response;
+      // Call subscription endpoint
       const requestBody = JSON.stringify({
         plan,
         isGuest,
@@ -320,78 +196,23 @@ class PaymentIntegrationService {
         paymentMethod: 'stripe'
       });
 
-      try {
-        // Try primary endpoint first
-        response = await fetch('/api/create-subscription', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: requestBody
-        });
-
-        // If 404, try fallback endpoint
-        if (response.status === 404) {
-          console.warn('🔄 Subscription endpoint /api/create-subscription returned 404, trying fallback /.netlify/functions/create-subscription');
-          response = await fetch('/.netlify/functions/create-subscription', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: requestBody
-          });
-
-          if (response.status === 404) {
-            console.error('❌ Both subscription endpoints failed with 404. Check Netlify function deployment.');
-            // Use mock service if available
-            if (mockPaymentService.isAvailable()) {
-              console.log('🔄 Payment endpoints unavailable, using demo checkout...');
-              const result = await mockPaymentService.createSubscription(plan, isGuest, guestEmail);
-              if (result.success) {
-                // Add helpful message about demo mode
-                console.warn('⚠️ Using demo checkout - no actual payment will be processed');
-              }
-              return result;
-            }
-          } else {
-            console.log('✅ Fallback subscription endpoint worked');
-          }
-        }
-      } catch (fetchError) {
-        console.error('Subscription endpoint fetch error:', fetchError);
-
-        // Use mock service as final fallback
-        if (mockPaymentService.isAvailable()) {
-          console.log('🔄 Network error, using demo checkout...');
-          const result = await mockPaymentService.createSubscription(plan, isGuest, guestEmail);
-          if (result.success) {
-            console.warn('⚠️ Using demo checkout due to network issues - no actual payment will be processed');
-          }
-          return result;
-        }
-
-        return {
-          success: false,
-          error: 'Network error: Unable to connect to subscription service'
-        };
-      }
-
-      let data;
-      try {
-        data = await response.json();
-      } catch (parseError) {
-        return {
-          success: false,
-          error: `Invalid response from subscription service: ${response.status} ${response.statusText}`
-        };
-      }
+      const response = await fetch('/api/create-subscription', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: requestBody
+      });
 
       if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
         return {
           success: false,
-          error: data.error || `Subscription creation failed: ${response.status} ${response.statusText}`
+          error: errorData.error || `Subscription creation failed: ${response.status} ${response.statusText}`
         };
       }
+
+      const data = await response.json();
 
       return {
         success: true,
@@ -403,13 +224,13 @@ class PaymentIntegrationService {
       console.error('Subscription creation error:', error);
       return {
         success: false,
-        error: error.message || 'An unexpected error occurred during subscription creation'
+        error: 'Subscription processing error. Please try again or contact support.'
       };
     }
   }
 
   /**
-   * Get configuration status for debugging
+   * Get configuration status
    */
   getConfigurationStatus() {
     return {
@@ -417,25 +238,6 @@ class PaymentIntegrationService {
       availableMethods: this.getAvailablePaymentMethods(),
       isConfigured: this.isConfigured()
     };
-  }
-
-  /**
-   * Get setup instructions for missing configuration
-   */
-  getSetupInstructions(): string[] {
-    const instructions: string[] = [];
-
-    if (!this.config.stripe.enabled) {
-      instructions.push(
-        'Stripe Setup: Add VITE_STRIPE_PUBLISHABLE_KEY to your environment variables'
-      );
-    }
-
-    if (instructions.length === 0) {
-      instructions.push('Payment integration is properly configured!');
-    }
-
-    return instructions;
   }
 }
 
