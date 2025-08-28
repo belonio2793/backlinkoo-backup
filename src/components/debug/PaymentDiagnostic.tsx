@@ -9,60 +9,95 @@ export function PaymentDiagnostic() {
     setIsLoading(true);
     setStatus('Testing payment endpoints...\n');
 
-    const endpoints = [
-      { name: 'Supabase Edge Function', url: '/api/create-payment' },
-      { name: 'Netlify Function', url: '/.netlify/functions/create-payment' }
-    ];
-
     const results = ['Testing payment endpoints...', ''];
 
-    for (const endpoint of endpoints) {
-      try {
-        results.push(`🔄 Testing ${endpoint.name}: ${endpoint.url}`);
-        setStatus(results.join('\n'));
+    try {
+      // Test Supabase Edge Function (proper method)
+      results.push('🔄 Testing Supabase Edge Function (via SDK)');
+      setStatus(results.join('\n'));
 
-        const response = await fetch(endpoint.url, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
+      // Import Supabase client
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+      if (!supabaseUrl || !supabaseKey) {
+        results.push('❌ Supabase client: Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY');
+      } else {
+        // Dynamically import Supabase client
+        const { createClient } = await import('@supabase/supabase-js');
+        const supabase = createClient(supabaseUrl, supabaseKey);
+
+        const { data, error } = await supabase.functions.invoke('create-payment', {
+          body: {
             amount: 1000, // $10.00 test amount
             credits: 100,
             productName: 'Test Credits',
             isGuest: true,
             guestEmail: 'test@example.com'
-          })
+          }
         });
 
-        if (response.ok) {
-          try {
-            const data = await response.json();
-            results.push(`✅ ${endpoint.name}: Working! Session ID: ${data.sessionId?.substring(0, 20)}...`);
-            break; // Found working endpoint
-          } catch (parseError) {
-            results.push(`❌ ${endpoint.name}: Response parsing error`);
+        if (error) {
+          if (error.message?.includes('not found') || error.message?.includes('404')) {
+            results.push('❌ Supabase Edge Function: Function not deployed');
+            results.push('💡 Run: supabase functions deploy create-payment');
+          } else {
+            results.push(`❌ Supabase Edge Function: ${error.message}`);
           }
+        } else if (data?.sessionId) {
+          results.push(`✅ Supabase Edge Function: Working! Session ID: ${data.sessionId.substring(0, 20)}...`);
         } else {
-          let errorMessage = `HTTP ${response.status}`;
-          try {
-            const errorText = await response.text();
-            if (errorText.length > 0 && errorText.length < 200) {
-              errorMessage += ` - ${errorText}`;
-            }
-          } catch (readError) {
-            // Ignore error reading response body
-          }
-          results.push(`❌ ${endpoint.name}: ${errorMessage}`);
+          results.push(`❌ Supabase Edge Function: Invalid response format`);
         }
-      } catch (error) {
-        results.push(`❌ ${endpoint.name}: Network error - ${error instanceof Error ? error.message : 'Unknown error'}`);
       }
 
-      results.push(''); // Add spacing between tests
+      results.push(''); // Add spacing
+
+      // Test Netlify Function (fallback)
+      results.push('🔄 Testing Netlify Function (fallback)');
       setStatus(results.join('\n'));
+
+      const response = await fetch('/.netlify/functions/create-payment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          amount: 1000,
+          credits: 100,
+          productName: 'Test Credits',
+          isGuest: true,
+          guestEmail: 'test@example.com'
+        })
+      });
+
+      if (response.ok) {
+        try {
+          const data = await response.json();
+          results.push(`✅ Netlify Function: Working! Session ID: ${data.sessionId?.substring(0, 20)}...`);
+        } catch (parseError) {
+          results.push(`❌ Netlify Function: Response parsing error`);
+        }
+      } else {
+        results.push(`❌ Netlify Function: HTTP ${response.status} (Expected on non-Netlify hosting)`);
+      }
+
+    } catch (error) {
+      results.push(`❌ Test error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
 
+    results.push('');
+    results.push('📋 Next Steps:');
+    results.push('1. Deploy Supabase Edge Functions:');
+    results.push('   supabase functions deploy create-payment');
+    results.push('   supabase functions deploy create-subscription');
+    results.push('   supabase functions deploy verify-payment');
+    results.push('');
+    results.push('2. Set Supabase secrets:');
+    results.push('   supabase secrets set STRIPE_SECRET_KEY=sk_live_...');
+    results.push('   supabase secrets set SUPABASE_SERVICE_ROLE_KEY=...');
+
+    setStatus(results.join('\n'));
     setIsLoading(false);
   };
 
