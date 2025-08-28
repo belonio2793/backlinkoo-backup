@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
-export function TestStripeIntegration() {
+export default function TestStripeIntegration() {
   const handlePaymentSuccess = (sessionId?: string) => {
     console.log('Payment successful:', sessionId);
     alert(`Payment successful! Session ID: ${sessionId}`);

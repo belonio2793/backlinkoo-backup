@@ -1,6 +1,6 @@
 import { CreditPaymentFixTest } from '@/components/test/CreditPaymentFixTest';
 
-export function CreditPaymentTest() {
+export default function CreditPaymentTest() {
   return (
     <div className="container mx-auto py-8">
       <div className="mb-6">
