@@ -1,11 +1,10 @@
 /**
- * Direct Checkout Service
- * Simplified payment flow that opens Stripe checkout in a new window
- * Uses Supabase Edge Functions - works on all deployment platforms
+ * Direct Checkout Service - Production Ready
+ * Direct Stripe checkout integration for backlinkoo.com
+ * Uses Supabase Edge Functions
  */
 
 import { supabase } from '@/integrations/supabase/client';
-import { FallbackPaymentService } from './fallbackPaymentService';
 
 interface DirectCheckoutOptions {
   type: 'credits' | 'premium';
@@ -24,7 +23,6 @@ class DirectCheckoutService {
   
   /**
    * Open Stripe checkout directly in a new window
-   * No loading states, no modals, no notifications
    */
   static async openCheckout(options: DirectCheckoutOptions): Promise<CheckoutResult> {
     try {
@@ -61,21 +59,10 @@ class DirectCheckoutService {
 
     } catch (error: any) {
       console.error('❌ Direct checkout failed:', error);
-
-      // Try fallback payment service
-      try {
-        console.log('🔄 Attempting fallback payment...');
-        await FallbackPaymentService.openPayment(options);
-        return { success: true };
-      } catch (fallbackError) {
-        console.error('❌ Fallback payment also failed:', fallbackError);
-        // Still return success and try a basic redirect as last resort
-        window.open('https://backlinkoo.com/pricing', '_blank');
-        return {
-          success: false,
-          error: error.message || 'Checkout failed'
-        };
-      }
+      return {
+        success: false,
+        error: error.message || 'Checkout failed'
+      };
     }
   }
   

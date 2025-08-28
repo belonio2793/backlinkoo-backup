@@ -5,9 +5,8 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Crown, CreditCard, Loader2, AlertCircle, ExternalLink } from 'lucide-react';
+import { Crown, CreditCard, Loader2, ExternalLink } from 'lucide-react';
 import { DirectCheckoutService } from '@/services/directCheckoutService';
-import { FallbackPaymentService } from '@/services/fallbackPaymentService';
 import { useToast } from '@/hooks/use-toast';
 
 interface EnhancedPaymentButtonProps {
@@ -100,42 +99,22 @@ export function EnhancedPaymentButton({
     } catch (error: any) {
       console.error('❌ Payment button error:', error);
 
-      // Try fallback payment service
-      try {
-        console.log('🔄 Trying fallback payment service...');
-        
-        await FallbackPaymentService.openPayment({
-          type,
-          plan,
-          credits
-        });
-        
-        toast({
-          title: "Alternative Payment Method",
-          description: "Primary payment system unavailable. Using alternative checkout.",
-          variant: "default"
-        });
-
-      } catch (fallbackError) {
-        console.error('❌ Fallback payment also failed:', fallbackError);
-        
-        // Show user-friendly error
-        toast({
-          title: "Payment Temporarily Unavailable",
-          description: "Please try again in a moment or contact support if the issue persists.",
-          variant: "destructive",
-          action: (
-            <Button 
-              size="sm" 
-              variant="outline"
-              onClick={() => window.open('mailto:support@backlinkoo.com', '_blank')}
-            >
-              <ExternalLink className="h-3 w-3 mr-1" />
-              Contact Support
-            </Button>
-          )
-        });
-      }
+      // Show user-friendly error
+      toast({
+        title: "Payment Error",
+        description: error.message || "Please try again or contact support if the issue persists.",
+        variant: "destructive",
+        action: (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => window.open('mailto:support@backlinkoo.com', '_blank')}
+          >
+            <ExternalLink className="h-3 w-3 mr-1" />
+            Contact Support
+          </Button>
+        )
+      });
     } finally {
       setIsLoading(false);
     }
