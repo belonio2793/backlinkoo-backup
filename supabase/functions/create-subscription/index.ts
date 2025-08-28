@@ -185,6 +185,16 @@ serve(async (req) => {
     }
 
     console.log("Initializing Stripe with email:", email);
+
+    // Validate live Stripe key for production
+    if (!stripeSecretKey.startsWith('sk_live_')) {
+      console.error("Live Stripe secret key required for production");
+      return new Response(
+        JSON.stringify({ error: "Live Stripe secret key required for production" }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const stripe = new Stripe(stripeSecretKey, {
       apiVersion: "2023-10-16",
     });
@@ -224,7 +234,22 @@ serve(async (req) => {
       }
     }
 
-    console.log("Creating checkout session for:", { customerId, email, priceId });
+    // Live Stripe product and price configuration
+    const PREMIUM_PRODUCT_ID = "prod_SoVja4018pbOcy";
+
+    // Create dynamic prices for the product based on plan
+    let priceAmount: number;
+    let interval: 'month' | 'year';
+
+    if (plan === 'monthly') {
+      priceAmount = 2900; // $29.00 in cents
+      interval = 'month';
+    } else { // yearly
+      priceAmount = 29000; // $290.00 in cents
+      interval = 'year';
+    }
+
+    console.log("Creating checkout session for:", { customerId, email, plan, priceAmount });
 
     let session;
     try {
@@ -233,10 +258,23 @@ serve(async (req) => {
         customer_email: customerId ? undefined : email,
         line_items: [
           {
-            price: priceId,
+            price_data: {
+              currency: 'usd',
+              product: PREMIUM_PRODUCT_ID,
+              recurring: {
+                interval: interval,
+              },
+              unit_amount: priceAmount,
+            },
             quantity: 1,
           },
         ],
+        metadata: {
+          plan: plan,
+          product_type: "premium_subscription",
+          is_guest: isGuest.toString(),
+          guest_email: isGuest ? email : ""
+        },
         mode: "subscription",
         success_url: `${req.headers.get("origin")}/subscription-success?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${req.headers.get("origin")}/subscription-cancelled`,
@@ -255,9 +293,12 @@ serve(async (req) => {
       user_id: user?.id || null,
       email,
       stripe_customer_id: customerId,
+      stripe_session_id: session.id,
       subscribed: false, // Will be updated when subscription is activated
       subscription_tier: tier,
+      subscription_plan: plan,
       payment_method: "stripe",
+      product_id: PREMIUM_PRODUCT_ID,
       guest_checkout: isGuest,
       updated_at: new Date().toISOString(),
     }, { onConflict: 'email' });
@@ -285,7 +326,8 @@ serve(async (req) => {
     return new Response(JSON.stringify({
       error: errorMessage,
       details: "Check server logs for more information",
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      productId: "prod_SoVja4018pbOcy"
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,

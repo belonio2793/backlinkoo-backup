@@ -2,7 +2,6 @@ import { supabase } from '@/integrations/supabase/client';
 import type { User } from '@supabase/supabase-js';
 import { logError as logFormattedError, getErrorMessage } from '@/utils/errorFormatter';
 import { ErrorLogger } from '@/utils/errorLogger';
-import { mockPaymentService } from '@/services/mockPaymentService';
 import { CheckoutRedirectManager, type CheckoutRedirectOptions } from '@/utils/checkoutRedirectManager';
 
 export interface SubscriptionStatus {
@@ -186,89 +185,16 @@ export class SubscriptionService {
         userEmail: !isGuest && user ? user.email : undefined // Include user email for authenticated users
       };
 
-      // Check environment and determine best approach
-      const env = this.getEnvironment();
-      console.log('🌍 Environment detected for subscription:', env);
+      console.log('🔄 Creating subscription via Supabase Edge Function...');
 
-      let data, error;
+      const { data, error } = await supabase.functions.invoke('create-subscription', {
+        body: requestBody
+      });
 
-      // Try Supabase Edge Functions first in production environments
-      if (env.hasSupabaseFunctions) {
-        try {
-          console.log('🔄 Attempting Supabase Edge Function...');
-          const { data: session } = await supabase.auth.getSession();
-          const result = await supabase.functions.invoke('create-subscription', {
-            body: requestBody
-          });
-          data = result.data;
-          error = result.error;
-
-          if (!error && data) {
-            console.log('✅ Supabase Edge Function succeeded');
-          }
-        } catch (edgeError) {
-          console.warn('⚠️ Supabase Edge Function failed:', edgeError);
-          error = edgeError;
-        }
+      if (!error && data) {
+        console.log('✅ Supabase Edge Function succeeded');
       }
 
-      // If edge functions failed or unavailable, try alternative endpoints
-      if (error || !data) {
-        console.log('🔄 Trying alternative subscription endpoints...');
-
-        const endpoints = [
-          '/api/create-subscription',
-          '/.netlify/functions/create-subscription',
-          '/functions/create-subscription'
-        ];
-
-        for (const endpoint of endpoints) {
-          try {
-            console.log(`🔄 Trying subscription endpoint: ${endpoint}`);
-            const response = await fetch(endpoint, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token || ''}`
-              },
-              body: JSON.stringify(requestBody)
-            });
-
-            if (response.ok) {
-              const result = await response.json();
-              data = result;
-              error = null;
-              console.log(`✅ Subscription endpoint succeeded: ${endpoint}`);
-              break;
-            } else {
-              console.warn(`⚠️ Endpoint ${endpoint} returned ${response.status}`);
-            }
-          } catch (fetchError) {
-            console.warn(`⚠️ Endpoint ${endpoint} failed:`, fetchError);
-            continue;
-          }
-        }
-      }
-
-      // Final fallback - use mock service for development/testing
-      if (error || !data) {
-        console.log('🔄 All subscription endpoints failed, using mock service fallback...');
-
-        const mockResult = await mockPaymentService.createSubscription(
-          planType === 'yearly' ? 'yearly' : 'monthly',
-          isGuest,
-          guestEmail
-        );
-
-        if (mockResult.success) {
-          return {
-            success: true,
-            url: mockResult.checkoutUrl || 'https://demo-checkout.stripe.com'
-          };
-        } else {
-          error = { message: mockResult.error || 'All subscription methods failed' };
-        }
-      }
 
       if (error) {
         ErrorLogger.logError('Edge function error', error);

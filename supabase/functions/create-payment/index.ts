@@ -9,10 +9,11 @@ const corsHeaders = {
 
 interface PaymentRequest {
   amount: number;
+  credits: number;
   productName: string;
   isGuest?: boolean;
   guestEmail?: string;
-  paymentMethod: 'stripe' | 'paypal';
+  paymentMethod: 'stripe';
 }
 
 // Rate limiting map (in production, use Redis or similar)
@@ -72,17 +73,25 @@ serve(async (req) => {
 
     const body: PaymentRequest = await req.json();
     console.log("Request body:", { ...body, guestEmail: body.guestEmail ? '[REDACTED]' : undefined });
-    
+
     // Input validation
     if (!body.amount || body.amount <= 0 || body.amount > 10000) {
       throw new Error('Invalid amount. Must be between $0.01 and $10,000');
     }
-    
+
+    if (!body.credits || body.credits <= 0 || body.credits > 10000) {
+      throw new Error('Invalid credits. Must be between 1 and 10,000 credits');
+    }
+
     if (!body.productName || body.productName.length > 200) {
       throw new Error('Invalid product name');
     }
-    
-    const { amount, isGuest = false, paymentMethod } = body;
+
+    if (body.paymentMethod !== 'stripe') {
+      throw new Error('Only Stripe payments are supported for live transactions');
+    }
+
+    const { amount, credits, isGuest = false, paymentMethod } = body;
     const productName = sanitizeInput(body.productName);
     let guestEmail = body.guestEmail ? sanitizeInput(body.guestEmail) : '';
     
@@ -123,126 +132,76 @@ serve(async (req) => {
       throw new Error("Email is required for payment processing");
     }
 
-    if (paymentMethod === 'stripe') {
-      const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
-      console.log("Stripe key available:", !!stripeKey, "Length:", stripeKey?.length || 0);
+    // Only Stripe is supported for live payments
+    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+    console.log("Stripe key available:", !!stripeKey, "Length:", stripeKey?.length || 0);
 
-      if (!stripeKey || stripeKey.length < 10) {
-        throw new Error("Stripe secret key not configured. Please set STRIPE_SECRET_KEY environment variable.");
-      }
-
-      const stripe = new Stripe(stripeKey, {
-        apiVersion: "2023-10-16",
-      });
-
-      let customerId;
-      if (!isGuest) {
-        const customers = await stripe.customers.list({ email, limit: 1 });
-        if (customers.data.length > 0) {
-          customerId = customers.data[0].id;
-        }
-      }
-
-      const session = await stripe.checkout.sessions.create({
-        customer: customerId,
-        customer_email: customerId ? undefined : email,
-        line_items: [
-          {
-            price_data: {
-              currency: "usd",
-              product_data: { name: productName },
-              unit_amount: Math.round(amount * 100), // Convert to cents
-            },
-            quantity: 1,
-          },
-        ],
-        mode: "payment",
-        success_url: `${req.headers.get("origin")}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${req.headers.get("origin")}/payment-cancelled`,
-      });
-
-      // Record order in database
-      await supabaseClient.from("orders").insert({
-        user_id: user?.id || null,
-        email,
-        stripe_session_id: session.id,
-        amount: Math.round(amount * 100),
-        status: "pending",
-        payment_method: "stripe",
-        product_name: productName,
-        guest_checkout: isGuest,
-      });
-
-      return new Response(JSON.stringify({ url: session.url, sessionId: session.id }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
-      });
-    } else if (paymentMethod === 'paypal') {
-      // PayPal integration
-      const paypalClientId = Deno.env.get("PAYPAL_CLIENT_ID");
-      const paypalSecret = Deno.env.get("PAYPAL_SECRET_KEY");
-      
-      if (!paypalClientId || !paypalSecret) {
-        throw new Error("PayPal credentials not configured");
-      }
-
-      // Get PayPal access token
-      const authResponse = await fetch("https://api.paypal.com/v1/oauth2/token", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          "Authorization": `Basic ${btoa(`${paypalClientId}:${paypalSecret}`)}`,
-        },
-        body: "grant_type=client_credentials",
-      });
-
-      const authData = await authResponse.json();
-
-      // Create PayPal order
-      const orderResponse = await fetch("https://api.paypal.com/v2/checkout/orders", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${authData.access_token}`,
-        },
-        body: JSON.stringify({
-          intent: "CAPTURE",
-          purchase_units: [{
-            amount: {
-              currency_code: "USD",
-              value: amount.toString(),
-            },
-            description: productName,
-          }],
-          application_context: {
-            return_url: `${req.headers.get("origin")}/payment-success`,
-            cancel_url: `${req.headers.get("origin")}/payment-cancelled`,
-          },
-        }),
-      });
-
-      const orderData = await orderResponse.json();
-      const approvalUrl = orderData.links.find((link: any) => link.rel === "approve")?.href;
-
-      // Record order in database
-      await supabaseClient.from("orders").insert({
-        user_id: user?.id || null,
-        email,
-        paypal_order_id: orderData.id,
-        amount: Math.round(amount * 100),
-        status: "pending",
-        payment_method: "paypal",
-        product_name: productName,
-        guest_checkout: isGuest,
-      });
-
-      return new Response(JSON.stringify({ url: approvalUrl, orderId: orderData.id }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
-      });
+    if (!stripeKey || stripeKey.length < 10) {
+      throw new Error("Stripe secret key not configured. Please set STRIPE_SECRET_KEY environment variable.");
     }
 
-    throw new Error("Invalid payment method");
+    if (!stripeKey.startsWith('sk_live_')) {
+      throw new Error("Live Stripe secret key required for production. Please configure sk_live_ key.");
+    }
+
+    const stripe = new Stripe(stripeKey, {
+      apiVersion: "2023-10-16",
+    });
+
+    // Use live Stripe product ID for credits
+    const CREDITS_PRODUCT_ID = "prod_SoVoAb8dXp1cS0";
+
+    let customerId;
+    if (!isGuest) {
+      const customers = await stripe.customers.list({ email, limit: 1 });
+      if (customers.data.length > 0) {
+        customerId = customers.data[0].id;
+      }
+    }
+
+    const session = await stripe.checkout.sessions.create({
+      customer: customerId,
+      customer_email: customerId ? undefined : email,
+      line_items: [
+        {
+          price_data: {
+            currency: "usd",
+            product: CREDITS_PRODUCT_ID,
+            unit_amount: Math.round(amount * 100), // Convert to cents
+          },
+          quantity: 1,
+        },
+      ],
+      metadata: {
+        credits: credits.toString(),
+        product_type: "credits",
+        is_guest: isGuest.toString(),
+        guest_email: isGuest ? email : ""
+      },
+      mode: "payment",
+      success_url: `${req.headers.get("origin")}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${req.headers.get("origin")}/payment-cancelled`,
+    });
+
+    // Record order in database
+    await supabaseClient.from("orders").insert({
+      user_id: user?.id || null,
+      email,
+      stripe_session_id: session.id,
+      amount: Math.round(amount * 100),
+      credits: credits,
+      status: "pending",
+      payment_method: "stripe",
+      product_name: productName,
+      product_id: CREDITS_PRODUCT_ID,
+      guest_checkout: isGuest,
+      created_at: new Date().toISOString(),
+    });
+
+    return new Response(JSON.stringify({ url: session.url, sessionId: session.id }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 200,
+    });
 
   } catch (error) {
     console.error("Error in create-payment:", error);
@@ -269,12 +228,15 @@ serve(async (req) => {
       errorMessage = "Network error. Please check your connection and try again.";
     } else if (error.message?.includes('card') || error.message?.includes('payment_method')) {
       errorMessage = "Payment method error. Please check your card details or try a different payment method.";
+    } else if (error.message?.includes('No such product')) {
+      errorMessage = "Product configuration error. Please contact support.";
     }
 
     return new Response(JSON.stringify({
       error: errorMessage,
       code: error.code || 'PAYMENT_ERROR',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      productId: 'prod_SoVoAb8dXp1cS0'
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,

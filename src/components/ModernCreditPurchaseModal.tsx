@@ -41,6 +41,7 @@ export function ModernCreditPurchaseModal({
   const [rate] = useState(1.40);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Credit packages pricing - Uses live Stripe product prod_SoVoAb8dXp1cS0
   const creditPackages: CreditPackage[] = [
     { credits: 50, price: 70, pricePerCredit: 1.40 },
     { credits: 100, price: 140, pricePerCredit: 1.40 },
