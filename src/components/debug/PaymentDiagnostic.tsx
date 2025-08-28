@@ -45,23 +45,32 @@ export function PaymentDiagnostic() {
     const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
     const results = [];
+
+    // Stripe Publishable Key
     if (publishableKey?.startsWith('pk_')) {
-      results.push('✅ VITE_STRIPE_PUBLISHABLE_KEY: Configured');
+      results.push(`✅ VITE_STRIPE_PUBLISHABLE_KEY: Configured (${publishableKey.substring(0, 10)}...)`);
     } else {
-      results.push('❌ VITE_STRIPE_PUBLISHABLE_KEY: Missing or invalid');
+      results.push(`❌ VITE_STRIPE_PUBLISHABLE_KEY: ${publishableKey ? `Invalid format: ${publishableKey.substring(0, 10)}...` : 'Missing'}`);
     }
 
+    // Supabase URL
     if (supabaseUrl?.includes('supabase.co')) {
-      results.push('✅ VITE_SUPABASE_URL: Configured');
+      results.push(`✅ VITE_SUPABASE_URL: Configured (${supabaseUrl})`);
     } else {
-      results.push('❌ VITE_SUPABASE_URL: Missing or invalid');
+      results.push(`❌ VITE_SUPABASE_URL: ${supabaseUrl ? `Invalid: ${supabaseUrl}` : 'Missing'}`);
     }
 
+    // Supabase Anon Key
     if (supabaseKey?.length > 50) {
-      results.push('✅ VITE_SUPABASE_ANON_KEY: Configured');
+      results.push(`✅ VITE_SUPABASE_ANON_KEY: Configured (${supabaseKey.length} chars, ${supabaseKey.substring(0, 10)}...)`);
     } else {
-      results.push('❌ VITE_SUPABASE_ANON_KEY: Missing or invalid');
+      results.push(`❌ VITE_SUPABASE_ANON_KEY: ${supabaseKey ? `Too short: ${supabaseKey.length} chars, ${supabaseKey.substring(0, 10)}...` : 'Missing'}`);
     }
+
+    // Additional debug info
+    results.push('\n🔍 Debug Info:');
+    results.push(`Environment: ${import.meta.env.MODE}`);
+    results.push(`Available env vars: ${Object.keys(import.meta.env).filter(key => key.startsWith('VITE_')).join(', ')}`);
 
     setStatus(results.join('\n'));
   };
