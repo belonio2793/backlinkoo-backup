@@ -236,9 +236,37 @@ export class CreditPaymentService {
           sessionId: result.sessionId || result.session_id
         };
       } else {
-        // Payment failed - provide detailed error
+        // Edge Function failed - try client-side fallback
         const errorMessage = edgeError ? this.extractErrorMessage(edgeError) : 'No payment URL received from server';
-        console.error('❌ Payment creation failed:', errorMessage);
+        console.warn('⚠️ Edge Function failed, trying client-side fallback:', errorMessage);
+
+        // Check if error indicates configuration issues
+        if (errorMessage.includes('not configured') || errorMessage.includes('configuration error') ||
+            errorMessage.includes('non-2xx status code') || errorMessage.includes('service error')) {
+
+          console.log('🔄 Attempting client-side Stripe fallback...');
+
+          try {
+            const fallbackResult = await ClientStripeService.createClientPayment({
+              amount: options.amount,
+              credits: options.credits,
+              productName: options.productName,
+              userEmail: finalGuestEmail || user?.email
+            });
+
+            if (fallbackResult.success && fallbackResult.url) {
+              console.log('✅ Client-side fallback successful');
+              return {
+                success: true,
+                url: fallbackResult.url,
+                sessionId: 'client-fallback-' + Date.now()
+              };
+            }
+          } catch (fallbackError) {
+            console.error('❌ Client-side fallback also failed:', fallbackError);
+          }
+        }
+
         ErrorLogger.logError('Credit payment error', edgeError || { message: 'No URL returned' });
 
         return {
