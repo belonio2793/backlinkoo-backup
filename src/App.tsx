@@ -48,16 +48,14 @@ const LazySubscriptionCancelled = lazy(() => import("./pages/SubscriptionCancell
 const LazyTermsOfService = lazy(() => import("./pages/TermsOfService"));
 const LazyPrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const LazyNotFound = lazy(() => import("./pages/NotFound"));
-const LazyPaymentTest = lazy(() => import("./pages/PaymentTest"));
 const LazyTwitterAdGenerator = lazy(() => import("./pages/TwitterAdGenerator"));
 const LazyAffiliate = lazy(() => import("./pages/Affiliate"));
-const LazyStripeTest = lazy(() => import("./pages/StripeTest"));
-const LazyDevStripeCheckout = lazy(() => import("./pages/DevStripeCheckout"));
 const LazyDomainsPage = lazy(() => import("./pages/DomainsPage"));
 const LazyEnhancedDomainsPage = lazy(() => import("./pages/EnhancedDomainsPage"));
 const LazyNetlifyTest = lazy(() => import("./pages/NetlifyTest"));
 const LazyNetlifyConnectionTest = lazy(() => import("./pages/NetlifyConnectionTest"));
 const LazySupabaseTest = lazy(() => import("./pages/SupabaseTest"));
+const LazyEdgeFunctionDebugPage = lazy(() => import("./pages/EdgeFunctionDebugPage"));
 const LazyBlogGenerationTest = lazy(() => import("./components/BlogGenerationTest"));
 const LazyAuthFix = lazy(() => import("./pages/AuthFix"));
 const LazyTestPaymentModal = lazy(() => import("./pages/TestPaymentModal"));
@@ -151,14 +149,6 @@ const App = () => {
                     <ReportSyncProvider>
             <Routes>
             <Route path="/" element={<Index />} />
-            <Route
-              path="/payment-test"
-              element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <LazyPaymentTest />
-                </Suspense>
-              }
-            />
             <Route
               path="/login"
               element={
@@ -321,6 +311,15 @@ const App = () => {
             />
 
             <Route
+              path="/edge-function-debug"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyEdgeFunctionDebugPage />
+                </Suspense>
+              }
+            />
+
+            <Route
               path="/domains-test"
               element={
                 <Suspense fallback={<LoadingSpinner />}>
@@ -329,23 +328,7 @@ const App = () => {
               }
             />
 
-            <Route
-              path="/stripe-test"
-              element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <LazyStripeTest />
-                </Suspense>
-              }
-            />
 
-            <Route
-              path="/dev-stripe-checkout"
-              element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <LazyDevStripeCheckout />
-                </Suspense>
-              }
-            />
 
             <Route
               path="/test"

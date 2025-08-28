@@ -5,13 +5,15 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS"
 };
 
 interface SubscriptionRequest {
-  priceId: string;
-  tier: string;
+  plan: 'monthly' | 'yearly' | 'annual';
+  tier?: string;
   isGuest?: boolean;
   guestEmail?: string;
+  userEmail?: string;
 }
 
 // Rate limiting map
@@ -41,13 +43,22 @@ function sanitizeInput(input: string): string {
 }
 
 serve(async (req) => {
-  console.log(`🚀 Edge function called: ${req.method} ${req.url}`);
+  console.log(`🚀 Premium Subscription Edge Function: ${req.method} ${req.url}`);
 
+  // Handle CORS preflight
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
-  // Check environment variables first
+  // Only allow POST requests
+  if (req.method !== "POST") {
+    return new Response(
+      JSON.stringify({ error: "Method not allowed" }),
+      { status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+
+  // Check environment variables
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   const stripeSecretKey = Deno.env.get("STRIPE_SECRET_KEY");
@@ -55,21 +66,22 @@ serve(async (req) => {
   console.log("🔧 Environment check:", {
     supabaseUrl: !!supabaseUrl,
     supabaseServiceKey: !!supabaseServiceKey,
-    stripeSecretKey: !!stripeSecretKey
+    stripeSecretKey: !!stripeSecretKey,
+    stripeKeyType: stripeSecretKey?.startsWith('sk_live_') ? 'live' : stripeSecretKey?.startsWith('sk_test_') ? 'test' : 'invalid'
   });
 
   if (!supabaseUrl || !supabaseServiceKey) {
-    console.error("Missing Supabase configuration");
+    console.error("❌ Missing Supabase configuration");
     return new Response(
-      JSON.stringify({ error: "Service configuration error" }),
+      JSON.stringify({ error: "Service configuration error. Please contact support." }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 
-  if (!stripeSecretKey) {
-    console.error("Missing Stripe configuration");
+  if (!stripeSecretKey || (!stripeSecretKey.startsWith('sk_live_') && !stripeSecretKey.startsWith('sk_test_'))) {
+    console.error("❌ Invalid Stripe configuration");
     return new Response(
-      JSON.stringify({ error: "Payment system not configured" }),
+      JSON.stringify({ error: "Payment system not configured. Please contact support." }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
@@ -81,54 +93,54 @@ serve(async (req) => {
   try {
     // Rate limiting check
     const clientIP = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
+    console.log("📍 Client IP:", clientIP);
+    
     if (!checkRateLimit(clientIP)) {
+      console.log("🚫 Rate limit exceeded for IP:", clientIP);
       return new Response(
-        JSON.stringify({ error: 'Rate limit exceeded' }),
+        JSON.stringify({ error: 'Too many requests. Please wait a moment and try again.' }),
         { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
+    // Parse request body
     let body: SubscriptionRequest;
     try {
       const rawBody = await req.text();
-      console.log("📝 Raw request body:", rawBody);
+      console.log("📝 Raw request body:", rawBody.substring(0, 200) + "...");
       body = JSON.parse(rawBody);
-      console.log("📋 Parsed request body:", body);
+      console.log("📋 Parsed request body:", { 
+        ...body, 
+        guestEmail: body.guestEmail ? '[REDACTED]' : undefined,
+        userEmail: body.userEmail ? '[REDACTED]' : undefined
+      });
     } catch (parseError) {
       console.error("❌ JSON parse error:", parseError);
       return new Response(
-        JSON.stringify({ error: "Invalid request format", details: parseError.message }),
+        JSON.stringify({ error: "Invalid request format", details: "Please check your request data" }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
-    
 
     // Input validation
-    if (!body.priceId || typeof body.priceId !== 'string' || body.priceId.length > 100) {
-      console.error("Invalid price ID:", body.priceId);
+    if (!body.plan || !['monthly', 'yearly', 'annual'].includes(body.plan)) {
+      console.error("❌ Invalid subscription plan:", body.plan);
       return new Response(
-        JSON.stringify({ error: 'Invalid price ID' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    if (!body.tier || body.tier.length > 50) {
-      console.error("Invalid tier:", body.tier);
-      return new Response(
-        JSON.stringify({ error: 'Invalid tier' }),
+        JSON.stringify({ error: 'Invalid subscription plan. Must be "monthly", "yearly", or "annual"' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
     
-    const { priceId, isGuest = false } = body;
-    const tier = sanitizeInput(body.tier);
+    const { isGuest = false } = body;
+    const plan = body.plan === 'annual' ? 'yearly' : body.plan; // Normalize annual to yearly
+    const tier = body.tier ? sanitizeInput(body.tier) : 'premium';
     let guestEmail = body.guestEmail ? sanitizeInput(body.guestEmail) : '';
     let userEmail = body.userEmail ? sanitizeInput(body.userEmail) : '';
 
     let user = null;
     let email = '';
 
-    // For non-guest users, try to get email from auth token
+    // Handle authentication for non-guest users
     if (!isGuest) {
       const authHeader = req.headers.get("Authorization");
       if (authHeader && authHeader.startsWith('Bearer ')) {
@@ -138,12 +150,12 @@ serve(async (req) => {
           if (!userError && userData.user?.email) {
             user = userData.user;
             email = user.email;
-            console.log('✅ Extracted email from auth token:', email);
+            console.log('✅ Authenticated user:', email);
           } else {
-            console.warn('⚠️ Failed to get user from auth token:', userError?.message);
+            console.warn('⚠️ Auth failed:', userError?.message);
           }
         } catch (authError) {
-          console.warn('⚠️ Auth token processing failed:', authError);
+          console.warn('⚠️ Auth error:', authError);
         }
       }
 
@@ -158,9 +170,9 @@ serve(async (req) => {
       console.log('👤 Using guest email:', email);
     }
 
-    // Final validation
+    // Email validation
     if (!email) {
-      console.error("❌ Email is required for subscription. isGuest:", isGuest, "guestEmail:", guestEmail, "userEmail:", userEmail);
+      console.error("❌ No email provided");
       return new Response(
         JSON.stringify({
           error: "Email is required for subscription",
@@ -175,69 +187,49 @@ serve(async (req) => {
       );
     }
 
-    // Validate email format
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       console.error("❌ Invalid email format:", email);
       return new Response(
-        JSON.stringify({ error: "Invalid email format" }),
+        JSON.stringify({ error: "Valid email address is required" }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log("Initializing Stripe with email:", email);
+    console.log("💳 Processing subscription for:", email, "Plan:", plan, "Tier:", tier);
 
-    // Validate live Stripe key for production
-    if (!stripeSecretKey.startsWith('sk_live_')) {
-      console.error("Live Stripe secret key required for production");
-      return new Response(
-        JSON.stringify({ error: "Live Stripe secret key required for production" }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
+    // Initialize Stripe
     const stripe = new Stripe(stripeSecretKey, {
       apiVersion: "2023-10-16",
     });
 
-    // Check if customer exists
-    let customers;
-    try {
-      customers = await stripe.customers.list({ email, limit: 1 });
-    } catch (stripeError) {
-      console.error("Stripe customer list error:", stripeError);
-      return new Response(
-        JSON.stringify({ error: "Payment system error" }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
+    // Check if customer exists or create one
     let customerId;
-
-    if (customers.data.length > 0) {
-      customerId = customers.data[0].id;
-      console.log("Found existing customer:", customerId);
-    } else if (!isGuest) {
-      // Create customer for authenticated users
-      try {
+    try {
+      const customers = await stripe.customers.list({ email, limit: 1 });
+      if (customers.data.length > 0) {
+        customerId = customers.data[0].id;
+        console.log("✅ Found existing customer:", customerId);
+      } else if (!isGuest) {
+        // Create customer for authenticated users
         const customer = await stripe.customers.create({
           email,
           metadata: { user_id: user?.id || '' }
         });
         customerId = customer.id;
-        console.log("Created new customer:", customerId);
-      } catch (stripeError) {
-        console.error("Stripe customer creation error:", stripeError);
-        return new Response(
-          JSON.stringify({ error: "Failed to create customer" }),
-          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
+        console.log("✅ Created new customer:", customerId);
       }
+    } catch (stripeError) {
+      console.error("❌ Stripe customer error:", stripeError);
+      return new Response(
+        JSON.stringify({ error: "Failed to manage customer account. Please try again." }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    // Live Stripe product and price configuration
+    // Use live Stripe product ID for premium subscriptions
     const PREMIUM_PRODUCT_ID = "prod_SoVja4018pbOcy";
 
-    // Create dynamic prices for the product based on plan
+    // Determine pricing based on plan
     let priceAmount: number;
     let interval: 'month' | 'year';
 
@@ -249,11 +241,12 @@ serve(async (req) => {
       interval = 'year';
     }
 
-    console.log("Creating checkout session for:", { customerId, email, plan, priceAmount });
+    console.log("🔄 Creating Stripe checkout session...", { plan, priceAmount, interval });
 
+    // Create Stripe checkout session
     let session;
     try {
-      session = await stripe.checkout.sessions.create({
+      const sessionData = {
         customer: customerId,
         customer_email: customerId ? undefined : email,
         line_items: [
@@ -271,45 +264,64 @@ serve(async (req) => {
         ],
         metadata: {
           plan: plan,
+          tier: tier,
           product_type: "premium_subscription",
           is_guest: isGuest.toString(),
-          guest_email: isGuest ? email : ""
+          guest_email: isGuest ? email : "",
+          product_id: PREMIUM_PRODUCT_ID
         },
-        mode: "subscription",
+        mode: "subscription" as const,
         success_url: `${req.headers.get("origin")}/subscription-success?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${req.headers.get("origin")}/subscription-cancelled`,
-      });
+      };
+
+      session = await stripe.checkout.sessions.create(sessionData);
+      console.log("✅ Stripe session created:", session.id);
     } catch (stripeError) {
-      console.error("Stripe session creation error:", stripeError);
+      console.error("❌ Stripe session creation failed:", stripeError);
       return new Response(
-        JSON.stringify({ error: "Failed to create checkout session" }),
+        JSON.stringify({ 
+          error: "Failed to create subscription checkout. Please try again or contact support.",
+          details: stripeError.message 
+        }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Update or create subscriber record
-    console.log("Updating subscriber record for:", email);
-    const { error: dbError } = await supabaseClient.from("subscribers").upsert({
-      user_id: user?.id || null,
-      email,
-      stripe_customer_id: customerId,
-      stripe_session_id: session.id,
-      subscribed: false, // Will be updated when subscription is activated
-      subscription_tier: tier,
-      subscription_plan: plan,
-      payment_method: "stripe",
-      product_id: PREMIUM_PRODUCT_ID,
-      guest_checkout: isGuest,
-      updated_at: new Date().toISOString(),
-    }, { onConflict: 'email' });
+    // Record subscription intent in database
+    try {
+      const { error: dbError } = await supabaseClient.from("subscribers").upsert({
+        user_id: user?.id || null,
+        email,
+        stripe_customer_id: customerId,
+        stripe_session_id: session.id,
+        subscribed: false, // Will be updated when subscription is activated
+        subscription_tier: tier,
+        subscription_plan: plan,
+        payment_method: "stripe",
+        product_id: PREMIUM_PRODUCT_ID,
+        guest_checkout: isGuest,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'email' });
 
-    if (dbError) {
-      console.error("Database error:", dbError);
-      // Don't fail the request for database errors, but log them
+      if (dbError) {
+        console.error("⚠️ Database upsert error (non-critical):", dbError);
+        // Don't fail the subscription for database issues
+      } else {
+        console.log("✅ Subscription intent recorded in database");
+      }
+    } catch (dbError) {
+      console.error("⚠️ Database error (non-critical):", dbError);
+      // Don't fail the subscription for database issues
     }
 
-    console.log("Successfully created checkout session:", session.id);
-    return new Response(JSON.stringify({ url: session.url, sessionId: session.id }), {
+    console.log("🎉 Subscription session created successfully");
+    return new Response(JSON.stringify({ 
+      url: session.url, 
+      sessionId: session.id,
+      plan: plan,
+      productId: PREMIUM_PRODUCT_ID
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
@@ -318,14 +330,20 @@ serve(async (req) => {
     console.error("❌ Unhandled error in create-subscription:", error);
     console.error("❌ Error stack:", error.stack);
 
-    let errorMessage = "Internal server error";
-    if (error.message) {
-      errorMessage = error.message;
+    // Provide user-friendly error messages
+    let errorMessage = "An unexpected error occurred. Please try again or contact support.";
+    
+    if (error.message?.includes("network") || error.message?.includes("fetch")) {
+      errorMessage = "Network error. Please check your connection and try again.";
+    } else if (error.message?.includes("stripe") || error.message?.includes("Stripe")) {
+      errorMessage = "Payment service error. Please try again or contact support.";
+    } else if (error.message?.includes("database") || error.message?.includes("supabase")) {
+      errorMessage = "Database error. Please try again or contact support.";
     }
 
     return new Response(JSON.stringify({
       error: errorMessage,
-      details: "Check server logs for more information",
+      code: error.code || 'SUBSCRIPTION_ERROR',
       timestamp: new Date().toISOString(),
       productId: "prod_SoVja4018pbOcy"
     }), {

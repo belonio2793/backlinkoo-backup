@@ -1,5 +1,7 @@
 import { SimpleBuyCreditsButton } from '@/components/SimpleBuyCreditsButton';
-import { PaymentTest } from '@/components/PaymentTest';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export function TestStripeIntegration() {
   const handlePaymentSuccess = (sessionId?: string) => {
@@ -14,77 +16,34 @@ export function TestStripeIntegration() {
 
   return (
     <div className="container mx-auto p-8 max-w-2xl">
-      <h1 className="text-3xl font-bold mb-8">Stripe Integration Test</h1>
+      <h1 className="text-3xl font-bold mb-8">Stripe Integration</h1>
       
       <div className="space-y-6">
-        <PaymentTest />
+        <Card>
+          <CardHeader>
+            <CardTitle>Live Payment Integration</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                Test components have been removed for production. Use the live checkout buttons below.
+              </AlertDescription>
+            </Alert>
+          </CardContent>
+        </Card>
+        
         <div className="p-6 border rounded-lg">
-          <h2 className="text-xl font-semibold mb-4">Buy Credits Test</h2>
-          <p className="text-gray-600 mb-4">
-            This will open a new window to Stripe for payment processing.
-          </p>
-          
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">50 Credits - $70</label>
-              <SimpleBuyCreditsButton
-                defaultCredits={50}
-                onPaymentSuccess={handlePaymentSuccess}
-                onPaymentCancel={handlePaymentCancel}
-                guestEmail="test@example.com"
-                variant="default"
-                size="default"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium mb-2">100 Credits - $140</label>
-              <SimpleBuyCreditsButton
-                defaultCredits={100}
-                onPaymentSuccess={handlePaymentSuccess}
-                onPaymentCancel={handlePaymentCancel}
-                guestEmail="test@example.com"
-                variant="outline"
-                size="default"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium mb-2">250 Credits - $350</label>
-              <SimpleBuyCreditsButton
-                defaultCredits={250}
-                onPaymentSuccess={handlePaymentSuccess}
-                onPaymentCancel={handlePaymentCancel}
-                guestEmail="test@example.com"
-                variant="secondary"
-                size="default"
-              />
-            </div>
-          </div>
-        </div>
-        
-        <div className="p-6 border rounded-lg bg-yellow-50">
-          <h3 className="text-lg font-semibold mb-2">Testing Instructions</h3>
-          <ul className="text-sm space-y-1 text-gray-700">
-            <li>• Click any "Buy Credits" button</li>
-            <li>• A new window will open to Stripe checkout</li>
-            <li>• Use test card: 4242 4242 4242 4242</li>
-            <li>• Any future expiry date and CVC</li>
-            <li>• Complete or cancel the payment</li>
-            <li>• Window will close and show success/cancel message</li>
-          </ul>
-        </div>
-        
-        <div className="p-6 border rounded-lg bg-blue-50">
-          <h3 className="text-lg font-semibold mb-2">Environment Variables Required</h3>
-          <ul className="text-sm space-y-1 text-gray-700">
-            <li>• STRIPE_SECRET_KEY (backend)</li>
-            <li>• VITE_STRIPE_PUBLISHABLE_KEY (frontend)</li>
-            <li>• SUPABASE_SERVICE_ROLE_KEY (order tracking)</li>
-            <li>• VITE_SUPABASE_URL (order tracking)</li>
-          </ul>
+          <h3 className="text-lg font-semibold mb-4">Live Credit Purchase</h3>
+          <SimpleBuyCreditsButton
+            credits={100}
+            onSuccess={handlePaymentSuccess}
+            onCancel={handlePaymentCancel}
+          />
         </div>
       </div>
     </div>
   );
 }
+
+export default TestStripeIntegration;

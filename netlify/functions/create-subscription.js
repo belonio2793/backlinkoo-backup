@@ -61,6 +61,8 @@ async function createStripeSubscription(subscriptionData, email, originUrl) {
     apiVersion: "2023-10-16",
   });
 
+  // Use live Stripe product ID for premium subscriptions - backlinkoo.com production
+  const PREMIUM_PRODUCT_ID = "prod_SoVja4018pbOcy";
   const planConfig = PRICING_CONFIG[subscriptionData.plan];
   
   // Create or find customer
@@ -78,50 +80,25 @@ async function createStripeSubscription(subscriptionData, email, originUrl) {
     }
   }
 
-  // Use predefined price ID or create dynamic price as fallback
-  let priceId = planConfig.priceId;
+  // Create dynamic price for live product (production mode)
+  console.log('Creating dynamic price for live product:', subscriptionData.plan);
 
-  // If using fallback price IDs, create the product and price
-  if (priceId.includes('fallback')) {
-    console.log('Creating dynamic product and price for', subscriptionData.plan);
+  const price = await stripe.prices.create({
+    product: PREMIUM_PRODUCT_ID,
+    unit_amount: planConfig.price * 100, // Convert to cents
+    currency: 'usd',
+    recurring: {
+      interval: planConfig.interval,
+    },
+    metadata: {
+      plan: subscriptionData.plan,
+      originalPrice: planConfig.originalPrice.toString(),
+      discount: planConfig.discount.toString()
+    }
+  });
 
-    const product = await stripe.products.create({
-      name: planConfig.productName,
-      description: planConfig.description,
-      metadata: {
-        plan: subscriptionData.plan,
-        type: 'subscription',
-        features: JSON.stringify([
-          'Unlimited Backlinks',
-          'Complete SEO Academy (50+ Lessons)',
-          'Advanced Analytics & Reports',
-          'Priority 24/7 Support',
-          'White-Hat Guarantee',
-          'Custom Campaign Strategies',
-          'Professional Certifications',
-          'API Access & Integrations'
-        ])
-      }
-    });
-
-    const price = await stripe.prices.create({
-      product: product.id,
-      unit_amount: planConfig.price * 100, // Convert to cents
-      currency: 'usd',
-      recurring: {
-        interval: planConfig.interval,
-      },
-      metadata: {
-        plan: subscriptionData.plan,
-        originalPrice: planConfig.originalPrice.toString(),
-        discount: planConfig.discount.toString()
-      }
-    });
-
-    priceId = price.id;
-  } else {
-    console.log('Using predefined price ID:', priceId);
-  }
+  const priceId = price.id;
+  console.log('Created price ID for live product:', priceId);
 
   // Create checkout session
   const session = await stripe.checkout.sessions.create({
@@ -139,15 +116,20 @@ async function createStripeSubscription(subscriptionData, email, originUrl) {
     metadata: {
       email,
       plan: subscriptionData.plan,
-      isGuest: subscriptionData.isGuest ? 'true' : 'false',
-      priceId: priceId,
+      product_type: "premium_subscription",
+      is_guest: subscriptionData.isGuest ? 'true' : 'false',
+      guest_email: subscriptionData.isGuest ? email : "",
+      price_id: priceId,
+      product_id: PREMIUM_PRODUCT_ID,
       description: planConfig.description
     },
     subscription_data: {
       metadata: {
         email,
         plan: subscriptionData.plan,
-        isGuest: subscriptionData.isGuest ? 'true' : 'false'
+        product_type: "premium_subscription",
+        is_guest: subscriptionData.isGuest ? 'true' : 'false',
+        product_id: PREMIUM_PRODUCT_ID
       }
     }
   });
