@@ -63,20 +63,17 @@ exports.handler = async (event, context) => {
 
     const originUrl = event.headers.origin || event.headers.referer || "https://backlinkoo.com";
     
-    // Create checkout session with dynamic product
+    // Use live Stripe product ID for credits - backlinkoo.com production
+    const CREDITS_PRODUCT_ID = "prod_SoVoAb8dXp1cS0";
+
+    // Create checkout session with live product ID
     const session = await stripe.checkout.sessions.create({
       customer_email: email,
       line_items: [
         {
           price_data: {
             currency: "usd",
-            product_data: { 
-              name: productName,
-              metadata: {
-                credits: body.credits?.toString() || '0',
-                type: 'credits'
-              }
-            },
+            product: CREDITS_PRODUCT_ID,
             unit_amount: Math.round(amount * 100), // Convert to cents
           },
           quantity: 1,
@@ -88,8 +85,11 @@ exports.handler = async (event, context) => {
       metadata: {
         email,
         credits: body.credits?.toString() || '0',
-        isGuest: isGuest ? 'true' : 'false',
-        productName: productName
+        product_type: "credits",
+        is_guest: isGuest ? 'true' : 'false',
+        guest_email: isGuest ? email : "",
+        product_name: productName,
+        product_id: CREDITS_PRODUCT_ID
       }
     });
 
