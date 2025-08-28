@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { AuthFormTabs } from '@/components/shared/AuthFormTabs';
 import SubscriptionService from '@/services/subscriptionService';
+import { stripeWrapper } from '@/services/stripeWrapper';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -118,29 +119,46 @@ export function EnhancedPremiumCheckoutModal({
         redirectUrl: redirectAfterSuccess
       }));
 
-      // Create subscription using Stripe checkout
-      const result = await SubscriptionService.createSubscription(
-        user,
-        checkoutMode === 'guest', // isGuest
-        checkoutMode === 'guest' ? guestEmail : undefined,
-        selectedPlan // Pass the selected plan (monthly or yearly)
-      );
+      // Create subscription using Stripe Wrapper (with fallback to legacy service)
+      let result;
+      try {
+        result = await stripeWrapper.createSubscription({
+          plan: selectedPlan,
+          tier: 'premium',
+          isGuest: checkoutMode === 'guest',
+          guestEmail: checkoutMode === 'guest' ? guestEmail : undefined
+        });
+
+        if (result.success) {
+          console.log(`✅ Subscription created via ${result.method}${result.fallbackUsed ? ' (fallback)' : ''}`);
+        }
+      } catch (wrapperError) {
+        console.warn('⚠️ Stripe Wrapper failed, using legacy service:', wrapperError);
+        result = await SubscriptionService.createSubscription(
+          user,
+          checkoutMode === 'guest',
+          checkoutMode === 'guest' ? guestEmail : undefined,
+          selectedPlan
+        );
+      }
 
       if (result.success && result.url) {
-        // Open Stripe checkout in new window
-
-        // Open in new window with proper features
-        const checkoutWindow = window.open(
-          result.url,
-          'stripe-checkout',
-          'width=800,height=600,scrollbars=yes,resizable=yes,location=yes,status=yes'
-        );
+        // Open Stripe checkout using wrapper if available, otherwise manual
+        let checkoutWindow;
+        if (result.method) {
+          checkoutWindow = stripeWrapper.openCheckoutWindow(result.url, result.sessionId);
+        } else {
+          checkoutWindow = window.open(
+            result.url,
+            'stripe-checkout',
+            'width=800,height=600,scrollbars=yes,resizable=yes,location=yes,status=yes'
+          );
+        }
 
         if (!checkoutWindow) {
-          // Popup blocked - try alternative new window approach first
           toast({
-            title: "Popup Blocked",
-            description: "Opening in new window...",
+            title: "Opening Checkout",
+            description: "Redirecting to secure payment page...",
           });
           setTimeout(() => {
             const fallbackWindow = window.open(result.url, 'stripe-checkout-fallback', 'width=800,height=600,scrollbars=yes,resizable=yes');

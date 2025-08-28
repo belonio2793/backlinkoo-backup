@@ -1,10 +1,11 @@
 /**
  * Universal Stripe Checkout Service
+ * Now powered by Stripe Wrapper with Supabase integration
  * Handles all Stripe payment flows with new window checkout
  * Supports credits, subscriptions, and premium upgrades
  */
 
-import { supabase } from '@/integrations/supabase/client';
+import { stripeWrapper, type PaymentOptions as WrapperPaymentOptions, type SubscriptionOptions as WrapperSubscriptionOptions, type PaymentResult as WrapperPaymentResult } from './stripeWrapper';
 import { useAuth } from '@/hooks/useAuth';
 
 export interface PaymentOptions {
@@ -89,7 +90,7 @@ export class UniversalStripeCheckout {
   }
 
   /**
-   * Open Stripe checkout in a new window for credit purchases
+   * Open Stripe checkout in a new window for credit purchases (Wrapper-powered)
    */
   public async purchaseCredits(options: {
     credits: number;
@@ -99,56 +100,46 @@ export class UniversalStripeCheckout {
     guestEmail?: string;
   }): Promise<PaymentResult> {
     try {
-      const paymentData = {
+      const paymentOptions: WrapperPaymentOptions = {
         amount: options.amount,
         credits: options.credits,
         productName: options.productName || `${options.credits} Backlink Credits`,
         isGuest: options.isGuest || false,
-        guestEmail: options.guestEmail,
-        paymentMethod: 'stripe'
+        guestEmail: options.guestEmail
       };
 
-      console.log('🔄 Attempting Supabase Edge Function payment creation...');
-      const { data: result, error } = await supabase.functions.invoke('create-payment', {
-        body: paymentData
+      console.log('🔄 Creating payment via Stripe Wrapper...');
+      const result = await stripeWrapper.createPayment(paymentOptions);
+
+      console.log('📥 Wrapper response:', {
+        success: result.success,
+        hasUrl: !!result.url,
+        method: result.method,
+        fallbackUsed: result.fallbackUsed
       });
 
-      console.log('📥 Supabase response:', { hasData: !!result, hasError: !!error });
-
-      if (error) {
-        const supabaseErrorMessage = this.extractErrorMessage(error);
-        console.error('❌ Supabase Edge Function error:', supabaseErrorMessage);
-        throw new Error(`Payment creation failed: ${supabaseErrorMessage}`);
+      if (!result.success) {
+        throw new Error(result.error || 'Payment creation failed');
       }
 
-      if (!result) {
-        console.error('❌ No result from Supabase Edge Function');
-        throw new Error(`Invalid response from payment service`);
+      if (!result.url) {
+        throw new Error('No checkout URL received from payment service');
       }
-      
-      if (result.url) {
-        // Open Stripe checkout in new window
-        const checkoutWindow = window.open(
-          result.url,
-          'stripe-checkout',
-          'width=800,height=600,scrollbars=yes,resizable=yes'
-        );
 
-        if (!checkoutWindow) {
-          throw new Error('Failed to open payment window. Please allow popups for this site.');
-        }
+      // Open Stripe checkout using wrapper
+      const checkoutWindow = stripeWrapper.openCheckoutWindow(result.url, result.sessionId);
 
+      if (checkoutWindow) {
         // Listen for window close to handle completion
         this.handleCheckoutWindow(checkoutWindow, result.sessionId);
-
-        return {
-          success: true,
-          url: result.url,
-          sessionId: result.sessionId
-        };
-      } else {
-        throw new Error('No payment URL received from server');
       }
+
+      return {
+        success: true,
+        url: result.url,
+        sessionId: result.sessionId
+      };
+
     } catch (error) {
       console.error('❌ Payment creation failed:', this.extractErrorMessage(error));
 
@@ -161,7 +152,7 @@ export class UniversalStripeCheckout {
   }
 
   /**
-   * Open Stripe checkout in a new window for subscription purchases
+   * Open Stripe checkout in a new window for subscription purchases (Wrapper-powered)
    */
   public async purchaseSubscription(options: {
     plan: 'monthly' | 'yearly';
@@ -169,40 +160,38 @@ export class UniversalStripeCheckout {
     guestEmail?: string;
   }): Promise<PaymentResult> {
     try {
-      const subscriptionData = {
+      const subscriptionOptions: WrapperSubscriptionOptions = {
         plan: options.plan,
-        tier: options.plan === 'yearly' ? 'premium-annual' : 'premium-monthly',
+        tier: 'premium',
         isGuest: options.isGuest || false,
-        guestEmail: options.guestEmail,
-        userEmail: !options.isGuest ? undefined : undefined
+        guestEmail: options.guestEmail
       };
 
-      console.log('🔄 Creating subscription via Supabase Edge Function...');
-      const { data: result, error } = await supabase.functions.invoke('create-subscription', {
-        body: subscriptionData
+      console.log('🔄 Creating subscription via Stripe Wrapper...');
+      const result = await stripeWrapper.createSubscription(subscriptionOptions);
+
+      console.log('📥 Wrapper subscription response:', {
+        success: result.success,
+        hasUrl: !!result.url,
+        method: result.method,
+        fallbackUsed: result.fallbackUsed
       });
 
-      if (error) {
-        throw new Error(`Subscription creation failed: ${this.extractErrorMessage(error)}`);
+      if (!result.success) {
+        throw new Error(result.error || 'Subscription creation failed');
       }
 
-      if (!result || !result.url) {
-        throw new Error('No subscription URL received from server');
+      if (!result.url) {
+        throw new Error('No subscription URL received from service');
       }
 
-      // Open Stripe checkout in new window
-      const checkoutWindow = window.open(
-        result.url,
-        'stripe-checkout',
-        'width=800,height=600,scrollbars=yes,resizable=yes'
-      );
+      // Open Stripe checkout using wrapper
+      const checkoutWindow = stripeWrapper.openCheckoutWindow(result.url, result.sessionId);
 
-      if (!checkoutWindow) {
-        throw new Error('Failed to open payment window. Please allow popups for this site.');
+      if (checkoutWindow) {
+        // Listen for window close to handle completion
+        this.handleCheckoutWindow(checkoutWindow, result.sessionId);
       }
-
-      // Listen for window close to handle completion
-      this.handleCheckoutWindow(checkoutWindow, result.sessionId);
 
       return {
         success: true,

@@ -1,9 +1,9 @@
 /**
  * Production Stripe Payment Service
- * Uses Supabase Edge Functions - works on all deployment platforms
+ * Now powered by Stripe Wrapper with Supabase integration
  */
 
-import { supabase } from '@/integrations/supabase/client';
+import { stripeWrapper, type PaymentOptions, type SubscriptionOptions, type PaymentResult } from './stripeWrapper';
 
 export interface StripePaymentOptions {
   amount: number;
@@ -20,59 +20,48 @@ export interface StripePaymentResult {
   url?: string;
   sessionId?: string;
   error?: string;
+  method?: string;
+  fallbackUsed?: boolean;
 }
 
 class StripePaymentService {
-  private publishableKey: string;
-
   constructor() {
-    this.publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
-    
-    if (!this.publishableKey || !this.publishableKey.startsWith('pk_')) {
-      throw new Error('VITE_STRIPE_PUBLISHABLE_KEY is required and must be a valid Stripe key');
-    }
-
-    console.log('🔧 Stripe Production Service Initialized');
+    console.log('🔧 Stripe Production Service Initialized (Wrapper-powered)');
   }
 
   /**
-   * Create payment session for credits using Supabase Edge Functions
+   * Create payment session for credits using Stripe Wrapper
    */
   async createPayment(options: StripePaymentOptions): Promise<StripePaymentResult> {
     try {
-      console.log('💳 Creating Stripe payment via Supabase Edge Function');
-      
-      const { data, error } = await supabase.functions.invoke('create-payment', {
-        body: {
-          amount: options.amount,
-          productName: options.productName || `${options.credits || 0} Backlink Credits`,
-          credits: options.credits,
-          paymentMethod: 'stripe',
-          isGuest: options.isGuest || false,
+      console.log('💳 Creating Stripe payment via Wrapper');
+
+      if (options.type === 'subscription') {
+        const subscriptionOptions: SubscriptionOptions = {
+          plan: options.plan || 'monthly',
+          tier: 'premium',
+          isGuest: options.isGuest,
           guestEmail: options.guestEmail
-        }
-      });
+        };
 
-      if (error) {
-        console.error('❌ Payment creation failed:', error);
-        throw new Error(`Payment API error: ${error.message || JSON.stringify(error)}`);
+        const result = await stripeWrapper.createSubscription(subscriptionOptions);
+        return this.convertResult(result);
+      } else {
+        const paymentOptions: PaymentOptions = {
+          amount: options.amount,
+          credits: options.credits,
+          productName: options.productName,
+          isGuest: options.isGuest,
+          guestEmail: options.guestEmail
+        };
+
+        const result = await stripeWrapper.createPayment(paymentOptions);
+        return this.convertResult(result);
       }
-
-      if (!data || !data.url) {
-        throw new Error('No checkout URL received from payment service');
-      }
-
-      console.log('✅ Payment session created successfully');
-      
-      return {
-        success: true,
-        url: data.url,
-        sessionId: data.sessionId || data.session_id
-      };
 
     } catch (error: any) {
       console.error('❌ Payment creation error:', error);
-      
+
       return {
         success: false,
         error: error.message || 'Failed to create payment session'
@@ -81,40 +70,25 @@ class StripePaymentService {
   }
 
   /**
-   * Create subscription session using Supabase Edge Functions
+   * Create subscription session using Stripe Wrapper
    */
   async createSubscription(options: StripePaymentOptions): Promise<StripePaymentResult> {
     try {
-      console.log('💳 Creating Stripe subscription via Supabase Edge Function');
-      
-      const { data, error } = await supabase.functions.invoke('create-subscription', {
-        body: {
-          plan: options.plan,
-          isGuest: options.isGuest || false,
-          guestEmail: options.guestEmail
-        }
-      });
+      console.log('💳 Creating Stripe subscription via Wrapper');
 
-      if (error) {
-        console.error('❌ Subscription creation failed:', error);
-        throw new Error(`Subscription API error: ${error.message || JSON.stringify(error)}`);
-      }
-
-      if (!data || !data.url) {
-        throw new Error('No checkout URL received from subscription service');
-      }
-
-      console.log('✅ Subscription session created successfully');
-      
-      return {
-        success: true,
-        url: data.url,
-        sessionId: data.sessionId || data.session_id
+      const subscriptionOptions: SubscriptionOptions = {
+        plan: options.plan || 'monthly',
+        tier: 'premium',
+        isGuest: options.isGuest || false,
+        guestEmail: options.guestEmail
       };
+
+      const result = await stripeWrapper.createSubscription(subscriptionOptions);
+      return this.convertResult(result);
 
     } catch (error: any) {
       console.error('❌ Subscription creation error:', error);
-      
+
       return {
         success: false,
         error: error.message || 'Failed to create subscription session'
@@ -123,86 +97,56 @@ class StripePaymentService {
   }
 
   /**
-   * Open payment in new window
+   * Open payment in new window using Stripe Wrapper
    */
   openCheckoutWindow(url: string, sessionId?: string): void {
-    const checkoutWindow = window.open(
-      url,
-      'stripe-checkout',
-      'width=800,height=600,scrollbars=yes,resizable=yes,toolbar=no,menubar=no'
-    );
-
-    if (!checkoutWindow) {
-      console.warn('⚠️ Popup blocked, redirecting current window');
-      window.location.href = url;
-    } else {
-      console.log('✅ Checkout window opened');
-    }
+    stripeWrapper.openCheckoutWindow(url, sessionId);
   }
 
   /**
-   * Quick purchase with preset amounts
+   * Convert PaymentResult to StripePaymentResult for backward compatibility
+   */
+  private convertResult(result: PaymentResult): StripePaymentResult {
+    return {
+      success: result.success,
+      url: result.url,
+      sessionId: result.sessionId,
+      error: result.error,
+      method: result.method,
+      fallbackUsed: result.fallbackUsed
+    };
+  }
+
+  /**
+   * Quick purchase with preset amounts using Stripe Wrapper
    */
   async quickPurchase(credits: 50 | 100 | 250 | 500, guestEmail?: string): Promise<StripePaymentResult> {
-    const amount = this.getCreditsPrice(credits);
-    
-    const result = await this.createPayment({
-      amount,
-      credits,
-      productName: `${credits} Backlink Credits`,
-      type: 'credits',
-      isGuest: !guestEmail,
-      guestEmail
-    });
-
-    if (result.success && result.url) {
-      this.openCheckoutWindow(result.url, result.sessionId);
-    }
-
-    return result;
+    const result = await stripeWrapper.quickBuyCredits(credits, guestEmail);
+    return this.convertResult(result);
   }
 
   /**
-   * Purchase premium subscription
+   * Purchase premium subscription using Stripe Wrapper
    */
   async purchasePremium(plan: 'monthly' | 'yearly', guestEmail?: string): Promise<StripePaymentResult> {
-    const result = await this.createSubscription({
-      plan,
-      type: 'subscription',
-      amount: plan === 'monthly' ? 29 : 290,
-      isGuest: !guestEmail,
-      guestEmail
-    });
-
-    if (result.success && result.url) {
-      this.openCheckoutWindow(result.url, result.sessionId);
-    }
-
-    return result;
+    const result = await stripeWrapper.quickSubscribe(plan, guestEmail);
+    return this.convertResult(result);
   }
 
   /**
-   * Get pricing for credit packages
-   */
-  private getCreditsPrice(credits: number): number {
-    switch (credits) {
-      case 50: return 70;
-      case 100: return 140;
-      case 250: return 350;
-      case 500: return 700;
-      default: return credits * 1.40; // $1.40 per credit
-    }
-  }
-
-  /**
-   * Get service status
+   * Get service status from Stripe Wrapper
    */
   getStatus() {
+    const wrapperStatus = stripeWrapper.getStatus();
     return {
-      configured: !!this.publishableKey,
-      publishableKey: this.publishableKey ? `${this.publishableKey.substring(0, 20)}...` : null,
-      isLive: this.publishableKey?.includes('live') || false,
-      isTest: this.publishableKey?.includes('test') || false
+      configured: wrapperStatus.configured,
+      publishableKey: wrapperStatus.publishableKey,
+      isLive: wrapperStatus.environment === 'live',
+      isTest: wrapperStatus.environment === 'test',
+      method: wrapperStatus.primaryMethod,
+      supabaseAvailable: wrapperStatus.supabaseAvailable,
+      fallbacksAvailable: wrapperStatus.netlifyAvailable || wrapperStatus.clientFallbackAvailable,
+      errors: wrapperStatus.errors
     };
   }
 }
@@ -210,15 +154,15 @@ class StripePaymentService {
 // Export singleton instance
 export const stripePaymentService = new StripePaymentService();
 
-// Convenience methods
+// Convenience methods - now powered by Stripe Wrapper
 export const buyCredits = (credits: number, amount: number, guestEmail?: string) =>
-  stripePaymentService.createPayment({ 
-    amount, 
-    credits, 
+  stripePaymentService.createPayment({
+    amount,
+    credits,
     type: 'credits',
     productName: `${credits} Backlink Credits`,
     isGuest: !!guestEmail,
-    guestEmail 
+    guestEmail
   });
 
 export const quickBuyCredits = (credits: 50 | 100 | 250 | 500, guestEmail?: string) =>
@@ -226,5 +170,8 @@ export const quickBuyCredits = (credits: 50 | 100 | 250 | 500, guestEmail?: stri
 
 export const upgradeToPremium = (plan: 'monthly' | 'yearly', guestEmail?: string) =>
   stripePaymentService.purchasePremium(plan, guestEmail);
+
+// Direct wrapper exports for advanced usage
+export { stripeWrapper, createPayment, createSubscription, verifyPayment, openCheckout, getStripeStatus } from './stripeWrapper';
 
 export default stripePaymentService;
