@@ -1975,6 +1975,21 @@ const Dashboard = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Modern Credit Purchase Modal */}
+      <ModernCreditPurchaseModal
+        isOpen={showCreditModal}
+        onClose={() => setShowCreditModal(false)}
+        onSuccess={() => {
+          setShowCreditModal(false);
+          fetchUserData(); // Refresh credits
+          fetchCampaigns(); // Refresh campaigns
+          toast({
+            title: "Payment Successful!",
+            description: "Your credits have been added to your account."
+          });
+        }}
+      />
+
     </div>
   );
 };
