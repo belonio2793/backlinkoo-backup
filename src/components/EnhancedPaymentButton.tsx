@@ -5,9 +5,8 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Crown, CreditCard, Loader2, AlertCircle, ExternalLink } from 'lucide-react';
+import { Crown, CreditCard, Loader2, ExternalLink } from 'lucide-react';
 import { DirectCheckoutService } from '@/services/directCheckoutService';
-import { FallbackPaymentService } from '@/services/fallbackPaymentService';
 import { useToast } from '@/hooks/use-toast';
 
 interface EnhancedPaymentButtonProps {
