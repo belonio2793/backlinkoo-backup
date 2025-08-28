@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { CreditCard, Loader2 } from 'lucide-react';
 import { paymentIntegrationService } from '@/services/paymentIntegrationService';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 
 interface SimpleBuyCreditsButtonProps {
   trigger?: React.ReactNode;
@@ -12,8 +13,6 @@ interface SimpleBuyCreditsButtonProps {
   variant?: 'default' | 'outline' | 'secondary' | 'ghost' | 'link';
   size?: 'default' | 'sm' | 'lg' | 'icon';
   className?: string;
-  guestEmail?: string;
-  isGuest?: boolean;
 }
 
 export function SimpleBuyCreditsButton({
