@@ -1,9 +1,10 @@
 /**
  * Direct Stripe Checkout Service
- * For immediate payment processing without modals
+ * Thin wrapper around central stripeWrapper for backward compatibility
+ * @deprecated Use stripeWrapper.quickBuyCredits() and stripeWrapper.quickSubscribe() directly
  */
 
-import { stripePaymentService } from './stripePaymentService';
+import { stripeWrapper } from './stripeWrapper';
 
 export interface DirectCheckoutOptions {
   type: 'credits' | 'premium';
@@ -17,44 +18,41 @@ export interface DirectCheckoutOptions {
 export class DirectStripeCheckout {
   /**
    * Quick credit purchases without modal
+   * @deprecated Use stripeWrapper.quickBuyCredits() directly
    */
   static async buyCredits(credits: number, guestEmail?: string): Promise<void> {
-    const pricing = {
-      50: 70,
-      100: 140,
-      250: 350,
-      500: 700
-    };
+    // Validate preset amounts for quickBuyCredits
+    const validCredits = [50, 100, 250, 500];
+    if (validCredits.includes(credits)) {
+      const result = await stripeWrapper.quickBuyCredits(credits as 50 | 100 | 250 | 500, guestEmail);
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to initiate credit purchase');
+      }
+    } else {
+      // For custom amounts, use createPayment directly
+      const amount = Math.ceil(credits * 1.40); // $1.40 per credit
+      const result = await stripeWrapper.createPayment({
+        amount,
+        credits,
+        productName: `${credits} Premium Backlink Credits`,
+        isGuest: !!guestEmail,
+        guestEmail
+      });
 
-    // Default pricing at $1.40 per credit for non-preset amounts
-    const amount = pricing[credits as keyof typeof pricing] || credits * 1.40;
-
-    const result = await stripePaymentService.createPayment({
-      amount,
-      credits,
-      productName: `${credits} Premium Backlink Credits`,
-      type: 'credits',
-      isGuest: !!guestEmail,
-      guestEmail
-    });
-
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to initiate credit purchase');
+      if (result.success && result.url) {
+        stripeWrapper.openCheckoutWindow(result.url, result.sessionId);
+      } else {
+        throw new Error(result.error || 'Failed to initiate credit purchase');
+      }
     }
   }
 
   /**
    * Direct premium subscription purchase
+   * @deprecated Use stripeWrapper.quickSubscribe() directly
    */
   static async upgradeToPremium(plan: 'monthly' | 'yearly', guestEmail?: string): Promise<void> {
-    const result = await stripePaymentService.createSubscription({
-      plan,
-      amount: plan === 'monthly' ? 29 : 290,
-      type: 'subscription',
-      isGuest: !!guestEmail,
-      guestEmail
-    });
-
+    const result = await stripeWrapper.quickSubscribe(plan, guestEmail);
     if (!result.success) {
       throw new Error(result.error || 'Failed to initiate premium subscription');
     }
@@ -62,6 +60,7 @@ export class DirectStripeCheckout {
 
   /**
    * Direct checkout with custom parameters
+   * @deprecated Use stripeWrapper methods directly
    */
   static async directCheckout(options: DirectCheckoutOptions): Promise<void> {
     if (options.type === 'credits') {
@@ -81,43 +80,44 @@ export class DirectStripeCheckout {
 
   /**
    * Quick preset purchases
+   * @deprecated Use stripeWrapper.quickBuyCredits() directly
    */
   static async quick50Credits(guestEmail?: string) {
-    return this.buyCredits(50, guestEmail);
+    return stripeWrapper.quickBuyCredits(50, guestEmail);
   }
 
   static async quick100Credits(guestEmail?: string) {
-    return this.buyCredits(100, guestEmail);
+    return stripeWrapper.quickBuyCredits(100, guestEmail);
   }
 
   static async quick250Credits(guestEmail?: string) {
-    return this.buyCredits(250, guestEmail);
+    return stripeWrapper.quickBuyCredits(250, guestEmail);
   }
 
   static async quick500Credits(guestEmail?: string) {
-    return this.buyCredits(500, guestEmail);
+    return stripeWrapper.quickBuyCredits(500, guestEmail);
   }
 
   static async quickMonthlyPremium(guestEmail?: string) {
-    return this.upgradeToPremium('monthly', guestEmail);
+    return stripeWrapper.quickSubscribe('monthly', guestEmail);
   }
 
   static async quickYearlyPremium(guestEmail?: string) {
-    return this.upgradeToPremium('yearly', guestEmail);
+    return stripeWrapper.quickSubscribe('yearly', guestEmail);
   }
 }
 
-// Export convenience functions
+// Export convenience functions (backward compatibility)
 export const directBuyCredits = DirectStripeCheckout.buyCredits;
 export const directUpgradePremium = DirectStripeCheckout.upgradeToPremium;
 export const directCheckout = DirectStripeCheckout.directCheckout;
 
-// Export preset functions
-export const buy50Credits = (email?: string) => DirectStripeCheckout.quick50Credits(email);
-export const buy100Credits = (email?: string) => DirectStripeCheckout.quick100Credits(email);
-export const buy250Credits = (email?: string) => DirectStripeCheckout.quick250Credits(email);
-export const buy500Credits = (email?: string) => DirectStripeCheckout.quick500Credits(email);
-export const upgradeMonthly = (email?: string) => DirectStripeCheckout.quickMonthlyPremium(email);
-export const upgradeYearly = (email?: string) => DirectStripeCheckout.quickYearlyPremium(email);
+// Export preset functions (backward compatibility)
+export const buy50Credits = (email?: string) => stripeWrapper.quickBuyCredits(50, email);
+export const buy100Credits = (email?: string) => stripeWrapper.quickBuyCredits(100, email);
+export const buy250Credits = (email?: string) => stripeWrapper.quickBuyCredits(250, email);
+export const buy500Credits = (email?: string) => stripeWrapper.quickBuyCredits(500, email);
+export const upgradeMonthly = (email?: string) => stripeWrapper.quickSubscribe('monthly', email);
+export const upgradeYearly = (email?: string) => stripeWrapper.quickSubscribe('yearly', email);
 
 export default DirectStripeCheckout;
