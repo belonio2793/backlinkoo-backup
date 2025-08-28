@@ -44,15 +44,14 @@ export function PremiumPlanModal({
   const [guestEmail, setGuestEmail] = useState('');
   const [checkoutMode, setCheckoutMode] = useState<'guest' | 'account'>('account');
 
-  // Premium plan configuration
+  // Premium plan configuration - Prices for live Stripe product prod_SoVja4018pbOcy
   const plans = {
     monthly: {
       price: 29,
       originalPrice: 49,
       period: 'month',
       savings: null,
-      discount: 41,
-      priceId: 'price_monthly_premium'
+      discount: 41
     },
     yearly: {
       price: 290,
@@ -60,7 +59,6 @@ export function PremiumPlanModal({
       period: 'year',
       savings: 298,
       discount: 51,
-      priceId: 'price_yearly_premium',
       monthlyEquivalent: 24
     }
   };
