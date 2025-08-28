@@ -162,11 +162,35 @@ export function PaymentDiagnostic() {
     }
 
     results.push('');
-    results.push('🔧 Troubleshooting Checklist:');
-    results.push('1. ✓ Verify Supabase functions are deployed');
-    results.push('2. ✓ Check Supabase secrets are set correctly');
-    results.push('3. ✓ Confirm Stripe secret key is valid');
-    results.push('4. ✓ Ensure SUPABASE_SERVICE_ROLE_KEY has proper permissions');
+    results.push('🔧 Troubleshooting "Failed to fetch" Errors:');
+    results.push('');
+    results.push('1. 🔍 Check Function Deployment:');
+    results.push('   supabase functions list');
+    results.push('   supabase functions deploy create-payment');
+    results.push('');
+    results.push('2. 🌐 Verify Network Access:');
+    results.push('   • Check if your domain can access Supabase');
+    results.push('   • Test from browser console: fetch("' + supabaseUrl + '/rest/v1/")');
+    results.push('');
+    results.push('3. 🔑 Check Secrets Configuration:');
+    results.push('   supabase secrets list');
+    results.push('   supabase secrets set STRIPE_SECRET_KEY=sk_live_...');
+    results.push('   supabase secrets set SUPABASE_SERVICE_ROLE_KEY=...');
+    results.push('');
+    results.push('4. 🛡️ CORS Configuration:');
+    results.push('   • Check if your domain is allowed in Supabase settings');
+    results.push('   • Verify Edge Function CORS headers');
+    results.push('');
+    results.push('5. 📊 Direct Test (copy to browser console):');
+    results.push('   fetch("' + supabaseUrl + '/functions/v1/create-payment", {');
+    results.push('     method: "POST",');
+    results.push('     headers: {');
+    results.push('       "Content-Type": "application/json",');
+    results.push('       "Authorization": "Bearer ' + supabaseKey + '",');
+    results.push('       "apikey": "' + supabaseKey + '"');
+    results.push('     },');
+    results.push('     body: JSON.stringify({ amount: 1000, credits: 100, productName: "Test" })');
+    results.push('   }).then(r => r.json()).then(console.log)');
 
     setStatus(results.join('\n'));
     setIsLoading(false);
