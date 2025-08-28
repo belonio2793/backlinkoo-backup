@@ -157,12 +157,10 @@ class PaymentIntegrationService {
   }
 
   /**
-   * Create a subscription for premium features
+   * Create a subscription for premium features - requires authentication
    */
   async createSubscription(
-    plan: 'monthly' | 'yearly',
-    isGuest: boolean = false,
-    guestEmail?: string
+    plan: 'monthly' | 'yearly'
   ): Promise<PaymentResult> {
     try {
       // Validate Stripe is configured
@@ -181,25 +179,27 @@ class PaymentIntegrationService {
         };
       }
 
-      if (isGuest && !guestEmail) {
+      // Check if user is authenticated via Supabase session
+      const { data: session } = await supabase.auth.getSession();
+      if (!session?.session?.user) {
         return {
           success: false,
-          error: 'Email is required for guest checkout'
+          error: 'Authentication required. Please sign in to upgrade to Premium.'
         };
       }
 
       // Call subscription endpoint
       const requestBody = JSON.stringify({
         plan,
-        isGuest,
-        guestEmail,
+        isGuest: false,
         paymentMethod: 'stripe'
       });
 
       const response = await fetch('/api/create-subscription', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.session.access_token}`
         },
         body: requestBody
       });
