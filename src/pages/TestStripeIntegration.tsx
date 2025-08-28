@@ -1,4 +1,5 @@
 import { SimpleBuyCreditsButton } from '@/components/SimpleBuyCreditsButton';
+import { PaymentTest } from '@/components/PaymentTest';
 
 export function TestStripeIntegration() {
   const handlePaymentSuccess = (sessionId?: string) => {
@@ -16,6 +17,7 @@ export function TestStripeIntegration() {
       <h1 className="text-3xl font-bold mb-8">Stripe Integration Test</h1>
       
       <div className="space-y-6">
+        <PaymentTest />
         <div className="p-6 border rounded-lg">
           <h2 className="text-xl font-semibold mb-4">Buy Credits Test</h2>
           <p className="text-gray-600 mb-4">
