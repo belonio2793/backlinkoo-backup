@@ -70,40 +70,25 @@ class StripePaymentService {
   }
 
   /**
-   * Create subscription session using Supabase Edge Functions
+   * Create subscription session using Stripe Wrapper
    */
   async createSubscription(options: StripePaymentOptions): Promise<StripePaymentResult> {
     try {
-      console.log('💳 Creating Stripe subscription via Supabase Edge Function');
-      
-      const { data, error } = await supabase.functions.invoke('create-subscription', {
-        body: {
-          plan: options.plan,
-          isGuest: options.isGuest || false,
-          guestEmail: options.guestEmail
-        }
-      });
+      console.log('💳 Creating Stripe subscription via Wrapper');
 
-      if (error) {
-        console.error('❌ Subscription creation failed:', error);
-        throw new Error(`Subscription API error: ${error.message || JSON.stringify(error)}`);
-      }
-
-      if (!data || !data.url) {
-        throw new Error('No checkout URL received from subscription service');
-      }
-
-      console.log('✅ Subscription session created successfully');
-      
-      return {
-        success: true,
-        url: data.url,
-        sessionId: data.sessionId || data.session_id
+      const subscriptionOptions: SubscriptionOptions = {
+        plan: options.plan || 'monthly',
+        tier: 'premium',
+        isGuest: options.isGuest || false,
+        guestEmail: options.guestEmail
       };
+
+      const result = await stripeWrapper.createSubscription(subscriptionOptions);
+      return this.convertResult(result);
 
     } catch (error: any) {
       console.error('❌ Subscription creation error:', error);
-      
+
       return {
         success: false,
         error: error.message || 'Failed to create subscription session'
