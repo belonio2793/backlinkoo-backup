@@ -285,7 +285,8 @@ serve(async (req) => {
     return new Response(JSON.stringify({
       error: errorMessage,
       details: "Check server logs for more information",
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      productId: "prod_SoVja4018pbOcy"
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
