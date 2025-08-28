@@ -8,7 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { Shield, CheckCircle, CreditCard } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
-import { CreditPaymentService } from "@/services/creditPaymentService";
+import { stripeWrapper } from "@/services/stripeWrapper";
 import { useAuthModal } from "@/contexts/ModalContext";
 import { setCheckoutIntent } from "@/utils/checkoutIntent";
 
@@ -49,93 +49,68 @@ export function ModernCreditPurchaseModal({
     { credits: 500, price: 700, pricePerCredit: 1.40 }
   ];
 
-  const featuresIncluded = [
-    "High DA backlinks",
-    "Automated content generation", 
-    "Real-time campaign tracking",
-    "Detailed performance reports",
-    "White-hat SEO practices",
-    "Multi-platform distribution"
-  ];
+  // Initialize with passed credits or default
+  useEffect(() => {
+    if (initialCredits) {
+      setCustomCredits(initialCredits.toString());
+      setTotalPrice(initialCredits * rate);
+      
+      // Check if it matches a package
+      const packageIndex = creditPackages.findIndex(pkg => pkg.credits === initialCredits);
+      if (packageIndex !== -1) {
+        setSelectedPackage(packageIndex);
+      } else {
+        setSelectedPackage(null);
+      }
+    }
+  }, [initialCredits, rate]);
 
-  // Calculate total price for custom amount
+  // Update total price when custom credits change
   useEffect(() => {
     const credits = parseInt(customCredits) || 0;
     setTotalPrice(credits * rate);
   }, [customCredits, rate]);
 
-  // Set initial credits if provided
-  useEffect(() => {
-    if (isOpen && initialCredits) {
-      setCustomCredits(initialCredits.toString());
-      setSelectedPackage(null);
-    }
-  }, [isOpen, initialCredits]);
-
-  const handlePackageSelect = (packageIndex: number) => {
-    setSelectedPackage(packageIndex);
-    setCustomCredits("");
+  const handlePackageSelect = (index: number) => {
+    const pkg = creditPackages[index];
+    setSelectedPackage(index);
+    setCustomCredits(pkg.credits.toString());
+    setTotalPrice(pkg.price);
   };
 
-  const handleCustomAmountChange = (value: string) => {
-    setCustomCredits(value);
-    setSelectedPackage(null);
+  const handleCustomCreditsChange = (value: string) => {
+    // Allow only numbers
+    const numericValue = value.replace(/[^0-9]/g, '');
+    setCustomCredits(numericValue);
+    setSelectedPackage(null); // Clear package selection for custom amount
   };
 
-  const getFinalSelection = () => {
-    if (selectedPackage !== null) {
-      const pkg = creditPackages[selectedPackage];
-      return {
-        credits: pkg.credits,
-        price: pkg.price
-      };
+  const getCreditsAmount = (): number => {
+    return parseInt(customCredits) || 0;
+  };
+
+  const getPriceAmount = (): number => {
+    const credits = getCreditsAmount();
+    
+    // Check if it matches a preset package
+    const preset = creditPackages.find(pkg => pkg.credits === credits);
+    if (preset) {
+      return preset.price;
     }
     
-    if (customCredits && parseInt(customCredits) > 0) {
-      return {
-        credits: parseInt(customCredits),
-        price: totalPrice
-      };
-    }
-    
-    return null;
+    // Use custom rate for non-preset amounts
+    return Math.ceil(credits * rate);
   };
 
   const handlePurchase = async () => {
-    const selection = getFinalSelection();
+    const credits = getCreditsAmount();
     
-    if (!selection) {
-      toast({
-        title: "Selection Required",
-        description: "Please select a credit package or enter a custom amount",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (selection.credits <= 0) {
+    if (credits <= 0) {
       toast({
         title: "Invalid Amount",
-        description: "Please enter a valid number of credits (minimum 1)",
-        variant: "destructive"
+        description: "Please enter a valid number of credits",
+        variant: "destructive",
       });
-      return;
-    }
-
-    if (selection.credits > 10000) {
-      toast({
-        title: "Maximum Exceeded", 
-        description: "Maximum 10,000 credits per purchase. Please contact support for larger amounts.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    // Require authentication: if not signed in, store intent and open login
-    if (!user) {
-      setCheckoutIntent({ type: 'credits', credits: selection.credits, price: selection.price });
-      openLoginModal({ pendingAction: `${selection.credits} credits` });
-      toast({ title: 'Sign in required', description: 'Please sign in to continue to secure checkout.' });
       return;
     }
 
@@ -144,214 +119,209 @@ export function ModernCreditPurchaseModal({
     try {
       toast({
         title: "🚀 Opening Stripe Checkout",
-        description: "Secure payment window is opening...",
+        description: `Processing ${credits} credits purchase...`,
       });
 
-      const result = await CreditPaymentService.createCreditPayment(
-        user,
-        false,
-        undefined,
-        {
-          amount: selection.price,
-          credits: selection.credits,
-          productName: `${selection.credits} Premium Backlink Credits`,
-          isGuest: false
-        }
-      );
+      // Set checkout intent for return URL handling
+      setCheckoutIntent({
+        type: 'credits',
+        amount: getPriceAmount(),
+        credits,
+        returnUrl: window.location.pathname
+      });
 
-      if (result.success) {
-        if (result.url) {
-          console.log('🚀 Opening checkout window:', result.url);
-          CreditPaymentService.openCheckoutWindow(result.url, result.sessionId);
+      let result;
+      const guestEmail = user?.email;
 
-          toast({
-            title: "✅ Checkout Opened Successfully",
-            description: "Complete your payment in the new window.",
-          });
-
-          // Don't auto-close the modal immediately - let user complete payment first
-          if (onSuccess) {
-            onSuccess();
-          }
-        } else if (result.usedFallback) {
-          toast({
-            title: "🧪 Development Mode",
-            description: "Test checkout opened in new window.",
-          });
-
-          if (onSuccess) {
-            onSuccess();
-          }
-        }
-
-        // Only close the modal after a delay to let the checkout window open
-        setTimeout(() => {
-          onClose();
-        }, 1000);
+      // Use quickBuyCredits for preset amounts, createPayment for custom amounts
+      const presetAmounts = [50, 100, 250, 500];
+      if (presetAmounts.includes(credits)) {
+        result = await stripeWrapper.quickBuyCredits(credits as 50 | 100 | 250 | 500, guestEmail);
       } else {
-        throw new Error(result.error || 'Failed to create payment session');
+        const amount = getPriceAmount();
+        result = await stripeWrapper.createPayment({
+          amount,
+          credits,
+          productName: `${credits} Premium Backlink Credits`,
+          isGuest: !user,
+          guestEmail
+        });
+
+        if (result.success && result.url) {
+          stripeWrapper.openCheckoutWindow(result.url, result.sessionId);
+        }
+      }
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to create checkout session');
+      }
+
+      toast({
+        title: "✅ Checkout Opened",
+        description: "Complete your purchase in the new window",
+      });
+
+      // Close modal and call success callback
+      onClose();
+      if (onSuccess) {
+        onSuccess();
       }
     } catch (error) {
       console.error('Credit purchase error:', error);
-
-      // Get user-friendly error message
-      let errorMessage = 'Failed to create payment session';
-      let errorTitle = 'Payment Error';
-
-      if (error instanceof Error) {
-        if (error.message.includes('popup') || error.message.includes('blocked')) {
-          errorTitle = 'Popup Blocked';
-          errorMessage = 'Please allow popups for this site and try again.';
-        } else if (error.message.includes('configuration') || error.message.includes('not configured')) {
-          errorTitle = 'Configuration Error';
-          errorMessage = 'Payment system is not properly configured. Please contact support.';
-        } else if (error.message.includes('network') || error.message.includes('fetch')) {
-          errorTitle = 'Network Error';
-          errorMessage = 'Please check your internet connection and try again.';
-        } else if (error.message.includes('authentication') || error.message.includes('sign in')) {
-          errorTitle = 'Authentication Required';
-          errorMessage = 'Please sign in to your account and try again.';
-        } else if (error.message.includes('Payment system error')) {
-          errorTitle = 'Payment System Error';
-          errorMessage = error.message;
-        } else if (error.message.includes('temporarily unavailable')) {
-          errorTitle = 'Service Unavailable';
-          errorMessage = error.message;
-        } else {
-          errorMessage = error.message;
-        }
-      } else {
-        // Handle non-Error objects
-        errorMessage = String(error);
-      }
-
-      // Log detailed error for debugging
-      console.error('Detailed error info:', {
-        error,
-        errorType: typeof error,
-        errorConstructor: error?.constructor?.name,
-        userAgent: navigator.userAgent,
-        url: window.location.href,
-        timestamp: new Date().toISOString(),
-        selection: selection
-      });
-
       toast({
-        title: errorTitle,
-        description: errorMessage,
+        title: "Checkout Error",
+        description: error instanceof Error ? error.message : 'Failed to open checkout',
         variant: "destructive",
-        duration: 7000 // Show error longer so user can read it
       });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const selection = getFinalSelection();
+  const handleLoginThenPurchase = () => {
+    openLoginModal(() => {
+      // After login, automatically trigger purchase
+      setTimeout(() => {
+        handlePurchase();
+      }, 1000);
+    });
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-[95vw] max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader className="pb-3">
-          <DialogTitle className="text-lg font-semibold">Buy Credits</DialogTitle>
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <CreditCard className="h-5 w-5" />
+            Purchase Backlink Credits
+          </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-3">
-          {/* Account Section and Credit Package in same row */}
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-            {/* Account + Custom Amount */}
-            <div className="lg:col-span-1 space-y-3">
-              {user && (
-                <div className="space-y-1">
-                  <Label className="text-sm font-medium text-gray-700">Account</Label>
-                  <div className="text-sm text-gray-600">{user.email}</div>
-                </div>
-              )}
-
-              {/* Custom Amount - moved to left side */}
-              <div className="space-y-2">
-                <Label className="text-sm font-semibold text-gray-700">Custom Amount</Label>
-                <div className="space-y-2">
-                  <Input
-                    id="customCredits"
-                    type="number"
-                    min="1"
-                    max="10000"
-                    value={customCredits}
-                    onChange={(e) => handleCustomAmountChange(e.target.value)}
-                    placeholder="300"
-                    className="text-center"
-                  />
-                  <div className="text-center">
-                    <div className="text-lg font-bold text-blue-600">${totalPrice.toFixed(2)}</div>
-                    <div className="text-xs text-gray-500">${rate.toFixed(2)} per credit</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Credit Packages - takes remaining space */}
-            <div className="lg:col-span-3 space-y-2">
-              <Label className="text-sm font-semibold text-gray-700">Select Credit Package</Label>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {creditPackages.map((pkg, index) => (
-                  <Card
-                    key={index}
-                    className={`cursor-pointer transition-all border-2 ${
-                      selectedPackage === index
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-blue-300'
-                    }`}
-                    onClick={() => handlePackageSelect(index)}
-                  >
-                    <CardContent className="p-3 text-center">
-                      <div className="text-sm font-semibold text-gray-900">{pkg.credits} Credits</div>
-                      <div className="text-xl font-bold text-blue-600">${pkg.price}</div>
-                      <div className="text-xs text-gray-500">${pkg.pricePerCredit.toFixed(2)} per credit</div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* What's Included - more horizontal */}
-          <div className="space-y-2">
-            <Label className="text-sm font-semibold text-gray-700">What's Included</Label>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
-              {featuresIncluded.map((feature, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <CheckCircle className="h-3 w-3 text-green-500 flex-shrink-0" />
-                  <span className="text-xs text-gray-700">{feature}</span>
-                </div>
+        <div className="space-y-6">
+          {/* Preset Packages */}
+          <div className="space-y-3">
+            <Label className="text-sm font-medium">Choose a Package</Label>
+            <div className="grid grid-cols-2 gap-3">
+              {creditPackages.map((pkg, index) => (
+                <Card
+                  key={index}
+                  className={`cursor-pointer transition-all ${
+                    selectedPackage === index 
+                      ? 'ring-2 ring-primary border-primary' 
+                      : 'hover:border-gray-300'
+                  }`}
+                  onClick={() => handlePackageSelect(index)}
+                >
+                  <CardContent className="p-4 text-center">
+                    <div className="text-lg font-semibold">{pkg.credits} Credits</div>
+                    <div className="text-2xl font-bold text-primary">${pkg.price}</div>
+                    <div className="text-sm text-muted-foreground">${pkg.pricePerCredit.toFixed(2)} per credit</div>
+                    {index === 1 && (
+                      <div className="mt-2">
+                        <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                          Popular
+                        </span>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
               ))}
             </div>
           </div>
 
-          {/* Purchase Button */}
-          <div className="flex items-center justify-between gap-4 pt-2">
-            <Button
-              onClick={handlePurchase}
-              disabled={isLoading || !selection}
-              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white h-11 text-base font-medium"
-            >
-              {isLoading ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Opening Secure Checkout...
-                </div>
-              ) : selection ? (
-                `Buy ${selection.credits} Credits for $${selection.price}`
-              ) : (
-                "Select Credits to Continue"
-              )}
-            </Button>
+          <Separator />
 
-            {/* Security Notice */}
-            <div className="flex items-center gap-2 text-xs text-gray-500">
-              <Shield className="h-3 w-3" />
-              <span>Secured by Stripe</span>
+          {/* Custom Amount */}
+          <div className="space-y-3">
+            <Label className="text-sm font-medium">Or Enter Custom Amount</Label>
+            <div className="space-y-2">
+              <div className="relative">
+                <Input
+                  type="text"
+                  value={customCredits}
+                  onChange={(e) => handleCustomCreditsChange(e.target.value)}
+                  placeholder="Enter number of credits"
+                  className="pr-16"
+                />
+                <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-muted-foreground">
+                  Credits
+                </span>
+              </div>
+              <div className="text-center">
+                <span className="text-2xl font-bold text-primary">
+                  ${getPriceAmount().toFixed(2)}
+                </span>
+                <span className="text-sm text-muted-foreground ml-2">
+                  (${rate.toFixed(2)} per credit)
+                </span>
+              </div>
             </div>
+          </div>
+
+          <Separator />
+
+          {/* Security & Features */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-sm">
+              <Shield className="h-4 w-4 text-green-600" />
+              <span>Secure payment processing via Stripe</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <span>Credits never expire</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <span>Instant credit activation</span>
+            </div>
+          </div>
+
+          {/* Purchase Button */}
+          <div className="space-y-3">
+            {user ? (
+              <Button
+                onClick={handlePurchase}
+                disabled={isLoading || getCreditsAmount() <= 0}
+                className="w-full"
+                size="lg"
+              >
+                {isLoading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    <CreditCard className="h-4 w-4 mr-2" />
+                    Purchase {getCreditsAmount()} Credits - ${getPriceAmount().toFixed(2)}
+                  </>
+                )}
+              </Button>
+            ) : (
+              <div className="space-y-2">
+                <Button
+                  onClick={handleLoginThenPurchase}
+                  disabled={isLoading || getCreditsAmount() <= 0}
+                  className="w-full"
+                  size="lg"
+                >
+                  Login & Purchase ${getPriceAmount().toFixed(2)}
+                </Button>
+                <Button
+                  onClick={handlePurchase}
+                  disabled={isLoading || getCreditsAmount() <= 0}
+                  variant="outline"
+                  className="w-full"
+                  size="lg"
+                >
+                  Continue as Guest
+                </Button>
+              </div>
+            )}
+          </div>
+
+          <div className="text-xs text-muted-foreground text-center">
+            Powered by Stripe • Secure checkout in new window
           </div>
         </div>
       </DialogContent>

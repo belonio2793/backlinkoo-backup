@@ -240,5 +240,3 @@ export default function PaymentValidation() {
     </div>
   );
 }
-
-export default PaymentValidation;

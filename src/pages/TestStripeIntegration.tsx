@@ -45,5 +45,3 @@ export default function TestStripeIntegration() {
     </div>
   );
 }
-
-export default TestStripeIntegration;

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, CreditCard, Shield, AlertCircle } from 'lucide-react';
 
-export default function SecurePayment() {
+function SecurePayment() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -79,7 +79,6 @@ export default function SecurePayment() {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-4">
-        {/* Back Button */}
         <Button 
           variant="ghost" 
           onClick={handleCancel}
@@ -89,7 +88,6 @@ export default function SecurePayment() {
           Back to Dashboard
         </Button>
 
-        {/* Payment Details Card */}
         <Card className="w-full">
           <CardHeader className="text-center">
             <CardTitle className="flex items-center justify-center gap-2">
@@ -100,7 +98,6 @@ export default function SecurePayment() {
           </CardHeader>
           
           <CardContent className="space-y-4">
-            {/* Order Summary */}
             <div className="bg-gray-50 p-4 rounded-lg space-y-2">
               <h4 className="font-semibold text-gray-900">Order Summary</h4>
               <div className="flex justify-between">
@@ -121,7 +118,6 @@ export default function SecurePayment() {
               </div>
             </div>
 
-            {/* Configuration Notice */}
             <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
               <div className="flex items-start gap-3">
                 <AlertCircle className="h-5 w-5 text-yellow-600 mt-0.5" />
@@ -135,7 +131,6 @@ export default function SecurePayment() {
               </div>
             </div>
 
-            {/* Action Buttons */}
             <div className="space-y-3">
               <Button 
                 onClick={handlePayment}
@@ -155,7 +150,6 @@ export default function SecurePayment() {
               </Button>
             </div>
 
-            {/* Security Notice */}
             <div className="flex items-center justify-center gap-2 text-xs text-gray-500 pt-2">
               <Shield className="h-3 w-3" />
               <span>Secured by Stripe • 256-bit SSL encryption</span>
@@ -163,7 +157,6 @@ export default function SecurePayment() {
           </CardContent>
         </Card>
 
-        {/* Setup Instructions */}
         <Card className="w-full">
           <CardHeader>
             <CardTitle className="text-sm">Setup Instructions</CardTitle>

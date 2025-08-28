@@ -380,6 +380,14 @@ const App = () => {
                 </Suspense>
               }
             />
+            <Route
+              path="/stripe-integration-test"
+              element={
+                <Suspense fallback={<div>Loading...</div>}>
+                  {React.createElement(React.lazy(() => import('./components/StripeIntegrationTest')))}
+                </Suspense>
+              }
+            />
 
             {/* Authentication routes */}
             <Route

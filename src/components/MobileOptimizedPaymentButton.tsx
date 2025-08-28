@@ -1,55 +1,61 @@
-/**
- * Mobile-Optimized Payment Button
- * Enhanced payment button with proper mobile touch handling and responsive design
- */
-
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Crown, CreditCard, Loader2, Smartphone, Monitor, Zap } from 'lucide-react';
-import { EnhancedPaymentService } from '@/services/enhancedPaymentService';
-import { stripeWrapper, quickBuyCredits, quickSubscribe } from '@/services/stripeWrapper';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
+import { Crown, CreditCard, Loader2, Smartphone, Monitor, Zap } from 'lucide-react';
+import { stripeWrapper } from '@/services/stripeWrapper';
 
 interface MobileOptimizedPaymentButtonProps {
-  type: 'premium' | 'credits';
-  plan?: 'monthly' | 'yearly';
+  type: 'credits' | 'premium';
   credits?: number;
-  variant?: 'default' | 'outline' | 'destructive' | 'secondary' | 'ghost' | 'link';
-  size?: 'default' | 'sm' | 'lg' | 'icon';
+  plan?: 'monthly' | 'yearly';
   className?: string;
-  children?: React.ReactNode;
-  email?: string;
-  onSuccess?: () => void;
-  onError?: (error: string) => void;
   disabled?: boolean;
+  guestEmail?: string;
+  showGuestInput?: boolean;
+  variant?: 'default' | 'outline' | 'secondary' | 'ghost' | 'link';
+  size?: 'default' | 'sm' | 'lg' | 'icon';
+  onSuccess?: () => void;
 }
 
 export function MobileOptimizedPaymentButton({
   type,
+  credits = 100,
   plan = 'monthly',
-  credits = 50,
+  className = '',
+  disabled = false,
+  guestEmail = '',
+  showGuestInput = true,
   variant = 'default',
   size = 'default',
-  className,
-  children,
-  email,
-  onSuccess,
-  onError,
-  disabled = false
+  onSuccess
 }: MobileOptimizedPaymentButtonProps) {
-  const [isLoading, setIsLoading] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-  const [deviceInfo, setDeviceInfo] = useState<any>(null);
   const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState(guestEmail);
+  const [isMobile, setIsMobile] = useState(false);
+  const [deviceInfo, setDeviceInfo] = useState<any>({});
 
-  // Detect mobile device and update state
   useEffect(() => {
     const checkDevice = () => {
-      const mobile = window.innerWidth <= 768 || 
-                    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                     window.innerWidth <= 768;
       setIsMobile(mobile);
-      setDeviceInfo(EnhancedPaymentService.getEnvironmentInfo());
+      setDeviceInfo({
+        isMobile: mobile,
+        isIOSSafari: /iPad|iPhone|iPod/.test(navigator.userAgent) && 
+                     /Safari/.test(navigator.userAgent) && 
+                     !/CriOS|FxiOS|OPiOS|mercury/.test(navigator.userAgent),
+        userAgent: navigator.userAgent,
+        viewport: {
+          width: window.innerWidth,
+          height: window.innerHeight
+        },
+        supportsPopups: !mobile || !/iPad|iPhone|iPod/.test(navigator.userAgent)
+      });
     };
 
     checkDevice();
@@ -57,250 +63,170 @@ export function MobileOptimizedPaymentButton({
     return () => window.removeEventListener('resize', checkDevice);
   }, []);
 
-  const getButtonText = () => {
-    if (children) return children;
-
-    if (type === 'premium') {
-      const planText = plan === 'yearly' ? 'Annual' : 'Monthly';
-      const price = plan === 'yearly' ? '$290' : '$29';
-      return (
-        <>
-          <Crown className="h-4 w-4 mr-2" />
-          {isMobile ? `Premium ${price}` : `Upgrade to Premium ${planText} (${price})`}
-        </>
-      );
-    } else {
-      const price = getCreditsPrice(credits);
-      return (
-        <>
-          <CreditCard className="h-4 w-4 mr-2" />
-          {isMobile ? `${credits} Credits $${price}` : `Buy ${credits} Credits ($${price})`}
-        </>
-      );
-    }
-  };
-
-  const getCreditsPrice = (creditsAmount: number): number => {
-    if (creditsAmount <= 50) return 19;
-    if (creditsAmount <= 100) return 29;
-    if (creditsAmount <= 250) return 49;
-    if (creditsAmount <= 500) return 79;
-    return 99;
-  };
-
   const handlePayment = async () => {
-    if (disabled || isLoading) return;
+    if (showGuestInput && !email) {
+      toast({
+        title: "Email Required",
+        description: "Please enter your email for checkout",
+        variant: "destructive",
+      });
+      return;
+    }
 
-    setIsLoading(true);
+    setLoading(true);
 
     try {
-      console.log('🎯 Mobile payment initiated:', { 
-        type, 
-        plan, 
-        credits, 
-        isMobile, 
-        deviceInfo 
-      });
-
       let result;
 
-      try {
-        // Try Stripe Wrapper first
-        if (type === 'premium') {
-          result = await quickSubscribe(plan, email);
-        } else {
-          result = await quickBuyCredits(credits, email);
-        }
+      if (type === 'premium') {
+        toast({
+          title: "🚀 Opening Premium Checkout",
+          description: `Processing ${plan} subscription...`,
+        });
 
-        if (result.success) {
-          console.log(`✅ Payment created via ${result.method}${result.fallbackUsed ? ' (fallback)' : ''}`);
-        }
-      } catch (wrapperError) {
-        console.warn('⚠️ Stripe Wrapper failed, using legacy service:', wrapperError);
-
-        // Fallback to legacy service
-        if (type === 'premium') {
-          result = await EnhancedPaymentService.upgradeToPremium(plan, email);
-        } else {
-          result = await EnhancedPaymentService.buyCredits(credits, email);
-        }
-      }
-
-      if (result.success) {
-        console.log('✅ Payment initiated successfully');
-        
-        // Payment initiated successfully
-
-        // Call success callback
-        onSuccess?.();
-
-        // Note: The redirect is handled by the service
-        
+        result = await stripeWrapper.quickSubscribe(plan, showGuestInput ? email : undefined);
       } else {
-        throw new Error(result.error || 'Payment failed');
+        toast({
+          title: "🚀 Opening Credits Checkout",
+          description: `Processing ${credits} credits purchase...`,
+        });
+
+        // Check if it's a preset amount for quickBuyCredits
+        const validCredits = [50, 100, 250, 500];
+        if (validCredits.includes(credits)) {
+          result = await stripeWrapper.quickBuyCredits(credits as 50 | 100 | 250 | 500, showGuestInput ? email : undefined);
+        } else {
+          // For custom amounts, use createPayment directly
+          const amount = Math.ceil(credits * 1.40);
+          result = await stripeWrapper.createPayment({
+            amount,
+            credits,
+            productName: `${credits} Premium Backlink Credits`,
+            isGuest: showGuestInput,
+            guestEmail: email
+          });
+
+          if (result.success && result.url) {
+            // Handle mobile-specific checkout behavior
+            if (deviceInfo.isMobile && deviceInfo.isIOSSafari) {
+              // iOS Safari - redirect in current window
+              window.location.href = result.url;
+              return;
+            } else if (deviceInfo.isMobile) {
+              // Other mobile - try popup with fallback to redirect
+              const popup = window.open(result.url, '_blank');
+              if (!popup) {
+                window.location.href = result.url;
+                return;
+              }
+            } else {
+              // Desktop - open in new window
+              stripeWrapper.openCheckoutWindow(result.url, result.sessionId);
+            }
+          }
+        }
       }
 
-    } catch (error: any) {
-      console.error('❌ Payment error:', error);
-      
-      const errorMessage = error.message || 'Payment temporarily unavailable';
-      
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to create checkout session');
+      }
+
       toast({
-        title: "Payment Error",
-        description: errorMessage,
-        variant: "destructive"
+        title: "✅ Checkout Opened",
+        description: isMobile 
+          ? "Complete your purchase in the checkout page" 
+          : "Complete your purchase in the new window",
       });
 
-      onError?.(errorMessage);
+      if (onSuccess) {
+        onSuccess();
+      }
+    } catch (error) {
+      console.error('Payment error:', error);
+      toast({
+        title: "Checkout Error",
+        description: error instanceof Error ? error.message : 'Failed to open checkout',
+        variant: "destructive",
+      });
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  // Mobile-specific styling
-  const mobileClasses = isMobile ? 'min-h-[44px] text-base font-medium' : '';
-  const touchClasses = 'touch-manipulation select-none';
-  
+  const getButtonText = () => {
+    if (loading) return 'Processing...';
+    
+    if (type === 'premium') {
+      return plan === 'monthly' ? 'Get Premium ($29/mo)' : 'Get Premium ($290/yr)';
+    } else {
+      const amount = credits <= 500 && [50, 100, 250, 500].includes(credits) 
+        ? [70, 140, 350, 700][[50, 100, 250, 500].indexOf(credits)]
+        : Math.ceil(credits * 1.40);
+      return `Buy ${credits} Credits ($${amount})`;
+    }
+  };
+
+  const getIcon = () => {
+    if (loading) return <Loader2 className="h-4 w-4 animate-spin" />;
+    return type === 'premium' ? <Crown className="h-4 w-4" /> : <Zap className="h-4 w-4" />;
+  };
+
   return (
-    <Button
-      variant={variant}
-      size={size}
-      className={cn(
-        'relative transition-all duration-200',
-        mobileClasses,
-        touchClasses,
-        className
-      )}
-      onClick={handlePayment}
-      disabled={disabled || isLoading}
-      style={{
-        // Ensure proper touch targets on mobile
-        minHeight: isMobile ? '44px' : undefined,
-        minWidth: isMobile ? '44px' : undefined,
-        touchAction: 'manipulation',
-        WebkitTapHighlightColor: 'rgba(0, 0, 0, 0.1)',
-        userSelect: 'none',
-        WebkitUserSelect: 'none'
-      }}
-    >
-      {isLoading ? (
-        <>
-          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-          {isMobile ? 'Opening...' : 'Opening Checkout...'}
-        </>
-      ) : (
-        getButtonText()
-      )}
-      
-      {/* Device indicator for debugging */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full text-xs flex items-center justify-center">
-          {isMobile ? (
-            <Smartphone className="h-2 w-2 text-blue-500" />
-          ) : (
-            <Monitor className="h-2 w-2 text-green-500" />
+    <Card className={className}>
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-lg">
+          {isMobile ? <Smartphone className="h-5 w-5" /> : <Monitor className="h-5 w-5" />}
+          Mobile-Optimized Checkout
+          <Badge variant="secondary" className="text-xs">
+            {deviceInfo.isIOSSafari ? 'iOS Safari' : isMobile ? 'Mobile' : 'Desktop'}
+          </Badge>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {showGuestInput && (
+          <div className="space-y-2">
+            <Label htmlFor="payment-email">Email Address</Label>
+            <Input
+              id="payment-email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email for checkout"
+              disabled={loading}
+            />
+          </div>
+        )}
+
+        <Button
+          variant={variant}
+          size={size}
+          className="w-full"
+          disabled={disabled || loading}
+          onClick={handlePayment}
+        >
+          {getIcon()}
+          <span className="ml-2">{getButtonText()}</span>
+          {type === 'premium' && plan === 'yearly' && !loading && (
+            <Badge variant="secondary" className="ml-2">Save $58</Badge>
+          )}
+        </Button>
+
+        <div className="text-xs text-muted-foreground space-y-1">
+          <div className="flex items-center justify-center gap-2">
+            <CreditCard className="h-3 w-3" />
+            Powered by Stripe • Secure checkout
+          </div>
+          {isMobile && (
+            <div className="text-center">
+              {deviceInfo.isIOSSafari 
+                ? "Will redirect to secure checkout page"
+                : "Optimized for mobile devices"
+              }
+            </div>
           )}
         </div>
-      )}
-    </Button>
-  );
-}
-
-/**
- * Quick Premium Button
- */
-export function QuickPremiumButton({
-  plan = 'monthly',
-  className,
-  onSuccess
-}: {
-  plan?: 'monthly' | 'yearly';
-  className?: string;
-  onSuccess?: () => void;
-}) {
-  return (
-    <MobileOptimizedPaymentButton
-      type="premium"
-      plan={plan}
-      variant="default"
-      size="lg"
-      className={cn('w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700', className)}
-      onSuccess={onSuccess}
-    />
-  );
-}
-
-/**
- * Quick Credits Button
- */
-export function QuickCreditsButton({
-  credits = 50,
-  className,
-  onSuccess
-}: {
-  credits?: number;
-  className?: string;
-  onSuccess?: () => void;
-}) {
-  return (
-    <MobileOptimizedPaymentButton
-      type="credits"
-      credits={credits}
-      variant="outline"
-      size="lg"
-      className={cn('w-full', className)}
-      onSuccess={onSuccess}
-    />
-  );
-}
-
-/**
- * Mobile Payment Grid - Responsive layout for multiple payment options
- */
-export function MobilePaymentGrid({
-  onSuccess,
-  className
-}: {
-  onSuccess?: () => void;
-  className?: string;
-}) {
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  return (
-    <div className={cn(
-      'grid gap-4',
-      isMobile ? 'grid-cols-1' : 'grid-cols-2 lg:grid-cols-4',
-      className
-    )}>
-      {/* Premium Plans */}
-      <div className={cn('space-y-2', isMobile ? 'order-1' : '')}>
-        <h3 className="font-semibold text-sm text-center">Premium Plans</h3>
-        <QuickPremiumButton plan="monthly" onSuccess={onSuccess} />
-        <QuickPremiumButton 
-          plan="yearly" 
-          className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
-          onSuccess={onSuccess} 
-        />
-      </div>
-
-      {/* Credits Options */}
-      <div className={cn('space-y-2', isMobile ? 'order-2' : 'col-span-3')}>
-        <h3 className="font-semibold text-sm text-center">Credits</h3>
-        <div className={cn('grid gap-2', isMobile ? 'grid-cols-2' : 'grid-cols-4')}>
-          <QuickCreditsButton credits={50} onSuccess={onSuccess} />
-          <QuickCreditsButton credits={100} onSuccess={onSuccess} />
-          <QuickCreditsButton credits={250} onSuccess={onSuccess} />
-          <QuickCreditsButton credits={500} onSuccess={onSuccess} />
-        </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
 
