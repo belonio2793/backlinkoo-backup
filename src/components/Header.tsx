@@ -29,6 +29,8 @@ export function Header({ showHomeLink = true }: HeaderProps) {
     pendingAction
   } = useUserFlow();
 
+  const [showCreditModal, setShowCreditModal] = useState(false);
+
   // Debug logging for header authentication state
   console.log('🎯 Header: User authentication state:', {
     userEmail: user?.email,
