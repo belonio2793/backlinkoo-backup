@@ -420,14 +420,6 @@ const App = () => {
                 </Suspense>
               }
             />
-            <Route
-              path="/payment-test"
-              element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <LazyPaymentTest />
-                </Suspense>
-              }
-            />
 
             {/* Legal routes */}
             <Route
