@@ -7,36 +7,63 @@ export function PaymentDiagnostic() {
 
   const testPaymentEndpoint = async () => {
     setIsLoading(true);
-    setStatus('Testing payment endpoint...');
-    
-    try {
-      // Test Supabase Edge Function
-      const response = await fetch('/.netlify/functions/create-payment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          amount: 1000, // $10.00 test amount
-          credits: 100,
-          productName: 'Test Credits',
-          isGuest: true,
-          guestEmail: 'test@example.com'
-        })
-      });
+    setStatus('Testing payment endpoints...\n');
 
-      if (response.ok) {
-        const data = await response.json();
-        setStatus(`✅ Payment endpoint working! Session ID: ${data.sessionId?.substring(0, 20)}...`);
-      } else {
-        const errorText = await response.text();
-        setStatus(`❌ Payment endpoint error: ${response.status} - ${errorText}`);
+    const endpoints = [
+      { name: 'Supabase Edge Function', url: '/api/create-payment' },
+      { name: 'Netlify Function', url: '/.netlify/functions/create-payment' }
+    ];
+
+    const results = ['Testing payment endpoints...', ''];
+
+    for (const endpoint of endpoints) {
+      try {
+        results.push(`🔄 Testing ${endpoint.name}: ${endpoint.url}`);
+        setStatus(results.join('\n'));
+
+        const response = await fetch(endpoint.url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            amount: 1000, // $10.00 test amount
+            credits: 100,
+            productName: 'Test Credits',
+            isGuest: true,
+            guestEmail: 'test@example.com'
+          })
+        });
+
+        if (response.ok) {
+          try {
+            const data = await response.json();
+            results.push(`✅ ${endpoint.name}: Working! Session ID: ${data.sessionId?.substring(0, 20)}...`);
+            break; // Found working endpoint
+          } catch (parseError) {
+            results.push(`❌ ${endpoint.name}: Response parsing error`);
+          }
+        } else {
+          let errorMessage = `HTTP ${response.status}`;
+          try {
+            const errorText = await response.text();
+            if (errorText.length > 0 && errorText.length < 200) {
+              errorMessage += ` - ${errorText}`;
+            }
+          } catch (readError) {
+            // Ignore error reading response body
+          }
+          results.push(`❌ ${endpoint.name}: ${errorMessage}`);
+        }
+      } catch (error) {
+        results.push(`❌ ${endpoint.name}: Network error - ${error instanceof Error ? error.message : 'Unknown error'}`);
       }
-    } catch (error) {
-      setStatus(`❌ Network error: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    } finally {
-      setIsLoading(false);
+
+      results.push(''); // Add spacing between tests
+      setStatus(results.join('\n'));
     }
+
+    setIsLoading(false);
   };
 
   const testEnvironmentVars = () => {
