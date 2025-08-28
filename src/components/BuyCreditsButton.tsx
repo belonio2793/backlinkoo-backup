@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { CreditCard } from 'lucide-react';
-import { BuyCreditsModal } from './BuyCreditsModal';
+import { ModernCreditPurchaseModal } from './ModernCreditPurchaseModal';
 
 interface BuyCreditsButtonProps {
   trigger?: React.ReactNode;
@@ -65,13 +65,10 @@ export function BuyCreditsButton({
         defaultTrigger
       )}
 
-      <BuyCreditsModal
+      <ModernCreditPurchaseModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onPaymentSuccess={handleSuccess}
-        onPaymentCancel={handleCancel}
-        userEmail={userEmail}
-        isGuest={isGuest}
+        onSuccess={handleSuccess}
       />
     </>
   );

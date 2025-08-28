@@ -220,7 +220,9 @@ export class CreditPaymentService {
             hasData: !!result,
             hasError: !!edgeError,
             error: edgeError,
-            dataKeys: result ? Object.keys(result) : []
+            errorMessage: edgeError?.message,
+            dataKeys: result ? Object.keys(result) : [],
+            resultContent: result ? result : 'no data'
           });
 
           data = result;
@@ -245,91 +247,32 @@ export class CreditPaymentService {
         }
       }
 
-      // If edge functions failed or unavailable, try alternative endpoints
+      // If edge functions failed, provide better error handling without trying non-existent endpoints
       if (error || !data) {
-        console.log('🔄 Trying alternative credit payment endpoints...');
+        console.log('❌ Supabase Edge Function failed, no fallback endpoints available in this deployment');
 
-        // Only use Netlify functions if we're actually on Netlify
-        const endpoints = environment.isNetlify
-          ? [
-              '/api/create-payment',
-              '/.netlify/functions/create-payment',
-              '/functions/create-payment'
-            ]
-          : [
-              '/api/create-payment',
-              '/functions/create-payment'
-            ];
+        // For production environments without alternative endpoints, we should use development fallback
+        if (environment.isDevelopment) {
+          console.log('🔄 Development environment detected - using dev checkout fallback');
+        } else {
+          console.error('💥 Production environment - Supabase Edge Function is the only payment method');
 
-        let lastError = null;
+          // If we have an error from Supabase Edge Function, use that
+          if (error) {
+            const supabaseErrorMessage = this.extractErrorMessage(error);
+            console.error('💥 Supabase Edge Function error:', supabaseErrorMessage);
 
-        for (const endpoint of endpoints) {
-          try {
-            console.log(`🔄 Trying credit payment endpoint: ${endpoint}`);
-            console.log(`📤 Request body:`, {
-              ...requestBody,
-              guestEmail: finalGuestEmail ? '***masked***' : undefined
-            });
-
-            // Prepare headers
-            const headers: Record<string, string> = {
-              'Content-Type': 'application/json'
+            // Return a more specific error based on what we got from Supabase
+            return {
+              success: false,
+              error: `Payment system error: ${supabaseErrorMessage}. Please try again or contact support.`
             };
-
-            // Add auth header for non-guest users
-            if (!finalIsGuest) {
-              const { data: session } = await supabase.auth.getSession();
-              if (session?.session?.access_token) {
-                headers['Authorization'] = `Bearer ${session.session.access_token}`;
-                console.log('🔐 Added authorization header');
-              }
-            }
-
-            const response = await fetch(endpoint, {
-              method: 'POST',
-              headers,
-              body: JSON.stringify(requestBody)
-            });
-
-            console.log(`📥 Response status: ${response.status} ${response.statusText}`);
-
-            if (response.ok) {
-              const result = await response.json();
-              console.log(`✅ Success response from ${endpoint}:`, {
-                hasUrl: !!result.url,
-                hasSessionId: !!result.sessionId,
-                keys: Object.keys(result)
-              });
-              data = result;
-              error = null;
-              break;
-            } else {
-              const errorText = await response.text();
-              lastError = {
-                endpoint,
-                status: response.status,
-                statusText: response.statusText,
-                body: errorText
-              };
-              console.warn(`⚠️ Endpoint ${endpoint} failed:`, lastError);
-            }
-          } catch (fetchError) {
-            lastError = {
-              endpoint,
-              error: fetchError instanceof Error ? fetchError.message : String(fetchError),
-              type: 'fetch_error'
+          } else {
+            return {
+              success: false,
+              error: 'Payment system is temporarily unavailable. Please try again in a moment or contact support.'
             };
-            console.warn(`⚠️ Network error for ${endpoint}:`, lastError);
-            continue;
           }
-        }
-
-        // If all endpoints failed, use the last error for debugging
-        if (!data && lastError) {
-          const lastErrorMessage = this.extractErrorMessage(lastError);
-          console.error('❌ All payment endpoints failed. Last error:', lastErrorMessage);
-          console.error('❌ Full error details:', lastError);
-          error = lastError;
         }
       }
 

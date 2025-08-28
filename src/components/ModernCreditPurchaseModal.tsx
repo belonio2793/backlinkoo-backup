@@ -3,7 +3,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Shield, CheckCircle, CreditCard } from "lucide-react";
@@ -37,9 +36,9 @@ export function ModernCreditPurchaseModal({
   const { openLoginModal } = useAuthModal();
 
   const [selectedPackage, setSelectedPackage] = useState<number | null>(null);
-  const [customCredits, setCustomCredits] = useState("");
-  const [totalPrice, setTotalPrice] = useState(0);
-  const [rate, setRate] = useState(1.40);
+  const [customCredits, setCustomCredits] = useState("300");
+  const [totalPrice, setTotalPrice] = useState(420.00);
+  const [rate] = useState(1.40);
   const [isLoading, setIsLoading] = useState(false);
 
   const creditPackages: CreditPackage[] = [
@@ -211,6 +210,12 @@ export function ModernCreditPurchaseModal({
         } else if (error.message.includes('authentication') || error.message.includes('sign in')) {
           errorTitle = 'Authentication Required';
           errorMessage = 'Please sign in to your account and try again.';
+        } else if (error.message.includes('Payment system error')) {
+          errorTitle = 'Payment System Error';
+          errorMessage = error.message;
+        } else if (error.message.includes('temporarily unavailable')) {
+          errorTitle = 'Service Unavailable';
+          errorMessage = error.message;
         } else {
           errorMessage = error.message;
         }
@@ -226,13 +231,15 @@ export function ModernCreditPurchaseModal({
         errorConstructor: error?.constructor?.name,
         userAgent: navigator.userAgent,
         url: window.location.href,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        selection: selection
       });
 
       toast({
         title: errorTitle,
         description: errorMessage,
         variant: "destructive",
+        duration: 7000 // Show error longer so user can read it
       });
     } finally {
       setIsLoading(false);
@@ -243,7 +250,7 @@ export function ModernCreditPurchaseModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-[95vw] max-w-6xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold">Buy Credits</DialogTitle>
         </DialogHeader>
@@ -298,7 +305,7 @@ export function ModernCreditPurchaseModal({
                   max="10000"
                   value={customCredits}
                   onChange={(e) => handleCustomAmountChange(e.target.value)}
-                  placeholder="Enter custom amount"
+                  placeholder="300"
                   className="text-center"
                 />
               </div>
