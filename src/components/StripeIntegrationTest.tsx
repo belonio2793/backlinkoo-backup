@@ -1,272 +1,389 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, XCircle, AlertCircle, CreditCard } from 'lucide-react';
-import { stripeCheckout } from '@/services/universalStripeCheckout';
-import { CreditPaymentService } from '@/services/creditPaymentService';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import { stripeWrapper } from '@/services/stripeWrapper';
+import { 
+  CheckCircle, 
+  XCircle, 
+  CreditCard, 
+  Crown, 
+  Zap, 
+  AlertCircle,
+  TestTube,
+  Loader2 
+} from 'lucide-react';
 
 export function StripeIntegrationTest() {
   const { toast } = useToast();
-  const [testResults, setTestResults] = useState<{
-    configTest: 'pending' | 'success' | 'error';
-    paymentServiceTest: 'pending' | 'success' | 'error';
-    universalServiceTest: 'pending' | 'success' | 'error';
-  }>({
-    configTest: 'pending',
-    paymentServiceTest: 'pending',
-    universalServiceTest: 'pending'
-  });
+  const [testResults, setTestResults] = useState<any[]>([]);
+  const [loading, setLoading] = useState<string | null>(null);
+  const [testEmail, setTestEmail] = useState('test@example.com');
 
-  const testStripeConfiguration = async () => {
-    try {
-      // Test environment variables
-      const stripePublicKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
-      
-      if (!stripePublicKey) {
-        throw new Error('VITE_STRIPE_PUBLISHABLE_KEY not configured');
-      }
-      
-      if (!stripePublicKey.startsWith('pk_')) {
-        throw new Error('Invalid Stripe publishable key format');
-      }
-
-      // Test configuration endpoint
-      const configTest = await stripeCheckout.testConfiguration();
-      
-      if (configTest.configured) {
-        setTestResults(prev => ({ ...prev, configTest: 'success' }));
-        toast({
-          title: "✅ Configuration Test Passed",
-          description: "Stripe is properly configured"
-        });
-      } else {
-        throw new Error(configTest.error || 'Configuration test failed');
-      }
-    } catch (error) {
-      setTestResults(prev => ({ ...prev, configTest: 'error' }));
-      toast({
-        title: "❌ Configuration Test Failed",
-        description: error instanceof Error ? error.message : 'Unknown error',
-        variant: "destructive"
-      });
-    }
-  };
-
-  const testCreditPaymentService = async () => {
-    try {
-      // Test CreditPaymentService with minimal data
-      const result = await CreditPaymentService.createCreditPayment(
-        null, // No user (guest)
-        true, // Is guest
-        'test@backlinkoo.com',
-        {
-          amount: 70,
-          credits: 50,
-          productName: 'Test 50 Credits'
-        }
-      );
-
-      if (result.success) {
-        setTestResults(prev => ({ ...prev, paymentServiceTest: 'success' }));
-        toast({
-          title: "✅ CreditPaymentService Works",
-          description: "Payment service is properly configured"
-        });
-      } else {
-        throw new Error(result.error || 'Payment service test failed');
-      }
-    } catch (error) {
-      setTestResults(prev => ({ ...prev, paymentServiceTest: 'error' }));
-      toast({
-        title: "❌ CreditPaymentService Failed",
-        description: error instanceof Error ? error.message : 'Unknown error',
-        variant: "destructive"
-      });
-    }
-  };
-
-  const testUniversalStripeService = async () => {
-    try {
-      // Test stripeCheckout service
-      const result = await stripeCheckout.purchaseCredits({
-        credits: 50,
-        amount: 70,
-        productName: 'Test 50 Credits',
-        isGuest: true,
-        guestEmail: 'test@backlinkoo.com'
-      });
-
-      if (result.success) {
-        setTestResults(prev => ({ ...prev, universalServiceTest: 'success' }));
-        toast({
-          title: "✅ UniversalStripeCheckout Works",
-          description: "Universal checkout service is ready"
-        });
-      } else {
-        throw new Error(result.error || 'Universal service test failed');
-      }
-    } catch (error) {
-      setTestResults(prev => ({ ...prev, universalServiceTest: 'error' }));
-      toast({
-        title: "❌ UniversalStripeCheckout Failed",
-        description: error instanceof Error ? error.message : 'Unknown error',
-        variant: "destructive"
-      });
-    }
-  };
-
-  const runAllTests = async () => {
-    setTestResults({
-      configTest: 'pending',
-      paymentServiceTest: 'pending',
-      universalServiceTest: 'pending'
+  const addTestResult = (test: string, status: 'success' | 'error' | 'info', message: string, details?: any) => {
+    const result = {
+      id: Date.now(),
+      test,
+      status,
+      message,
+      details,
+      timestamp: new Date().toLocaleTimeString()
+    };
+    setTestResults(prev => [result, ...prev]);
+    
+    toast({
+      title: `${test} - ${status}`,
+      description: message,
+      variant: status === 'error' ? 'destructive' : 'default'
     });
-
-    await testStripeConfiguration();
-    await new Promise(resolve => setTimeout(resolve, 500));
-    await testCreditPaymentService();
-    await new Promise(resolve => setTimeout(resolve, 500));
-    await testUniversalStripeService();
   };
 
-  const getStatusIcon = (status: 'pending' | 'success' | 'error') => {
-    switch (status) {
-      case 'success':
-        return <CheckCircle className="h-5 w-5 text-green-500" />;
-      case 'error':
-        return <XCircle className="h-5 w-5 text-red-500" />;
-      default:
-        return <AlertCircle className="h-5 w-5 text-yellow-500" />;
+  const testStripeConfiguration = () => {
+    const status = stripeWrapper.getStatus();
+    
+    addTestResult(
+      'Stripe Configuration',
+      status.configured ? 'success' : 'error',
+      status.configured 
+        ? `Configured for ${status.environment} environment`
+        : 'Stripe not properly configured',
+      status
+    );
+
+    if (status.errors.length > 0) {
+      status.errors.forEach(error => {
+        addTestResult('Configuration Error', 'error', error);
+      });
     }
   };
 
-  const getStatusBadge = (status: 'pending' | 'success' | 'error') => {
-    switch (status) {
-      case 'success':
-        return <Badge className="bg-green-100 text-green-800">✅ Pass</Badge>;
-      case 'error':
-        return <Badge variant="destructive">❌ Fail</Badge>;
-      default:
-        return <Badge variant="secondary">⏳ Pending</Badge>;
+  const testCreditPurchase = async (credits: 50 | 100 | 250 | 500) => {
+    const testId = `credits-${credits}`;
+    setLoading(testId);
+
+    try {
+      addTestResult(`${credits} Credits Purchase`, 'info', 'Testing credit purchase flow...');
+      
+      const result = await stripeWrapper.quickBuyCredits(credits, testEmail);
+      
+      if (result.success) {
+        addTestResult(
+          `${credits} Credits Purchase`,
+          'success',
+          'Checkout session created successfully',
+          { url: result.url, sessionId: result.sessionId, method: result.method }
+        );
+      } else {
+        addTestResult(
+          `${credits} Credits Purchase`,
+          'error',
+          result.error || 'Failed to create checkout session',
+          result
+        );
+      }
+    } catch (error: any) {
+      addTestResult(
+        `${credits} Credits Purchase`,
+        'error',
+        error.message || 'Credit purchase test failed',
+        error
+      );
+    } finally {
+      setLoading(null);
     }
   };
 
-  const allTestsPassed = Object.values(testResults).every(result => result === 'success');
-  const hasFailures = Object.values(testResults).some(result => result === 'error');
+  const testPremiumSubscription = async (plan: 'monthly' | 'yearly') => {
+    const testId = `premium-${plan}`;
+    setLoading(testId);
+
+    try {
+      addTestResult(`Premium ${plan}`, 'info', 'Testing subscription flow...');
+      
+      const result = await stripeWrapper.quickSubscribe(plan, testEmail);
+      
+      if (result.success) {
+        addTestResult(
+          `Premium ${plan}`,
+          'success',
+          'Subscription checkout created successfully',
+          { url: result.url, sessionId: result.sessionId, method: result.method }
+        );
+      } else {
+        addTestResult(
+          `Premium ${plan}`,
+          'error',
+          result.error || 'Failed to create subscription checkout',
+          result
+        );
+      }
+    } catch (error: any) {
+      addTestResult(
+        `Premium ${plan}`,
+        'error',
+        error.message || 'Subscription test failed',
+        error
+      );
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const testCustomCredits = async () => {
+    const testId = 'custom-credits';
+    setLoading(testId);
+
+    try {
+      const customCredits = 123;
+      const customAmount = Math.ceil(customCredits * 1.40);
+      
+      addTestResult('Custom Credits', 'info', `Testing custom ${customCredits} credits purchase...`);
+      
+      const result = await stripeWrapper.createPayment({
+        amount: customAmount,
+        credits: customCredits,
+        productName: `${customCredits} Custom Backlink Credits`,
+        isGuest: true,
+        guestEmail: testEmail
+      });
+      
+      if (result.success) {
+        addTestResult(
+          'Custom Credits',
+          'success',
+          'Custom credits checkout created successfully',
+          { amount: customAmount, credits: customCredits, url: result.url, method: result.method }
+        );
+      } else {
+        addTestResult(
+          'Custom Credits',
+          'error',
+          result.error || 'Failed to create custom credits checkout',
+          result
+        );
+      }
+    } catch (error: any) {
+      addTestResult(
+        'Custom Credits',
+        'error',
+        error.message || 'Custom credits test failed',
+        error
+      );
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const clearResults = () => {
+    setTestResults([]);
+  };
+
+  const status = stripeWrapper.getStatus();
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <CreditCard className="h-5 w-5" />
+    <div className="container mx-auto p-6 max-w-4xl space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold flex items-center gap-2">
+          <TestTube className="h-8 w-8" />
           Stripe Integration Test
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Environment Info */}
-        <div className="space-y-2">
-          <h3 className="font-medium">Environment Configuration</h3>
-          <div className="space-y-1 text-sm">
-            <div className="flex justify-between">
-              <span>Stripe Publishable Key:</span>
-              <Badge variant={import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY?.startsWith('pk_') ? 'default' : 'destructive'}>
-                {import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY ? 
-                  (import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY.startsWith('pk_') ? '✅ Configured' : '❌ Invalid') : 
-                  '❌ Missing'
-                }
+        </h1>
+        <Button onClick={clearResults} variant="outline" size="sm">
+          Clear Results
+        </Button>
+      </div>
+
+      {/* Configuration Status */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <CreditCard className="h-5 w-5" />
+            Stripe Configuration Status
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="flex items-center gap-2">
+              {status.configured ? <CheckCircle className="h-4 w-4 text-green-500" /> : <XCircle className="h-4 w-4 text-red-500" />}
+              <span className="text-sm">Configured</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Badge variant={status.environment === 'live' ? 'default' : 'secondary'}>
+                {status.environment}
               </Badge>
             </div>
-            <div className="flex justify-between">
-              <span>Environment:</span>
-              <Badge variant="secondary">
-                {window.location.hostname === 'localhost' ? 'Development' : 'Production'}
-              </Badge>
+            <div className="flex items-center gap-2">
+              <span className="text-sm">Primary: {status.primaryMethod}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              {status.errors.length === 0 ? <CheckCircle className="h-4 w-4 text-green-500" /> : <AlertCircle className="h-4 w-4 text-red-500" />}
+              <span className="text-sm">{status.errors.length} errors</span>
             </div>
           </div>
-        </div>
 
-        {/* Test Results */}
-        <div className="space-y-3">
-          <h3 className="font-medium">Test Results</h3>
-          
+          <Button onClick={testStripeConfiguration} variant="outline" size="sm">
+            Test Configuration
+          </Button>
+
+          {status.errors.length > 0 && (
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                Configuration errors: {status.errors.join(', ')}
+              </AlertDescription>
+            </Alert>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Test Email Input */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Test Configuration</CardTitle>
+        </CardHeader>
+        <CardContent>
           <div className="space-y-2">
-            <div className="flex items-center justify-between p-3 border rounded-lg">
-              <div className="flex items-center gap-2">
-                {getStatusIcon(testResults.configTest)}
-                <span>Stripe Configuration</span>
-              </div>
-              {getStatusBadge(testResults.configTest)}
-            </div>
-
-            <div className="flex items-center justify-between p-3 border rounded-lg">
-              <div className="flex items-center gap-2">
-                {getStatusIcon(testResults.paymentServiceTest)}
-                <span>CreditPaymentService</span>
-              </div>
-              {getStatusBadge(testResults.paymentServiceTest)}
-            </div>
-
-            <div className="flex items-center justify-between p-3 border rounded-lg">
-              <div className="flex items-center gap-2">
-                {getStatusIcon(testResults.universalServiceTest)}
-                <span>UniversalStripeCheckout</span>
-              </div>
-              {getStatusBadge(testResults.universalServiceTest)}
-            </div>
+            <Label htmlFor="test-email">Test Email</Label>
+            <Input
+              id="test-email"
+              type="email"
+              value={testEmail}
+              onChange={(e) => setTestEmail(e.target.value)}
+              placeholder="Enter test email"
+            />
           </div>
-        </div>
+        </CardContent>
+      </Card>
 
-        {/* Overall Status */}
-        {allTestsPassed && (
-          <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-            <div className="flex items-center gap-2 text-green-800">
-              <CheckCircle className="h-5 w-5" />
-              <span className="font-medium">All Tests Passed!</span>
-            </div>
-            <p className="text-sm text-green-700 mt-1">
-              Your Stripe integration is ready for live credit purchases.
-            </p>
+      {/* Credit Purchase Tests */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Zap className="h-5 w-5" />
+            Credit Purchase Tests
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {[50, 100, 250, 500].map((credits) => (
+              <Button
+                key={credits}
+                onClick={() => testCreditPurchase(credits as 50 | 100 | 250 | 500)}
+                disabled={loading !== null}
+                variant="outline"
+                className="flex flex-col h-auto p-4"
+              >
+                {loading === `credits-${credits}` ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Zap className="h-4 w-4" />
+                )}
+                <span>{credits} Credits</span>
+                <span className="text-xs opacity-60">${credits <= 500 ? [70, 140, 350, 700][[50, 100, 250, 500].indexOf(credits)] : credits * 1.40}</span>
+              </Button>
+            ))}
           </div>
-        )}
 
-        {hasFailures && (
-          <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-            <div className="flex items-center gap-2 text-red-800">
-              <XCircle className="h-5 w-5" />
-              <span className="font-medium">Some Tests Failed</span>
-            </div>
-            <p className="text-sm text-red-700 mt-1">
-              Please check the configuration and try again.
-            </p>
+          <Button
+            onClick={testCustomCredits}
+            disabled={loading !== null}
+            variant="outline"
+            className="w-full"
+          >
+            {loading === 'custom-credits' ? (
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            ) : (
+              <CreditCard className="h-4 w-4 mr-2" />
+            )}
+            Test Custom Credits (123 credits)
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Premium Subscription Tests */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Crown className="h-5 w-5 text-yellow-500" />
+            Premium Subscription Tests
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <Button
+              onClick={() => testPremiumSubscription('monthly')}
+              disabled={loading !== null}
+              variant="outline"
+              className="flex flex-col h-auto p-4"
+            >
+              {loading === 'premium-monthly' ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Crown className="h-4 w-4" />
+              )}
+              <span>Monthly Premium</span>
+              <span className="text-xs opacity-60">$29/month</span>
+            </Button>
+
+            <Button
+              onClick={() => testPremiumSubscription('yearly')}
+              disabled={loading !== null}
+              variant="outline"
+              className="flex flex-col h-auto p-4"
+            >
+              {loading === 'premium-yearly' ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Crown className="h-4 w-4" />
+              )}
+              <span>Yearly Premium</span>
+              <span className="text-xs opacity-60">$290/year</span>
+            </Button>
           </div>
-        )}
+        </CardContent>
+      </Card>
 
-        {/* Action Buttons */}
-        <div className="flex gap-2">
-          <Button onClick={runAllTests} className="flex-1">
-            Run All Tests
-          </Button>
-          <Button onClick={testStripeConfiguration} variant="outline">
-            Test Config
-          </Button>
-          <Button onClick={testCreditPaymentService} variant="outline">
-            Test Payment Service
-          </Button>
-          <Button onClick={testUniversalStripeService} variant="outline">
-            Test Universal Service
-          </Button>
-        </div>
-
-        {/* Instructions */}
-        <div className="text-sm text-gray-600 space-y-1">
-          <p><strong>Note:</strong> These tests validate that your Stripe integration is properly configured.</p>
-          <p>• Tests will create payment sessions but won't charge any cards</p>
-          <p>• Replace placeholder API keys with live Stripe keys for production</p>
-          <p>• Set up webhooks in Stripe Dashboard for credit balance updates</p>
-        </div>
-      </CardContent>
-    </Card>
+      {/* Test Results */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Test Results</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {testResults.length === 0 ? (
+            <p className="text-muted-foreground">No tests run yet. Click the test buttons above.</p>
+          ) : (
+            <div className="space-y-3 max-h-96 overflow-y-auto">
+              {testResults.map((result) => (
+                <div key={result.id} className="border rounded p-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      {result.status === 'success' && <CheckCircle className="h-4 w-4 text-green-500" />}
+                      {result.status === 'error' && <XCircle className="h-4 w-4 text-red-500" />}
+                      {result.status === 'info' && <AlertCircle className="h-4 w-4 text-blue-500" />}
+                      <span className="font-medium">{result.test}</span>
+                    </div>
+                    <span className="text-xs text-muted-foreground">{result.timestamp}</span>
+                  </div>
+                  <p className="text-sm mt-1">{result.message}</p>
+                  {result.details && (
+                    <details className="mt-2">
+                      <summary className="text-xs text-muted-foreground cursor-pointer">Details</summary>
+                      <pre className="text-xs bg-gray-50 p-2 rounded mt-1 overflow-x-auto">
+                        {JSON.stringify(result.details, null, 2)}
+                      </pre>
+                    </details>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 }
+
+export default StripeIntegrationTest;
