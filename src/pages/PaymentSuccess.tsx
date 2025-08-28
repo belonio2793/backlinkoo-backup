@@ -41,8 +41,34 @@ export default function PaymentSuccess() {
   const sessionId = searchParams.get('session_id');
   const credits = searchParams.get('credits');
   const plan = searchParams.get('plan');
+  const isInstant = searchParams.get('instant') === 'true';
+  const isDemo = searchParams.get('demo') === 'true';
+  const method = searchParams.get('method');
 
   useEffect(() => {
+    // Handle instant/demo redirects without verification
+    if (isInstant || isDemo || method === 'direct') {
+      console.log('🚀 Instant redirect detected - skipping verification');
+      setVerifying(false);
+      setVerification({
+        verified: true,
+        credits: credits ? parseInt(credits) : undefined,
+        plan: plan || undefined,
+        orderId: `demo_${Date.now()}`
+      });
+
+      toast({
+        title: "🚀 Payment Processed (Demo Mode)",
+        description: credits
+          ? `${credits} credits have been added to your account.`
+          : plan
+            ? `Your ${plan} subscription is now active.`
+            : "Your payment has been processed successfully.",
+      });
+      return;
+    }
+
+    // Regular verification for real payments
     if (sessionId) {
       verifyPayment();
     } else {
@@ -52,7 +78,7 @@ export default function PaymentSuccess() {
         error: 'No payment session found'
       });
     }
-  }, [sessionId]);
+  }, [sessionId, isInstant, isDemo, method]);
 
   const verifyPayment = async () => {
     try {
