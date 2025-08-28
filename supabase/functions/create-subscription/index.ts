@@ -185,6 +185,16 @@ serve(async (req) => {
     }
 
     console.log("Initializing Stripe with email:", email);
+
+    // Validate live Stripe key for production
+    if (!stripeSecretKey.startsWith('sk_live_')) {
+      console.error("Live Stripe secret key required for production");
+      return new Response(
+        JSON.stringify({ error: "Live Stripe secret key required for production" }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const stripe = new Stripe(stripeSecretKey, {
       apiVersion: "2023-10-16",
     });
