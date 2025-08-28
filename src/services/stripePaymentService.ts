@@ -118,68 +118,35 @@ class StripePaymentService {
   }
 
   /**
-   * Quick purchase with preset amounts
+   * Quick purchase with preset amounts using Stripe Wrapper
    */
   async quickPurchase(credits: 50 | 100 | 250 | 500, guestEmail?: string): Promise<StripePaymentResult> {
-    const amount = this.getCreditsPrice(credits);
-    
-    const result = await this.createPayment({
-      amount,
-      credits,
-      productName: `${credits} Backlink Credits`,
-      type: 'credits',
-      isGuest: !guestEmail,
-      guestEmail
-    });
-
-    if (result.success && result.url) {
-      this.openCheckoutWindow(result.url, result.sessionId);
-    }
-
-    return result;
+    const result = await stripeWrapper.quickBuyCredits(credits, guestEmail);
+    return this.convertResult(result);
   }
 
   /**
-   * Purchase premium subscription
+   * Purchase premium subscription using Stripe Wrapper
    */
   async purchasePremium(plan: 'monthly' | 'yearly', guestEmail?: string): Promise<StripePaymentResult> {
-    const result = await this.createSubscription({
-      plan,
-      type: 'subscription',
-      amount: plan === 'monthly' ? 29 : 290,
-      isGuest: !guestEmail,
-      guestEmail
-    });
-
-    if (result.success && result.url) {
-      this.openCheckoutWindow(result.url, result.sessionId);
-    }
-
-    return result;
+    const result = await stripeWrapper.quickSubscribe(plan, guestEmail);
+    return this.convertResult(result);
   }
 
   /**
-   * Get pricing for credit packages
-   */
-  private getCreditsPrice(credits: number): number {
-    switch (credits) {
-      case 50: return 70;
-      case 100: return 140;
-      case 250: return 350;
-      case 500: return 700;
-      default: return credits * 1.40; // $1.40 per credit
-    }
-  }
-
-  /**
-   * Get service status
+   * Get service status from Stripe Wrapper
    */
   getStatus() {
+    const wrapperStatus = stripeWrapper.getStatus();
     return {
-      configured: !!this.publishableKey,
-      publishableKey: this.publishableKey ? `${this.publishableKey.substring(0, 20)}...` : null,
-      isLive: this.publishableKey?.includes('live') || false,
-      isTest: this.publishableKey?.includes('test') || false
+      configured: wrapperStatus.configured,
+      publishableKey: wrapperStatus.publishableKey,
+      isLive: wrapperStatus.environment === 'live',
+      isTest: wrapperStatus.environment === 'test',
+      method: wrapperStatus.primaryMethod,
+      supabaseAvailable: wrapperStatus.supabaseAvailable,
+      fallbacksAvailable: wrapperStatus.netlifyAvailable || wrapperStatus.clientFallbackAvailable,
+      errors: wrapperStatus.errors
     };
   }
 }
