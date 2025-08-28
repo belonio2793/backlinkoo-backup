@@ -14,6 +14,7 @@ import { PremiumCheckoutModal } from "@/components/PremiumCheckoutModal";
 import { PricingModal } from "@/components/PricingModal";
 import { QuickCreditButton, PremiumUpgradeButton, UniversalPaymentComponent } from "@/components/UniversalPaymentComponent";
 import { BuyCreditsButton } from "@/components/BuyCreditsButton";
+import { ModernCreditPurchaseModal } from "@/components/ModernCreditPurchaseModal";
 import { setPremiumStatus } from "@/utils/setPremiumStatus";
 import {
   DropdownMenu,
