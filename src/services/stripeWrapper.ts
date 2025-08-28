@@ -115,48 +115,31 @@ class StripeWrapper {
       return { success: false, error: 'Stripe Wrapper not initialized' };
     }
 
-    console.log('💳 Creating payment:', {
+    console.log('💳 Creating payment with instant redirect:', {
       amount: options.amount,
       credits: options.credits,
       isGuest: options.isGuest
     });
 
-    // INSTANT REDIRECT: Use direct Stripe checkout URL for fastest experience
-    try {
-      const result = await this.createDirectStripeCheckout(options);
-      if (result.success) {
-        return { ...result, method: 'direct' };
-      }
-    } catch (error: any) {
-      console.warn('⚠️ Direct Stripe method failed, trying backend:', error.message);
-    }
+    // FASTEST PATH: Try Supabase first but don't wait long
+    const supabasePromise = this.createPaymentViaSupabase(options);
+    const timeoutPromise = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('Timeout')), 2000) // 2 second timeout
+    );
 
-    // Fallback 1: Supabase Edge Functions (if direct fails)
     try {
-      const result = await this.createPaymentViaSupabase(options);
+      const result = await Promise.race([supabasePromise, timeoutPromise]);
       if (result.success) {
+        console.log('✅ Fast Supabase payment created');
         return { ...result, method: 'supabase' };
       }
-      console.warn('⚠️ Supabase payment failed:', result.error);
     } catch (error: any) {
-      console.warn('⚠️ Supabase method error:', error.message);
+      console.log('⚡ Supabase too slow or failed, using instant redirect');
     }
 
-    // Fallback 2: Netlify Functions
-    try {
-      const result = await this.createPaymentViaNetlify(options);
-      if (result.success) {
-        return { ...result, method: 'netlify', fallbackUsed: true };
-      }
-      console.warn('⚠️ Netlify payment failed:', result.error);
-    } catch (error: any) {
-      console.warn('⚠️ Netlify method error:', error.message);
-    }
-
-    return {
-      success: false,
-      error: 'All payment methods unavailable. Please try again or contact support.'
-    };
+    // INSTANT FALLBACK: Direct redirect without backend dependencies
+    console.log('🚀 Using instant redirect to bypass slow backend');
+    return this.createInstantPaymentRedirect(options);
   }
 
   /**
