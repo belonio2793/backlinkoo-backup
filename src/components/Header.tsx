@@ -9,7 +9,7 @@ import { AuthService } from '@/services/authService';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { navigateToSection, NAVIGATION_CONFIGS } from '@/utils/navigationUtils';
-import { HeaderUpgradeButton } from '@/components/PremiumUpgradeButton';
+import { PremiumUpgradeButton } from '@/components/PremiumUpgradeButton';
 import { ModernCreditPurchaseModal } from '@/components/ModernCreditPurchaseModal';
 
 interface HeaderProps {
