@@ -1,7 +1,7 @@
 import React from 'react';
 import { PaymentDiagnostic } from '../components/debug/PaymentDiagnostic';
 
-export function PaymentTest() {
+export default function PaymentTest() {
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="container mx-auto px-4">
