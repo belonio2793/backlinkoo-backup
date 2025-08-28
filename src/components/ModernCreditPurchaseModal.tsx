@@ -5,12 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Shield, CheckCircle, CreditCard } from "lucide-react";
+import { Shield, CheckCircle, CreditCard, ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
-import { stripeWrapper } from "@/services/stripeWrapper";
 import { useAuthModal } from "@/contexts/ModalContext";
-import { setCheckoutIntent } from "@/utils/checkoutIntent";
 
 interface ModernCreditPurchaseModalProps {
   isOpen: boolean;
@@ -41,13 +39,16 @@ export function ModernCreditPurchaseModal({
   const [rate] = useState(1.40);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Credit packages pricing - Uses live Stripe product prod_SoVoAb8dXp1cS0
+  // Credit packages pricing
   const creditPackages: CreditPackage[] = [
     { credits: 50, price: 70, pricePerCredit: 1.40 },
     { credits: 100, price: 140, pricePerCredit: 1.40 },
     { credits: 250, price: 350, pricePerCredit: 1.40 },
     { credits: 500, price: 700, pricePerCredit: 1.40 }
   ];
+
+  // Stripe checkout URL for credits
+  const CREDITS_CHECKOUT_URL = 'https://buy.stripe.com/9B63cv1tmcYe';
 
   // Initialize with passed credits or default
   useEffect(() => {
@@ -102,6 +103,26 @@ export function ModernCreditPurchaseModal({
     return Math.ceil(credits * rate);
   };
 
+  const createCheckoutUrl = (): string => {
+    const url = new URL(CREDITS_CHECKOUT_URL);
+    const currentOrigin = window.location.origin;
+    
+    // Add return URLs
+    url.searchParams.set('success_url', `${currentOrigin}/payment-success?session_id={CHECKOUT_SESSION_ID}`);
+    url.searchParams.set('cancel_url', `${currentOrigin}/payment-cancelled`);
+    
+    // Add user email if available
+    if (user?.email) {
+      url.searchParams.set('prefilled_email', user.email);
+    }
+    
+    // Add metadata for webhook processing
+    const credits = getCreditsAmount();
+    url.searchParams.set('client_reference_id', `credits_${credits}`);
+    
+    return url.toString();
+  };
+
   const handlePurchase = async () => {
     const credits = getCreditsAmount();
     
@@ -118,50 +139,17 @@ export function ModernCreditPurchaseModal({
 
     try {
       toast({
-        title: "🚀 Opening Stripe Checkout",
-        description: `Processing ${credits} credits purchase...`,
+        title: "🚀 Redirecting to Stripe",
+        description: `Redirecting to secure checkout for ${credits} credits...`,
       });
 
-      // Set checkout intent for return URL handling
-      setCheckoutIntent({
-        type: 'credits',
-        amount: getPriceAmount(),
-        credits,
-        returnUrl: window.location.pathname
-      });
+      // Create checkout URL and redirect
+      const checkoutUrl = createCheckoutUrl();
+      
+      // Redirect to Stripe checkout
+      window.location.href = checkoutUrl;
 
-      let result;
-      const guestEmail = user?.email;
-
-      // Use quickBuyCredits for preset amounts, createPayment for custom amounts
-      const presetAmounts = [50, 100, 250, 500];
-      if (presetAmounts.includes(credits)) {
-        result = await stripeWrapper.quickBuyCredits(credits as 50 | 100 | 250 | 500, guestEmail);
-      } else {
-        const amount = getPriceAmount();
-        result = await stripeWrapper.createPayment({
-          amount,
-          credits,
-          productName: `${credits} Premium Backlink Credits`,
-          isGuest: !user,
-          guestEmail
-        });
-
-        if (result.success && result.url) {
-          stripeWrapper.openCheckoutWindow(result.url, result.sessionId);
-        }
-      }
-
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to create checkout session');
-      }
-
-      toast({
-        title: "✅ Checkout Opened",
-        description: "Complete your purchase in the new window",
-      });
-
-      // Close modal and call success callback
+      // Close modal
       onClose();
       if (onSuccess) {
         onSuccess();
@@ -169,8 +157,8 @@ export function ModernCreditPurchaseModal({
     } catch (error) {
       console.error('Credit purchase error:', error);
       toast({
-        title: "Checkout Error",
-        description: error instanceof Error ? error.message : 'Failed to open checkout',
+        title: "Redirect Error",
+        description: "Failed to redirect to checkout. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -272,7 +260,11 @@ export function ModernCreditPurchaseModal({
             </div>
             <div className="flex items-center gap-2 text-sm">
               <CheckCircle className="h-4 w-4 text-green-600" />
-              <span>Instant credit activation</span>
+              <span>Instant credit activation via webhooks</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <ExternalLink className="h-4 w-4 text-blue-600" />
+              <span>Redirects to Stripe's secure checkout page</span>
             </div>
           </div>
 
@@ -288,12 +280,12 @@ export function ModernCreditPurchaseModal({
                 {isLoading ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Processing...
+                    Redirecting...
                   </>
                 ) : (
                   <>
-                    <CreditCard className="h-4 w-4 mr-2" />
-                    Purchase {getCreditsAmount()} Credits - ${getPriceAmount().toFixed(2)}
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Buy {getCreditsAmount()} Credits - ${getPriceAmount().toFixed(2)}
                   </>
                 )}
               </Button>
@@ -321,7 +313,7 @@ export function ModernCreditPurchaseModal({
           </div>
 
           <div className="text-xs text-muted-foreground text-center">
-            Powered by Stripe • Secure checkout in new window
+            Powered by Stripe • Secure checkout • Credits activated automatically via webhooks
           </div>
         </div>
       </DialogContent>

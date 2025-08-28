@@ -1,118 +1,59 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Loader2, AlertCircle } from 'lucide-react';
-import { stripeWrapper } from '@/services/stripeWrapper';
+import { ArrowLeft, ExternalLink } from 'lucide-react';
 
 function SecurePayment() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { toast } = useToast();
-
-  const [isProcessing, setIsProcessing] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const processPayment = async () => {
-      try {
-        // Extract payment details from URL parameters
-        const credits = parseInt(searchParams.get('credits') || '0');
-        const amount = parseFloat(searchParams.get('amount') || '0');
-        const email = searchParams.get('email') || '';
-        const isGuest = searchParams.get('guest') === 'true';
+    // Immediately redirect to the credits checkout page
+    const creditsUrl = 'https://buy.stripe.com/9B63cv1tmcYe';
+    
+    // Add return URLs for better UX
+    const url = new URL(creditsUrl);
+    const currentOrigin = window.location.origin;
+    url.searchParams.set('success_url', `${currentOrigin}/payment-success?session_id={CHECKOUT_SESSION_ID}`);
+    url.searchParams.set('cancel_url', `${currentOrigin}/payment-cancelled`);
+    
+    // Redirect to Stripe checkout
+    window.location.href = url.toString();
+  }, []);
 
-        if (credits <= 0 || amount <= 0) {
-          toast({
-            title: 'Invalid Payment Details',
-            description: 'Please return to the dashboard and try again.',
-            variant: 'destructive'
-          });
-          navigate('/dashboard');
-          return;
-        }
-
-        // Create payment session with stripeWrapper
-        const result = await stripeWrapper.createPayment({
-          amount,
-          credits,
-          productName: `${credits} Backlink Credits`,
-          isGuest,
-          guestEmail: email
-        });
-
-        if (result.success && result.url) {
-          // Redirect directly to Stripe checkout
-          window.location.href = result.url;
-        } else {
-          setError(result.error || 'Failed to create payment session');
-          setIsProcessing(false);
-        }
-      } catch (error: any) {
-        console.error('Payment creation error:', error);
-        setError(error.message || 'Failed to create payment session');
-        setIsProcessing(false);
-      }
-    };
-
-    processPayment();
-  }, [searchParams, navigate, toast]);
-
-  const handleRetry = () => {
-    setIsProcessing(true);
-    setError(null);
-    window.location.reload();
-  };
-
-  const handleCancel = () => {
+  const handleGoBack = () => {
     navigate('/dashboard');
   };
 
-  if (isProcessing) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardContent className="p-8 text-center">
-            <Loader2 className="h-12 w-12 text-blue-600 mx-auto mb-4 animate-spin" />
-            <h3 className="text-lg font-semibold mb-2">Redirecting to Stripe Checkout</h3>
-            <p className="text-gray-600 mb-4">
-              Please wait while we redirect you to the secure payment page...
-            </p>
-            <Button onClick={handleCancel} variant="outline" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Cancel
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardContent className="p-6 text-center">
-            <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Payment Error</h3>
-            <p className="text-gray-600 mb-4">{error}</p>
-            <div className="space-y-2">
-              <Button onClick={handleRetry} className="w-full">
-                Try Again
-              </Button>
-              <Button onClick={handleCancel} variant="outline" className="w-full">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Return to Dashboard
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  return null;
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <Card className="w-full max-w-md">
+        <CardContent className="p-8 text-center">
+          <ExternalLink className="h-12 w-12 text-blue-600 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold mb-2">Redirecting to Stripe</h3>
+          <p className="text-gray-600 mb-4">
+            You're being redirected to Stripe's secure checkout page...
+          </p>
+          <p className="text-sm text-gray-500 mb-4">
+            If you're not redirected automatically, 
+            <a 
+              href="https://buy.stripe.com/9B63cv1tmcYe" 
+              className="text-blue-600 hover:underline ml-1"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              click here
+            </a>
+          </p>
+          <Button onClick={handleGoBack} variant="outline" size="sm">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Return to Dashboard
+          </Button>
+        </CardContent>
+      </Card>
+    </div>
+  );
 }
 
 export default SecurePayment;

@@ -7,25 +7,20 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import SubscriptionService from '@/services/subscriptionService';
 import { useAuth } from '@/hooks/useAuth';
-import { CheckoutRedirectManager } from '@/utils/checkoutRedirectManager';
 import {
   Crown,
-  CreditCard,
   Shield,
   CheckCircle,
-  X,
-  Lock,
-  Star,
   Infinity,
   BookOpen,
   TrendingUp,
   Users,
   Target,
   Sparkles,
-  Calendar,
-  Zap
+  Star,
+  Zap,
+  ExternalLink
 } from 'lucide-react';
 
 interface PremiumCheckoutModalProps {
@@ -39,18 +34,16 @@ export function PremiumCheckoutModal({ isOpen, onClose, onSuccess }: PremiumChec
   const { user } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('monthly');
-  const [paymentMethod, setPaymentMethod] = useState<'stripe'>('stripe');
 
-  // Debug user state
-  console.log('PremiumCheckoutModal - User state:', { user, hasUser: !!user, email: user?.email });
   const [formData, setFormData] = useState({
-    email: user?.email || '',
-    cardNumber: '',
-    expiryDate: '',
-    cvv: '',
-    name: '',
-    country: ''
+    email: user?.email || ''
   });
+
+  // Stripe checkout URLs
+  const STRIPE_CHECKOUT_URLS = {
+    monthly: 'https://buy.stripe.com/6oUaEX3Buf6m0V1fO11ZS00',
+    yearly: 'https://buy.stripe.com/14A4gzb3W8HY5bhatH1ZS01'
+  };
 
   const plans = {
     monthly: {
@@ -78,120 +71,68 @@ export function PremiumCheckoutModal({ isOpen, onClose, onSuccess }: PremiumChec
     { icon: <Zap className="h-4 w-4" />, text: "API Access & Integrations" }
   ];
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const createCheckoutUrl = (plan: 'monthly' | 'yearly'): string => {
+    const baseUrl = STRIPE_CHECKOUT_URLS[plan];
+    const url = new URL(baseUrl);
+    const currentOrigin = window.location.origin;
+    
+    // Add return URLs
+    url.searchParams.set('success_url', `${currentOrigin}/subscription-success?session_id={CHECKOUT_SESSION_ID}`);
+    url.searchParams.set('cancel_url', `${currentOrigin}/payment-cancelled`);
+    
+    // Add user email if available
+    if (user?.email || formData.email) {
+      url.searchParams.set('prefilled_email', user?.email || formData.email);
+    }
+    
+    // Add metadata for webhook processing
+    url.searchParams.set('client_reference_id', `premium_${plan}`);
+    
+    return url.toString();
   };
 
-  const handleCheckout = async (method: 'stripe' = 'stripe') => {
+  const handleCheckout = async () => {
     setIsProcessing(true);
-    setPaymentMethod(method);
 
     try {
-      // Create subscription and get checkout URL
-      const result = await SubscriptionService.createSubscription(
-        user,
-        !user, // isGuest if no user
-        !user ? formData.email : undefined, // guestEmail if no user
-        selectedPlan // Use selected plan instead of default
-      );
-
-      if (result.success && result.url) {
-        // Open checkout in new window
-        const checkoutWindow = window.open(
-          result.url,
-          'stripe-checkout',
-          'width=800,height=600,scrollbars=yes,resizable=yes,location=yes,status=yes'
-        );
-
-        if (!checkoutWindow) {
-          // Popup was blocked - try alternative new window approach first
+      // Validate email for guests
+      if (!user && !formData.email) {
         toast({
-          title: "Popup Blocked",
-          description: "Trying alternative window opening...",
+          title: "Email Required",
+          description: "Please enter your email address to continue.",
+          variant: "destructive"
         });
-        const fallbackWindow = window.open(result.url, 'stripe-checkout-fallback', 'width=800,height=600,scrollbars=yes,resizable=yes');
-        if (!fallbackWindow) {
-          // Only use current window as last resort
-          window.location.href = result.url;
-        }
-        } else {
-          // Popup opened successfully
-          toast({
-            title: "✅ Checkout Opened",
-            description: "Complete your payment in the Stripe window.",
-          });
-          // Close modal after successful redirect
-          onClose();
-        }
-      } else if (result.success && result.usedFallback) {
-        // Fallback was used - handle locally
-        toast({
-          title: "✅ Premium Activated!",
-          description: "Your account has been upgraded to Premium (development mode).",
-        });
+        setIsProcessing(false);
+        return;
+      }
 
-        // Close modal and trigger success callback
-        onClose();
-        if (onSuccess) {
-          onSuccess();
-        }
-      } else {
-        throw new Error(result.error || 'Failed to create subscription');
+      toast({
+        title: "🚀 Redirecting to Stripe",
+        description: `Opening secure checkout for ${selectedPlan} premium plan...`,
+      });
+
+      // Create checkout URL and redirect
+      const checkoutUrl = createCheckoutUrl(selectedPlan);
+      
+      // Redirect to Stripe checkout
+      window.location.href = checkoutUrl;
+
+      // Close modal
+      onClose();
+      if (onSuccess) {
+        onSuccess();
       }
     } catch (error: any) {
       console.error('Checkout error:', error);
 
-      let errorMessage = "There was an issue setting up your payment. Please try again.";
-
-      // Handle different error types
-      if (typeof error === 'string') {
-        errorMessage = error;
-      } else if (error?.message) {
-        errorMessage = error.message;
-      } else if (error?.error) {
-        errorMessage = error.error;
-      }
-
-      // Handle specific error cases
-      if (errorMessage.includes('authentication') || errorMessage.includes('auth')) {
-        errorMessage = 'Please sign in first, then try upgrading to premium.';
-      } else if (errorMessage.includes('configuration') || errorMessage.includes('not configured')) {
-        errorMessage = 'Payment system is not configured. Please contact support.';
-      } else if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
-        errorMessage = 'Network error. Please check your connection and try again.';
-      }
-
       toast({
-        title: "Payment Setup Failed",
-        description: errorMessage,
+        title: "Redirect Error",
+        description: "Failed to redirect to checkout. Please try again.",
         variant: "destructive"
       });
     } finally {
       setIsProcessing(false);
     }
-  };
-
-  const formatCardNumber = (value: string) => {
-    const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
-    const matches = v.match(/\d{4,16}/g);
-    const match = matches && matches[0] || '';
-    const parts = [];
-    for (let i = 0, len = match.length; i < len; i += 4) {
-      parts.push(match.substring(i, i + 4));
-    }
-    if (parts.length) {
-      return parts.join(' ');
-    } else {
-      return v;
-    }
-  };
-
-  const formatExpiryDate = (value: string) => {
-    const v = value.replace(/\D/g, '');
-    if (v.length >= 2) {
-      return v.substring(0, 2) + '/' + v.substring(2, 4);
-    }
-    return v;
   };
 
   // Update email when user state changes
@@ -298,7 +239,7 @@ export function PremiumCheckoutModal({ isOpen, onClose, onSuccess }: PremiumChec
             </div>
           </div>
 
-          {/* Right Side - Payment Form */}
+          {/* Right Side - Checkout Form */}
           <div className="p-8">
             <div className="space-y-6">
               {/* Show user account info or email input */}
@@ -318,7 +259,7 @@ export function PremiumCheckoutModal({ isOpen, onClose, onSuccess }: PremiumChec
                     type="email"
                     placeholder="your@email.com"
                     value={formData.email}
-                    onChange={(e) => handleInputChange('email', e.target.value)}
+                    onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                     className="mt-2"
                     required
                   />
@@ -335,16 +276,16 @@ export function PremiumCheckoutModal({ isOpen, onClose, onSuccess }: PremiumChec
                 </div>
                 <h3 className="text-lg font-semibold mb-2 text-gray-900">Secure Stripe Checkout</h3>
                 <p className="text-gray-600 text-sm mb-3">
-                  You'll be redirected to Stripe's secure payment page to safely enter your payment details.
+                  You'll be redirected to Stripe's secure payment page to safely complete your subscription.
                 </p>
                 <div className="flex items-center justify-center gap-4 text-xs text-gray-500">
                   <div className="flex items-center gap-1">
-                    <CreditCard className="h-3 w-3" />
-                    <span>Cards</span>
+                    <ExternalLink className="h-3 w-3" />
+                    <span>Direct Link</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <div className="w-3 h-3 bg-green-600 rounded"></div>
-                    <span>Apple Pay</span>
+                    <Shield className="h-3 w-3" />
+                    <span>Secure</span>
                   </div>
                 </div>
               </div>
@@ -370,39 +311,32 @@ export function PremiumCheckoutModal({ isOpen, onClose, onSuccess }: PremiumChec
                 </div>
               </div>
 
-              {/* Payment Method Selection */}
-              <div className="space-y-3">
-                <Label className="text-lg font-semibold">Choose Payment Method</Label>
-                <div className="grid grid-cols-1 gap-3">
-                  {/* Stripe Button */}
-                  <Button
-                    className="w-full h-12 text-lg bg-blue-600 hover:bg-blue-700"
-                    onClick={() => handleCheckout('stripe')}
-                    disabled={isProcessing || (!user && !formData.email)}
-                  >
-                    {isProcessing && paymentMethod === 'stripe' ? (
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        Processing...
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <CreditCard className="h-4 w-4" />
-                        Pay with Stripe
-                      </div>
-                    )}
-                  </Button>
-
-                </div>
-              </div>
+              {/* Checkout Button */}
+              <Button
+                className="w-full h-12 text-lg bg-blue-600 hover:bg-blue-700"
+                onClick={handleCheckout}
+                disabled={isProcessing || (!user && !formData.email)}
+              >
+                {isProcessing ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Redirecting...
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <ExternalLink className="h-4 w-4" />
+                    Subscribe for ${plans[selectedPlan].price}
+                  </div>
+                )}
+              </Button>
 
               {/* Security Notice */}
               <div className="text-center text-sm text-gray-500">
                 <div className="flex items-center justify-center gap-1 mb-1">
                   <Shield className="h-4 w-4" />
-                  <span>Secured by 256-bit SSL encryption</span>
+                  <span>Secured by Stripe • Instant activation via webhooks</span>
                 </div>
-                <p>Your payment information is secure and encrypted.</p>
+                <p>Your subscription will be activated automatically when payment completes.</p>
               </div>
             </div>
           </div>
