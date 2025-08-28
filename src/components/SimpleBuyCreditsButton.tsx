@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { CreditCard, Loader2 } from 'lucide-react';
-import { paymentIntegrationService } from '@/services/paymentIntegrationService';
+import { CreditCard, Loader2, ExternalLink } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 
 interface SimpleBuyCreditsButtonProps {
   trigger?: React.ReactNode;
@@ -29,6 +29,30 @@ export function SimpleBuyCreditsButton({
 }: SimpleBuyCreditsButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
+
+  // Stripe checkout URL for credits
+  const CREDITS_CHECKOUT_URL = 'https://buy.stripe.com/9B63cv1tmcYe';
+
+  const createCheckoutUrl = (): string => {
+    const url = new URL(CREDITS_CHECKOUT_URL);
+    const currentOrigin = window.location.origin;
+    
+    // Add return URLs
+    url.searchParams.set('success_url', `${currentOrigin}/payment-success?session_id={CHECKOUT_SESSION_ID}`);
+    url.searchParams.set('cancel_url', `${currentOrigin}/payment-cancelled`);
+    
+    // Add user email if available
+    const emailToUse = user?.email || guestEmail;
+    if (emailToUse) {
+      url.searchParams.set('prefilled_email', emailToUse);
+    }
+    
+    // Add metadata for webhook processing
+    url.searchParams.set('client_reference_id', `credits_${defaultCredits}`);
+    
+    return url.toString();
+  };
 
   const handleBuyCredits = async () => {
     if (isLoading) return;
@@ -36,30 +60,28 @@ export function SimpleBuyCreditsButton({
     setIsLoading(true);
 
     try {
-      // Calculate amount based on credits ($1.40 per credit)
-      const amount = defaultCredits * 1.40;
+      toast({
+        title: "🚀 Redirecting to Stripe",
+        description: `Opening secure checkout for ${defaultCredits} credits...`,
+      });
 
-      const result = await paymentIntegrationService.createPayment(
-        amount,
-        defaultCredits,
-        'stripe',
-        isGuest,
-        isGuest ? (guestEmail || 'support@backlinkoo.com') : undefined
-      );
+      // Create checkout URL and redirect
+      const checkoutUrl = createCheckoutUrl();
+      
+      // Redirect to Stripe checkout
+      window.location.href = checkoutUrl;
 
-      if (result.success && result.url) {
-        // Redirect to Stripe checkout
-        window.location.href = result.url;
-      } else {
-        throw new Error(result.error || 'Payment creation failed');
+      // Call success callback if provided
+      if (onPaymentSuccess) {
+        onPaymentSuccess();
       }
 
     } catch (error: any) {
-      console.error('💳 Payment creation error:', error);
+      console.error('💳 Payment redirect error:', error);
       
       toast({
-        title: "Payment Error",
-        description: error.message || "Unable to process payment. Please try again or contact support.",
+        title: "Redirect Error",
+        description: "Failed to redirect to checkout. Please try again.",
         variant: "destructive"
       });
 
@@ -80,7 +102,7 @@ export function SimpleBuyCreditsButton({
       {isLoading ? (
         <Loader2 className="h-4 w-4 mr-1 sm:mr-2 animate-spin" />
       ) : (
-        <CreditCard className="h-4 w-4 mr-1 sm:mr-2" />
+        <ExternalLink className="h-4 w-4 mr-1 sm:mr-2" />
       )}
       <span className="hidden sm:inline">Buy {defaultCredits} Credits</span>
       <span className="sm:hidden">{defaultCredits}</span>

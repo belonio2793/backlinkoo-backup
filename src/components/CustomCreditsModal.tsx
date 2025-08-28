@@ -8,7 +8,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CreditCard, Shield, ExternalLink, Zap, Calculator, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { CreditPaymentService } from "@/services/creditPaymentService";
 import { useAuth } from "@/hooks/useAuth";
 
 interface CustomCreditsModalProps {
@@ -25,6 +24,7 @@ export const CustomCreditsModal = ({
   onSuccess
 }: CustomCreditsModalProps) => {
   const CREDIT_PRICE = 1.40;
+  const CREDITS_CHECKOUT_URL = 'https://buy.stripe.com/9B63cv1tmcYe';
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -63,7 +63,28 @@ export const CustomCreditsModal = ({
     setCredits(creditAmount.toString());
   };
 
-  // Handle credit purchase with new window checkout
+  // Create checkout URL with user data
+  const createCheckoutUrl = (): string => {
+    const url = new URL(CREDITS_CHECKOUT_URL);
+    const currentOrigin = window.location.origin;
+    
+    // Add return URLs
+    url.searchParams.set('success_url', `${currentOrigin}/payment-success?session_id={CHECKOUT_SESSION_ID}`);
+    url.searchParams.set('cancel_url', `${currentOrigin}/payment-cancelled`);
+    
+    // Add user email if available
+    if (user?.email) {
+      url.searchParams.set('prefilled_email', user.email);
+    }
+    
+    // Add metadata for webhook processing
+    const creditCount = parseInt(credits);
+    url.searchParams.set('client_reference_id', `credits_${creditCount}`);
+    
+    return url.toString();
+  };
+
+  // Handle credit purchase with direct checkout
   const handleCreditPurchase = async () => {
     const creditCount = parseInt(credits);
     
@@ -89,67 +110,31 @@ export const CustomCreditsModal = ({
 
     try {
       toast({
-        title: "🚀 Opening Stripe Checkout",
-        description: "Secure payment window is opening...",
+        title: "🚀 Redirecting to Stripe",
+        description: `Opening secure checkout for ${creditCount} credits...`,
       });
 
-      const result = await CreditPaymentService.createCreditPayment(
-        user,
-        !user, // Set guest status based on user authentication
-        user?.email,
-        {
-          amount: totalAmount,
-          credits: creditCount,
-          productName: `${creditCount} Premium Backlink Credits`,
-          isGuest: !user,
-          guestEmail: user?.email
-        }
-      );
+      // Create checkout URL and redirect
+      const checkoutUrl = createCheckoutUrl();
+      
+      // Redirect to Stripe checkout
+      window.location.href = checkoutUrl;
 
-      if (result.success) {
-        if (result.url) {
-          // Open checkout in new window
-          CreditPaymentService.openCheckoutWindow(result.url, result.sessionId);
-
-          toast({
-            title: "✅ Checkout Opened Successfully",
-            description: "Complete your payment in the new window. This modal will close shortly.",
-          });
-        } else if (result.usedFallback) {
-          toast({
-            title: "✅ Development Mode",
-            description: "Credit purchase simulated in development mode.",
-          });
-        }
-
-        // Call success callback if provided
-        if (onSuccess) {
-          onSuccess();
-        }
-
-        // Close modal after successful checkout window opening
-        setTimeout(() => {
-          onClose();
-        }, 2500);
-      } else {
-        throw new Error(result.error || 'Failed to create payment session');
+      // Call success callback if provided
+      if (onSuccess) {
+        onSuccess();
       }
+
+      // Close modal
+      onClose();
     } catch (error) {
       console.error('Credit purchase error:', error);
       
-      if (error instanceof Error && error.message.includes('popup')) {
-        toast({
-          title: "Popup Blocked",
-          description: "Please allow popups for this site and try again.",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Payment Error",
-          description: error instanceof Error ? error.message : 'Failed to create payment session',
-          variant: "destructive",
-        });
-      }
+      toast({
+        title: "Redirect Error",
+        description: "Failed to redirect to checkout. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -286,13 +271,12 @@ export const CustomCreditsModal = ({
             {loading ? (
               <div className="flex items-center gap-2">
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                Opening Secure Checkout...
+                Redirecting...
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <CreditCard className="h-5 w-5" />
+                <ExternalLink className="h-5 w-5" />
                 Buy {credits || 0} Credits for ${totalAmount.toFixed(2)}
-                <ExternalLink className="h-4 w-4 ml-1" />
               </div>
             )}
           </Button>
@@ -305,7 +289,7 @@ export const CustomCreditsModal = ({
             </div>
             <div className="flex items-center justify-center gap-2">
               <ExternalLink className="h-4 w-4" />
-              <span>Checkout opens in new window for security</span>
+              <span>Direct checkout link • Instant activation via webhooks</span>
             </div>
             <p className="text-xs mt-2">
               Credits are added to your account immediately after successful payment
