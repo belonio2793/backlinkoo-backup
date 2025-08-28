@@ -33,7 +33,7 @@ export class CreditPaymentService {
 
     // Treat fly.dev as development environment (Builder.io development servers)
     const isDevelopment = isLocalhost || isFlyDev;
-    const hasSupabaseFunctions = !isDevelopment; // Edge functions more likely to work in production
+    const hasSupabaseFunctions = true; // Always try Supabase edge functions first since Stripe keys are configured there
 
     return {
       isLocalhost,
