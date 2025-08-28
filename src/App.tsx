@@ -48,6 +48,7 @@ const LazySubscriptionSuccess = lazy(() => import("./pages/SubscriptionSuccess")
 const LazySubscriptionCancelled = lazy(() => import("./pages/SubscriptionCancelled"));
 const LazyTermsOfService = lazy(() => import("./pages/TermsOfService"));
 const LazyPrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const LazyPaymentTest = lazy(() => import("./pages/PaymentTest"));
 const LazyNotFound = lazy(() => import("./pages/NotFound"));
 const LazyTwitterAdGenerator = lazy(() => import("./pages/TwitterAdGenerator"));
 const LazyAffiliate = lazy(() => import("./pages/Affiliate"));
