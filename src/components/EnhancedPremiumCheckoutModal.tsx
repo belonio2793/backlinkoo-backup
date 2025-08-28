@@ -197,20 +197,7 @@ export function EnhancedPremiumCheckoutModal({
     }
   };
 
-  // Handle guest checkout
-  const handleGuestCheckout = async () => {
-    if (!guestEmail) {
-      toast({
-        title: "Email Required",
-        description: "Please enter your email address to continue.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setCheckoutMode('guest');
-    await handleCheckout();
-  };
+  // Removed guest checkout - authentication now required
 
 
   const renderAuthStep = () => (
