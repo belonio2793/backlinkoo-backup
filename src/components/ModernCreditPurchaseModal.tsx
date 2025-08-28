@@ -103,8 +103,18 @@ export function ModernCreditPurchaseModal({
   };
 
   const handlePurchase = async () => {
+    // Require authentication for all purchases
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to purchase credits",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const credits = getCreditsAmount();
-    
+
     if (credits <= 0) {
       toast({
         title: "Invalid Amount",
@@ -131,20 +141,19 @@ export function ModernCreditPurchaseModal({
       });
 
       let result;
-      const guestEmail = user?.email;
 
       // Use quickBuyCredits for preset amounts, createPayment for custom amounts
       const presetAmounts = [50, 100, 250, 500];
       if (presetAmounts.includes(credits)) {
-        result = await stripeWrapper.quickBuyCredits(credits as 50 | 100 | 250 | 500, guestEmail);
+        result = await stripeWrapper.quickBuyCredits(credits as 50 | 100 | 250 | 500, user.email);
       } else {
         const amount = getPriceAmount();
         result = await stripeWrapper.createPayment({
           amount,
           credits,
           productName: `${credits} Premium Backlink Credits`,
-          isGuest: !user,
-          guestEmail
+          isGuest: false,
+          guestEmail: user.email
         });
 
         if (result.success && result.url) {
