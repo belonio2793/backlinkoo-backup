@@ -286,25 +286,40 @@ export const CustomCreditsModal = ({
           </div>
 
           {/* Purchase Button */}
-          <Button 
-            onClick={handleCreditPurchase} 
-            disabled={loading || !isValidAmount}
-            className="w-full h-14 text-lg"
-            size="lg"
-          >
-            {loading ? (
-              <div className="flex items-center gap-2">
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                Opening Secure Checkout...
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <CreditCard className="h-5 w-5" />
-                Buy {credits || 0} Credits for ${totalAmount.toFixed(2)}
-                <ExternalLink className="h-4 w-4 ml-1" />
-              </div>
-            )}
-          </Button>
+          {user ? (
+            <Button
+              onClick={handleCreditPurchase}
+              disabled={loading || !isValidAmount}
+              className="w-full h-14 text-lg"
+              size="lg"
+            >
+              {loading ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Opening Secure Checkout...
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <CreditCard className="h-5 w-5" />
+                  Buy {credits || 0} Credits for ${totalAmount.toFixed(2)}
+                  <ExternalLink className="h-4 w-4 ml-1" />
+                </div>
+              )}
+            </Button>
+          ) : (
+            <Button
+              onClick={() => toast({
+                title: "Authentication Required",
+                description: "Please sign in to purchase credits",
+                variant: "destructive",
+              })}
+              className="w-full h-14 text-lg"
+              size="lg"
+              variant="outline"
+            >
+              Sign In to Purchase Credits
+            </Button>
+          )}
 
           {/* Security & Process Notice */}
           <div className="text-center text-sm text-muted-foreground border-t pt-4 space-y-2">
