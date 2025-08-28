@@ -227,37 +227,23 @@ export class CreditPaymentService {
         resultContent: result ? result : 'no data'
       });
 
-      if (!response.ok) {
-        let errorMessage;
-        try {
-          // Try to read as JSON first for structured errors
-          const errorData = await response.json();
-          errorMessage = errorData.error || errorData.message || response.statusText;
-        } catch {
-          // If JSON parsing fails, fall back to status text
-          errorMessage = response.statusText;
-        }
-        console.error('❌ Netlify Function failed:', response.status, errorMessage);
-        throw new Error(`Payment service returned ${response.status}: ${errorMessage}`);
-      }
-
-      const result = await response.json();
-
-      console.log('📥 Netlify Function response data:', {
-        hasUrl: !!result.url,
-        hasSessionId: !!result.sessionId,
-        dataKeys: Object.keys(result)
-      });
-
-      if (result.url) {
+      if (!edgeError && result && result.url) {
         console.log('✅ Live payment session created successfully');
         return {
           success: true,
           url: result.url,
-          sessionId: result.sessionId
+          sessionId: result.sessionId || result.session_id
         };
       } else {
-        throw new Error('No payment URL received from server');
+        // Payment failed - provide detailed error
+        const errorMessage = edgeError ? this.extractErrorMessage(edgeError) : 'No payment URL received from server';
+        console.error('❌ Payment creation failed:', errorMessage);
+        ErrorLogger.logError('Credit payment error', edgeError || { message: 'No URL returned' });
+
+        return {
+          success: false,
+          error: `Payment system error: ${errorMessage}. Please try again or contact support.`
+        };
       }
 
     } catch (error) {
