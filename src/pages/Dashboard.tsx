@@ -648,6 +648,7 @@ const Dashboard = () => {
   const [userType, setUserType] = useState<"user" | "admin">("user");
   const [credits, setCredits] = useState(0);
   const [campaigns, setCampaigns] = useState<any[]>([]);
+  const [showCreditModal, setShowCreditModal] = useState(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [showCampaignForm, setShowCampaignForm] = useState(false);
   const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
