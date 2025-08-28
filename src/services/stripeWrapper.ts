@@ -121,39 +121,42 @@ class StripeWrapper {
       isGuest: options.isGuest
     });
 
-    // Primary method: Supabase Edge Functions
+    // INSTANT REDIRECT: Use direct Stripe checkout URL for fastest experience
+    try {
+      const result = await this.createDirectStripeCheckout(options);
+      if (result.success) {
+        return { ...result, method: 'direct' };
+      }
+    } catch (error: any) {
+      console.warn('⚠️ Direct Stripe method failed, trying backend:', error.message);
+    }
+
+    // Fallback 1: Supabase Edge Functions (if direct fails)
     try {
       const result = await this.createPaymentViaSupabase(options);
       if (result.success) {
         return { ...result, method: 'supabase' };
       }
-      console.warn('⚠️ Supabase payment failed, trying fallback:', result.error);
+      console.warn('⚠️ Supabase payment failed:', result.error);
     } catch (error: any) {
       console.warn('⚠️ Supabase method error:', error.message);
     }
 
-    // Fallback 1: Netlify Functions
+    // Fallback 2: Netlify Functions
     try {
       const result = await this.createPaymentViaNetlify(options);
       if (result.success) {
         return { ...result, method: 'netlify', fallbackUsed: true };
       }
-      console.warn('⚠️ Netlify payment failed, trying final fallback:', result.error);
+      console.warn('⚠️ Netlify payment failed:', result.error);
     } catch (error: any) {
       console.warn('⚠️ Netlify method error:', error.message);
     }
 
-    // Fallback 2: Client-side payment
-    try {
-      const result = await this.createPaymentViaClient(options);
-      return { ...result, method: 'client', fallbackUsed: true };
-    } catch (error: any) {
-      console.error('❌ All payment methods failed:', error.message);
-      return {
-        success: false,
-        error: 'All payment methods unavailable. Please try again or contact support.'
-      };
-    }
+    return {
+      success: false,
+      error: 'All payment methods unavailable. Please try again or contact support.'
+    };
   }
 
   /**
