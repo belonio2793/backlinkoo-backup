@@ -110,6 +110,18 @@ const SubscriptionSuccess = () => {
           <CardContent className="space-y-6">
             {subscriptionVerified && (
               <>
+                {/* Demo Mode Indicator */}
+                {(searchParams.get('instant') === 'true' || searchParams.get('method') === 'direct') && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <div className="flex items-center gap-2 text-blue-800">
+                      <CheckCircle className="h-4 w-4" />
+                      <span className="text-sm font-medium">
+                        Demo Mode: This is a demonstration of the subscription flow. No actual payment was processed.
+                      </span>
+                    </div>
+                  </div>
+                )}
+
                 <div className="space-y-3">
                   <h3 className="font-semibold flex items-center gap-2">
                     <Crown className="h-5 w-5 text-yellow-600" />
