@@ -22,15 +22,23 @@ export function SimpleBuyCreditsButton({
   onPaymentCancel,
   variant = 'outline',
   size = 'sm',
-  className,
-  guestEmail,
-  isGuest = true
+  className
 }: SimpleBuyCreditsButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const handleBuyCredits = async () => {
     if (isLoading) return;
+
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to purchase credits.",
+        variant: "destructive"
+      });
+      return;
+    }
 
     setIsLoading(true);
 
@@ -41,9 +49,7 @@ export function SimpleBuyCreditsButton({
       const result = await paymentIntegrationService.createPayment(
         amount,
         defaultCredits,
-        'stripe',
-        isGuest,
-        isGuest ? (guestEmail || 'support@backlinkoo.com') : undefined
+        'stripe'
       );
 
       if (result.success && result.url) {
@@ -55,7 +61,7 @@ export function SimpleBuyCreditsButton({
 
     } catch (error: any) {
       console.error('💳 Payment creation error:', error);
-      
+
       toast({
         title: "Payment Error",
         description: error.message || "Unable to process payment. Please try again or contact support.",
