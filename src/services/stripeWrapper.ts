@@ -156,38 +156,31 @@ class StripeWrapper {
       return { success: false, error: 'Invalid subscription plan' };
     }
 
-    console.log('🎖️ Creating subscription:', {
+    console.log('🎖️ Creating subscription with instant redirect:', {
       plan,
       tier: options.tier,
       isGuest: options.isGuest
     });
 
-    // Primary method: Supabase Edge Functions
+    // FASTEST PATH: Try Supabase first but don't wait long
+    const supabasePromise = this.createSubscriptionViaSupabase({ ...options, plan });
+    const timeoutPromise = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('Timeout')), 2000) // 2 second timeout
+    );
+
     try {
-      const result = await this.createSubscriptionViaSupabase({ ...options, plan });
+      const result = await Promise.race([supabasePromise, timeoutPromise]);
       if (result.success) {
+        console.log('✅ Fast Supabase subscription created');
         return { ...result, method: 'supabase' };
       }
-      console.warn('⚠️ Supabase subscription failed, trying fallback:', result.error);
     } catch (error: any) {
-      console.warn('⚠️ Supabase subscription error:', error.message);
+      console.log('⚡ Supabase too slow or failed, using instant redirect');
     }
 
-    // Fallback 1: Netlify Functions
-    try {
-      const result = await this.createSubscriptionViaNetlify({ ...options, plan });
-      if (result.success) {
-        return { ...result, method: 'netlify', fallbackUsed: true };
-      }
-      console.warn('⚠️ Netlify subscription failed:', result.error);
-    } catch (error: any) {
-      console.warn('⚠️ Netlify subscription error:', error.message);
-    }
-
-    return {
-      success: false,
-      error: 'Subscription service unavailable. Please try again or contact support.'
-    };
+    // INSTANT FALLBACK: Direct redirect for subscriptions
+    console.log('🚀 Using instant subscription redirect');
+    return this.createInstantSubscriptionRedirect({ ...options, plan });
   }
 
   /**
