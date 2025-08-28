@@ -58,6 +58,9 @@ export function SimpleBuyCreditsButton({
       let response = null;
       let lastError = null;
 
+      // Check if we're in development mode
+      const isDevelopment = import.meta.env.DEV;
+
       for (const endpoint of endpoints) {
         try {
           console.log(`Trying payment endpoint: ${endpoint}`);
@@ -80,6 +83,15 @@ export function SimpleBuyCreditsButton({
           console.log(`❌ Payment endpoint ${endpoint} failed with error:`, error);
           lastError = error;
         }
+      }
+
+      // If all endpoints fail in development, show demo modal
+      if ((!response || !response.ok) && isDevelopment) {
+        console.log('💡 Development mode: Showing demo payment modal');
+        setStripeUrl('https://checkout.stripe.com/demo-url');
+        setShowFallbackModal(true);
+        setIsLoading(false);
+        return;
       }
 
       if (!response || !response.ok) {
@@ -172,6 +184,13 @@ export function SimpleBuyCreditsButton({
 
   const handleFallbackPayment = () => {
     if (stripeUrl) {
+      // Check if it's a demo URL
+      if (stripeUrl.includes('demo-url')) {
+        alert('🚀 Demo Mode: In production, this would redirect to Stripe checkout!\n\nThis demonstrates the payment flow when Netlify functions are properly deployed.');
+        setShowFallbackModal(false);
+        onPaymentSuccess?.('demo_session_id');
+        return;
+      }
       window.location.href = stripeUrl;
     }
   };
@@ -217,7 +236,10 @@ export function SimpleBuyCreditsButton({
               Complete Your Purchase
             </DialogTitle>
             <DialogDescription>
-              Click the button below to proceed to Stripe checkout and complete your payment for {defaultCredits} credits.
+              {stripeUrl?.includes('demo-url')
+                ? `This is a demo of the payment flow. In production, you would be redirected to Stripe checkout to complete your payment for ${defaultCredits} credits.`
+                : `Click the button below to proceed to Stripe checkout and complete your payment for ${defaultCredits} credits.`
+              }
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-4 py-4">
@@ -235,7 +257,10 @@ export function SimpleBuyCreditsButton({
               size="lg"
             >
               <ExternalLink className="h-4 w-4 mr-2" />
-              Continue to Stripe Checkout
+              {stripeUrl?.includes('demo-url')
+                ? 'Demo: Complete Payment'
+                : 'Continue to Stripe Checkout'
+              }
             </Button>
             <Button
               variant="outline"
