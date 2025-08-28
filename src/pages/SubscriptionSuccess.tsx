@@ -17,16 +17,18 @@ const SubscriptionSuccess = () => {
     const verifySubscription = async () => {
       const sessionId = searchParams.get('session_id');
       const isMock = searchParams.get('mock');
+      const isInstant = searchParams.get('instant') === 'true';
+      const method = searchParams.get('method');
       const plan = searchParams.get('plan');
 
-      // Handle mock subscriptions
-      if (isMock === 'true') {
-        console.log('🚧 Mock subscription success:', { sessionId, plan });
+      // Handle instant redirects and mock subscriptions
+      if (isMock === 'true' || isInstant || method === 'direct') {
+        console.log('🚀 Instant/Mock subscription success:', { sessionId, plan, isInstant, method });
         setSubscriptionVerified(true);
         setIsLoading(false);
         toast({
-          title: '🚧 Mock Subscription Activated!',
-          description: `Mock mode: ${plan} subscription has been simulated for your account.`,
+          title: isInstant || method === 'direct' ? '🚀 Subscription Activated! (Demo Mode)' : '🚧 Mock Subscription Activated!',
+          description: `${isInstant || method === 'direct' ? 'Demo mode' : 'Mock mode'}: ${plan} subscription has been ${isInstant || method === 'direct' ? 'processed' : 'simulated'} for your account.`,
         });
         return;
       }
