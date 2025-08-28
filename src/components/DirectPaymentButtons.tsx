@@ -239,52 +239,20 @@ export function DirectPaymentButton({
       return;
     }
 
+    if (!user) {
+      const actionType = type === 'credits' ? 'purchase credits' : 'upgrade to Premium';
+      toast(`Please sign in to ${actionType}`, { duration: 3000 });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      if (user) {
-        // User is authenticated, proceed with normal flow
-        if (type === 'credits') {
-          await stripeCheckout.quickBuyCredits(credits || 50);
-        } else {
-          await stripeCheckout.upgradeToPremium(plan || 'monthly');
-        }
+      // User is authenticated, proceed with purchase
+      if (type === 'credits') {
+        await stripeCheckout.quickBuyCredits(credits || 50);
       } else {
-        // User is not authenticated, collect email for guest checkout
-        const email = window.prompt(
-          type === 'credits'
-            ? 'Please enter your email address to purchase credits:'
-            : 'Please enter your email address to upgrade to Premium:'
-        );
-
-        if (!email || !email.includes('@')) {
-          toast('A valid email address is required to complete your purchase', {
-            duration: 3000
-          });
-          return;
-        }
-
-        if (type === 'credits') {
-          const creditAmount = credits || 50;
-          const pricing = {
-            50: 70,
-            100: 140,
-            250: 350,
-            500: 700
-          };
-          const amount = pricing[creditAmount as keyof typeof pricing] || creditAmount * 1.40;
-
-          await stripeCheckout.guestQuickBuy({
-            credits: creditAmount,
-            amount,
-            email
-          });
-        } else {
-          await stripeCheckout.guestPremiumUpgrade({
-            plan: plan || 'monthly',
-            email
-          });
-        }
+        await stripeCheckout.upgradeToPremium(plan || 'monthly');
       }
     } catch (error) {
       console.error('Purchase error:', error);
