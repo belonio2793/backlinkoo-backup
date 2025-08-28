@@ -16,7 +16,6 @@ export interface CreditPaymentResult {
   url?: string;
   sessionId?: string;
   error?: string;
-  usedFallback?: boolean;
 }
 
 export class CreditPaymentService {
@@ -31,17 +30,12 @@ export class CreditPaymentService {
     const isNetlify = hostname.includes('netlify.app') || hostname.includes('netlify.com');
     const isFlyDev = hostname.includes('fly.dev');
 
-    // Treat fly.dev as development environment (Builder.io development servers)
-    const isDevelopment = isLocalhost || isFlyDev;
-    const hasSupabaseFunctions = true; // Always try Supabase edge functions first since Stripe keys are configured there
-
     return {
       isLocalhost,
       isNetlify,
       isFlyDev,
-      isDevelopment,
-      isProduction: !isDevelopment,
-      hasSupabaseFunctions,
+      isDevelopment: isLocalhost,
+      isProduction: !isLocalhost,
       hostname
     };
   }
@@ -98,38 +92,7 @@ export class CreditPaymentService {
   }
 
   /**
-   * Create development Stripe URL for testing
-   */
-  private static createDevStripeUrl(options: CreditPaymentOptions): string {
-    // Check if we have Stripe test keys for development
-    const stripePublishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
-
-    if (stripePublishableKey && stripePublishableKey.startsWith('pk_test_')) {
-      console.log('🧪 Using Stripe test environment for development');
-      // Create a mock Stripe checkout page that will open in new window
-      const params = new URLSearchParams({
-        credits: options.credits.toString(),
-        amount: options.amount.toString(),
-        productName: options.productName || `${options.credits} Credits`,
-        testMode: 'true'
-      });
-
-      // Return a local test page that simulates Stripe checkout
-      return `/dev-stripe-checkout?${params.toString()}`;
-    } else {
-      console.log('🔧 No valid Stripe test keys - using local dev checkout');
-      const params = new URLSearchParams({
-        credits: options.credits.toString(),
-        amount: options.amount.toString(),
-        productName: options.productName || `${options.credits} Credits`,
-        testMode: 'false'
-      });
-      return `/dev-stripe-checkout?${params.toString()}`;
-    }
-  }
-
-  /**
-   * Create credit payment session
+   * Create credit payment session using Supabase Edge Functions
    */
   static async createCreditPayment(
     user: User | null,
@@ -166,9 +129,6 @@ export class CreditPaymentService {
       return { success: false, error: 'Email is required for payment processing' };
     }
 
-    // Note: Stripe keys are configured in Supabase Edge Functions secrets
-    console.log('🔧 Using Supabase Edge Functions for payment processing (Stripe keys configured in Supabase secrets)');
-
     const requestBody = {
       amount: options.amount,
       credits: options.credits,
@@ -185,214 +145,68 @@ export class CreditPaymentService {
       finalIsGuest
     });
 
-    let data = null;
-    let error = null;
-
     try {
-      // Try Supabase Edge Functions first (if available)
-      if (environment.hasSupabaseFunctions) {
-        console.log('🔄 Trying Supabase Edge Function for credit payment...');
-        console.log('Environment details:', environment);
+      console.log('🔄 Using Supabase Edge Function for credit payment...');
 
-        try {
-          // Get auth session for Supabase edge functions
-          const { data: session } = await supabase.auth.getSession();
-          const headers: Record<string, string> = {
-            'Content-Type': 'application/json'
-          };
+      // Get auth session for Supabase edge functions
+      const { data: session } = await supabase.auth.getSession();
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json'
+      };
 
-          if (!finalIsGuest && session?.session?.access_token) {
-            headers['Authorization'] = `Bearer ${session.session.access_token}`;
-          }
-
-          console.log('📤 Calling Supabase Edge Function with:', {
-            function: 'create-payment',
-            hasAuth: !!headers['Authorization'],
-            requestBody: { ...requestBody, guestEmail: finalGuestEmail ? '***' : undefined }
-          });
-
-          const { data: result, error: edgeError } = await supabase.functions.invoke('create-payment', {
-            body: requestBody,
-            headers
-          });
-
-          console.log('📥 Supabase Edge Function response:', {
-            hasData: !!result,
-            hasError: !!edgeError,
-            error: edgeError,
-            errorMessage: edgeError?.message,
-            dataKeys: result ? Object.keys(result) : [],
-            resultContent: result ? result : 'no data'
-          });
-
-          data = result;
-          error = edgeError;
-
-          if (!error && data && data.url) {
-            console.log('✅ Supabase Edge Function succeeded for credits');
-            // Exit early on success
-            return {
-              success: true,
-              url: data.url,
-              sessionId: data.sessionId || data.session_id
-            };
-          } else if (error) {
-            console.warn('⚠️ Supabase Edge Function error:', error);
-          } else {
-            console.warn('⚠️ Supabase Edge Function returned no URL');
-          }
-        } catch (edgeError) {
-          console.warn('⚠️ Supabase Edge Function failed for credits:', edgeError);
-          error = edgeError;
-        }
+      if (!finalIsGuest && session?.session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.session.access_token}`;
       }
 
-      // If edge functions failed, provide better error handling without trying non-existent endpoints
-      if (error || !data) {
-        console.log('❌ Supabase Edge Function failed, no fallback endpoints available in this deployment');
+      console.log('📤 Calling Supabase Edge Function with:', {
+        function: 'create-payment',
+        hasAuth: !!headers['Authorization'],
+        requestBody: { ...requestBody, guestEmail: finalGuestEmail ? '***' : undefined }
+      });
 
-        // For production environments without alternative endpoints, we should use development fallback
-        if (environment.isDevelopment) {
-          console.log('🔄 Development environment detected - using dev checkout fallback');
-        } else {
-          console.error('💥 Production environment - Supabase Edge Function is the only payment method');
+      const { data, error } = await supabase.functions.invoke('create-payment', {
+        body: requestBody,
+        headers
+      });
 
-          // If we have an error from Supabase Edge Function, use that
-          if (error) {
-            const supabaseErrorMessage = this.extractErrorMessage(error);
-            console.error('💥 Supabase Edge Function error:', supabaseErrorMessage);
-
-            // Return a more specific error based on what we got from Supabase
-            return {
-              success: false,
-              error: `Payment system error: ${supabaseErrorMessage}. Please try again or contact support.`
-            };
-          } else {
-            return {
-              success: false,
-              error: 'Payment system is temporarily unavailable. Please try again in a moment or contact support.'
-            };
-          }
-        }
-      }
-
-      // Final fallback - use development mode credits
-      if (error || !data) {
-        console.log('🔄 All credit payment endpoints failed, using development fallback...');
-        console.log('🌍 Environment check:', {
-          isLocalhost: environment.isLocalhost,
-          hostname: environment.hostname,
-          shouldUseFallback: environment.isLocalhost || environment.hostname.includes('localhost')
-        });
-
-        if (environment.isDevelopment) {
-          console.log('🏠 Development environment detected - creating Stripe test checkout');
-
-          // For development, create a real Stripe test checkout URL
-          const testCheckoutUrl = this.createDevStripeUrl(options);
-
-          return {
-            success: true,
-            usedFallback: true,
-            url: testCheckoutUrl
-          };
-        } else {
-          console.error('💥 Production environment - all payment methods failed');
-          const prodErrorMessage = this.extractErrorMessage(error);
-          console.error('💥 Last error was:', prodErrorMessage);
-          error = {
-            message: 'All credit payment methods failed',
-            lastError: error,
-            environment,
-            timestamp: new Date().toISOString()
-          };
-        }
-      }
+      console.log('📥 Supabase Edge Function response:', {
+        hasData: !!data,
+        hasError: !!error,
+        error: error,
+        errorMessage: error?.message,
+        dataKeys: data ? Object.keys(data) : [],
+        hasUrl: data && !!data.url
+      });
 
       if (error) {
-        const extractedErrorMessage = this.extractErrorMessage(error);
-        console.error('❌ Final payment error:', extractedErrorMessage);
-        console.error('❌ Full error object:', error);
-        ErrorLogger.logError('Credit payment error', error);
-
-        // Provide more specific error messages based on the error type
-        let errorMessage = 'Failed to create credit payment';
-
-        // Handle different error object structures
-        if (error && typeof error === 'object') {
-          const errorObj = error as any;
-
-          // Check for specific error types first
-          if (errorObj.status === 404) {
-            errorMessage = 'Payment service not found. Please check your configuration.';
-          } else if (errorObj.status === 401 || errorObj.status === 403) {
-            errorMessage = 'Authentication required. Please sign in and try again.';
-          } else if (errorObj.status === 500) {
-            errorMessage = 'Server error. Please try again in a moment.';
-          } else if (errorObj.body && typeof errorObj.body === 'string') {
-            try {
-              const parsed = JSON.parse(errorObj.body);
-              errorMessage = parsed.error || parsed.message || errorMessage;
-            } catch {
-              errorMessage = errorObj.body;
-            }
-          } else if (errorObj.error && typeof errorObj.error === 'string') {
-            errorMessage = errorObj.error;
-          } else if (errorObj.message && typeof errorObj.message === 'string') {
-            errorMessage = errorObj.message;
-          } else if (errorObj.details) {
-            errorMessage = errorObj.details;
-          } else if (errorObj.msg) {
-            errorMessage = errorObj.msg;
-          } else {
-            // Try to extract meaningful info from the error
-            const errorInfo = [
-              errorObj.endpoint && `Endpoint: ${errorObj.endpoint}`,
-              errorObj.status && `Status: ${errorObj.status}`,
-              errorObj.type && `Type: ${errorObj.type}`
-            ].filter(Boolean).join(', ');
-
-            errorMessage = errorInfo ?
-              `Payment service error (${errorInfo})` :
-              'Payment service temporarily unavailable';
-          }
-        } else if (typeof error === 'string') {
-          errorMessage = error;
-        }
-
-        // Handle specific error cases with user-friendly messages
-        if (errorMessage.includes('Rate limit') || errorMessage.includes('429')) {
-          errorMessage = 'Too many requests. Please wait a moment and try again.';
-        } else if (errorMessage.includes('Authentication') || errorMessage.includes('auth') || errorMessage.includes('401')) {
-          errorMessage = 'Please sign in to your account and try again.';
-        } else if (errorMessage.includes('network') || errorMessage.includes('Network') || errorMessage.includes('fetch')) {
-          errorMessage = 'Network error. Please check your connection and try again.';
-        } else if (errorMessage.includes('configuration') || errorMessage.includes('not configured') || errorMessage.includes('404')) {
-          errorMessage = 'Payment system configuration error. Please contact support.';
-        } else if (errorMessage.includes('STRIPE') || errorMessage.includes('stripe')) {
-          errorMessage = 'Payment processor error. Please try again or contact support.';
-        }
-
-        return { success: false, error: errorMessage };
-      }
-
-      if (data && data.url) {
-        console.log('✅ Credit payment session created successfully');
+        console.error('❌ Supabase Edge Function error:', error);
+        const errorMessage = this.extractErrorMessage(error);
         return {
-          success: true,
-          url: data.url,
-          sessionId: data.sessionId || data.session_id
-        };
-      } else {
-        return { 
-          success: false, 
-          error: 'No payment URL received from server' 
+          success: false,
+          error: `Payment system error: ${errorMessage}`
         };
       }
+
+      if (!data || !data.url) {
+        console.error('❌ No checkout URL received from Supabase Edge Function');
+        return {
+          success: false,
+          error: 'Payment system error: No checkout URL received'
+        };
+      }
+
+      console.log('✅ Credit payment session created successfully');
+      return {
+        success: true,
+        url: data.url,
+        sessionId: data.sessionId || data.session_id
+      };
 
     } catch (error: any) {
+      console.error('❌ Credit payment creation failed:', error);
       const catchErrorMessage = getErrorMessage(error);
       logFormattedError('Credit payment creation failed', error);
+      ErrorLogger.logError('Credit payment error', error);
 
       return {
         success: false,
@@ -405,6 +219,8 @@ export class CreditPaymentService {
    * Open credit payment checkout in new window
    */
   static openCheckoutWindow(url: string, sessionId?: string): void {
+    console.log('🚀 Opening Stripe checkout in new window:', url);
+    
     const checkoutWindow = window.open(
       url,
       'stripe-credit-checkout',
@@ -412,6 +228,7 @@ export class CreditPaymentService {
     );
 
     if (!checkoutWindow) {
+      console.log('🚫 Popup blocked, redirecting current window');
       // Fallback to current window if popup blocked
       window.location.href = url;
       return;
@@ -452,7 +269,7 @@ export class CreditPaymentService {
     if (!sessionId) return;
 
     try {
-      // Verify payment status
+      // Verify payment status using Netlify function
       const response = await fetch(`/.netlify/functions/verify-payment?session_id=${sessionId}`);
       
       if (response.ok) {
