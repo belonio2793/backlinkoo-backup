@@ -251,15 +251,15 @@ export function ModernCreditPurchaseModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">Buy Credits</DialogTitle>
+      <DialogContent className="w-[95vw] max-w-lg max-h-[85vh] overflow-y-auto">
+        <DialogHeader className="pb-3">
+          <DialogTitle className="text-lg font-semibold">Buy Credits</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* Account Section */}
           {user && (
-            <div className="space-y-2">
+            <div className="space-y-1">
               <Label className="text-sm font-medium text-gray-700">Account</Label>
               <div className="text-sm text-gray-600">{user.email}</div>
             </div>
@@ -268,7 +268,7 @@ export function ModernCreditPurchaseModal({
           {/* Select Credit Package */}
           <div className="space-y-3">
             <Label className="text-sm font-semibold text-gray-700">Select Credit Package</Label>
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
               {creditPackages.map((pkg, index) => (
                 <Card
                   key={index}
@@ -279,9 +279,9 @@ export function ModernCreditPurchaseModal({
                   }`}
                   onClick={() => handlePackageSelect(index)}
                 >
-                  <CardContent className="p-4 text-center">
-                    <div className="font-semibold text-gray-900">{pkg.credits} Credits</div>
-                    <div className="text-2xl font-bold text-blue-600">${pkg.price}</div>
+                  <CardContent className="p-2 md:p-3 text-center">
+                    <div className="text-sm font-semibold text-gray-900">{pkg.credits} Credits</div>
+                    <div className="text-lg md:text-xl font-bold text-blue-600">${pkg.price}</div>
                     <div className="text-xs text-gray-500">${pkg.pricePerCredit.toFixed(2)} per credit</div>
                   </CardContent>
                 </Card>
@@ -289,12 +289,12 @@ export function ModernCreditPurchaseModal({
             </div>
           </div>
 
-          <Separator />
+          <Separator className="my-3" />
 
           {/* Custom Amount */}
-          <div className="space-y-4">
+          <div className="space-y-3">
             <Label className="text-sm font-semibold text-gray-700">Custom Amount</Label>
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div className="space-y-2">
                 <Label htmlFor="customCredits" className="text-sm font-medium text-gray-700">
                   Number of Credits
@@ -318,22 +318,23 @@ export function ModernCreditPurchaseModal({
               </div>
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-gray-700">Rate</Label>
-                <div className="h-10 px-3 py-2 border border-gray-200 rounded-md bg-gray-50 flex items-center justify-center text-lg font-semibold text-gray-700">
+                <div className="h-10 px-3 py-2 border border-gray-200 rounded-md bg-gray-50 flex items-center justify-center text-sm md:text-lg font-semibold text-gray-700">
                   ${rate.toFixed(2)}
+                  <span className="text-xs text-gray-500 ml-1 md:hidden">per credit</span>
                 </div>
-                <div className="text-xs text-gray-500 text-center">per credit</div>
+                <div className="text-xs text-gray-500 text-center hidden md:block">per credit</div>
               </div>
             </div>
           </div>
 
           {/* What's Included */}
-          <div className="space-y-3">
+          <div className="space-y-2">
             <Label className="text-sm font-semibold text-gray-700">What's Included</Label>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
               {featuresIncluded.map((feature, index) => (
                 <div key={index} className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
-                  <span className="text-sm text-gray-700">{feature}</span>
+                  <CheckCircle className="h-3 w-3 text-green-500 flex-shrink-0" />
+                  <span className="text-xs text-gray-700">{feature}</span>
                 </div>
               ))}
             </div>
@@ -343,7 +344,7 @@ export function ModernCreditPurchaseModal({
           <Button
             onClick={handlePurchase}
             disabled={isLoading || !selection}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white h-12 text-base font-medium"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white h-11 text-sm md:text-base font-medium mt-4"
           >
             {isLoading ? (
               <div className="flex items-center gap-2">
@@ -358,8 +359,8 @@ export function ModernCreditPurchaseModal({
           </Button>
 
           {/* Security Notice */}
-          <div className="flex items-center justify-center gap-2 text-xs text-gray-500">
-            <Shield className="h-4 w-4" />
+          <div className="flex items-center justify-center gap-2 text-xs text-gray-500 pt-2">
+            <Shield className="h-3 w-3" />
             <span>Secured by Stripe • 256-bit SSL encryption</span>
           </div>
         </div>
