@@ -16,7 +16,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 
-export function PaymentValidation() {
+export default function PaymentValidation() {
   const [showPricingModal, setShowPricingModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showEnhancedModal, setShowEnhancedModal] = useState(false);

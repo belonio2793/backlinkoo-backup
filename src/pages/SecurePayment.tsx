@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, CreditCard, Shield, AlertCircle } from 'lucide-react';
 
-export function SecurePayment() {
+export default function SecurePayment() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
