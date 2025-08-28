@@ -3,7 +3,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Shield, CheckCircle, CreditCard } from "lucide-react";
@@ -37,9 +36,9 @@ export function ModernCreditPurchaseModal({
   const { openLoginModal } = useAuthModal();
 
   const [selectedPackage, setSelectedPackage] = useState<number | null>(null);
-  const [customCredits, setCustomCredits] = useState("");
-  const [totalPrice, setTotalPrice] = useState(0);
-  const [rate, setRate] = useState(1.40);
+  const [customCredits, setCustomCredits] = useState("300");
+  const [totalPrice, setTotalPrice] = useState(420.00);
+  const [rate] = useState(1.40);
   const [isLoading, setIsLoading] = useState(false);
 
   const creditPackages: CreditPackage[] = [
@@ -243,7 +242,7 @@ export function ModernCreditPurchaseModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-[95vw] max-w-6xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold">Buy Credits</DialogTitle>
         </DialogHeader>
@@ -298,7 +297,7 @@ export function ModernCreditPurchaseModal({
                   max="10000"
                   value={customCredits}
                   onChange={(e) => handleCustomAmountChange(e.target.value)}
-                  placeholder="Enter custom amount"
+                  placeholder="300"
                   className="text-center"
                 />
               </div>
