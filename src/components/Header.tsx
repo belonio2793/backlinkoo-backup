@@ -179,21 +179,16 @@ export function Header({ showHomeLink = true }: HeaderProps) {
               // Authenticated user buttons
               <>
                 <HeaderUpgradeButton />
-                <BuyCreditsButton
-                  trigger={
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="bg-transparent hover:bg-green-50/50 border border-green-200/60 text-green-600 hover:text-green-700 hover:border-green-300/80 transition-all duration-200 font-medium px-2 sm:px-4 py-2 backdrop-blur-sm shadow-sm hover:shadow-md flex items-center"
-                    >
-                      <CreditCard className="h-4 w-4 mr-1 sm:mr-2" />
-                      <span className="hidden sm:inline">Buy Credits</span>
-                      <span className="sm:hidden">Credits</span>
-                    </Button>
-                  }
-                  userEmail={user?.email || "support@backlinkoo.com"}
-                  isGuest={!user}
-                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="bg-transparent hover:bg-green-50/50 border border-green-200/60 text-green-600 hover:text-green-700 hover:border-green-300/80 transition-all duration-200 font-medium px-2 sm:px-4 py-2 backdrop-blur-sm shadow-sm hover:shadow-md flex items-center"
+                  onClick={() => setShowCreditModal(true)}
+                >
+                  <CreditCard className="h-4 w-4 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">Buy Credits</span>
+                  <span className="sm:hidden">Credits</span>
+                </Button>
                 <Button
                   onClick={() => navigate("/dashboard")}
                   className="bg-transparent hover:bg-blue-50/50 border border-blue-200/60 text-blue-700 hover:text-blue-800 hover:border-blue-300/80 transition-all duration-200 font-medium px-6 py-2 backdrop-blur-sm shadow-sm hover:shadow-md"
