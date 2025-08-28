@@ -41,7 +41,7 @@ import { QuickTrialUpgrade } from "@/components/QuickTrialUpgrade";
 import { TrialConversionService } from "@/services/trialConversionService";
 import { useAuthModal, usePremiumModal, useWaitlistModal, useModal } from "@/contexts/ModalContext";
 import { WaitlistModal } from "@/components/WaitlistModal";
-import { SimpleBuyCreditsButton } from "@/components/SimpleBuyCreditsButton";
+import { BuyCreditsButton } from "@/components/BuyCreditsButton";
 
 
 
@@ -262,7 +262,7 @@ const Index = () => {
                 <div className="w-24 h-9 bg-gray-200 animate-pulse rounded"></div>
               ) : user ? (
                 <>
-                  <SimpleBuyCreditsButton
+                  <BuyCreditsButton
                     trigger={
                       <Button
                         variant="outline"
@@ -273,7 +273,8 @@ const Index = () => {
                         Buy Credits
                       </Button>
                     }
-                    defaultCredits={100}
+                    userEmail={user?.email || "support@backlinkoo.com"}
+                    isGuest={!user}
                   />
                   <Button
                     onClick={() => startTransition(() => navigate("/dashboard"))}

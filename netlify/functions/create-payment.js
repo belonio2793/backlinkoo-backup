@@ -1,108 +1,4 @@
 const Stripe = require("stripe");
-const { createClient } = require('@supabase/supabase-js');
-
-// Rate limiting map (in production, use Redis or similar)
-const rateLimitMap = new Map();
-
-function checkRateLimit(identifier) {
-  const now = Date.now();
-  const windowMs = 60000; // 1 minute
-  const maxRequests = 10;
-  
-  const record = rateLimitMap.get(identifier);
-  if (!record || now > record.resetTime) {
-    rateLimitMap.set(identifier, { count: 1, resetTime: now + windowMs });
-    return true;
-  }
-  
-  if (record.count >= maxRequests) {
-    return false;
-  }
-  
-  record.count++;
-  return true;
-}
-
-function sanitizeInput(input) {
-  return input.replace(/[<>'"&]/g, '').trim();
-}
-
-// Initialize Supabase client for database operations
-function getSupabaseClient() {
-  const supabaseUrl = process.env.VITE_SUPABASE_URL;
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-  if (!supabaseUrl || !supabaseServiceKey) {
-    console.warn("Supabase configuration missing - order tracking disabled");
-    return null;
-  }
-
-  return createClient(supabaseUrl, supabaseServiceKey, {
-    auth: { persistSession: false }
-  });
-}
-
-async function getClientIP(request) {
-  const forwarded = request.headers.get('x-forwarded-for');
-  const realIP = request.headers.get('x-real-ip');
-  const cfConnectingIP = request.headers.get('cf-connecting-ip');
-  
-  return forwarded?.split(',')[0]?.trim() || realIP || cfConnectingIP || 'unknown';
-}
-
-async function createStripePayment(paymentData, email, originUrl) {
-  const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-
-  // Validate Stripe configuration
-  if (!stripeSecretKey || !stripeSecretKey.startsWith('sk_')) {
-    throw new Error("STRIPE_SECRET_KEY is required and must be a valid Stripe secret key");
-  }
-
-  const stripe = new Stripe(stripeSecretKey, {
-    apiVersion: "2023-10-16",
-  });
-
-  let customerId;
-  if (!paymentData.isGuest) {
-    const customers = await stripe.customers.list({ email, limit: 1 });
-    if (customers.data.length > 0) {
-      customerId = customers.data[0].id;
-    }
-  }
-
-  // Create checkout session with dynamic product
-  const session = await stripe.checkout.sessions.create({
-    customer: customerId,
-    customer_email: customerId ? undefined : email,
-    line_items: [
-      {
-        price_data: {
-          currency: "usd",
-          product_data: { 
-            name: paymentData.productName,
-            metadata: {
-              credits: paymentData.credits?.toString() || '0',
-              type: 'credits'
-            }
-          },
-          unit_amount: Math.round(paymentData.amount * 100), // Convert to cents
-        },
-        quantity: 1,
-      },
-    ],
-    mode: "payment",
-    success_url: `${originUrl}/payment-success?session_id={CHECKOUT_SESSION_ID}&credits=${paymentData.credits || 0}`,
-    cancel_url: `${originUrl}/payment-cancelled`,
-    metadata: {
-      email,
-      credits: paymentData.credits?.toString() || '0',
-      isGuest: paymentData.isGuest ? 'true' : 'false',
-      productName: paymentData.productName
-    }
-  });
-
-  return { url: session.url, sessionId: session.id };
-}
 
 exports.handler = async (event, context) => {
   // Handle CORS preflight
@@ -129,23 +25,6 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    // Rate limiting check - use IP from event
-    const clientIP = event.headers['x-forwarded-for']?.split(',')[0]?.trim() || 
-                     event.headers['x-real-ip'] || 
-                     event.headers['cf-connecting-ip'] || 
-                     'unknown';
-    
-    if (!checkRateLimit(clientIP)) {
-      return {
-        statusCode: 429,
-        headers: { 
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*"
-        },
-        body: JSON.stringify({ error: 'Rate limit exceeded. Please try again in a minute.' }),
-      };
-    }
-
     const body = JSON.parse(event.body);
     
     // Input validation
@@ -160,18 +39,23 @@ exports.handler = async (event, context) => {
     if (body.paymentMethod !== 'stripe') {
       throw new Error('Only Stripe payments are supported');
     }
+
+    const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+
+    // Validate Stripe configuration
+    if (!stripeSecretKey || !stripeSecretKey.startsWith('sk_')) {
+      throw new Error("STRIPE_SECRET_KEY is required and must be a valid Stripe secret key");
+    }
+
+    const stripe = new Stripe(stripeSecretKey, {
+      apiVersion: "2023-10-16",
+    });
     
-    const { amount, isGuest = false, paymentMethod } = body;
-    const productName = sanitizeInput(body.productName);
-    let guestEmail = body.guestEmail ? sanitizeInput(body.guestEmail) : '';
+    const { amount, isGuest = false } = body;
+    const productName = body.productName.replace(/[<>'"&]/g, '').trim();
+    let guestEmail = body.guestEmail ? body.guestEmail.replace(/[<>'"&]/g, '').trim() : '';
     
     let email = guestEmail;
-
-    // For authenticated users, we should get email from auth header in production
-    // For now, we'll use the guest email or require it
-    if (!isGuest && !email) {
-      throw new Error("Email is required for payment processing");
-    }
 
     if (isGuest && (!guestEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestEmail))) {
       throw new Error('Valid email address is required');
@@ -179,34 +63,37 @@ exports.handler = async (event, context) => {
 
     const originUrl = event.headers.origin || event.headers.referer || "https://backlinkoo.com";
     
-    const result = await createStripePayment(body, email, originUrl);
-
-    // Store order in database for tracking
-    try {
-      const supabase = getSupabaseClient();
-      if (supabase && result.sessionId) {
-        await supabase
-          .from('orders')
-          .insert({
-            stripe_session_id: result.sessionId,
-            email,
-            amount: Math.round(body.amount * 100), // Convert to cents
-            status: 'pending',
-            payment_method: 'stripe',
-            product_name: body.productName || `${body.credits || 0} Backlink Credits`,
-            guest_checkout: body.isGuest || false,
-            credits: body.credits || 0,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          });
-        console.log(`Order created for payment: ${result.sessionId} - ${email} - $${amount}`);
+    // Create checkout session with dynamic product
+    const session = await stripe.checkout.sessions.create({
+      customer_email: email,
+      line_items: [
+        {
+          price_data: {
+            currency: "usd",
+            product_data: { 
+              name: productName,
+              metadata: {
+                credits: body.credits?.toString() || '0',
+                type: 'credits'
+              }
+            },
+            unit_amount: Math.round(amount * 100), // Convert to cents
+          },
+          quantity: 1,
+        },
+      ],
+      mode: "payment",
+      success_url: `${originUrl}/payment-success?session_id={CHECKOUT_SESSION_ID}&credits=${body.credits || 0}`,
+      cancel_url: `${originUrl}/payment-cancelled`,
+      metadata: {
+        email,
+        credits: body.credits?.toString() || '0',
+        isGuest: isGuest ? 'true' : 'false',
+        productName: productName
       }
-    } catch (dbError) {
-      console.error('Database order creation failed:', dbError);
-      // Don't fail the payment creation if database fails
-    }
+    });
 
-    console.log(`Payment initiated: ${paymentMethod} - ${email} - $${amount}`);
+    console.log(`Payment initiated: stripe - ${email} - $${amount}`);
 
     return {
       statusCode: 200,
@@ -214,7 +101,7 @@ exports.handler = async (event, context) => {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*"
       },
-      body: JSON.stringify(result),
+      body: JSON.stringify({ url: session.url, sessionId: session.id }),
     };
 
   } catch (error) {
@@ -222,20 +109,6 @@ exports.handler = async (event, context) => {
 
     // Provide user-friendly error messages
     let userMessage = error.message || 'Payment processing failed. Please try again.';
-
-    // Handle specific Stripe errors
-    if (error.message?.includes('Invalid amount')) {
-      if (error.message?.includes('Must be between')) {
-        // This is likely a Stripe account limit
-        userMessage = 'Payment amount exceeds your account limit. Please try a smaller amount or contact support to increase your limit.';
-      }
-    } else if (error.message?.includes('Your account cannot currently make live charges')) {
-      userMessage = 'Account verification required. Please contact support to enable payments.';
-    } else if (error.message?.includes('rate limit') || error.message?.includes('too many requests')) {
-      userMessage = 'Too many payment requests. Please wait a moment and try again.';
-    } else if (error.message?.includes('card') || error.message?.includes('payment_method')) {
-      userMessage = 'Payment method error. Please check your card details or try a different payment method.';
-    }
 
     return {
       statusCode: 500,

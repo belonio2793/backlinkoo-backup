@@ -10,7 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { navigateToSection, NAVIGATION_CONFIGS } from '@/utils/navigationUtils';
 import { HeaderUpgradeButton } from '@/components/PremiumUpgradeButton';
-import { SimpleBuyCreditsButton } from '@/components/SimpleBuyCreditsButton';
+import { BuyCreditsButton } from '@/components/BuyCreditsButton';
 
 interface HeaderProps {
   showHomeLink?: boolean;
@@ -177,7 +177,7 @@ export function Header({ showHomeLink = true }: HeaderProps) {
               // Authenticated user buttons
               <>
                 <HeaderUpgradeButton />
-                <SimpleBuyCreditsButton
+                <BuyCreditsButton
                   trigger={
                     <Button
                       variant="outline"
@@ -189,7 +189,8 @@ export function Header({ showHomeLink = true }: HeaderProps) {
                       <span className="sm:hidden">Credits</span>
                     </Button>
                   }
-                  defaultCredits={100}
+                  userEmail={user?.email || "support@backlinkoo.com"}
+                  isGuest={!user}
                 />
                 <Button
                   onClick={() => navigate("/dashboard")}
