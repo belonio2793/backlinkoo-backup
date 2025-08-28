@@ -262,7 +262,7 @@ const Index = () => {
                 <div className="w-24 h-9 bg-gray-200 animate-pulse rounded"></div>
               ) : user ? (
                 <>
-                  <SimpleBuyCreditsButton
+                  <BuyCreditsButton
                     trigger={
                       <Button
                         variant="outline"
@@ -273,7 +273,8 @@ const Index = () => {
                         Buy Credits
                       </Button>
                     }
-                    defaultCredits={100}
+                    userEmail={user?.email || "support@backlinkoo.com"}
+                    isGuest={!user}
                   />
                   <Button
                     onClick={() => startTransition(() => navigate("/dashboard"))}
