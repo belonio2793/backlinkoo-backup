@@ -1366,23 +1366,10 @@ const Dashboard = () => {
                         className="min-h-[3rem]"
                       />
                     </div>
-                    <UniversalPaymentComponent
-                      trigger={
-                        <Button>
-                          <Plus className="h-4 w-4 mr-2" />
-                          Buy Your First Credits
-                        </Button>
-                      }
-                      defaultType="credits"
-                      showTrigger={false}
-                      onPaymentSuccess={() => {
-                        fetchDashboardData();
-                        toast({
-                          title: "Payment Successful!",
-                          description: "Your credits have been added to your account."
-                        });
-                      }}
-                    />
+                    <Button onClick={() => setShowCreditModal(true)}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Buy Your First Credits
+                    </Button>
                   </CardContent>
                 </Card>
               )}
