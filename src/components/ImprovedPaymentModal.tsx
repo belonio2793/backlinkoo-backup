@@ -74,6 +74,15 @@ export const ImprovedPaymentModal = ({
 
   // Handle credit purchase
   const handleCreditPurchase = async () => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to purchase credits",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!credits || parseFloat(credits) <= 0) {
       toast({
         title: "Error",
@@ -93,14 +102,14 @@ export const ImprovedPaymentModal = ({
 
       const result = await CreditPaymentService.createCreditPayment(
         user,
-        !user, // Set guest status based on user authentication
-        user?.email,
+        false, // No guest checkout
+        user.email,
         {
           amount: parseFloat(amount),
           credits: parseInt(credits),
           productName: `${credits} Premium Backlink Credits`,
-          isGuest: !user,
-          guestEmail: user?.email
+          isGuest: false,
+          guestEmail: user.email
         }
       );
 
