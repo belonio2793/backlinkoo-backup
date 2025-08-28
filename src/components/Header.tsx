@@ -10,7 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { navigateToSection, NAVIGATION_CONFIGS } from '@/utils/navigationUtils';
 import { HeaderUpgradeButton } from '@/components/PremiumUpgradeButton';
-import { SimpleBuyCreditsButton } from '@/components/SimpleBuyCreditsButton';
+import { BuyCreditsButton } from '@/components/BuyCreditsButton';
 
 interface HeaderProps {
   showHomeLink?: boolean;
