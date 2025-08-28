@@ -65,8 +65,17 @@ export const CustomCreditsModal = ({
 
   // Handle credit purchase with new window checkout
   const handleCreditPurchase = async () => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to purchase credits",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const creditCount = parseInt(credits);
-    
+
     if (!credits || creditCount <= 0) {
       toast({
         title: "Invalid Amount",
@@ -95,14 +104,14 @@ export const CustomCreditsModal = ({
 
       const result = await CreditPaymentService.createCreditPayment(
         user,
-        !user, // Set guest status based on user authentication
-        user?.email,
+        false, // No guest checkout
+        user.email,
         {
           amount: totalAmount,
           credits: creditCount,
           productName: `${creditCount} Premium Backlink Credits`,
-          isGuest: !user,
-          guestEmail: user?.email
+          isGuest: false,
+          guestEmail: user.email
         }
       );
 
@@ -136,7 +145,7 @@ export const CustomCreditsModal = ({
       }
     } catch (error) {
       console.error('Credit purchase error:', error);
-      
+
       if (error instanceof Error && error.message.includes('popup')) {
         toast({
           title: "Popup Blocked",
