@@ -150,6 +150,14 @@ const App = () => {
             <Routes>
             <Route path="/" element={<Index />} />
             <Route
+              path="/payment-test"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyPaymentTest />
+                </Suspense>
+              }
+            />
+            <Route
               path="/login"
               element={
                 <Suspense fallback={<LoadingSpinner />}>
