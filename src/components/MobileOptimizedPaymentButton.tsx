@@ -7,6 +7,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Crown, CreditCard, Loader2, Smartphone, Monitor, Zap } from 'lucide-react';
 import { EnhancedPaymentService } from '@/services/enhancedPaymentService';
+import { stripeWrapper, quickBuyCredits, quickSubscribe } from '@/services/stripeWrapper';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
@@ -102,11 +103,27 @@ export function MobileOptimizedPaymentButton({
       });
 
       let result;
-      
-      if (type === 'premium') {
-        result = await EnhancedPaymentService.upgradeToPremium(plan, email);
-      } else {
-        result = await EnhancedPaymentService.buyCredits(credits, email);
+
+      try {
+        // Try Stripe Wrapper first
+        if (type === 'premium') {
+          result = await quickSubscribe(plan, email);
+        } else {
+          result = await quickBuyCredits(credits, email);
+        }
+
+        if (result.success) {
+          console.log(`✅ Payment created via ${result.method}${result.fallbackUsed ? ' (fallback)' : ''}`);
+        }
+      } catch (wrapperError) {
+        console.warn('⚠️ Stripe Wrapper failed, using legacy service:', wrapperError);
+
+        // Fallback to legacy service
+        if (type === 'premium') {
+          result = await EnhancedPaymentService.upgradeToPremium(plan, email);
+        } else {
+          result = await EnhancedPaymentService.buyCredits(credits, email);
+        }
       }
 
       if (result.success) {
