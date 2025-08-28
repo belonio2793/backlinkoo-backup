@@ -98,8 +98,50 @@ export function PaymentDiagnostic() {
 
       results.push(''); // Add spacing
 
+      // Direct HTTP test as fallback
+      results.push('🔄 Testing direct Edge Function HTTP endpoint...');
+      setStatus(results.join('\n'));
+
+      try {
+        const directUrl = `${supabaseUrl}/functions/v1/create-payment`;
+        results.push(`📡 Direct URL: ${directUrl}`);
+
+        const directResponse = await fetch(directUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${supabaseKey}`,
+            'apikey': supabaseKey
+          },
+          body: JSON.stringify(testPayload)
+        });
+
+        results.push(`📊 Direct HTTP Response: ${directResponse.status} ${directResponse.statusText}`);
+
+        if (directResponse.ok) {
+          try {
+            const directData = await directResponse.json();
+            results.push('✅ Direct HTTP Success:');
+            results.push(`   Response: ${JSON.stringify(directData, null, 2)}`);
+          } catch (parseError) {
+            results.push('❌ Could not parse direct response as JSON');
+          }
+        } else {
+          try {
+            const errorText = await directResponse.text();
+            results.push(`❌ Direct HTTP Error: ${errorText}`);
+          } catch (readError) {
+            results.push(`❌ Direct HTTP Error: Could not read error response`);
+          }
+        }
+      } catch (directError) {
+        results.push(`❌ Direct HTTP failed: ${directError instanceof Error ? directError.message : 'Unknown error'}`);
+      }
+
+      results.push(''); // Add spacing
+
       // Quick connectivity test
-      results.push('🔄 Testing Supabase connectivity...');
+      results.push('🔄 Testing Supabase REST API connectivity...');
       setStatus(results.join('\n'));
 
       try {
