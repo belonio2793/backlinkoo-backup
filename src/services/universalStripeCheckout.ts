@@ -1,10 +1,11 @@
 /**
  * Universal Stripe Checkout Service
+ * Now powered by Stripe Wrapper with Supabase integration
  * Handles all Stripe payment flows with new window checkout
  * Supports credits, subscriptions, and premium upgrades
  */
 
-import { supabase } from '@/integrations/supabase/client';
+import { stripeWrapper, type PaymentOptions as WrapperPaymentOptions, type SubscriptionOptions as WrapperSubscriptionOptions, type PaymentResult as WrapperPaymentResult } from './stripeWrapper';
 import { useAuth } from '@/hooks/useAuth';
 
 export interface PaymentOptions {
