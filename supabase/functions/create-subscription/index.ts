@@ -283,9 +283,12 @@ serve(async (req) => {
       user_id: user?.id || null,
       email,
       stripe_customer_id: customerId,
+      stripe_session_id: session.id,
       subscribed: false, // Will be updated when subscription is activated
       subscription_tier: tier,
+      subscription_plan: plan,
       payment_method: "stripe",
+      product_id: PREMIUM_PRODUCT_ID,
       guest_checkout: isGuest,
       updated_at: new Date().toISOString(),
     }, { onConflict: 'email' });
