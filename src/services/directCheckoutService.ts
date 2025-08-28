@@ -77,18 +77,30 @@ class DirectCheckoutService {
     const amount = options.amount || this.getCreditsPrice(credits);
     
     console.log('💳 Creating credits checkout via Supabase Edge Function');
+    console.log('Request details:', {
+      credits,
+      amount,
+      user: user ? { id: user.id, email: user.email } : null,
+      isGuest: !user
+    });
+    
+    // Prepare request body to match edge function interface
+    const requestBody = {
+      amount,
+      credits,
+      productName: `${credits} Backlink Credits`,
+      isGuest: !user,
+      guestEmail: !user ? (options.email || user?.email || 'guest@example.com') : undefined,
+      paymentMethod: 'stripe'
+    };
+
+    console.log('📤 Sending request to create-payment edge function:', {
+      ...requestBody,
+      guestEmail: requestBody.guestEmail ? '[REDACTED]' : undefined
+    });
     
     const { data, error } = await supabase.functions.invoke('create-payment', {
-      body: {
-        amount,
-        credits,
-        paymentMethod: 'stripe',
-        productName: `${credits} Backlink Credits`,
-        isGuest: !user,
-        guestEmail: !user ? (options.email || 'guest@example.com') : undefined,
-        successUrl: `${window.location.origin}/payment-success?type=credits&credits=${credits}`,
-        cancelUrl: `${window.location.origin}${window.location.pathname}`
-      }
+      body: requestBody
     });
     
     if (error) {
@@ -116,17 +128,26 @@ class DirectCheckoutService {
     const plan = options.plan === 'annual' ? 'yearly' : (options.plan || 'monthly');
 
     console.log('💳 Creating premium checkout via Supabase Edge Function for plan:', plan);
-    console.log('👤 User:', user ? 'authenticated' : 'guest');
+    console.log('Request details:', {
+      plan,
+      user: user ? { id: user.id, email: user.email } : null,
+      isGuest: !user
+    });
 
+    // Prepare request body to match edge function interface
     const requestBody = {
       plan,
+      tier: 'premium', // Default tier
       isGuest: !user,
-      guestEmail: options.email || user?.email || 'guest@example.com',
-      successUrl: `${window.location.origin}/payment-success?type=premium&plan=${plan}`,
-      cancelUrl: `${window.location.origin}${window.location.pathname}`
+      guestEmail: !user ? (options.email || 'guest@example.com') : undefined,
+      userEmail: user?.email || undefined
     };
 
-    console.log('📤 Request body:', requestBody);
+    console.log('📤 Sending request to create-subscription edge function:', {
+      ...requestBody,
+      guestEmail: requestBody.guestEmail ? '[REDACTED]' : undefined,
+      userEmail: requestBody.userEmail ? '[REDACTED]' : undefined
+    });
 
     const { data, error } = await supabase.functions.invoke('create-subscription', {
       body: requestBody
