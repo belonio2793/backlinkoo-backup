@@ -55,6 +55,7 @@ const LazyEnhancedDomainsPage = lazy(() => import("./pages/EnhancedDomainsPage")
 const LazyNetlifyTest = lazy(() => import("./pages/NetlifyTest"));
 const LazyNetlifyConnectionTest = lazy(() => import("./pages/NetlifyConnectionTest"));
 const LazySupabaseTest = lazy(() => import("./pages/SupabaseTest"));
+const LazyEdgeFunctionDebugPage = lazy(() => import("./pages/EdgeFunctionDebugPage"));
 const LazyBlogGenerationTest = lazy(() => import("./components/BlogGenerationTest"));
 const LazyAuthFix = lazy(() => import("./pages/AuthFix"));
 const LazyTestPaymentModal = lazy(() => import("./pages/TestPaymentModal"));
