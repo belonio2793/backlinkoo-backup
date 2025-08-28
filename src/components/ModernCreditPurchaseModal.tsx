@@ -256,81 +256,69 @@ export function ModernCreditPurchaseModal({
           <DialogTitle className="text-lg font-semibold">Buy Credits</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
-          {/* Account Section */}
-          {user && (
-            <div className="space-y-1">
-              <Label className="text-sm font-medium text-gray-700">Account</Label>
-              <div className="text-sm text-gray-600">{user.email}</div>
-            </div>
-          )}
+        <div className="space-y-3">
+          {/* Account Section and Credit Package in same row */}
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+            {/* Account + Custom Amount */}
+            <div className="lg:col-span-1 space-y-3">
+              {user && (
+                <div className="space-y-1">
+                  <Label className="text-sm font-medium text-gray-700">Account</Label>
+                  <div className="text-sm text-gray-600">{user.email}</div>
+                </div>
+              )}
 
-          {/* Select Credit Package */}
-          <div className="space-y-3">
-            <Label className="text-sm font-semibold text-gray-700">Select Credit Package</Label>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
-              {creditPackages.map((pkg, index) => (
-                <Card
-                  key={index}
-                  className={`cursor-pointer transition-all border-2 ${
-                    selectedPackage === index
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-blue-300'
-                  }`}
-                  onClick={() => handlePackageSelect(index)}
-                >
-                  <CardContent className="p-2 md:p-3 text-center">
-                    <div className="text-sm font-semibold text-gray-900">{pkg.credits} Credits</div>
-                    <div className="text-lg md:text-xl font-bold text-blue-600">${pkg.price}</div>
-                    <div className="text-xs text-gray-500">${pkg.pricePerCredit.toFixed(2)} per credit</div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-
-          <Separator className="my-3" />
-
-          {/* Custom Amount */}
-          <div className="space-y-3">
-            <Label className="text-sm font-semibold text-gray-700">Custom Amount</Label>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {/* Custom Amount - moved to left side */}
               <div className="space-y-2">
-                <Label htmlFor="customCredits" className="text-sm font-medium text-gray-700">
-                  Number of Credits
-                </Label>
-                <Input
-                  id="customCredits"
-                  type="number"
-                  min="1"
-                  max="10000"
-                  value={customCredits}
-                  onChange={(e) => handleCustomAmountChange(e.target.value)}
-                  placeholder="300"
-                  className="text-center"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-sm font-medium text-gray-700">Total Price</Label>
-                <div className="h-10 px-3 py-2 border border-gray-200 rounded-md bg-gray-50 flex items-center justify-center text-lg font-semibold text-blue-600">
-                  ${totalPrice.toFixed(2)}
+                <Label className="text-sm font-semibold text-gray-700">Custom Amount</Label>
+                <div className="space-y-2">
+                  <Input
+                    id="customCredits"
+                    type="number"
+                    min="1"
+                    max="10000"
+                    value={customCredits}
+                    onChange={(e) => handleCustomAmountChange(e.target.value)}
+                    placeholder="300"
+                    className="text-center"
+                  />
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-blue-600">${totalPrice.toFixed(2)}</div>
+                    <div className="text-xs text-gray-500">${rate.toFixed(2)} per credit</div>
+                  </div>
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label className="text-sm font-medium text-gray-700">Rate</Label>
-                <div className="h-10 px-3 py-2 border border-gray-200 rounded-md bg-gray-50 flex items-center justify-center text-sm md:text-lg font-semibold text-gray-700">
-                  ${rate.toFixed(2)}
-                  <span className="text-xs text-gray-500 ml-1 md:hidden">per credit</span>
-                </div>
-                <div className="text-xs text-gray-500 text-center hidden md:block">per credit</div>
+            </div>
+
+            {/* Credit Packages - takes remaining space */}
+            <div className="lg:col-span-3 space-y-2">
+              <Label className="text-sm font-semibold text-gray-700">Select Credit Package</Label>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {creditPackages.map((pkg, index) => (
+                  <Card
+                    key={index}
+                    className={`cursor-pointer transition-all border-2 ${
+                      selectedPackage === index
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-200 hover:border-blue-300'
+                    }`}
+                    onClick={() => handlePackageSelect(index)}
+                  >
+                    <CardContent className="p-3 text-center">
+                      <div className="text-sm font-semibold text-gray-900">{pkg.credits} Credits</div>
+                      <div className="text-xl font-bold text-blue-600">${pkg.price}</div>
+                      <div className="text-xs text-gray-500">${pkg.pricePerCredit.toFixed(2)} per credit</div>
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
             </div>
           </div>
 
-          {/* What's Included */}
+          {/* What's Included - more horizontal */}
           <div className="space-y-2">
             <Label className="text-sm font-semibold text-gray-700">What's Included</Label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
               {featuresIncluded.map((feature, index) => (
                 <div key={index} className="flex items-center gap-2">
                   <CheckCircle className="h-3 w-3 text-green-500 flex-shrink-0" />
@@ -341,27 +329,29 @@ export function ModernCreditPurchaseModal({
           </div>
 
           {/* Purchase Button */}
-          <Button
-            onClick={handlePurchase}
-            disabled={isLoading || !selection}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white h-11 text-sm md:text-base font-medium mt-4"
-          >
-            {isLoading ? (
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                Opening Secure Checkout...
-              </div>
-            ) : selection ? (
-              `Buy ${selection.credits} Credits for $${selection.price}`
-            ) : (
-              "Select Credits to Continue"
-            )}
-          </Button>
+          <div className="flex items-center justify-between gap-4 pt-2">
+            <Button
+              onClick={handlePurchase}
+              disabled={isLoading || !selection}
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white h-11 text-base font-medium"
+            >
+              {isLoading ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Opening Secure Checkout...
+                </div>
+              ) : selection ? (
+                `Buy ${selection.credits} Credits for $${selection.price}`
+              ) : (
+                "Select Credits to Continue"
+              )}
+            </Button>
 
-          {/* Security Notice */}
-          <div className="flex items-center justify-center gap-2 text-xs text-gray-500 pt-2">
-            <Shield className="h-3 w-3" />
-            <span>Secured by Stripe • 256-bit SSL encryption</span>
+            {/* Security Notice */}
+            <div className="flex items-center gap-2 text-xs text-gray-500">
+              <Shield className="h-3 w-3" />
+              <span>Secured by Stripe</span>
+            </div>
           </div>
         </div>
       </DialogContent>
