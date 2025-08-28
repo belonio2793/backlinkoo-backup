@@ -107,29 +107,16 @@ export function DirectUpgradeToPremiumButton({
       return;
     }
 
+    if (!user) {
+      toast('Please sign in to upgrade to Premium', { duration: 3000 });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      if (user) {
-        // User is authenticated, proceed with normal flow
-        await stripeCheckout.upgradeToPremium(plan);
-      } else {
-        // User is not authenticated, collect email for guest checkout
-        const email = window.prompt('Please enter your email address to upgrade to Premium:');
-
-        if (!email || !email.includes('@')) {
-          toast('A valid email address is required to upgrade to Premium', {
-            duration: 3000
-          });
-          return;
-        }
-
-        // Use guest premium upgrade with email
-        await stripeCheckout.guestPremiumUpgrade({
-          plan,
-          email
-        });
-      }
+      // User is authenticated, proceed with upgrade
+      await stripeCheckout.upgradeToPremium(plan);
     } catch (error) {
       console.error('Premium upgrade error:', error);
       toast('Premium upgrade failed. Please try again.', {
