@@ -361,6 +361,14 @@ const App = () => {
                 </Suspense>
               }
             />
+            <Route
+              path="/test-payment-modal"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyTestPaymentModal />
+                </Suspense>
+              }
+            />
 
             {/* Authentication routes */}
             <Route
