@@ -231,6 +231,19 @@ export function Header({ showHomeLink = true }: HeaderProps) {
         defaultTab={defaultAuthTab}
         pendingAction={pendingAction}
       />
+
+      {/* Buy Credits Modal */}
+      <ModernCreditPurchaseModal
+        isOpen={showCreditModal}
+        onClose={() => setShowCreditModal(false)}
+        onSuccess={() => {
+          setShowCreditModal(false);
+          toast({
+            title: "Payment Successful",
+            description: "Your credits have been added to your account.",
+          });
+        }}
+      />
     </header>
   );
 }
