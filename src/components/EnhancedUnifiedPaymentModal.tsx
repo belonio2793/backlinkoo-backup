@@ -10,10 +10,8 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
 import { CheckoutAuthForm } from '@/components/CheckoutAuthForm';
-import { paymentConfigService } from '@/services/paymentConfigService';
-import { paymentIntegrationService } from '@/services/paymentIntegrationService';
+import { stripeWrapper } from '@/services/stripeWrapper';
 import {
   CreditCard,
   Shield,
@@ -28,7 +26,8 @@ import {
   Wallet,
   Calculator,
   DollarSign,
-  Info
+  Info,
+  ExternalLink
 } from 'lucide-react';
 
 interface EnhancedUnifiedPaymentModalProps {
@@ -77,11 +76,8 @@ export function EnhancedUnifiedPaymentModal({
   const [customCredits, setCustomCredits] = useState(initialCredits || 200);
   const [showCustomCredits, setShowCustomCredits] = useState(false);
   
-
-  // Payment method availability
-  const [availablePaymentMethods, setAvailablePaymentMethods] = useState<'stripe'[]>(['stripe']);
-
   const CREDIT_PRICE = 1.40;
+  const CREDITS_CHECKOUT_URL = 'https://buy.stripe.com/9B63cv1tmcYe';
 
   // Credit plans configuration
   const creditPlans: CreditPlan[] = [
@@ -197,7 +193,27 @@ export function EnhancedUnifiedPaymentModal({
     return null;
   };
 
-  // Handle payment
+  // Create checkout URL with user data
+  const createCheckoutUrl = (selection: any): string => {
+    const url = new URL(CREDITS_CHECKOUT_URL);
+    const currentOrigin = window.location.origin;
+    
+    // Add return URLs
+    url.searchParams.set('success_url', `${currentOrigin}/payment-success?session_id={CHECKOUT_SESSION_ID}`);
+    url.searchParams.set('cancel_url', `${currentOrigin}/payment-cancelled`);
+    
+    // Add user email if available
+    if (user?.email) {
+      url.searchParams.set('prefilled_email', user.email);
+    }
+    
+    // Add metadata for webhook processing
+    url.searchParams.set('client_reference_id', `credits_${selection.credits}`);
+    
+    return url.toString();
+  };
+
+  // Handle payment with direct checkout
   const handlePayment = async () => {
     const selection = getFinalSelection();
     if (!selection) {
@@ -209,38 +225,33 @@ export function EnhancedUnifiedPaymentModal({
       return;
     }
 
-
     setCurrentStep('processing');
     setIsProcessing(true);
 
     try {
-      const result = await paymentIntegrationService.createPayment({
-        amount: selection.price,
-        credits: selection.credits,
-        productName: `${selection.credits} Premium Backlink Credits`,
-        type: 'credits',
-        isGuest: false
+      toast({
+        title: "🚀 Redirecting to Stripe",
+        description: `Opening secure checkout for ${selection.credits} credits...`,
       });
 
-      if (result.success) {
-        setCurrentStep('success');
-        if (onSuccess) {
-          onSuccess();
-        }
-        
-        // Redirect after success
-        setTimeout(() => {
-          handleClose();
-          navigate(redirectAfterSuccess);
-        }, 2000);
-      } else {
-        throw new Error(result.error || 'Payment failed');
+      // Create checkout URL and redirect
+      const checkoutUrl = createCheckoutUrl(selection);
+      
+      // Redirect to Stripe checkout
+      window.location.href = checkoutUrl;
+
+      // Call success callback
+      if (onSuccess) {
+        onSuccess();
       }
+      
+      // Close modal since we're redirecting
+      handleClose();
     } catch (error) {
       console.error('Payment error:', error);
       toast({
         title: 'Payment Error',
-        description: error instanceof Error ? error.message : 'Payment processing failed',
+        description: 'Failed to redirect to checkout. Please try again.',
         variant: 'destructive'
       });
       setCurrentStep('payment');
@@ -447,7 +458,7 @@ export function EnhancedUnifiedPaymentModal({
         <div className="text-center space-y-3">
           <h3 className="text-2xl font-bold">Complete Your Purchase</h3>
           <p className="text-muted-foreground">
-            Review your selection and complete payment
+            You'll be redirected to Stripe's secure checkout
           </p>
         </div>
 
@@ -478,6 +489,27 @@ export function EnhancedUnifiedPaymentModal({
           </CardContent>
         </Card>
 
+        {/* Secure Payment Notice */}
+        <div className="text-center py-4 px-4 bg-blue-50 rounded-lg border border-blue-200">
+          <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+            <Shield className="h-6 w-6 text-blue-600" />
+          </div>
+          <h3 className="font-semibold mb-2 text-gray-900">Secure Stripe Checkout</h3>
+          <p className="text-gray-600 text-sm mb-3">
+            You'll be redirected to Stripe's secure payment page.
+          </p>
+          <div className="flex items-center justify-center gap-4 text-xs text-gray-500">
+            <div className="flex items-center gap-1">
+              <ExternalLink className="h-3 w-3" />
+              <span>Direct Link</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Shield className="h-3 w-3" />
+              <span>Secure</span>
+            </div>
+          </div>
+        </div>
+
         {/* Payment Button */}
         <Button
           onClick={handlePayment}
@@ -488,11 +520,11 @@ export function EnhancedUnifiedPaymentModal({
           {isProcessing ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Processing Payment...
+              Redirecting...
             </>
           ) : (
             <>
-              <CreditCard className="mr-2 h-4 w-4" />
+              <ExternalLink className="mr-2 h-4 w-4" />
               Pay ${selection.price.toFixed(2)}
             </>
           )}
@@ -519,9 +551,9 @@ export function EnhancedUnifiedPaymentModal({
         <Loader2 className="h-8 w-8 text-primary animate-spin" />
       </div>
       <div className="space-y-2">
-        <h3 className="text-xl font-bold">Processing Your Payment</h3>
+        <h3 className="text-xl font-bold">Redirecting to Stripe</h3>
         <p className="text-muted-foreground">
-          Please wait while we process your payment...
+          Please wait while we redirect you to secure checkout...
         </p>
       </div>
     </div>
@@ -551,7 +583,7 @@ export function EnhancedUnifiedPaymentModal({
             {currentStep === 'selection' && 'Buy Credits'}
             {currentStep === 'auth' && 'Sign In or Create Account'}
             {currentStep === 'payment' && 'Complete Purchase'}
-            {currentStep === 'processing' && 'Processing Payment'}
+            {currentStep === 'processing' && 'Redirecting to Checkout'}
             {currentStep === 'success' && 'Payment Complete'}
           </DialogTitle>
         </DialogHeader>

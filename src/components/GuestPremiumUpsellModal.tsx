@@ -12,13 +12,11 @@ import { Progress } from '@/components/ui/progress';
 import {
   Crown, CheckCircle, TrendingUp, Target, Zap, AlertTriangle,
   UserPlus, BarChart3, Globe, Link, Sparkles, ArrowRight, X,
-  Clock, Shield, Infinity, Star, Gift, Rocket, Play, Pause
+  Clock, Shield, Infinity, Star, Gift, Rocket, Play, Pause, ExternalLink
 } from 'lucide-react';
 import { guestTrackingService, type PremiumLimitWarning } from '@/services/guestTrackingService';
 import { LoginModal } from '@/components/LoginModal';
 import { useToast } from '@/hooks/use-toast';
-import { paymentIntegrationService } from '@/services/paymentIntegrationService';
-import { CheckoutRedirectManager } from '@/utils/checkoutRedirectManager';
 
 interface GuestPremiumUpsellModalProps {
   open: boolean;
@@ -40,6 +38,12 @@ export function GuestPremiumUpsellModal({
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('monthly');
   const { toast } = useToast();
 
+  // Stripe checkout URLs
+  const STRIPE_CHECKOUT_URLS = {
+    monthly: 'https://buy.stripe.com/6oUaEX3Buf6m0V1fO11ZS00',
+    yearly: 'https://buy.stripe.com/14A4gzb3W8HY5bhatH1ZS01'
+  };
+
   const guestStats = guestTrackingService.getGuestStats();
   const { campaigns, restrictions } = guestTrackingService.getGuestCampaignsWithRestrictions();
 
@@ -50,88 +54,54 @@ export function GuestPremiumUpsellModal({
     }
   }, [open]);
 
+  // Create checkout URL with guest data
+  const createCheckoutUrl = (plan: 'monthly' | 'yearly'): string => {
+    const baseUrl = STRIPE_CHECKOUT_URLS[plan];
+    const url = new URL(baseUrl);
+    const currentOrigin = window.location.origin;
+    
+    // Add return URLs
+    url.searchParams.set('success_url', `${currentOrigin}/subscription-success?session_id={CHECKOUT_SESSION_ID}`);
+    url.searchParams.set('cancel_url', `${currentOrigin}/payment-cancelled`);
+    
+    // Add guest email if available
+    const guestData = guestTrackingService.getGuestData();
+    const guestEmail = guestData?.email;
+    if (guestEmail) {
+      url.searchParams.set('prefilled_email', guestEmail);
+    }
+    
+    // Add metadata for webhook processing
+    url.searchParams.set('client_reference_id', `premium_${plan}`);
+    
+    return url.toString();
+  };
+
   const handleUpgrade = async () => {
     setIsProcessingUpgrade(true);
     try {
-      const guestData = guestTrackingService.getGuestData();
-      const guestEmail = guestData?.email || '';
-
-      // Show processing message
       toast({
-        title: "🚀 Creating Secure Checkout!",
-        description: "Opening payment window...",
+        title: "🚀 Redirecting to Stripe",
+        description: `Opening secure checkout for ${selectedPlan} premium plan...`,
       });
 
-      // Create subscription checkout session using payment integration service
-      const result = await paymentIntegrationService.createSubscription(
-        selectedPlan,
-        true, // isGuest
-        guestEmail,
-        {
-          preferNewWindow: true,
-          fallbackToCurrentWindow: true,
-          onPopupBlocked: () => {
-            toast({
-              title: "Popup Blocked",
-              description: "Opening checkout in current window...",
-            });
-          },
-          onRedirectSuccess: () => {
-            // Close modal since checkout opened
-            onOpenChange(false);
+      // Create checkout URL and redirect
+      const checkoutUrl = createCheckoutUrl(selectedPlan);
+      
+      // Redirect to Stripe checkout
+      window.location.href = checkoutUrl;
 
-            toast({
-              title: "✅ Checkout Opened",
-              description: "Complete your payment in the Stripe window.",
-            });
+      // Close modal since we're redirecting
+      onOpenChange(false);
 
-            if (onUpgrade) {
-              onUpgrade();
-            }
-          },
-          onRedirectError: (error) => {
-            toast({
-              title: "Checkout Error",
-              description: "Unable to open checkout window. Please try again.",
-              variant: "destructive"
-            });
-          }
-        }
-      );
-
-      if (result.success) {
-        if (result.usedFallback) {
-          // Handle demo/mock checkout
-          toast({
-            title: "🚧 Demo Checkout Mode",
-            description: "Payment system is in demo mode. No actual payment will be processed.",
-            duration: 5000,
-          });
-
-          // For demo, just navigate to success page
-          onOpenChange(false);
-        if (result.url) {
-          // Open Stripe checkout in new window
-          const checkoutWindow = window.open(result.url, 'stripe-checkout', 'width=800,height=600,scrollbars=yes,resizable=yes');
-          if (!checkoutWindow) {
-            // Fallback to current window if popup blocked
-            window.location.href = result.url;
-          }
-        }
-
-          if (onUpgrade) {
-            onUpgrade();
-          }
-        }
-        // If using checkout redirect manager, redirect is already handled
-      } else {
-        throw new Error(result.error || 'Failed to create checkout session');
+      if (onUpgrade) {
+        onUpgrade();
       }
     } catch (error) {
       console.error('Upgrade error:', error);
       toast({
-        title: "Checkout Error",
-        description: error instanceof Error ? error.message : "Something went wrong. Please try again.",
+        title: "Redirect Error",
+        description: "Failed to redirect to checkout. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -485,11 +455,11 @@ export function GuestPremiumUpsellModal({
                 {isProcessingUpgrade ? (
                   <>
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                    Processing...
+                    Redirecting...
                   </>
                 ) : (
                   <>
-                    <Crown className="h-5 w-5 mr-2" />
+                    <ExternalLink className="h-5 w-5 mr-2" />
                     Upgrade to Premium - {selectedPlan === 'monthly' ? '$29/month' : '$17/month (billed yearly)'}
                     <ArrowRight className="h-5 w-5 ml-2" />
                   </>
@@ -520,7 +490,7 @@ export function GuestPremiumUpsellModal({
 
             <div className="text-center text-xs text-gray-500 space-y-1">
               <p>By upgrading, you agree to our Terms of Service and Privacy Policy</p>
-              <p>Secure payment processed by Stripe</p>
+              <p>Secure payment processed by Stripe • Credits activated automatically via webhooks</p>
             </div>
           </div>
         </DialogContent>
