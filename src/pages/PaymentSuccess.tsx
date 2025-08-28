@@ -195,6 +195,16 @@ export default function PaymentSuccess() {
             </div>
           )}
 
+          {/* Demo Mode Indicator */}
+          {(isInstant || isDemo || method === 'direct') && (
+            <Alert className="border-blue-200 bg-blue-50">
+              <CheckCircle className="h-4 w-4 text-blue-600" />
+              <AlertDescription className="text-blue-800">
+                <strong>Demo Mode:</strong> This is a demonstration of the payment flow. No actual payment was processed.
+              </AlertDescription>
+            </Alert>
+          )}
+
           {/* Success Details */}
           {verification?.verified && (
             <div className="space-y-3">
@@ -202,7 +212,9 @@ export default function PaymentSuccess() {
                 <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
                   <div className="flex items-center gap-2">
                     <CreditCard className="h-5 w-5 text-green-600" />
-                    <span className="font-medium">Credits Added</span>
+                    <span className="font-medium">
+                      Credits {isInstant || isDemo || method === 'direct' ? 'Would Be Added' : 'Added'}
+                    </span>
                   </div>
                   <Badge variant="secondary" className="bg-green-100 text-green-800">
                     +{verification.credits} Credits
@@ -214,7 +226,9 @@ export default function PaymentSuccess() {
                 <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
                   <div className="flex items-center gap-2">
                     <Crown className="h-5 w-5 text-purple-600" />
-                    <span className="font-medium">Subscription Active</span>
+                    <span className="font-medium">
+                      Subscription {isInstant || isDemo || method === 'direct' ? 'Would Be Active' : 'Active'}
+                    </span>
                   </div>
                   <Badge variant="secondary" className="bg-purple-100 text-purple-800">
                     {verification.plan.charAt(0).toUpperCase() + verification.plan.slice(1)} Plan
