@@ -43,40 +43,56 @@ export function PaymentDiagnostic() {
         results.push('⏳ Calling supabase.functions.invoke("create-payment")...');
         setStatus(results.join('\n'));
 
-        const { data, error } = await supabase.functions.invoke('create-payment', {
-          body: testPayload
-        });
+        try {
+          const { data, error } = await supabase.functions.invoke('create-payment', {
+            body: testPayload
+          });
 
-        if (error) {
-          results.push(`❌ Supabase Edge Function Error:`);
-          results.push(`   Error Code: ${error.name || 'Unknown'}`);
-          results.push(`   Error Message: ${error.message || 'No message'}`);
-          results.push(`   Error Details: ${JSON.stringify(error, null, 2)}`);
+          if (error) {
+            results.push(`❌ Supabase Edge Function Error:`);
+            results.push(`   Error Code: ${error.name || 'Unknown'}`);
+            results.push(`   Error Message: ${error.message || 'No message'}`);
 
-          // Check specific error types
-          if (error.message?.includes('not found') || error.message?.includes('404')) {
-            results.push('💡 Diagnosis: Function not deployed or wrong function name');
-          } else if (error.message?.includes('CORS')) {
-            results.push('💡 Diagnosis: CORS configuration issue');
-          } else if (error.message?.includes('Environment')) {
-            results.push('💡 Diagnosis: Missing environment variables in Supabase');
-          } else if (error.message?.includes('STRIPE_SECRET_KEY')) {
-            results.push('💡 Diagnosis: Missing or invalid Stripe secret key');
-          } else if (error.message?.includes('SUPABASE_SERVICE_ROLE_KEY')) {
-            results.push('💡 Diagnosis: Missing or invalid Supabase service role key');
-          }
-        } else {
-          results.push('✅ Supabase Edge Function Response:');
-          results.push(`   Data: ${JSON.stringify(data, null, 2)}`);
-
-          if (data?.sessionId) {
-            results.push(`✅ SUCCESS! Session ID: ${data.sessionId.substring(0, 20)}...`);
-            results.push(`   Payment URL: ${data.url ? 'Generated' : 'Missing'}`);
-          } else if (data?.error) {
-            results.push(`❌ Function Error: ${data.error}`);
+            // Check specific error types
+            if (error.message?.includes('Failed to fetch') || error.message?.includes('fetch')) {
+              results.push('💡 Diagnosis: Network/CORS issue - Functions may not be accessible');
+              results.push('🔧 Solutions:');
+              results.push('   1. Check Supabase URL is correct');
+              results.push('   2. Verify functions are deployed and running');
+              results.push('   3. Check CORS configuration in Supabase');
+              results.push('   4. Try direct function URL test below');
+            } else if (error.message?.includes('not found') || error.message?.includes('404')) {
+              results.push('💡 Diagnosis: Function not deployed or wrong function name');
+            } else if (error.message?.includes('CORS')) {
+              results.push('💡 Diagnosis: CORS configuration issue');
+            } else if (error.message?.includes('Environment')) {
+              results.push('💡 Diagnosis: Missing environment variables in Supabase');
+            } else if (error.message?.includes('STRIPE_SECRET_KEY')) {
+              results.push('💡 Diagnosis: Missing or invalid Stripe secret key');
+            } else if (error.message?.includes('SUPABASE_SERVICE_ROLE_KEY')) {
+              results.push('💡 Diagnosis: Missing or invalid Supabase service role key');
+            }
           } else {
-            results.push('❌ Unexpected response format');
+            results.push('✅ Supabase Edge Function Response:');
+            results.push(`   Data: ${JSON.stringify(data, null, 2)}`);
+
+            if (data?.sessionId) {
+              results.push(`✅ SUCCESS! Session ID: ${data.sessionId.substring(0, 20)}...`);
+              results.push(`   Payment URL: ${data.url ? 'Generated' : 'Missing'}`);
+            } else if (data?.error) {
+              results.push(`❌ Function Error: ${data.error}`);
+            } else {
+              results.push('❌ Unexpected response format');
+            }
           }
+        } catch (invokeError) {
+          results.push(`❌ Supabase SDK Error (Failed to fetch):`);
+          results.push(`   Error: ${invokeError instanceof Error ? invokeError.message : 'Unknown error'}`);
+          results.push('💡 This usually means:');
+          results.push('   1. Network connectivity issue');
+          results.push('   2. CORS configuration problem');
+          results.push('   3. Functions not deployed or accessible');
+          results.push('   4. Wrong Supabase URL');
         }
       }
 
