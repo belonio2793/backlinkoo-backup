@@ -47,30 +47,33 @@ export function PaymentDiagnostic() {
     const results = [];
 
     // Stripe Publishable Key
-    if (publishableKey?.startsWith('pk_')) {
-      results.push(`✅ VITE_STRIPE_PUBLISHABLE_KEY: Configured (${publishableKey.substring(0, 10)}...)`);
+    if (publishableKey && publishableKey.startsWith('pk_')) {
+      results.push('✅ VITE_STRIPE_PUBLISHABLE_KEY: Configured (' + publishableKey.substring(0, 10) + '...)');
     } else {
-      results.push(`❌ VITE_STRIPE_PUBLISHABLE_KEY: ${publishableKey ? `Invalid format: ${publishableKey.substring(0, 10)}...` : 'Missing'}`);
+      results.push('❌ VITE_STRIPE_PUBLISHABLE_KEY: ' + (publishableKey ? 'Invalid format' : 'Missing'));
     }
 
     // Supabase URL
-    if (supabaseUrl?.includes('supabase.co')) {
-      results.push(`✅ VITE_SUPABASE_URL: Configured (${supabaseUrl})`);
+    if (supabaseUrl && supabaseUrl.includes('supabase.co')) {
+      results.push('✅ VITE_SUPABASE_URL: Configured');
     } else {
-      results.push(`❌ VITE_SUPABASE_URL: ${supabaseUrl ? `Invalid: ${supabaseUrl}` : 'Missing'}`);
+      results.push('❌ VITE_SUPABASE_URL: ' + (supabaseUrl ? 'Invalid format' : 'Missing'));
     }
 
     // Supabase Anon Key
-    if (supabaseKey?.length > 50) {
-      results.push(`✅ VITE_SUPABASE_ANON_KEY: Configured (${supabaseKey.length} chars, ${supabaseKey.substring(0, 10)}...)`);
+    if (supabaseKey && supabaseKey.length > 50) {
+      results.push('✅ VITE_SUPABASE_ANON_KEY: Configured (' + supabaseKey.length + ' chars)');
     } else {
-      results.push(`❌ VITE_SUPABASE_ANON_KEY: ${supabaseKey ? `Too short: ${supabaseKey.length} chars, ${supabaseKey.substring(0, 10)}...` : 'Missing'}`);
+      const keyLength = supabaseKey ? supabaseKey.length : 0;
+      results.push('❌ VITE_SUPABASE_ANON_KEY: ' + (supabaseKey ? 'Too short (' + keyLength + ' chars)' : 'Missing'));
     }
 
-    // Additional debug info
-    results.push('\n🔍 Debug Info:');
-    results.push(`Environment: ${import.meta.env.MODE}`);
-    results.push(`Available env vars: ${Object.keys(import.meta.env).filter(key => key.startsWith('VITE_')).join(', ')}`);
+    // Debug info
+    results.push('');
+    results.push('🔍 Debug Info:');
+    results.push('Environment: ' + import.meta.env.MODE);
+    const viteKeys = Object.keys(import.meta.env).filter(key => key.startsWith('VITE_'));
+    results.push('Available VITE_ vars: ' + viteKeys.join(', '));
 
     setStatus(results.join('\n'));
   };
