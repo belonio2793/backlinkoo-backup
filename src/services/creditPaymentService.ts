@@ -134,8 +134,8 @@ export class CreditPaymentService {
       return { success: false, error: 'Email is required for payment processing' };
     }
 
-    // Production payment processing - Supabase Edge Functions only
-    console.log('🔧 Using Supabase Edge Functions for live payment processing');
+    // Production payment processing - Using reliable Netlify Functions
+    console.log('🔧 Using Netlify Functions for live payment processing');
 
     const requestBody = {
       amount: options.amount,
@@ -154,9 +154,9 @@ export class CreditPaymentService {
     });
 
     try {
-      console.log('🔄 Calling Supabase Edge Function for credit payment...');
+      console.log('🔄 Calling Netlify Function for credit payment...');
 
-      // Get auth session for Supabase edge functions
+      // Get auth session for potential authentication header
       const { data: session } = await supabase.auth.getSession();
       const headers: Record<string, string> = {
         'Content-Type': 'application/json'
@@ -166,43 +166,43 @@ export class CreditPaymentService {
         headers['Authorization'] = `Bearer ${session.session.access_token}`;
       }
 
-      console.log('📤 Calling Supabase Edge Function with:', {
-        function: 'create-payment',
+      console.log('📤 Calling Netlify Function with:', {
+        endpoint: '/.netlify/functions/create-payment',
         hasAuth: !!headers['Authorization'],
         requestBody: { ...requestBody, guestEmail: finalGuestEmail ? '***' : undefined }
       });
 
-      const { data: result, error: edgeError } = await supabase.functions.invoke('create-payment', {
-        body: requestBody,
-        headers
+      const response = await fetch('/.netlify/functions/create-payment', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(requestBody)
       });
 
-      console.log('📥 Supabase Edge Function response:', {
-        hasData: !!result,
-        hasError: !!edgeError,
-        error: edgeError,
-        errorMessage: edgeError?.message,
-        dataKeys: result ? Object.keys(result) : [],
-        resultContent: result ? result : 'no data'
+      console.log('📥 Netlify Function response status:', response.status, response.statusText);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ Netlify Function failed:', response.status, errorText);
+        throw new Error(`Payment service returned ${response.status}: ${errorText}`);
+      }
+
+      const result = await response.json();
+
+      console.log('📥 Netlify Function response data:', {
+        hasUrl: !!result.url,
+        hasSessionId: !!result.sessionId,
+        dataKeys: Object.keys(result)
       });
 
-      if (!edgeError && result && result.url) {
+      if (result.url) {
         console.log('✅ Live payment session created successfully');
         return {
           success: true,
           url: result.url,
-          sessionId: result.sessionId || result.session_id
+          sessionId: result.sessionId
         };
       } else {
-        // Payment failed - provide detailed error
-        const errorMessage = edgeError ? this.extractErrorMessage(edgeError) : 'No payment URL received from server';
-        console.error('❌ Payment creation failed:', errorMessage);
-        ErrorLogger.logError('Credit payment error', edgeError || { message: 'No URL returned' });
-
-        return {
-          success: false,
-          error: `Payment system error: ${errorMessage}. Please try again or contact support.`
-        };
+        throw new Error('No payment URL received from server');
       }
 
     } catch (error) {
