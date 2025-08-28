@@ -181,5 +181,3 @@ export default function SecurePayment() {
     </div>
   );
 }
-
-export default SecurePayment;
