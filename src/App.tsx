@@ -60,6 +60,7 @@ const LazyNetlifyConnectionTest = lazy(() => import("./pages/NetlifyConnectionTe
 const LazySupabaseTest = lazy(() => import("./pages/SupabaseTest"));
 const LazyBlogGenerationTest = lazy(() => import("./components/BlogGenerationTest"));
 const LazyAuthFix = lazy(() => import("./pages/AuthFix"));
+const LazyTestPaymentModal = lazy(() => import("./pages/TestPaymentModal"));
 import BlogGenerationFixTestPage from "./pages/BlogGenerationFixTest";
 
 const queryClient = new QueryClient({
