@@ -24,16 +24,12 @@ export interface PaymentOptions {
   amount: number;
   credits?: number;
   productName?: string;
-  isGuest?: boolean;
-  guestEmail?: string;
   metadata?: Record<string, string>;
 }
 
 export interface SubscriptionOptions {
   plan: 'monthly' | 'yearly' | 'annual';
   tier?: string;
-  isGuest?: boolean;
-  guestEmail?: string;
   userEmail?: string;
   metadata?: Record<string, string>;
 }
