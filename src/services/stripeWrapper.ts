@@ -215,15 +215,13 @@ class StripeWrapper {
   /**
    * Quick credit purchase - redirects to credits checkout
    */
-  async quickBuyCredits(credits: 50 | 100 | 250 | 500, guestEmail?: string): Promise<PaymentResult> {
+  async quickBuyCredits(credits: 50 | 100 | 250 | 500): Promise<PaymentResult> {
     const amount = this.getCreditsPrice(credits);
-    
+
     const result = await this.createPayment({
       amount,
       credits,
-      productName: `${credits} Backlink Credits`,
-      isGuest: !!guestEmail,
-      guestEmail
+      productName: `${credits} Backlink Credits`
     });
 
     if (result.success && result.url) {
