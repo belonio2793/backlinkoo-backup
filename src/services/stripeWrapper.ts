@@ -125,8 +125,7 @@ class StripeWrapper {
     
     console.log('🎖️ Redirecting to direct Stripe subscription checkout:', {
       plan,
-      tier: options.tier,
-      isGuest: options.isGuest
+      tier: options.tier
     });
 
     // Select the appropriate checkout URL based on plan
