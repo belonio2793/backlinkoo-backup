@@ -196,17 +196,29 @@ class StripeWrapper {
   }
 
   /**
-   * Open checkout window or redirect directly
+   * Open checkout window in new popup
    */
   openCheckoutWindow(url: string, sessionId?: string): Window | null {
     try {
-      console.log('🚀 Redirecting to Stripe checkout:', url);
-      
-      // For direct Stripe checkouts, redirect in current window for better UX
-      window.location.href = url;
-      return null;
+      console.log('🚀 Opening Stripe checkout in new window:', url);
+
+      // Open in new popup window for better UX and security
+      const windowFeatures = 'width=800,height=600,scrollbars=yes,resizable=yes,status=yes,location=yes,toolbar=no,menubar=no';
+      const checkoutWindow = window.open(url, 'stripe-checkout', windowFeatures);
+
+      if (!checkoutWindow) {
+        console.warn('⚠��� Popup blocked, falling back to same-window redirect');
+        window.location.href = url;
+        return null;
+      }
+
+      // Focus the new window
+      checkoutWindow.focus();
+
+      return checkoutWindow;
     } catch (error: any) {
-      console.error('❌ Failed to redirect to checkout:', error.message);
+      console.error('❌ Failed to open checkout window:', error.message);
+      // Fallback to same-window redirect if popup fails
       window.location.href = url;
       return null;
     }
