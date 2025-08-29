@@ -7,8 +7,8 @@
 
 // Direct Stripe checkout URLs
 const STRIPE_CHECKOUT_URLS = {
-  credits: 'https://buy.stripe.com/9B63cv1tmcYe',
-  premiumMonthly: 'https://buy.stripe.com/6oUaEX3Buf6m0V1fO11ZS00', 
+  credits: 'https://buy.stripe.com/9B63cv1tmcYeeLRbxL1ZS02',
+  premiumMonthly: 'https://buy.stripe.com/6oUaEX3Buf6m0V1fO11ZS00',
   premiumAnnual: 'https://buy.stripe.com/14A4gzb3W8HY5bhatH1ZS01'
 };
 
@@ -92,6 +92,16 @@ class StripeWrapper {
     };
   }
 
+  /** Helper: build Payment Link with prefilled quantity and email */
+  private buildCreditsPaymentLink(credits: number, userEmail?: string): string | null {
+    const base = STRIPE_CHECKOUT_URLS.credits;
+    if (!base) return null;
+    const url = new URL(base);
+    if (credits && credits > 0) url.searchParams.set('quantity', String(credits));
+    if (userEmail) url.searchParams.set('prefilled_email', userEmail);
+    return url.toString();
+  }
+
   /**
    * Create payment session - now redirects directly to Stripe checkout
    */
@@ -100,53 +110,57 @@ class StripeWrapper {
       return { success: false, error: 'Stripe Wrapper not initialized' };
     }
 
-    try {
-      console.log('💳 Creating Stripe Checkout Session (server) for credits:', {
-        amount: options.amount,
-        credits: options.credits
-      });
+    const payload = {
+      amount: options.amount,
+      credits: options.credits,
+      productName: options.productName || (options.credits ? `${options.credits} Backlink Credits` : 'Backlink Credits'),
+      isGuest: !options.userEmail,
+      guestEmail: options.userEmail,
+      paymentMethod: 'stripe'
+    };
 
-      const response = await fetch('/api/create-payment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          amount: options.amount,
-          credits: options.credits,
-          productName: options.productName || (options.credits ? `${options.credits} Backlink Credits` : 'Backlink Credits'),
-          isGuest: !options.userEmail,
-          guestEmail: options.userEmail,
-          paymentMethod: 'stripe'
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-
-      const data = await response.json();
-      return { success: true, url: data.url, sessionId: data.sessionId };
-    } catch (e: any) {
-      console.warn('⚠️ Netlify create-payment failed, falling back to Supabase Edge:', e?.message);
-      try {
-        const { data, error } = await supabase.functions.invoke('create-payment', {
-          body: {
-            amount: options.amount,
-            credits: options.credits,
-            productName: options.productName || (options.credits ? `${options.credits} Backlink Credits` : 'Backlink Credits'),
-            isGuest: !options.userEmail,
-            guestEmail: options.userEmail,
-            paymentMethod: 'stripe'
-          }
-        });
-        if (error || !data?.url) {
-          return { success: false, error: error?.message || 'Failed to start checkout' };
-        }
-        return { success: true, url: data.url, sessionId: data.sessionId };
-      } catch (e2: any) {
-        console.error('❌ Supabase fallback failed:', e2?.message);
-        return { success: false, error: e2?.message || 'Failed to start checkout' };
-      }
+    // Prefer Payment Link for credits to auto-fill quantity
+    if (typeof options.credits === 'number' && options.credits > 0) {
+      const link = this.buildCreditsPaymentLink(options.credits, options.userEmail);
+      if (link) return { success: true, url: link, method: 'direct_stripe' };
     }
+
+    // Try multiple endpoints before falling back to Supabase
+    const endpoints = [
+      '/.netlify/functions/create-payment',
+      '/api/create-payment'
+    ];
+
+    for (const url of endpoints) {
+      try {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.url) return { success: true, url: data.url, sessionId: data.sessionId };
+        }
+      } catch (_) {}
+    }
+
+    // Supabase Edge fallback
+    try {
+      const { data, error } = await supabase.functions.invoke('create-payment', { body: payload });
+      if (!error && data?.url) {
+        return { success: true, url: data.url, sessionId: data.sessionId };
+      }
+    } catch (_) {}
+
+    // Final fallback: Stripe Payment Link (no server dependency)
+    if (STRIPE_CHECKOUT_URLS.credits) {
+      const url = new URL(STRIPE_CHECKOUT_URLS.credits);
+      if (payload.guestEmail) url.searchParams.set('prefilled_email', payload.guestEmail as string);
+      return { success: true, url: url.toString(), sessionId: undefined };
+    }
+
+    return { success: false, error: 'Failed to start checkout' };
   }
 
   /**
@@ -157,47 +171,51 @@ class StripeWrapper {
       return { success: false, error: 'Stripe Wrapper not initialized' };
     }
 
-    try {
-      const plan = options.plan === 'annual' ? 'yearly' : options.plan;
-      console.log('🎖️ Creating Stripe Subscription Session (server):', { plan, tier: options.tier });
+    const plan = options.plan === 'annual' ? 'yearly' : options.plan;
+    const payload = {
+      plan,
+      isGuest: !options.userEmail,
+      guestEmail: options.userEmail,
+      paymentMethod: 'stripe'
+    };
 
-      const response = await fetch('/api/create-subscription', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          plan,
-          isGuest: !options.userEmail,
-          guestEmail: options.userEmail,
-          paymentMethod: 'stripe'
-        })
-      });
+    // Try multiple endpoints first
+    const endpoints = [
+      '/.netlify/functions/create-subscription',
+      '/api/create-subscription'
+    ];
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-
-      const data = await response.json();
-      return { success: true, url: data.url, sessionId: data.sessionId };
-    } catch (e: any) {
-      console.warn('⚠️ Netlify create-subscription failed, falling back to Supabase Edge:', e?.message);
+    for (const url of endpoints) {
       try {
-        const { data, error } = await supabase.functions.invoke('create-subscription', {
-          body: {
-            plan,
-            isGuest: !options.userEmail,
-            guestEmail: options.userEmail,
-            paymentMethod: 'stripe'
-          }
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
         });
-        if (error || !data?.url) {
-          return { success: false, error: error?.message || 'Failed to start subscription checkout' };
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.url) return { success: true, url: data.url, sessionId: data.sessionId };
         }
-        return { success: true, url: data.url, sessionId: data.sessionId };
-      } catch (e2: any) {
-        console.error('❌ Supabase subscription fallback failed:', e2?.message);
-        return { success: false, error: e2?.message || 'Failed to start subscription checkout' };
-      }
+      } catch (_) {}
     }
+
+    // Supabase Edge fallback
+    try {
+      const { data, error } = await supabase.functions.invoke('create-subscription', { body: payload });
+      if (!error && data?.url) {
+        return { success: true, url: data.url, sessionId: data.sessionId };
+      }
+    } catch (_) {}
+
+    // Final fallback: Stripe Payment Links
+    const fallbackUrl = payload.plan === 'yearly' ? STRIPE_CHECKOUT_URLS.premiumAnnual : STRIPE_CHECKOUT_URLS.premiumMonthly;
+    if (fallbackUrl) {
+      const url = new URL(fallbackUrl);
+      if (payload.guestEmail) url.searchParams.set('prefilled_email', payload.guestEmail as string);
+      return { success: true, url: url.toString(), sessionId: undefined };
+    }
+
+    return { success: false, error: 'Failed to start subscription checkout' };
   }
 
   /**
@@ -253,17 +271,15 @@ class StripeWrapper {
       const popup = window.open(
         url,
         'stripe-checkout',
-        'width=600,height=720,scrollbars=yes,resizable=yes'
+        'width=800,height=720,scrollbars=yes,resizable=yes,noopener,noreferrer'
       );
       if (!popup) {
-        // Fallback if popup blocked
-        window.location.href = url;
+        console.warn('Popup blocked');
         return null;
       }
       return popup;
     } catch (error: any) {
-      console.error('❌ Failed to open checkout window:', error.message);
-      window.location.href = url;
+      console.error('❌ Failed to open checkout window:', error?.message);
       return null;
     }
   }
@@ -271,47 +287,26 @@ class StripeWrapper {
   /**
    * Quick credit purchase - redirects to credits checkout
    */
-  async quickBuyCredits(credits: 50 | 100 | 250 | 500, userEmail?: string): Promise<PaymentResult> {
+  async quickBuyCredits(credits: number, userEmail?: string): Promise<PaymentResult> {
+    // No placeholder popup; rely on caller to decide UI (modal Elements preferred)
     const amount = this.getCreditsPrice(credits);
-
-    // Open placeholder window immediately to preserve user gesture
-    let popup: Window | null = null;
-    try {
-      popup = window.open('about:blank', 'stripe-checkout', 'width=600,height=720,scrollbars=yes,resizable=yes');
-    } catch (_) {}
-
-    const result = await this.createPayment({
-      amount,
-      credits,
-      productName: `${credits} Backlink Credits`,
-      userEmail
-    });
-
-    if (result.success && result.url) {
-      try {
-        if (popup && !popup.closed) {
-          popup.location.href = result.url;
-          return result;
-        }
-      } catch (_) {}
-      this.openCheckoutWindow(result.url, result.sessionId);
-    } else if (popup && !popup.closed) {
-      try { popup.close(); } catch (_) {}
+    const serverResult = await this.createPayment({ amount, credits, productName: `${credits} Backlink Credits`, userEmail });
+    if (serverResult.success && serverResult.url) {
+      return serverResult;
     }
 
-    return result;
+    const link = this.buildCreditsPaymentLink(credits, userEmail);
+    if (link) {
+      return { success: true, url: link, method: 'direct_stripe' };
+    }
+
+    return { success: false, error: serverResult.error || 'Failed to start checkout' };
   }
 
   /**
    * Quick premium subscription purchase
    */
   async quickSubscribe(plan: 'monthly' | 'yearly', userEmail?: string): Promise<PaymentResult> {
-    // Open placeholder window immediately to preserve user gesture
-    let popup: Window | null = null;
-    try {
-      popup = window.open('about:blank', 'stripe-checkout', 'width=600,height=720,scrollbars=yes,resizable=yes');
-    } catch (_) {}
-
     const result = await this.createSubscription({
       plan,
       tier: 'premium',
@@ -319,15 +314,7 @@ class StripeWrapper {
     });
 
     if (result.success && result.url) {
-      try {
-        if (popup && !popup.closed) {
-          popup.location.href = result.url;
-          return result;
-        }
-      } catch (_) {}
       this.openCheckoutWindow(result.url, result.sessionId);
-    } else if (popup && !popup.closed) {
-      try { popup.close(); } catch (_) {}
     }
 
     return result;
@@ -381,7 +368,7 @@ export const createPayment = (options: PaymentOptions) => stripeWrapper.createPa
 export const createSubscription = (options: SubscriptionOptions) => stripeWrapper.createSubscription(options);
 export const verifyPayment = (sessionId: string) => stripeWrapper.verifyPayment(sessionId);
 export const openCheckout = (url: string, sessionId?: string) => stripeWrapper.openCheckoutWindow(url, sessionId);
-export const quickBuyCredits = (credits: 50 | 100 | 250 | 500, userEmail?: string) => stripeWrapper.quickBuyCredits(credits, userEmail);
+export const quickBuyCredits = (credits: number, userEmail?: string) => stripeWrapper.quickBuyCredits(credits, userEmail);
 export const quickSubscribe = (plan: 'monthly' | 'yearly', userEmail?: string) => stripeWrapper.quickSubscribe(plan, userEmail);
 export const getStripeStatus = () => stripeWrapper.getStatus();
 

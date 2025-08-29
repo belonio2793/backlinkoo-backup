@@ -96,34 +96,8 @@ export function MobileOptimizedPaymentButton({
         if (validCredits.includes(credits)) {
           result = await stripeWrapper.quickBuyCredits(credits as 50 | 100 | 250 | 500, showGuestInput ? email : undefined);
         } else {
-          // For custom amounts, use createPayment directly
-          const amount = Math.ceil(credits * 1.40);
-          result = await stripeWrapper.createPayment({
-            amount,
-            credits,
-            productName: `${credits} Premium Backlink Credits`,
-            isGuest: showGuestInput,
-            guestEmail: email
-          });
-
-          if (result.success && result.url) {
-            // Handle mobile-specific checkout behavior
-            if (deviceInfo.isMobile && deviceInfo.isIOSSafari) {
-              // iOS Safari - redirect in current window
-              window.location.href = result.url;
-              return;
-            } else if (deviceInfo.isMobile) {
-              // Other mobile - try popup with fallback to redirect
-              const popup = window.open(result.url, '_blank');
-              if (!popup) {
-                window.location.href = result.url;
-                return;
-              }
-            } else {
-              // Desktop - open in new window
-              stripeWrapper.openCheckoutWindow(result.url, result.sessionId);
-            }
-          }
+          // For custom amounts, use payment link with quantity prefilled
+          result = await stripeWrapper.quickBuyCredits(credits, showGuestInput ? email : undefined);
         }
       }
 

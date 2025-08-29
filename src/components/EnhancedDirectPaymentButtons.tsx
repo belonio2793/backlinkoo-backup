@@ -60,20 +60,10 @@ export function QuickCreditButtons({ guestEmail, showGuestInput = true }: Direct
           throw new Error(result.error || 'Failed to create checkout session');
         }
       } else {
-        // For custom amounts, use createPayment
-        const amount = Math.ceil(credits * 1.40);
-        const result = await stripeWrapper.createPayment({
-          amount,
-          credits,
-          productName: `${credits} Premium Backlink Credits`,
-          isGuest: showGuestInput,
-          guestEmail: email
-        });
-
-        if (result.success && result.url) {
-          stripeWrapper.openCheckoutWindow(result.url, result.sessionId);
-        } else {
-          throw new Error(result.error || 'Failed to create checkout session');
+        // For custom amounts, use payment link with quantity prefilled
+        const result = await stripeWrapper.quickBuyCredits(credits, showGuestInput ? email : undefined);
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to open checkout');
         }
       }
 
