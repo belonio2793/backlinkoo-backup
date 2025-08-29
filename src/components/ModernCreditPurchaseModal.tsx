@@ -146,8 +146,19 @@ export function ModernCreditPurchaseModal({
       // Create checkout URL and redirect
       const checkoutUrl = createCheckoutUrl();
       
-      // Redirect to Stripe checkout
-      window.location.href = checkoutUrl;
+      // Open Stripe checkout in new window
+      const checkoutWindow = window.open(
+        checkoutUrl,
+        'stripe-checkout',
+        'width=800,height=600,scrollbars=yes,resizable=yes,status=yes,location=yes'
+      );
+
+      if (!checkoutWindow) {
+        // Fallback to same window if popup blocked
+        window.location.href = checkoutUrl;
+      } else {
+        checkoutWindow.focus();
+      }
 
       // Close modal
       onClose();
