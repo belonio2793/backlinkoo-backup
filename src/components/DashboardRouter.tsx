@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { GuestDashboard } from './GuestDashboard';
 import Dashboard from '../pages/Dashboard';
 import { Loader2 } from 'lucide-react';
 
