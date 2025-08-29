@@ -106,10 +106,8 @@ export function ModernCreditPurchaseModal({
 
   const startCheckout = async () => {
     const credits = getCreditsAmount();
-    const amount = getPriceAmount();
-    const result = await stripeWrapper.createPayment({ amount, credits, productName: `${credits} Backlink Credits`, userEmail: user?.email || undefined });
+    const result = await stripeWrapper.quickBuyCredits(credits, user?.email || undefined);
     if (result.success && result.url) {
-      stripeWrapper.openCheckoutWindow(result.url, result.sessionId);
       return true;
     }
     throw new Error(result.error || 'Unable to start checkout');
