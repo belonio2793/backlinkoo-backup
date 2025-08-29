@@ -119,11 +119,6 @@ class StripeWrapper {
       paymentMethod: 'stripe'
     };
 
-    // Prefer Payment Link for credits to auto-fill quantity
-    if (typeof options.credits === 'number' && options.credits > 0) {
-      const link = this.buildCreditsPaymentLink(options.credits, options.userEmail);
-      if (link) return { success: true, url: link, method: 'direct_stripe' };
-    }
 
     // Try multiple endpoints before falling back to Supabase
     const endpoints = [
@@ -376,7 +371,7 @@ class StripeWrapper {
       case 100: return 140;
       case 250: return 350;
       case 500: return 700;
-      default: return Math.ceil(credits * 1.40); // $1.40 per credit
+      default: return Number((credits * 1.40).toFixed(2));
     }
   }
 }

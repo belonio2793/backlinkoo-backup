@@ -139,8 +139,8 @@ export function StripeIntegrationTest() {
 
     try {
       const customCredits = 123;
-      const customAmount = Math.ceil(customCredits * 1.40);
-      
+      const customAmount = Number((customCredits * 1.40).toFixed(2));
+
       addTestResult('Custom Credits', 'info', `Testing custom ${customCredits} credits purchase...`);
       
       const result = await stripeWrapper.createPayment({

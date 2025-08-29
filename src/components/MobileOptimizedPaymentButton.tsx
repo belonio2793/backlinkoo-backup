@@ -135,7 +135,7 @@ export function MobileOptimizedPaymentButton({
     } else {
       const amount = credits <= 500 && [50, 100, 250, 500].includes(credits) 
         ? [70, 140, 350, 700][[50, 100, 250, 500].indexOf(credits)]
-        : Math.ceil(credits * 1.40);
+        : Number((credits * 1.40).toFixed(2));
       return `Buy ${credits} Credits ($${amount})`;
     }
   };
