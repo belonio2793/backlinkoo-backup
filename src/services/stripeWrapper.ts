@@ -249,17 +249,38 @@ class StripeWrapper {
       return { success: false, paid: false, error: 'Session ID required' };
     }
 
-    console.log('🔍 Verifying payment via webhook system:', sessionId);
+    try {
+      // Prefer Supabase Edge Function
+      const { data, error } = await supabase.functions.invoke('verify-payment', {
+        body: { type: 'payment', sessionId }
+      });
+      if (!error && data) {
+        return {
+          success: true,
+          paid: !!data.paid || data.status === 'paid' || data.status === 'complete',
+          sessionId,
+          amount: data.amount_total ? data.amount_total / 100 : undefined,
+          credits: data.credits,
+        };
+      }
+    } catch (_) {}
 
-    // In the direct checkout system, verification happens via webhooks
-    // This method is mainly for compatibility with existing success pages
-    return {
-      success: true,
-      paid: true, // Assume paid if we reached success page
-      sessionId,
-      amount: 0, // Will be handled by webhook
-      credits: 0 // Will be handled by webhook
-    };
+    // Fallback to Netlify function if available
+    try {
+      const res = await fetch('/.netlify/functions/verify-payment?session_id=' + encodeURIComponent(sessionId));
+      if (res.ok) {
+        const result = await res.json();
+        return {
+          success: !!result.verified,
+          paid: !!result.verified,
+          sessionId,
+          amount: result.amount,
+          credits: result.credits,
+        };
+      }
+    } catch (_) {}
+
+    return { success: false, paid: false, error: 'Verification failed' };
   }
 
   /**
