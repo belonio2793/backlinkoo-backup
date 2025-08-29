@@ -48,13 +48,22 @@ export default function InlineStripeCredits({ credits, email, onSuccess }:{ cred
     const run = async () => {
       setClientSecret(null);
       try {
-        const res = await fetch('/.netlify/functions/create-payment-intent', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ credits, email })
-        });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
+        const attempt = async (url: string) => {
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ credits, email })
+          });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return res.json();
+        };
+
+        let data: any;
+        try {
+          data = await attempt('/api/create-payment-intent');
+        } catch {
+          data = await attempt('/.netlify/functions/create-payment-intent');
+        }
         setClientSecret(data.clientSecret || null);
       } catch (e:any) {
         console.error('create-payment-intent error', e);
