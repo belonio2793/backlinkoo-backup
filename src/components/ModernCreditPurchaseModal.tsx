@@ -36,8 +36,8 @@ export function ModernCreditPurchaseModal({
   const { openLoginModal } = useAuthModal();
 
   const [selectedPackage, setSelectedPackage] = useState<number | null>(null);
-  const [customCredits, setCustomCredits] = useState("300");
-  const [totalPrice, setTotalPrice] = useState(420.00);
+  const [customCredits, setCustomCredits] = useState("");
+  const [totalPrice, setTotalPrice] = useState(0);
   const [rate] = useState(1.40);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -82,7 +82,7 @@ export function ModernCreditPurchaseModal({
   };
 
   const handleCustomCreditsChange = (value: string) => {
-    // Allow only numbers
+    // Allow only integers
     const numericValue = value.replace(/[^0-9]/g, '');
     setCustomCredits(numericValue);
     setSelectedPackage(null); // Clear package selection for custom amount
@@ -216,7 +216,9 @@ export function ModernCreditPurchaseModal({
               <div className="space-y-2">
                 <div className="relative">
                   <Input
-                    type="text"
+                    type="number"
+                    min={1}
+                    step={1}
                     value={customCredits}
                     onChange={(e) => handleCustomCreditsChange(e.target.value)}
                     placeholder="Enter number of credits"
