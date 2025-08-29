@@ -7,8 +7,8 @@
 
 // Direct Stripe checkout URLs
 const STRIPE_CHECKOUT_URLS = {
-  credits: 'https://buy.stripe.com/9B63cv1tmcYe',
-  premiumMonthly: 'https://buy.stripe.com/6oUaEX3Buf6m0V1fO11ZS00', 
+  credits: 'https://buy.stripe.com/9B63cv1tmcYeeLRbxL1ZS02',
+  premiumMonthly: 'https://buy.stripe.com/6oUaEX3Buf6m0V1fO11ZS00',
   premiumAnnual: 'https://buy.stripe.com/14A4gzb3W8HY5bhatH1ZS01'
 };
 
