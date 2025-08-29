@@ -267,7 +267,7 @@ class StripeWrapper {
    */
   openCheckoutWindow(url: string, sessionId?: string): Window | null {
     try {
-      console.log('🚀 Opening Stripe checkout in new window:', url);
+      console.log('���� Opening Stripe checkout in new window:', url);
       const popup = window.open(
         url,
         'stripe-checkout',
@@ -289,20 +289,16 @@ class StripeWrapper {
   /**
    * Quick credit purchase - redirects to credits checkout
    */
-  async quickBuyCredits(credits: 50 | 100 | 250 | 500, userEmail?: string): Promise<PaymentResult> {
-    const amount = this.getCreditsPrice(credits);
-
-    const result = await this.createPayment({
-      amount,
-      credits,
-      productName: `${credits} Backlink Credits`,
-      userEmail
-    });
-
-    if (result.success && result.url) {
-      this.openCheckoutWindow(result.url, result.sessionId);
+  async quickBuyCredits(credits: number, userEmail?: string): Promise<PaymentResult> {
+    const link = this.buildCreditsPaymentLink(credits, userEmail);
+    if (link) {
+      this.openCheckoutWindow(link);
+      return { success: true, url: link, method: 'direct_stripe' };
     }
 
+    const amount = this.getCreditsPrice(credits);
+    const result = await this.createPayment({ amount, credits, productName: `${credits} Backlink Credits`, userEmail });
+    if (result.success && result.url) this.openCheckoutWindow(result.url, result.sessionId);
     return result;
   }
 
