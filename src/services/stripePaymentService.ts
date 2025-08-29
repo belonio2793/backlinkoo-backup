@@ -112,16 +112,16 @@ class StripePaymentService {
   /**
    * Quick purchase with preset amounts using Stripe Wrapper
    */
-  async quickPurchase(credits: 50 | 100 | 250 | 500, guestEmail?: string): Promise<StripePaymentResult> {
-    const result = await stripeWrapper.quickBuyCredits(credits, guestEmail);
+  async quickPurchase(credits: 50 | 100 | 250 | 500): Promise<StripePaymentResult> {
+    const result = await stripeWrapper.quickBuyCredits(credits);
     return this.convertResult(result);
   }
 
   /**
    * Purchase premium subscription using Stripe Wrapper
    */
-  async purchasePremium(plan: 'monthly' | 'yearly', guestEmail?: string): Promise<StripePaymentResult> {
-    const result = await stripeWrapper.quickSubscribe(plan, guestEmail);
+  async purchasePremium(plan: 'monthly' | 'yearly'): Promise<StripePaymentResult> {
+    const result = await stripeWrapper.quickSubscribe(plan);
     return this.convertResult(result);
   }
 
