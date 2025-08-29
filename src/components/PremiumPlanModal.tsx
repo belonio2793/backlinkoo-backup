@@ -66,9 +66,9 @@ export function PremiumPlanModal({
   // Core premium features
   const premiumFeatures = [
     {
-      icon: <Infinity className="h-5 w-5" />,
-      title: "Unlimited Backlinks",
-      description: "Build unlimited high-quality backlinks with no monthly limits"
+      icon: <TrendingUp className="h-5 w-5" />,
+      title: "Premium Backlinks",
+      description: "Access high-quality backlinks with credit-based usage"
     },
     {
       icon: <BookOpen className="h-5 w-5" />,
@@ -265,7 +265,7 @@ export function PremiumPlanModal({
             Premium Plan
           </h2>
           <p className="text-xl text-gray-600 mt-2">
-            Unlock unlimited SEO potential with our comprehensive premium features
+            Unlock premium SEO potential with our comprehensive features
           </p>
         </div>
       </div>
@@ -643,7 +643,7 @@ export function PremiumPlanModal({
         <div className="bg-green-50 rounded-lg p-6 mt-6">
           <h4 className="font-semibold text-green-900 mb-3">What's Next?</h4>
           <p className="text-sm text-green-700 mb-4">
-            You now have access to unlimited backlinks, SEO Academy, priority support, and all premium features.
+            You now have access to premium features including the SEO Academy, priority support, and more.
           </p>
           <Button
             onClick={() => {
