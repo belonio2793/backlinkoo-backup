@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { stripeWrapper } from '@/services/stripeWrapper';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -71,24 +72,8 @@ export function PremiumCheckoutModal({ isOpen, onClose, onSuccess }: PremiumChec
     { icon: <Zap className="h-4 w-4" />, text: "API Access & Integrations" }
   ];
 
-  const createCheckoutUrl = (plan: 'monthly' | 'yearly'): string => {
-    const baseUrl = STRIPE_CHECKOUT_URLS[plan];
-    const url = new URL(baseUrl);
-    const currentOrigin = window.location.origin;
-    
-    // Add return URLs
-    url.searchParams.set('success_url', `${currentOrigin}/subscription-success?session_id={CHECKOUT_SESSION_ID}`);
-    url.searchParams.set('cancel_url', `${currentOrigin}/payment-cancelled`);
-    
-    // Add user email if available
-    if (user?.email || formData.email) {
-      url.searchParams.set('prefilled_email', user?.email || formData.email);
-    }
-    
-    // Add metadata for webhook processing
-    url.searchParams.set('client_reference_id', `premium_${plan}`);
-    
-    return url.toString();
+  const startCheckout = async (plan: 'monthly' | 'yearly') => {
+    await stripeWrapper.quickSubscribe(plan, (user?.email || formData.email) || undefined);
   };
 
   const handleCheckout = async () => {
@@ -111,11 +96,7 @@ export function PremiumCheckoutModal({ isOpen, onClose, onSuccess }: PremiumChec
         description: `Opening secure checkout for ${selectedPlan} premium plan...`,
       });
 
-      // Create checkout URL and redirect
-      const checkoutUrl = createCheckoutUrl(selectedPlan);
-      
-      // Redirect to Stripe checkout
-      window.location.href = checkoutUrl;
+      await startCheckout(selectedPlan);
 
       // Close modal
       onClose();

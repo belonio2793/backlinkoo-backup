@@ -193,24 +193,9 @@ export function EnhancedUnifiedPaymentModal({
     return null;
   };
 
-  // Create checkout URL with user data
-  const createCheckoutUrl = (selection: any): string => {
-    const url = new URL(CREDITS_CHECKOUT_URL);
-    const currentOrigin = window.location.origin;
-    
-    // Add return URLs
-    url.searchParams.set('success_url', `${currentOrigin}/payment-success?session_id={CHECKOUT_SESSION_ID}`);
-    url.searchParams.set('cancel_url', `${currentOrigin}/payment-cancelled`);
-    
-    // Add user email if available
-    if (user?.email) {
-      url.searchParams.set('prefilled_email', user.email);
-    }
-    
-    // Add metadata for webhook processing
-    url.searchParams.set('client_reference_id', `credits_${selection.credits}`);
-    
-    return url.toString();
+  // Use central Stripe wrapper
+  const startCheckout = async (selection: any) => {
+    await stripeWrapper.quickBuyCredits(selection.credits as 50 | 100 | 250 | 500, user?.email || undefined);
   };
 
   // Handle payment with direct checkout
@@ -234,10 +219,7 @@ export function EnhancedUnifiedPaymentModal({
         description: `Opening secure checkout for ${selection.credits} credits...`,
       });
 
-      // Create checkout URL and redirect
-      const checkoutUrl = createCheckoutUrl(selection);
-      
-      // Redirect to Stripe checkout
+      await startCheckout(selection);
       window.location.href = checkoutUrl;
 
       // Call success callback
