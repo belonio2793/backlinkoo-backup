@@ -94,9 +94,9 @@ export default function InlineStripeCredits({ credits, email, onSuccess }:{ cred
         };
         let data: any;
         try {
-          data = await attempt('/api/create-payment-intent');
-        } catch {
           data = await attempt('/.netlify/functions/create-payment-intent');
+        } catch {
+          data = await attempt('/api/create-payment-intent');
         }
         setClientSecret(data.clientSecret || null);
       } catch (e:any) {
@@ -109,7 +109,7 @@ export default function InlineStripeCredits({ credits, email, onSuccess }:{ cred
 
   const options: StripeElementsOptions | undefined = useMemo(() => clientSecret ? ({ clientSecret, appearance: { theme: 'stripe' } }) : undefined, [clientSecret]);
 
-  if (!stripe || !clientSecret) return <div className="text-sm text-muted-foreground">Preparing secure checkout…</div>;
+  if (!stripe || !clientSecret) return <div className="text-sm text-muted-foreground">Preparing secure checkout��</div>;
 
   return (
     <Elements stripe={stripe} options={options}>
