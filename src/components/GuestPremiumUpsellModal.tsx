@@ -17,6 +17,7 @@ import {
 import { guestTrackingService, type PremiumLimitWarning } from '@/services/guestTrackingService';
 import { LoginModal } from '@/components/LoginModal';
 import { useToast } from '@/hooks/use-toast';
+import { stripeWrapper } from '@/services/stripeWrapper';
 
 interface GuestPremiumUpsellModalProps {
   open: boolean;
@@ -54,27 +55,10 @@ export function GuestPremiumUpsellModal({
     }
   }, [open]);
 
-  // Create checkout URL with guest data
-  const createCheckoutUrl = (plan: 'monthly' | 'yearly'): string => {
-    const baseUrl = STRIPE_CHECKOUT_URLS[plan];
-    const url = new URL(baseUrl);
-    const currentOrigin = window.location.origin;
-    
-    // Add return URLs
-    url.searchParams.set('success_url', `${currentOrigin}/subscription-success?session_id={CHECKOUT_SESSION_ID}`);
-    url.searchParams.set('cancel_url', `${currentOrigin}/payment-cancelled`);
-    
-    // Add guest email if available
+  const startCheckout = async (plan: 'monthly' | 'yearly') => {
     const guestData = guestTrackingService.getGuestData();
     const guestEmail = guestData?.email;
-    if (guestEmail) {
-      url.searchParams.set('prefilled_email', guestEmail);
-    }
-    
-    // Add metadata for webhook processing
-    url.searchParams.set('client_reference_id', `premium_${plan}`);
-    
-    return url.toString();
+    await stripeWrapper.quickSubscribe(plan, guestEmail);
   };
 
   const handleUpgrade = async () => {
@@ -85,11 +69,7 @@ export function GuestPremiumUpsellModal({
         description: `Opening secure checkout for ${selectedPlan} premium plan...`,
       });
 
-      // Create checkout URL and redirect
-      const checkoutUrl = createCheckoutUrl(selectedPlan);
-      
-      // Redirect to Stripe checkout
-      window.location.href = checkoutUrl;
+      await startCheckout(selectedPlan);
 
       // Close modal since we're redirecting
       onOpenChange(false);
