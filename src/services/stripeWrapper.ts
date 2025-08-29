@@ -98,20 +98,36 @@ class StripeWrapper {
       return { success: false, error: 'Stripe Wrapper not initialized' };
     }
 
-    console.log('💳 Redirecting to direct Stripe checkout for credits:', {
-      amount: options.amount,
-      credits: options.credits
-    });
+    try {
+      console.log('💳 Creating Stripe Checkout Session (server) for credits:', {
+        amount: options.amount,
+        credits: options.credits
+      });
 
-    // All credit purchases go to the credits checkout URL
-    const url = this.addUserDataToUrl(STRIPE_CHECKOUT_URLS.credits, options);
-    
-    return {
-      success: true,
-      url,
-      sessionId: `direct_${Date.now()}`,
-      method: 'direct_stripe'
-    };
+      const response = await fetch('/api/create-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount: options.amount,
+          credits: options.credits,
+          productName: options.productName || (options.credits ? `${options.credits} Backlink Credits` : 'Backlink Credits'),
+          isGuest: !options.userEmail,
+          guestEmail: options.userEmail,
+          paymentMethod: 'stripe'
+        })
+      });
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({} as any));
+        return { success: false, error: err.error || `Payment creation failed (${response.status})` };
+      }
+
+      const data = await response.json();
+      return { success: true, url: data.url, sessionId: data.sessionId };
+    } catch (e: any) {
+      console.error('❌ createPayment error:', e);
+      return { success: false, error: e?.message || 'Failed to start checkout' };
+    }
   }
 
   /**
@@ -122,31 +138,32 @@ class StripeWrapper {
       return { success: false, error: 'Stripe Wrapper not initialized' };
     }
 
-    const plan = options.plan === 'annual' ? 'yearly' : options.plan;
-    
-    console.log('🎖️ Redirecting to direct Stripe subscription checkout:', {
-      plan,
-      tier: options.tier
-    });
+    try {
+      const plan = options.plan === 'annual' ? 'yearly' : options.plan;
+      console.log('🎖️ Creating Stripe Subscription Session (server):', { plan, tier: options.tier });
 
-    // Select the appropriate checkout URL based on plan
-    let baseUrl: string;
-    if (plan === 'monthly') {
-      baseUrl = STRIPE_CHECKOUT_URLS.premiumMonthly;
-    } else if (plan === 'yearly') {
-      baseUrl = STRIPE_CHECKOUT_URLS.premiumAnnual;
-    } else {
-      return { success: false, error: 'Invalid subscription plan' };
+      const response = await fetch('/api/create-subscription', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          plan,
+          isGuest: !options.userEmail,
+          guestEmail: options.userEmail,
+          paymentMethod: 'stripe'
+        })
+      });
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({} as any));
+        return { success: false, error: err.error || `Subscription creation failed (${response.status})` };
+      }
+
+      const data = await response.json();
+      return { success: true, url: data.url, sessionId: data.sessionId };
+    } catch (e: any) {
+      console.error('❌ createSubscription error:', e);
+      return { success: false, error: e?.message || 'Failed to start subscription checkout' };
     }
-
-    const url = this.addUserDataToUrl(baseUrl, options);
-
-    return {
-      success: true,
-      url,
-      sessionId: `direct_sub_${Date.now()}`,
-      method: 'direct_stripe'
-    };
   }
 
   /**
