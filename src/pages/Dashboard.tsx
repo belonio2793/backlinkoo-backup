@@ -765,7 +765,7 @@ const Dashboard = () => {
         ];
 
         const results = await Promise.all(dataPromises);
-        console.log('���� Dashboard - All data promises resolved:', {
+        console.log('����� Dashboard - All data promises resolved:', {
           userData: results[0] ? 'success' : 'failed',
           campaigns: results[1] ? 'success' : 'failed',
           premiumStatus: results[2],
@@ -980,6 +980,22 @@ const Dashboard = () => {
   const loadGlobalStats = async () => {
     // Simple function to trigger stats reload - currently just used for callback consistency
     console.log('Loading global stats after blog generation...');
+  };
+
+  const fetchTransactions = async (authUser?: User) => {
+    try {
+      const currentUser = authUser || user;
+      if (!currentUser) return;
+      const { data, error } = await supabase
+        .from('credit_transactions')
+        .select('created_at, type, amount, description, order_id')
+        .eq('user_id', currentUser.id)
+        .order('created_at', { ascending: false })
+        .limit(20);
+      if (!error && data) setTransactions(data);
+    } catch (e) {
+      console.warn('⚠️ Failed to load transactions');
+    }
   };
 
   const fetchCampaigns = async (authUser?: User) => {
