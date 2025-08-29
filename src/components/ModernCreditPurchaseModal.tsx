@@ -110,12 +110,14 @@ export function ModernCreditPurchaseModal({
     const result = await stripeWrapper.createPayment({ amount, credits, productName: `${credits} Backlink Credits`, userEmail: user?.email || undefined });
     if (result.success && result.url) {
       stripeWrapper.openCheckoutWindow(result.url, result.sessionId);
+      return true;
     }
+    throw new Error(result.error || 'Unable to start checkout');
   };
 
   const handlePurchase = async () => {
     const credits = getCreditsAmount();
-    
+
     if (credits <= 0) {
       toast({
         title: "Invalid Amount",
@@ -135,7 +137,7 @@ export function ModernCreditPurchaseModal({
 
       await startCheckout();
 
-      // Close modal
+      // Close only after successful redirect initiation
       onClose();
       if (onSuccess) {
         onSuccess();
@@ -144,9 +146,10 @@ export function ModernCreditPurchaseModal({
       console.error('Credit purchase error:', error);
       toast({
         title: "Redirect Error",
-        description: "Failed to redirect to checkout. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to redirect to checkout.",
         variant: "destructive",
       });
+      // Keep modal open for retry
     } finally {
       setIsLoading(false);
     }
