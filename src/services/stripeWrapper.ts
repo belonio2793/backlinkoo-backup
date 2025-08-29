@@ -24,16 +24,12 @@ export interface PaymentOptions {
   amount: number;
   credits?: number;
   productName?: string;
-  isGuest?: boolean;
-  guestEmail?: string;
   metadata?: Record<string, string>;
 }
 
 export interface SubscriptionOptions {
   plan: 'monthly' | 'yearly' | 'annual';
   tier?: string;
-  isGuest?: boolean;
-  guestEmail?: string;
   userEmail?: string;
   metadata?: Record<string, string>;
 }
@@ -103,8 +99,7 @@ class StripeWrapper {
 
     console.log('💳 Redirecting to direct Stripe checkout for credits:', {
       amount: options.amount,
-      credits: options.credits,
-      isGuest: options.isGuest
+      credits: options.credits
     });
 
     // All credit purchases go to the credits checkout URL
@@ -130,8 +125,7 @@ class StripeWrapper {
     
     console.log('🎖️ Redirecting to direct Stripe subscription checkout:', {
       plan,
-      tier: options.tier,
-      isGuest: options.isGuest
+      tier: options.tier
     });
 
     // Select the appropriate checkout URL based on plan
@@ -161,9 +155,7 @@ class StripeWrapper {
     const url = new URL(baseUrl);
     
     // Add customer email if available
-    if ('guestEmail' in options && options.guestEmail) {
-      url.searchParams.set('prefilled_email', options.guestEmail);
-    } else if ('userEmail' in options && options.userEmail) {
+    if ('userEmail' in options && options.userEmail) {
       url.searchParams.set('prefilled_email', options.userEmail);
     }
 
@@ -223,15 +215,13 @@ class StripeWrapper {
   /**
    * Quick credit purchase - redirects to credits checkout
    */
-  async quickBuyCredits(credits: 50 | 100 | 250 | 500, guestEmail?: string): Promise<PaymentResult> {
+  async quickBuyCredits(credits: 50 | 100 | 250 | 500): Promise<PaymentResult> {
     const amount = this.getCreditsPrice(credits);
-    
+
     const result = await this.createPayment({
       amount,
       credits,
-      productName: `${credits} Backlink Credits`,
-      isGuest: !!guestEmail,
-      guestEmail
+      productName: `${credits} Backlink Credits`
     });
 
     if (result.success && result.url) {
@@ -244,12 +234,10 @@ class StripeWrapper {
   /**
    * Quick premium subscription purchase
    */
-  async quickSubscribe(plan: 'monthly' | 'yearly', guestEmail?: string): Promise<PaymentResult> {
+  async quickSubscribe(plan: 'monthly' | 'yearly'): Promise<PaymentResult> {
     const result = await this.createSubscription({
       plan,
-      tier: 'premium',
-      isGuest: !!guestEmail,
-      guestEmail
+      tier: 'premium'
     });
 
     if (result.success && result.url) {
@@ -307,8 +295,8 @@ export const createPayment = (options: PaymentOptions) => stripeWrapper.createPa
 export const createSubscription = (options: SubscriptionOptions) => stripeWrapper.createSubscription(options);
 export const verifyPayment = (sessionId: string) => stripeWrapper.verifyPayment(sessionId);
 export const openCheckout = (url: string, sessionId?: string) => stripeWrapper.openCheckoutWindow(url, sessionId);
-export const quickBuyCredits = (credits: 50 | 100 | 250 | 500, guestEmail?: string) => stripeWrapper.quickBuyCredits(credits, guestEmail);
-export const quickSubscribe = (plan: 'monthly' | 'yearly', guestEmail?: string) => stripeWrapper.quickSubscribe(plan, guestEmail);
+export const quickBuyCredits = (credits: 50 | 100 | 250 | 500) => stripeWrapper.quickBuyCredits(credits);
+export const quickSubscribe = (plan: 'monthly' | 'yearly') => stripeWrapper.quickSubscribe(plan);
 export const getStripeStatus = () => stripeWrapper.getStatus();
 
 export default stripeWrapper;

@@ -10,8 +10,6 @@ export interface StripePaymentOptions {
   credits?: number;
   productName?: string;
   plan?: 'monthly' | 'yearly';
-  isGuest?: boolean;
-  guestEmail?: string;
   type: 'credits' | 'subscription';
 }
 
@@ -39,9 +37,7 @@ class StripePaymentService {
       if (options.type === 'subscription') {
         const subscriptionOptions: SubscriptionOptions = {
           plan: options.plan || 'monthly',
-          tier: 'premium',
-          isGuest: options.isGuest,
-          guestEmail: options.guestEmail
+          tier: 'premium'
         };
 
         const result = await stripeWrapper.createSubscription(subscriptionOptions);
@@ -50,9 +46,7 @@ class StripePaymentService {
         const paymentOptions: PaymentOptions = {
           amount: options.amount,
           credits: options.credits,
-          productName: options.productName,
-          isGuest: options.isGuest,
-          guestEmail: options.guestEmail
+          productName: options.productName
         };
 
         const result = await stripeWrapper.createPayment(paymentOptions);
@@ -78,9 +72,7 @@ class StripePaymentService {
 
       const subscriptionOptions: SubscriptionOptions = {
         plan: options.plan || 'monthly',
-        tier: 'premium',
-        isGuest: options.isGuest || false,
-        guestEmail: options.guestEmail
+        tier: 'premium'
       };
 
       const result = await stripeWrapper.createSubscription(subscriptionOptions);
@@ -120,16 +112,16 @@ class StripePaymentService {
   /**
    * Quick purchase with preset amounts using Stripe Wrapper
    */
-  async quickPurchase(credits: 50 | 100 | 250 | 500, guestEmail?: string): Promise<StripePaymentResult> {
-    const result = await stripeWrapper.quickBuyCredits(credits, guestEmail);
+  async quickPurchase(credits: 50 | 100 | 250 | 500): Promise<StripePaymentResult> {
+    const result = await stripeWrapper.quickBuyCredits(credits);
     return this.convertResult(result);
   }
 
   /**
    * Purchase premium subscription using Stripe Wrapper
    */
-  async purchasePremium(plan: 'monthly' | 'yearly', guestEmail?: string): Promise<StripePaymentResult> {
-    const result = await stripeWrapper.quickSubscribe(plan, guestEmail);
+  async purchasePremium(plan: 'monthly' | 'yearly'): Promise<StripePaymentResult> {
+    const result = await stripeWrapper.quickSubscribe(plan);
     return this.convertResult(result);
   }
 
@@ -155,21 +147,19 @@ class StripePaymentService {
 export const stripePaymentService = new StripePaymentService();
 
 // Convenience methods - now powered by Stripe Wrapper
-export const buyCredits = (credits: number, amount: number, guestEmail?: string) =>
+export const buyCredits = (credits: number, amount: number) =>
   stripePaymentService.createPayment({
     amount,
     credits,
     type: 'credits',
-    productName: `${credits} Backlink Credits`,
-    isGuest: !!guestEmail,
-    guestEmail
+    productName: `${credits} Backlink Credits`
   });
 
-export const quickBuyCredits = (credits: 50 | 100 | 250 | 500, guestEmail?: string) =>
-  stripePaymentService.quickPurchase(credits, guestEmail);
+export const quickBuyCredits = (credits: 50 | 100 | 250 | 500) =>
+  stripePaymentService.quickPurchase(credits);
 
-export const upgradeToPremium = (plan: 'monthly' | 'yearly', guestEmail?: string) =>
-  stripePaymentService.purchasePremium(plan, guestEmail);
+export const upgradeToPremium = (plan: 'monthly' | 'yearly') =>
+  stripePaymentService.purchasePremium(plan);
 
 // Direct wrapper exports for advanced usage
 export { stripeWrapper, createPayment, createSubscription, verifyPayment, openCheckout, getStripeStatus } from './stripeWrapper';
