@@ -102,7 +102,7 @@ export function ModernCreditPurchaseModal({
     }
     
     // Use custom rate for non-preset amounts
-    return Math.ceil(credits * rate);
+    return Number((credits * rate).toFixed(2));
   };
 
   const startCheckout = async () => {
