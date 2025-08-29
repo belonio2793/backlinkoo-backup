@@ -47,8 +47,8 @@ export default function InlineStripeCredits({ credits, email, onSuccess }:{ cred
       setClientSecret(null);
       setStripe(null);
       try {
-        // 1) Fetch publishable key from server using STRIPE_PUBLISHABLE_KEY with robust fallback
-        const configUrls = ['/api/public-config', '/.netlify/functions/public-config'];
+        // 1) Fetch publishable key from server using STRIPE_PUBLISHABLE_KEY via Netlify first
+        const configUrls = ['/.netlify/functions/public-config', '/api/public-config'];
         let keyData: any = null;
         for (const url of configUrls) {
           try {
@@ -57,6 +57,9 @@ export default function InlineStripeCredits({ credits, email, onSuccess }:{ cred
             let json: any = null;
             if (ct.includes('application/json')) {
               try { json = await res.json(); } catch {}
+            } else {
+              // Non-JSON response; read as text for debugging context
+              try { await res.text(); } catch {}
             }
             if (res.ok && json?.stripePublishableKey) {
               keyData = json;
@@ -64,8 +67,10 @@ export default function InlineStripeCredits({ credits, email, onSuccess }:{ cred
             }
           } catch {}
         }
-        if (!keyData?.stripePublishableKey) throw new Error('Missing publishable key');
-        const stripeInstance = await loadStripe(keyData.stripePublishableKey);
+        // Final safety: allow a publishable key from Vite env if serverless route is unavailable
+        const publishableKey = keyData?.stripePublishableKey || (import.meta as any)?.env?.VITE_STRIPE_PUBLISHABLE_KEY || '';
+        if (!publishableKey) throw new Error('Missing publishable key');
+        const stripeInstance = await loadStripe(publishableKey);
         if (!stripeInstance) throw new Error('Failed to load Stripe');
         setStripe(stripeInstance);
 
