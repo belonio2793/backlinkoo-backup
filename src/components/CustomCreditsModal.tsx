@@ -103,11 +103,7 @@ export const CustomCreditsModal = ({
         description: `Opening secure checkout for ${creditCount} credits...`,
       });
 
-      // Create checkout URL and redirect
-      const checkoutUrl = createCheckoutUrl();
-      
-      // Redirect to Stripe checkout
-      window.location.href = checkoutUrl;
+      await startCheckout();
 
       // Call success callback if provided
       if (onSuccess) {
