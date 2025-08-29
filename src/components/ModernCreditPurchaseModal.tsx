@@ -104,24 +104,13 @@ export function ModernCreditPurchaseModal({
     return Math.ceil(credits * rate);
   };
 
-  const createCheckoutUrl = (): string => {
-    const url = new URL(CREDITS_CHECKOUT_URL);
-    const currentOrigin = window.location.origin;
-    
-    // Add return URLs
-    url.searchParams.set('success_url', `${currentOrigin}/payment-success?session_id={CHECKOUT_SESSION_ID}`);
-    url.searchParams.set('cancel_url', `${currentOrigin}/payment-cancelled`);
-    
-    // Add user email if available
-    if (user?.email) {
-      url.searchParams.set('prefilled_email', user.email);
-    }
-    
-    // Add metadata for webhook processing
+  const startCheckout = async () => {
     const credits = getCreditsAmount();
-    url.searchParams.set('client_reference_id', `credits_${credits}`);
-    
-    return url.toString();
+    const amount = getPriceAmount();
+    const result = await stripeWrapper.createPayment({ amount, credits, productName: `${credits} Backlink Credits`, userEmail: user?.email || undefined });
+    if (result.success && result.url) {
+      stripeWrapper.openCheckoutWindow(result.url, result.sessionId);
+    }
   };
 
   const handlePurchase = async () => {
