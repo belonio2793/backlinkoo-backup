@@ -1178,8 +1178,9 @@ const Dashboard = () => {
                     }
                     userEmail={user?.email || "support@backlinkoo.com"}
                     isGuest={!user}
-                    onPaymentSuccess={() => {
-                      fetchDashboardData();
+                    onPaymentSuccess={async () => {
+                      await fetchUserData();
+                      await fetchTransactions();
                       toast({
                         title: "Payment Successful!",
                         description: "Your credits have been added to your account."
