@@ -249,22 +249,12 @@ class StripeWrapper {
    */
   openCheckoutWindow(url: string, sessionId?: string): Window | null {
     try {
-      console.log('🚀 Opening Stripe checkout in new window:', url);
-      const popup = window.open(
-        url,
-        'stripe-checkout',
-        'width=600,height=720,scrollbars=yes,resizable=yes'
-      );
-      if (!popup) {
-        // Fallback if popup blocked
-        window.location.href = url;
-        return null;
-      }
-      return popup;
-    } catch (error: any) {
-      console.error('❌ Failed to open checkout window:', error.message);
+      console.log('🚀 Redirecting to Stripe checkout:', url);
       window.location.href = url;
       return null;
+    } catch (error: any) {
+      console.error('❌ Failed to redirect to checkout:', error?.message);
+      throw error;
     }
   }
 
@@ -274,12 +264,6 @@ class StripeWrapper {
   async quickBuyCredits(credits: 50 | 100 | 250 | 500, userEmail?: string): Promise<PaymentResult> {
     const amount = this.getCreditsPrice(credits);
 
-    // Open placeholder window immediately to preserve user gesture
-    let popup: Window | null = null;
-    try {
-      popup = window.open('about:blank', 'stripe-checkout', 'width=600,height=720,scrollbars=yes,resizable=yes');
-    } catch (_) {}
-
     const result = await this.createPayment({
       amount,
       credits,
@@ -288,15 +272,7 @@ class StripeWrapper {
     });
 
     if (result.success && result.url) {
-      try {
-        if (popup && !popup.closed) {
-          popup.location.href = result.url;
-          return result;
-        }
-      } catch (_) {}
       this.openCheckoutWindow(result.url, result.sessionId);
-    } else if (popup && !popup.closed) {
-      try { popup.close(); } catch (_) {}
     }
 
     return result;
@@ -306,12 +282,6 @@ class StripeWrapper {
    * Quick premium subscription purchase
    */
   async quickSubscribe(plan: 'monthly' | 'yearly', userEmail?: string): Promise<PaymentResult> {
-    // Open placeholder window immediately to preserve user gesture
-    let popup: Window | null = null;
-    try {
-      popup = window.open('about:blank', 'stripe-checkout', 'width=600,height=720,scrollbars=yes,resizable=yes');
-    } catch (_) {}
-
     const result = await this.createSubscription({
       plan,
       tier: 'premium',
@@ -319,15 +289,7 @@ class StripeWrapper {
     });
 
     if (result.success && result.url) {
-      try {
-        if (popup && !popup.closed) {
-          popup.location.href = result.url;
-          return result;
-        }
-      } catch (_) {}
       this.openCheckoutWindow(result.url, result.sessionId);
-    } else if (popup && !popup.closed) {
-      try { popup.close(); } catch (_) {}
     }
 
     return result;
