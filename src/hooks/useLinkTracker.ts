@@ -24,7 +24,7 @@ export function useLinkTracker() {
 
   // Determine user's link limit based on plan
   const getLinkLimit = useCallback(() => {
-    if (isPremium) return Infinity; // Premium users have unlimited links
+    if (isPremium) return Infinity; // Premium users have higher link limits (credit-based)
     return 20; // Guest and Free users have 20 links
   }, [isPremium]);
 
@@ -90,7 +90,7 @@ export function useLinkTracker() {
     // Check if this would exceed the limit for non-premium users
     if (!isPremium && newTotal > linkLimit) {
       toast.error('Link Limit Reached', {
-        description: `You've reached your ${linkLimit}-link limit. Upgrade to Premium for unlimited links.`
+        description: `You've reached your ${linkLimit}-link limit. Upgrade to Premium for higher link limits.`
       });
       return false;
     }
