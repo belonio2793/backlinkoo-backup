@@ -25,17 +25,24 @@ function getSupabaseClient() {
 
 async function handlePaymentSuccess(session: any) {
   console.log('Processing successful payment:', session.id);
-  
+
   const supabase = getSupabaseClient();
   const metadata = session.metadata || {};
-  
+
   try {
     // Extract payment information
     const email = metadata.email || session.customer_email;
-    const credits = parseInt(metadata.credits || '0');
+
+    // Determine credits purchased
+    let credits = parseInt(metadata.credits || '0');
+    if (!credits && session.client_reference_id && typeof session.client_reference_id === 'string') {
+      const match = session.client_reference_id.match(/^credits_(\d{1,5})$/);
+      if (match) credits = parseInt(match[1], 10);
+    }
+
     const isGuest = metadata.isGuest === 'true';
     const amount = session.amount_total / 100; // Convert from cents
-    
+
     // Record the order in database
     const { error: orderError } = await supabase
       .from('orders')
@@ -45,9 +52,9 @@ async function handlePaymentSuccess(session: any) {
         amount: session.amount_total,
         status: 'completed',
         payment_method: 'stripe',
-        product_name: metadata.productName || `${credits} Backlink Credits`,
+        product_name: metadata.productName || (credits ? `${credits} Backlink Credits` : 'Stripe Payment'),
         guest_checkout: isGuest,
-        credits: credits,
+        credits: credits || 0,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       });
@@ -57,16 +64,16 @@ async function handlePaymentSuccess(session: any) {
     }
 
     // If credits were purchased, update user balance
-    if (credits > 0 && !isGuest) {
+    if (credits > 0 && !isGuest && email) {
       // Find user by email
       const { data: userData, error: userError } = await supabase.auth.admin.listUsers();
-      
+
       if (!userError && userData?.users) {
         const user = userData.users.find(u => u.email === email);
-        
+
         if (user) {
           // Get current credits first
-          const { data: currentCredits, error: fetchError } = await supabase
+          const { data: currentCredits } = await supabase
             .from('user_credits')
             .select('credits')
             .eq('user_id', user.id)
@@ -94,14 +101,13 @@ async function handlePaymentSuccess(session: any) {
             console.log(`✅ Successfully added ${credits} credits to user ${email} (total: ${newTotalCredits})`);
           }
         } else {
-          console.error(`❌ User not found with email: ${email}`);
-          throw new Error(`User not found: ${email}`);
+          console.warn(`User not found with email: ${email}. This may be a guest checkout.`);
         }
       }
     }
 
     console.log('Payment processing completed successfully');
-    
+
   } catch (error) {
     console.error('Payment processing error:', error);
     throw error;
