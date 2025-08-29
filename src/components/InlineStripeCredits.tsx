@@ -47,25 +47,42 @@ export default function InlineStripeCredits({ credits, email, onSuccess }:{ cred
       setClientSecret(null);
       setStripe(null);
       try {
-        // 1) Fetch publishable key from server using STRIPE_PUBLISHABLE_KEY
-        const keyRes = await fetch('/api/public-config');
-        const keyData = keyRes.ok ? await keyRes.json() : await (await fetch('/.netlify/functions/public-config')).json();
+        // 1) Fetch publishable key from server using STRIPE_PUBLISHABLE_KEY with robust fallback
+        const configUrls = ['/api/public-config', '/.netlify/functions/public-config'];
+        let keyData: any = null;
+        for (const url of configUrls) {
+          try {
+            const res = await fetch(url, { headers: { Accept: 'application/json' } });
+            const ct = res.headers.get('content-type') || '';
+            let json: any = null;
+            if (ct.includes('application/json')) {
+              try { json = await res.json(); } catch {}
+            }
+            if (res.ok && json?.stripePublishableKey) {
+              keyData = json;
+              break;
+            }
+          } catch {}
+        }
         if (!keyData?.stripePublishableKey) throw new Error('Missing publishable key');
         const stripeInstance = await loadStripe(keyData.stripePublishableKey);
         if (!stripeInstance) throw new Error('Failed to load Stripe');
         setStripe(stripeInstance);
 
-        // 2) Create payment intent for current credits
+        // 2) Create payment intent for current credits with strict JSON + fallback
         const attempt = async (url: string) => {
           const res = await fetch(url, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
             body: JSON.stringify({ credits, email })
           });
+          const ct = res.headers.get('content-type') || '';
           let data: any = null;
-          try { data = await res.json(); } catch(_) {}
-          if (!res.ok) {
-            const msg = data?.error || `HTTP ${res.status}`;
+          if (ct.includes('application/json')) {
+            try { data = await res.json(); } catch {}
+          }
+          if (!res.ok || !data || !data.clientSecret) {
+            const msg = (data && data.error) ? data.error : `Non-JSON or HTTP ${res.status}`;
             throw new Error(msg);
           }
           return data;
