@@ -1,11 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
-import { loadStripe, StripeElementsOptions } from '@stripe/stripe-js';
+import { loadStripe, StripeElementsOptions, Stripe as StripeJs } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-
-const publishableKey = (import.meta as any).env?.VITE_STRIPE_PUBLISHABLE_KEY || (import.meta as any).env?.STRIPE_PUBLISHABLE_KEY || '';
-const stripePromise = publishableKey ? loadStripe(publishableKey) : null;
 
 function InnerCheckout({ credits, email, onSuccess }:{ credits:number; email?:string; onSuccess?:()=>void }){
   const stripe = useStripe();
@@ -43,11 +40,22 @@ function InnerCheckout({ credits, email, onSuccess }:{ credits:number; email?:st
 
 export default function InlineStripeCredits({ credits, email, onSuccess }:{ credits:number; email?:string; onSuccess?:()=>void }){
   const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [stripe, setStripe] = useState<StripeJs | null>(null);
 
   useEffect(() => {
-    const run = async () => {
+    const loadConfigAndIntent = async () => {
       setClientSecret(null);
+      setStripe(null);
       try {
+        // 1) Fetch publishable key from server using STRIPE_PUBLISHABLE_KEY
+        const keyRes = await fetch('/api/public-config');
+        const keyData = keyRes.ok ? await keyRes.json() : await (await fetch('/.netlify/functions/public-config')).json();
+        if (!keyData?.stripePublishableKey) throw new Error('Missing publishable key');
+        const stripeInstance = await loadStripe(keyData.stripePublishableKey);
+        if (!stripeInstance) throw new Error('Failed to load Stripe');
+        setStripe(stripeInstance);
+
+        // 2) Create payment intent for current credits
         const attempt = async (url: string) => {
           const res = await fetch(url, {
             method: 'POST',
@@ -57,7 +65,6 @@ export default function InlineStripeCredits({ credits, email, onSuccess }:{ cred
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
           return res.json();
         };
-
         let data: any;
         try {
           data = await attempt('/api/create-payment-intent');
@@ -70,16 +77,15 @@ export default function InlineStripeCredits({ credits, email, onSuccess }:{ cred
         setClientSecret(null);
       }
     };
-    if (credits > 0) run();
+    if (credits > 0) loadConfigAndIntent();
   }, [credits, email]);
 
   const options: StripeElementsOptions | undefined = useMemo(() => clientSecret ? ({ clientSecret, appearance: { theme: 'stripe' } }) : undefined, [clientSecret]);
 
-  if (!stripePromise) return null;
-  if (!clientSecret) return <div className="text-sm text-muted-foreground">Preparing secure checkout…</div>;
+  if (!stripe || !clientSecret) return <div className="text-sm text-muted-foreground">Preparing secure checkout…</div>;
 
   return (
-    <Elements stripe={stripePromise} options={options}>
+    <Elements stripe={stripe} options={options}>
       <InnerCheckout credits={credits} email={email} onSuccess={onSuccess} />
     </Elements>
   );
