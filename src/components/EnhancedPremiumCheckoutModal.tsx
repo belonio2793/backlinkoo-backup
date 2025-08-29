@@ -217,39 +217,6 @@ export function EnhancedPremiumCheckoutModal({
         </div>
       </div>
 
-      {/* Quick Guest Option */}
-      <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <CreditCard className="h-4 w-4 text-gray-600" />
-            <span className="font-medium">Quick Checkout</span>
-          </div>
-          <p className="text-sm text-gray-600">
-            Enter your email to proceed directly to payment (account created automatically)
-          </p>
-          <div className="flex gap-2">
-            <Input
-              type="email"
-              placeholder="your@email.com"
-              value={guestEmail}
-              onChange={(e) => setGuestEmail(e.target.value)}
-              className="flex-1"
-            />
-            <Button onClick={handleGuestCheckout} disabled={!guestEmail}>
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <Separator className="w-full" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-white px-2 text-gray-500">Or</span>
-        </div>
-      </div>
 
       {/* Full Auth Form */}
       <AuthFormTabs
