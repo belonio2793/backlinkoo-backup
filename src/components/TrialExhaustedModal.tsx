@@ -160,13 +160,13 @@ export function TrialExhaustedModal({
           
           <DialogTitle className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
             {isLoggedIn ?
-              `🚀 ${userName ? `Hey ${userName.split(' ')[0]}!` : 'Hey there!'} Ready for Unlimited Campaigns?` :
+              `🚀 ${userName ? `Hey ${userName.split(' ')[0]}!` : 'Hey there!'} Ready for higher campaign limits?` :
               '🎉 SURPRISE! Look What You Just Built!'
             }
           </DialogTitle>
           <DialogDescription className="text-lg text-gray-600">
             {isLoggedIn ?
-              'You\'ve reached your free campaign limit. Upgrade to premium for unlimited campaigns and advanced features!' :
+              'You\'ve reached your free campaign limit. Upgrade to premium for higher campaign limits and advanced features!' :
               'While you were creating campaigns, our AI was secretly building premium backlinks for you!'
             }
           </DialogDescription>
