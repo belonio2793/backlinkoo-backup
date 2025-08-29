@@ -34,9 +34,7 @@ export function PaymentDiagnostic() {
         const testPayload = {
           amount: 1000, // $10.00 test amount
           credits: 100,
-          productName: 'Test Credits',
-          isGuest: true,
-          guestEmail: 'test@example.com'
+          productName: 'Test Credits'
         };
 
         results.push(`📦 Test payload: ${JSON.stringify(testPayload, null, 2)}`);
