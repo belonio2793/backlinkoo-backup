@@ -252,7 +252,7 @@ export function GuestPremiumUpsellModal({
                 ))}
                 <div className="mt-4 text-center">
                   <p className="text-red-800 font-medium">
-                    🔓 Upgrade to Premium to reactivate and continue building unlimited links!
+                    🔓 Upgrade to Premium to reactivate and continue building more links!
                   </p>
                 </div>
               </div>
