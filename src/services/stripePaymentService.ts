@@ -37,9 +37,7 @@ class StripePaymentService {
       if (options.type === 'subscription') {
         const subscriptionOptions: SubscriptionOptions = {
           plan: options.plan || 'monthly',
-          tier: 'premium',
-          isGuest: options.isGuest,
-          guestEmail: options.guestEmail
+          tier: 'premium'
         };
 
         const result = await stripeWrapper.createSubscription(subscriptionOptions);
@@ -48,9 +46,7 @@ class StripePaymentService {
         const paymentOptions: PaymentOptions = {
           amount: options.amount,
           credits: options.credits,
-          productName: options.productName,
-          isGuest: options.isGuest,
-          guestEmail: options.guestEmail
+          productName: options.productName
         };
 
         const result = await stripeWrapper.createPayment(paymentOptions);
