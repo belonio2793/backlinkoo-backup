@@ -100,7 +100,7 @@ export function PremiumPlanPopup({
   };
 
   const features = [
-    { icon: <Infinity className="h-4 w-4" />, text: "Unlimited Backlinks" },
+    { icon: <TrendingUp className="h-4 w-4" />, text: "Premium Backlinks (credit-based)" },
     { icon: <BookOpen className="h-4 w-4" />, text: "Complete SEO Academy (50+ Lessons)" },
     { icon: <TrendingUp className="h-4 w-4" />, text: "Advanced Analytics & Reports" },
     { icon: <Users className="h-4 w-4" />, text: "Priority 24/7 Support" },
@@ -317,7 +317,7 @@ export function PremiumPlanPopup({
           </h2>
         </div>
         <p className="text-sm sm:text-base text-muted-foreground">
-          Choose your plan and unlock unlimited SEO potential
+          Choose your plan and unlock premium SEO potential
         </p>
       </div>
 
