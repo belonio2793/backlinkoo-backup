@@ -25,6 +25,7 @@ export interface PaymentOptions {
   credits?: number;
   productName?: string;
   metadata?: Record<string, string>;
+  userEmail?: string;
 }
 
 export interface SubscriptionOptions {
@@ -153,22 +154,19 @@ class StripeWrapper {
    */
   private addUserDataToUrl(baseUrl: string, options: PaymentOptions | SubscriptionOptions): string {
     const url = new URL(baseUrl);
-    
-    // Add customer email if available
+
+    // Prefill email when available (supported by Stripe Payment Links)
     if ('userEmail' in options && options.userEmail) {
       url.searchParams.set('prefilled_email', options.userEmail);
     }
 
-    // Add success/cancel URLs
-    const currentOrigin = window.location.origin;
-    url.searchParams.set('success_url', `${currentOrigin}/payment-success?session_id={CHECKOUT_SESSION_ID}`);
-    url.searchParams.set('cancel_url', `${currentOrigin}/payment-cancelled`);
+    // For Payment Links, do NOT append success_url/cancel_url; configure these in Stripe Dashboard
 
-    // Add metadata for webhook processing
-    if ('credits' in options && options.credits) {
-      url.searchParams.set('client_reference_id', `credits_${options.credits}`);
+    // Add lightweight reference so webhooks can credit users
+    if ('credits' in options && (options as PaymentOptions).credits) {
+      url.searchParams.set('client_reference_id', `credits_${(options as PaymentOptions).credits}`);
     } else if ('plan' in options) {
-      url.searchParams.set('client_reference_id', `premium_${options.plan}`);
+      url.searchParams.set('client_reference_id', `premium_${(options as SubscriptionOptions).plan}`);
     }
 
     return url.toString();
@@ -200,13 +198,20 @@ class StripeWrapper {
    */
   openCheckoutWindow(url: string, sessionId?: string): Window | null {
     try {
-      console.log('🚀 Redirecting to Stripe checkout:', url);
-      
-      // For direct Stripe checkouts, redirect in current window for better UX
-      window.location.href = url;
-      return null;
+      console.log('🚀 Opening Stripe checkout in new window:', url);
+      const popup = window.open(
+        url,
+        'stripe-checkout',
+        'width=600,height=720,scrollbars=yes,resizable=yes'
+      );
+      if (!popup) {
+        // Fallback if popup blocked
+        window.location.href = url;
+        return null;
+      }
+      return popup;
     } catch (error: any) {
-      console.error('❌ Failed to redirect to checkout:', error.message);
+      console.error('❌ Failed to open checkout window:', error.message);
       window.location.href = url;
       return null;
     }
@@ -215,13 +220,14 @@ class StripeWrapper {
   /**
    * Quick credit purchase - redirects to credits checkout
    */
-  async quickBuyCredits(credits: 50 | 100 | 250 | 500): Promise<PaymentResult> {
+  async quickBuyCredits(credits: 50 | 100 | 250 | 500, userEmail?: string): Promise<PaymentResult> {
     const amount = this.getCreditsPrice(credits);
 
     const result = await this.createPayment({
       amount,
       credits,
-      productName: `${credits} Backlink Credits`
+      productName: `${credits} Backlink Credits`,
+      userEmail
     });
 
     if (result.success && result.url) {
@@ -234,10 +240,11 @@ class StripeWrapper {
   /**
    * Quick premium subscription purchase
    */
-  async quickSubscribe(plan: 'monthly' | 'yearly'): Promise<PaymentResult> {
+  async quickSubscribe(plan: 'monthly' | 'yearly', userEmail?: string): Promise<PaymentResult> {
     const result = await this.createSubscription({
       plan,
-      tier: 'premium'
+      tier: 'premium',
+      userEmail
     });
 
     if (result.success && result.url) {
@@ -295,8 +302,8 @@ export const createPayment = (options: PaymentOptions) => stripeWrapper.createPa
 export const createSubscription = (options: SubscriptionOptions) => stripeWrapper.createSubscription(options);
 export const verifyPayment = (sessionId: string) => stripeWrapper.verifyPayment(sessionId);
 export const openCheckout = (url: string, sessionId?: string) => stripeWrapper.openCheckoutWindow(url, sessionId);
-export const quickBuyCredits = (credits: 50 | 100 | 250 | 500) => stripeWrapper.quickBuyCredits(credits);
-export const quickSubscribe = (plan: 'monthly' | 'yearly') => stripeWrapper.quickSubscribe(plan);
+export const quickBuyCredits = (credits: 50 | 100 | 250 | 500, userEmail?: string) => stripeWrapper.quickBuyCredits(credits, userEmail);
+export const quickSubscribe = (plan: 'monthly' | 'yearly', userEmail?: string) => stripeWrapper.quickSubscribe(plan, userEmail);
 export const getStripeStatus = () => stripeWrapper.getStatus();
 
 export default stripeWrapper;
