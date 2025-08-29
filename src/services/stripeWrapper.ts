@@ -236,12 +236,10 @@ class StripeWrapper {
   /**
    * Quick premium subscription purchase
    */
-  async quickSubscribe(plan: 'monthly' | 'yearly', guestEmail?: string): Promise<PaymentResult> {
+  async quickSubscribe(plan: 'monthly' | 'yearly'): Promise<PaymentResult> {
     const result = await this.createSubscription({
       plan,
-      tier: 'premium',
-      isGuest: !!guestEmail,
-      guestEmail
+      tier: 'premium'
     });
 
     if (result.success && result.url) {
