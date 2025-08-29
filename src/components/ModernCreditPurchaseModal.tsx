@@ -290,25 +290,14 @@ export function ModernCreditPurchaseModal({
                 )}
               </Button>
             ) : (
-              <div className="space-y-2">
-                <Button
-                  onClick={handleLoginThenPurchase}
-                  disabled={isLoading || getCreditsAmount() <= 0}
-                  className="w-full"
-                  size="lg"
-                >
-                  Login & Purchase ${getPriceAmount().toFixed(2)}
-                </Button>
-                <Button
-                  onClick={handlePurchase}
-                  disabled={isLoading || getCreditsAmount() <= 0}
-                  variant="outline"
-                  className="w-full"
-                  size="lg"
-                >
-                  Continue as Guest
-                </Button>
-              </div>
+              <Button
+                onClick={handleLoginThenPurchase}
+                disabled={isLoading || getCreditsAmount() <= 0}
+                className="w-full"
+                size="lg"
+              >
+                Login & Purchase ${getPriceAmount().toFixed(2)}
+              </Button>
             )}
           </div>
 
