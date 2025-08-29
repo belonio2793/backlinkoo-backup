@@ -173,15 +173,30 @@ class StripeWrapper {
       });
 
       if (!response.ok) {
-        const err = await response.json().catch(() => ({} as any));
-        return { success: false, error: err.error || `Subscription creation failed (${response.status})` };
+        throw new Error(`HTTP ${response.status}`);
       }
 
       const data = await response.json();
       return { success: true, url: data.url, sessionId: data.sessionId };
     } catch (e: any) {
-      console.error('❌ createSubscription error:', e);
-      return { success: false, error: e?.message || 'Failed to start subscription checkout' };
+      console.warn('⚠️ Netlify create-subscription failed, falling back to Supabase Edge:', e?.message);
+      try {
+        const { data, error } = await supabase.functions.invoke('create-subscription', {
+          body: {
+            plan,
+            isGuest: !options.userEmail,
+            guestEmail: options.userEmail,
+            paymentMethod: 'stripe'
+          }
+        });
+        if (error || !data?.url) {
+          return { success: false, error: error?.message || 'Failed to start subscription checkout' };
+        }
+        return { success: true, url: data.url, sessionId: data.sessionId };
+      } catch (e2: any) {
+        console.error('❌ Supabase subscription fallback failed:', e2?.message);
+        return { success: false, error: e2?.message || 'Failed to start subscription checkout' };
+      }
     }
   }
 
