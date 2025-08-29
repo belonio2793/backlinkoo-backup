@@ -1178,7 +1178,7 @@ const Dashboard = () => {
                 <Home className="h-4 w-4" />
                 <span className="hidden sm:inline">Home</span>
               </Button>
-              {(activeSection === "dashboard" || activeSection === "seo-tools" || activeSection === "trial") && (
+              {(activeSection === "dashboard" || activeSection === "seo-tools" || activeSection === "trial" || activeSection === "premium-plan") && (
                 <>
                   {/* Credit system - visible to all users (separate from premium subscription) */}
                   <Badge variant="outline" className="gap-1 text-xs sm:text-sm">
