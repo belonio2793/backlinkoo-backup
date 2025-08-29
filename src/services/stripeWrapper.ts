@@ -100,52 +100,45 @@ class StripeWrapper {
       return { success: false, error: 'Stripe Wrapper not initialized' };
     }
 
-    try {
-      console.log('💳 Creating Stripe Checkout Session (server) for credits:', {
-        amount: options.amount,
-        credits: options.credits
-      });
+    const payload = {
+      amount: options.amount,
+      credits: options.credits,
+      productName: options.productName || (options.credits ? `${options.credits} Backlink Credits` : 'Backlink Credits'),
+      isGuest: !options.userEmail,
+      guestEmail: options.userEmail,
+      paymentMethod: 'stripe'
+    };
 
-      const response = await fetch('/api/create-payment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          amount: options.amount,
-          credits: options.credits,
-          productName: options.productName || (options.credits ? `${options.credits} Backlink Credits` : 'Backlink Credits'),
-          isGuest: !options.userEmail,
-          guestEmail: options.userEmail,
-          paymentMethod: 'stripe'
-        })
-      });
+    // Try multiple endpoints before falling back to Supabase
+    const endpoints = [
+      '/.netlify/functions/create-payment',
+      '/api/create-payment'
+    ];
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-
-      const data = await response.json();
-      return { success: true, url: data.url, sessionId: data.sessionId };
-    } catch (e: any) {
-      console.warn('⚠️ Netlify create-payment failed, falling back to Supabase Edge:', e?.message);
+    for (const url of endpoints) {
       try {
-        const { data, error } = await supabase.functions.invoke('create-payment', {
-          body: {
-            amount: options.amount,
-            credits: options.credits,
-            productName: options.productName || (options.credits ? `${options.credits} Backlink Credits` : 'Backlink Credits'),
-            isGuest: !options.userEmail,
-            guestEmail: options.userEmail,
-            paymentMethod: 'stripe'
-          }
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
         });
-        if (error || !data?.url) {
-          return { success: false, error: error?.message || 'Failed to start checkout' };
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.url) return { success: true, url: data.url, sessionId: data.sessionId };
         }
-        return { success: true, url: data.url, sessionId: data.sessionId };
-      } catch (e2: any) {
-        console.error('❌ Supabase fallback failed:', e2?.message);
-        return { success: false, error: e2?.message || 'Failed to start checkout' };
+      } catch (_) {}
+    }
+
+    // Supabase Edge fallback
+    try {
+      const { data, error } = await supabase.functions.invoke('create-payment', { body: payload });
+      if (error || !data?.url) {
+        return { success: false, error: error?.message || 'Failed to start checkout' };
       }
+      return { success: true, url: data.url, sessionId: data.sessionId };
+    } catch (e2: any) {
+      console.error('❌ Supabase fallback failed:', e2?.message);
+      return { success: false, error: e2?.message || 'Failed to start checkout' };
     }
   }
 
