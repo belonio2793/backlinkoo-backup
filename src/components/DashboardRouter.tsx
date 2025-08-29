@@ -77,11 +77,7 @@ export function DashboardRouter() {
     return <Dashboard />;
   }
 
-  // If user has trial posts, show guest dashboard
-  if (hasTrialPosts) {
-    return <GuestDashboard />;
-  }
-
-  // Fallback - this shouldn't happen due to useEffect navigation
+  // Redirect to login if not authenticated
+  // (This shouldn't happen due to useEffect navigation above)
   return null;
 }
