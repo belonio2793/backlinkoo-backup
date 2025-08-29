@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useAuthModal } from "@/contexts/ModalContext";
 import { stripeWrapper } from "@/services/stripeWrapper";
+import InlineStripeCredits from '@/components/InlineStripeCredits';
 
 interface ModernCreditPurchaseModalProps {
   isOpen: boolean;
@@ -255,38 +256,17 @@ export function ModernCreditPurchaseModal({
             </div>
           </div>
 
-          {/* Purchase Button */}
-          <div className="space-y-3">
-            {user ? (
-              <Button
-                onClick={handlePurchase}
-                disabled={isLoading || getCreditsAmount() <= 0}
-                className="w-full"
-                size="lg"
-              >
-                {isLoading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Redirecting...
-                  </>
-                ) : (
-                  <>
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Buy {getCreditsAmount()} Credits - ${getPriceAmount().toFixed(2)}
-                  </>
-                )}
-              </Button>
-            ) : (
-              <Button
-                onClick={handleLoginThenPurchase}
-                disabled={isLoading || getCreditsAmount() <= 0}
-                className="w-full"
-                size="lg"
-              >
-                Login & Purchase ${getPriceAmount().toFixed(2)}
-              </Button>
-            )}
-          </div>
+          {/* Integrated Payment */}
+          {user ? (
+            <div className="space-y-2">
+              <div className="text-center text-sm font-medium">Pay ${getPriceAmount().toFixed(2)} for {getCreditsAmount()} credits</div>
+              <InlineStripeCredits credits={getCreditsAmount()} email={user?.email || undefined} onSuccess={() => { onClose(); onSuccess?.(); }} />
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <Button onClick={handleLoginThenPurchase} className="w-full" size="lg">Login to Pay ${getPriceAmount().toFixed(2)}</Button>
+            </div>
+          )}
 
           <div className="text-xs text-muted-foreground text-center">
             Powered by Stripe • Secure checkout • Credits activated automatically via webhooks
