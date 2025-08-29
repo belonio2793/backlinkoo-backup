@@ -132,14 +132,19 @@ class StripeWrapper {
     // Supabase Edge fallback
     try {
       const { data, error } = await supabase.functions.invoke('create-payment', { body: payload });
-      if (error || !data?.url) {
-        return { success: false, error: error?.message || 'Failed to start checkout' };
+      if (!error && data?.url) {
+        return { success: true, url: data.url, sessionId: data.sessionId };
       }
-      return { success: true, url: data.url, sessionId: data.sessionId };
-    } catch (e2: any) {
-      console.error('❌ Supabase fallback failed:', e2?.message);
-      return { success: false, error: e2?.message || 'Failed to start checkout' };
+    } catch (_) {}
+
+    // Final fallback: Stripe Payment Link (no server dependency)
+    if (STRIPE_CHECKOUT_URLS.credits) {
+      const url = new URL(STRIPE_CHECKOUT_URLS.credits);
+      if (payload.guestEmail) url.searchParams.set('prefilled_email', payload.guestEmail as string);
+      return { success: true, url: url.toString(), sessionId: undefined };
     }
+
+    return { success: false, error: 'Failed to start checkout' };
   }
 
   /**
