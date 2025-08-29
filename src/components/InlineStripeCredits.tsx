@@ -78,7 +78,8 @@ export default function InlineStripeCredits({ credits, email, onSuccess }:{ cred
         }
         setClientSecret(data.clientSecret || null);
       } catch (e:any) {
-        console.error('create-payment-intent error', e);
+        // Suppress noisy console error; fallback UI already handles missing client secret gracefully
+        console.warn('create-payment-intent unavailable; falling back to external checkout');
         setClientSecret(null);
       }
     };
