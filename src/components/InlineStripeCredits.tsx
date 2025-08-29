@@ -62,8 +62,13 @@ export default function InlineStripeCredits({ credits, email, onSuccess }:{ cred
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ credits, email })
           });
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          return res.json();
+          let data: any = null;
+          try { data = await res.json(); } catch(_) {}
+          if (!res.ok) {
+            const msg = data?.error || `HTTP ${res.status}`;
+            throw new Error(msg);
+          }
+          return data;
         };
         let data: any;
         try {
