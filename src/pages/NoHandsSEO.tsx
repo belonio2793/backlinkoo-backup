@@ -207,11 +207,11 @@ const NoHandsSEO = () => {
           <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-sm sm:text-base text-gray-600 font-medium">
             <div className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4 text-green-600" />
-              <span>Unlimited Projects</span>
+              <span>Higher Project Limits</span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4 text-green-600" />
-              <span>Unlimited Keywords</span>
+              <span>Flexible Keywords</span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4 text-green-600" />
@@ -305,11 +305,11 @@ const NoHandsSEO = () => {
                   <div className="space-y-2 text-sm text-blue-800">
                     <div className="flex justify-between">
                       <span>Blog Scraping:</span>
-                      <span className="font-medium">Unlimited</span>
+                      <span className="font-medium">Flexible</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Keywords:</span>
-                      <span className="font-medium">Unlimited</span>
+                      <span className="font-medium">Flexible</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Auto Posting:</span>
@@ -325,7 +325,7 @@ const NoHandsSEO = () => {
                     </div>
                   </div>
                   <p className="text-xs text-blue-700 mt-2">
-                    Subscription required for unlimited access
+                    Subscription required for higher limits and advanced features
                   </p>
                 </div>
 
