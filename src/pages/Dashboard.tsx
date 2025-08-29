@@ -1383,7 +1383,7 @@ const Dashboard = () => {
                   </CardHeader>
                   <CardContent>
                     <p className="text-purple-700 mb-4">
-                      <strong>Premium Benefits:</strong> Unlimited backlinks, complete SEO Academy, and priority support.<br/>
+                      <strong>Premium Benefits:</strong> Premium backlinks (credit-based), complete SEO Academy, and priority support.<br/>
                       <strong>Credits:</strong> Use for premium services and additional features. Credits work alongside your premium subscription.
                     </p>
                     <div className="flex gap-2">
@@ -1393,7 +1393,7 @@ const Dashboard = () => {
                       </Button>
                       <Button onClick={() => setActiveTab('campaigns')}>
                         <Infinity className="h-4 w-4 mr-2" />
-                        Unlimited Campaigns
+                        Higher Campaign Limits
                       </Button>
                     </div>
                   </CardContent>
