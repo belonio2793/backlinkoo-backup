@@ -18,7 +18,7 @@ import { User } from '@supabase/supabase-js';
 import { LoginModal } from "@/components/LoginModal";
 import { useToast } from "@/hooks/use-toast";
 import { ToolsHeaderUpgradeButton } from "@/components/PremiumUpgradeButton";
-import { SimpleBuyCreditsButton } from "@/components/SimpleBuyCreditsButton";
+import { BuyCreditsButton } from "@/components/BuyCreditsButton";
 
 interface ToolsHeaderProps {
   user: User | null;
@@ -184,7 +184,7 @@ const ToolsHeader = ({ user, currentTool }: ToolsHeaderProps) => {
 
             {/* Buy Credits Button */}
             {user && (
-              <SimpleBuyCreditsButton
+              <BuyCreditsButton
                 trigger={
                   <Button
                     variant="outline"
@@ -196,7 +196,6 @@ const ToolsHeader = ({ user, currentTool }: ToolsHeaderProps) => {
                     <span className="sm:hidden">Credits</span>
                   </Button>
                 }
-                defaultCredits={100}
               />
             )}
 
