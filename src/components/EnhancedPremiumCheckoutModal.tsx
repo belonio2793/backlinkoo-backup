@@ -76,7 +76,7 @@ export function EnhancedPremiumCheckoutModal({
   };
 
   const features = [
-    { icon: <Infinity className="h-4 w-4" />, text: "Unlimited Backlinks" },
+    { icon: <TrendingUp className="h-4 w-4" />, text: "Premium Backlinks (credit-based)" },
     { icon: <BookOpen className="h-4 w-4" />, text: "Complete SEO Academy (50+ Lessons)" },
     { icon: <TrendingUp className="h-4 w-4" />, text: "Advanced Analytics & Reports" },
     { icon: <Users className="h-4 w-4" />, text: "Priority 24/7 Support" },
@@ -428,7 +428,7 @@ export function EnhancedPremiumCheckoutModal({
         <p className="text-gray-600">Your account has been successfully upgraded.</p>
         <div className="mt-4 p-4 bg-green-50 rounded-lg">
           <p className="text-sm text-green-700">
-            You now have access to all premium features including unlimited backlinks, 
+            You now have access to all premium features including premium backlinks (credit-based),
             SEO academy, and priority support.
           </p>
         </div>
