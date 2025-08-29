@@ -93,7 +93,7 @@ const BrandGuidelinesPDF: React.FC = () => {
       category: 'Premium Features',
       description: 'Advanced tools and services for serious SEO professionals',
       items: [
-        { name: 'Unlimited Backlinks', description: 'No caps on backlink generation - scale without limits' },
+        { name: 'Premium Backlinks', description: 'Credit-based backlink generation with scalable limits' },
         { name: 'SEO Academy Access', description: 'Comprehensive education platform with 50+ lessons' },
         { name: 'Advanced Analytics Dashboard', description: 'Real-time insights and performance tracking' },
         { name: 'Priority Support & Consultation', description: '24/7 dedicated account management and strategy calls' },
@@ -401,9 +401,9 @@ const BrandGuidelinesPDF: React.FC = () => {
             <h2 className="text-3xl font-semibold mb-6 text-gray-900">Brand Positioning Statement</h2>
             <div className="bg-gradient-to-r from-gray-50 to-blue-50 p-8 rounded-xl border-l-4 border-blue-600">
               <p className="text-xl text-gray-800 italic leading-relaxed">
-                "For SEO professionals and businesses who demand unlimited growth potential, Backlink ∞ is 
+                "For SEO professionals and businesses who demand scalable growth potential, Backlink ∞ is 
                 the only platform that removes traditional limitations while maintaining the highest quality 
-                standards. Unlike competitors who cap your success, we provide truly unlimited backlinks, 
+                standards. Unlike competitors who cap your success, we provide premium-quality backlinks with scalable limits, 
                 AI-powered content creation, and comprehensive education to ensure your SEO dominance."
               </p>
             </div>

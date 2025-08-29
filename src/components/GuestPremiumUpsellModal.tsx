@@ -103,7 +103,7 @@ export function GuestPremiumUpsellModal({
         return {
           icon: <Target className="h-10 w-10 text-white" />,
           title: '🚀 Campaign Limit Reached!',
-          subtitle: 'You\'ve maxed out your free campaigns. Time to go unlimited!',
+          subtitle: 'You\'ve maxed out your free campaigns. Time to upgrade for higher limits!',
           color: 'from-orange-500 to-red-500'
         };
       case 'link_limit':
@@ -111,7 +111,7 @@ export function GuestPremiumUpsellModal({
           icon: <AlertTriangle className="h-10 w-10 text-white" />,
           title: hasLimitReachedCampaign ? '🛑 Campaign Paused - Limit Reached!' : '⚡ Link Limit Hit!',
           subtitle: hasLimitReachedCampaign
-            ? 'Your campaign reached 20 links and has been paused. Upgrade to continue building unlimited links!'
+            ? 'Your campaign reached 20 links and has been paused. Upgrade to continue building more links!'
             : 'This campaign has reached the 20-link free limit.',
           color: 'from-red-500 to-orange-500'
         };
@@ -126,7 +126,7 @@ export function GuestPremiumUpsellModal({
         return {
           icon: <Sparkles className="h-10 w-10 text-white" />,
           title: '✨ Upgrade to Premium',
-          subtitle: 'Unlock unlimited campaigns and premium features!',
+          subtitle: 'Unlock higher limits and premium features!',
           color: 'from-green-500 to-blue-500'
         };
     }
@@ -252,7 +252,7 @@ export function GuestPremiumUpsellModal({
                 ))}
                 <div className="mt-4 text-center">
                   <p className="text-red-800 font-medium">
-                    🔓 Upgrade to Premium to reactivate and continue building unlimited links!
+                    🔓 Upgrade to Premium to reactivate and continue building more links!
                   </p>
                 </div>
               </div>
@@ -302,11 +302,11 @@ export function GuestPremiumUpsellModal({
             <div className="text-center mb-6">
               <h3 className="text-2xl font-bold mb-2 flex items-center justify-center gap-2">
                 <Crown className="h-6 w-6" />
-                {campaigns.some(c => c.linksGenerated >= 20) ? 'Continue Your Paused Campaigns' : 'Premium Unlimited Access'}
+                {campaigns.some(c => c.linksGenerated >= 20) ? 'Continue Your Paused Campaigns' : 'Premium Access'}
               </h3>
               <p className="opacity-90">
                 {campaigns.some(c => c.linksGenerated >= 20)
-                  ? 'Upgrade now to reactivate paused campaigns and continue building unlimited links'
+                  ? 'Upgrade now to reactivate paused campaigns and continue building more links'
                   : 'Everything you need to dominate search results'
                 }
               </p>
@@ -317,8 +317,8 @@ export function GuestPremiumUpsellModal({
                 <div className="h-12 w-12 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
                   <Infinity className="h-6 w-6" />
                 </div>
-                <div className="text-xl font-bold">Unlimited Everything</div>
-                <div className="text-sm opacity-90">500+ links per campaign, unlimited campaigns</div>
+                <div className="text-xl font-bold">Premium Access</div>
+                <div className="text-sm opacity-90">Higher limits, more campaigns</div>
               </div>
               <div className="text-center">
                 <div className="h-12 w-12 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
@@ -340,7 +340,7 @@ export function GuestPremiumUpsellModal({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
               <div className="flex items-center gap-2">
                 <CheckCircle className="h-4 w-4" />
-                <span><strong>Unlimited Links</strong> - No more 20 link limits</span>
+                <span><strong>Higher Link Limits</strong> - Go beyond the free cap</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle className="h-4 w-4" />

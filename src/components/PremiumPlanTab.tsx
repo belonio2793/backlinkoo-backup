@@ -46,10 +46,10 @@ export function PremiumPlanTab({ isSubscribed, onUpgrade }: PremiumPlanTabProps)
 
   const premiumFeatures = [
     {
-      icon: <Infinity className="h-6 w-6" />,
-      title: "Unlimited Backlinks",
-      description: "Create unlimited high-quality backlinks without credit restrictions",
-      value: "∞ Backlinks/month"
+      icon: <TrendingUp className="h-6 w-6" />,
+      title: "Premium Backlinks",
+      description: "Access high-quality backlinks with credit-based usage",
+      value: "Credit-based"
     },
     {
       icon: <BookOpen className="h-6 w-6" />,
@@ -84,11 +84,11 @@ export function PremiumPlanTab({ isSubscribed, onUpgrade }: PremiumPlanTabProps)
   ];
 
   const comparisonData = [
-    { feature: "Backlinks per month", free: "10", premium: "Unlimited" },
+    { feature: "Backlinks per month", free: "10", premium: "Based on credits" },
     { feature: "SEO Course Access", free: "❌", premium: "✅ Full Access" },
     { feature: "Advanced Analytics", free: "Basic", premium: "Full Suite" },
     { feature: "Priority Support", free: "Email only", premium: "24/7 Priority" },
-    { feature: "Custom Reports", free: "❌", premium: "✅ Unlimited" },
+    { feature: "Custom Reports", free: "❌", premium: "✅ Advanced" },
     { feature: "API Access", free: "❌", premium: "✅ Full API" },
     { feature: "White-label Options", free: "❌", premium: "✅ Available" },
     { feature: "Account Manager", free: "❌", premium: "✅ Dedicated" }
@@ -129,13 +129,13 @@ export function PremiumPlanTab({ isSubscribed, onUpgrade }: PremiumPlanTabProps)
             </h1>
 
             <p className="text-xl text-purple-100 mb-6 max-w-2xl">
-              You're all set! Enjoy unlimited backlinks, complete SEO Academy access, and all premium features.
+              You're all set! Enjoy premium features, complete SEO Academy access, and priority support.
             </p>
 
             <div className="flex items-center gap-6 mb-8">
               <div className="text-center">
-                <div className="text-3xl font-bold">∞</div>
-                <div className="text-purple-200">backlinks</div>
+                <div className="text-3xl font-bold">Credits</div>
+                <div className="text-purple-200">usage-based</div>
               </div>
               <div className="text-center">
                 <div className="text-3xl font-bold">50+</div>
@@ -207,7 +207,7 @@ export function PremiumPlanTab({ isSubscribed, onUpgrade }: PremiumPlanTabProps)
             </h1>
 
             <p className="text-xl text-purple-100 mb-6 max-w-2xl">
-              Get unlimited backlinks, exclusive SEO training, and premium tools to dominate search rankings.
+              Get premium backlinks, exclusive SEO training, and powerful tools to dominate search rankings.
             </p>
 
             <div className="flex items-center gap-6 mb-8">
@@ -216,8 +216,8 @@ export function PremiumPlanTab({ isSubscribed, onUpgrade }: PremiumPlanTabProps)
                 <div className="text-purple-200">per month</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold">∞</div>
-                <div className="text-purple-200">backlinks</div>
+                <div className="text-3xl font-bold">Credits</div>
+                <div className="text-purple-200">usage-based</div>
               </div>
               <div className="text-center">
                 <div className="text-3xl font-bold">50+</div>

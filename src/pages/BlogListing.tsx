@@ -289,7 +289,7 @@ export function BlogListing() {
         setShowPricingModal(true);
         toast({
           title: "Claim limit reached",
-          description: "Upgrade to claim unlimited posts.",
+          description: "Upgrade to increase your claim limits.",
           variant: "destructive"
         });
       } else if (error.message?.includes('expired')) {
@@ -335,7 +335,7 @@ export function BlogListing() {
                         onClick={() => setShowPricingModal(true)}
                         className="underline hover:no-underline ml-1"
                       >
-                        upgrade for unlimited
+                        upgrade for higher limits
                       </button>
                     </>
                   )}
@@ -563,7 +563,7 @@ export function BlogListing() {
           checkUserClaimStatus();
           toast({
             title: "Welcome! 🎉",
-            description: "You can now claim unlimited blog posts.",
+            description: "Your claim limits have been increased.",
           });
         }}
       />

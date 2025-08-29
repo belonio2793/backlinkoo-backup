@@ -31,7 +31,7 @@ class PaymentButtonTestUtility {
       { id: 'premium-monthly-3', name: 'Upgrade to Premium', type: 'premium', plan: 'monthly' },
       { id: 'premium-monthly-4', name: 'Continue with Premium', type: 'premium', plan: 'monthly' },
       { id: 'premium-monthly-5', name: 'Upgrade Now', type: 'premium', plan: 'monthly' },
-      { id: 'premium-monthly-6', name: 'Get Unlimited Links', type: 'premium', plan: 'monthly' },
+      { id: 'premium-monthly-6', name: 'Get More Links', type: 'premium', plan: 'monthly' },
       { id: 'credits-50', name: 'Buy 50 Credits', type: 'credits', credits: 50 },
       { id: 'credits-100', name: 'Buy 100 Credits', type: 'credits', credits: 100 }
     ];

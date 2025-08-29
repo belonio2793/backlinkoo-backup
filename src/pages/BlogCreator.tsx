@@ -212,7 +212,7 @@ export function BlogCreator() {
                 }}
               >
                 <Sparkles className="h-5 w-5 mr-2" />
-                Get Unlimited Access
+                Get Full Access
               </Button>
               <Button 
                 size="lg" 

@@ -73,7 +73,7 @@ export function HeaderCTAExample() {
       <Crown className="h-4 w-4 text-yellow-500" />
       <AlertDescription className="flex items-center justify-between">
         <div>
-          <span className="font-medium">Unlock unlimited backlinks and premium features!</span>
+          <span className="font-medium">Unlock premium backlinks and features!</span>
           <p className="text-sm text-muted-foreground mt-1">
             Join thousands of SEO professionals already using our premium tools.
           </p>
@@ -89,7 +89,7 @@ export function FeatureListExample() {
   const { isPremium } = useOpenPremiumPopup();
 
   const features = [
-    { icon: <Infinity />, name: 'Unlimited Backlinks', premium: true, description: 'Create unlimited high-quality backlinks' },
+    { icon: <TrendingUp />, name: 'Premium Backlinks (credit-based)', premium: true, description: 'Access premium-quality backlinks with credits' },
     { icon: <BarChart3 />, name: 'Basic Analytics', premium: false, description: 'View basic performance metrics' },
     { icon: <Shield />, name: 'White-Hat Guarantee', premium: true, description: 'All backlinks follow best practices' },
     { icon: <Users />, name: 'Priority Support', premium: true, description: '24/7 dedicated support team' },
@@ -185,7 +185,7 @@ export function UsageLimitExample() {
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="font-medium text-green-900">Unlimited Usage</div>
+              <div className="font-medium text-green-900">Higher Limits</div>
               <div className="text-sm text-green-700">Premium plan active</div>
             </div>
             <Infinity className="h-8 w-8 text-green-600" />
@@ -268,7 +268,7 @@ export function InlinePromotionExample() {
             Unlock Premium Features
           </h3>
           <p className="text-sm text-gray-700 mb-3">
-            Get unlimited backlinks, advanced analytics, priority support, and more with our Premium plan.
+            Get premium backlinks, advanced analytics, priority support, and more with our Premium plan.
           </p>
           
           <div className="flex items-center gap-3">

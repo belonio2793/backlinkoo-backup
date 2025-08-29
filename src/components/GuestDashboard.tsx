@@ -144,7 +144,7 @@ export function GuestDashboard() {
                 </h3>
                 <p className="text-amber-800 mb-4">
                   Your trial backlinks will be automatically deleted unless you create an account. 
-                  Save them forever and unlock unlimited backlink creation!
+                  Save them forever and unlock premium backlink creation with credits!
                 </p>
                 <div className="flex gap-3">
                   <Button
@@ -242,7 +242,7 @@ export function GuestDashboard() {
           <CardContent className="p-8 text-center">
             <h2 className="text-2xl font-bold mb-4">Ready to Scale Your SEO?</h2>
             <p className="text-blue-100 mb-6 text-lg">
-              Create unlimited professional backlinks, access advanced analytics, 
+              Create premium professional backlinks, access advanced analytics, 
               and never lose your content again.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">

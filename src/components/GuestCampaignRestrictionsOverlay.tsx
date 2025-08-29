@@ -61,7 +61,7 @@ export function GuestCampaignRestrictionsOverlay({
         icon: <Target className="h-4 w-4" />,
         title: 'Campaign Limit Reached',
         message: `Free users can create up to ${restrictions.campaignsLimit} campaigns. You've used ${restrictions.campaignsUsed}.`,
-        action: 'Upgrade for unlimited campaigns',
+        action: 'Upgrade for higher campaign limits',
         severity: 'blocking' as const
       };
     }
@@ -72,7 +72,7 @@ export function GuestCampaignRestrictionsOverlay({
         icon: <Link className="h-4 w-4" />,
         title: 'Link Limit Reached',
         message: `This campaign has reached the free limit of 20 links.`,
-        action: 'Upgrade for unlimited links per campaign',
+        action: 'Upgrade for higher link limits per campaign',
         severity: 'blocking' as const
       };
     }
@@ -106,7 +106,7 @@ export function GuestCampaignRestrictionsOverlay({
         icon: <AlertTriangle className="h-4 w-4" />,
         title: 'Almost at Campaign Limit',
         message: `You're using ${restrictions.campaignsUsed}/${restrictions.campaignsLimit} free campaigns.`,
-        action: 'Upgrade for unlimited access',
+        action: 'Upgrade for higher limits',
         severity: 'warning' as const
       };
     }
@@ -258,7 +258,7 @@ export function GuestCampaignRestrictionsOverlay({
                   className="h-6 text-xs border-purple-200 text-purple-600 hover:bg-purple-50"
                 >
                   <Infinity className="h-3 w-3 mr-1" />
-                  Go Unlimited
+                  Raise Limits
                 </Button>
               </div>
             )}

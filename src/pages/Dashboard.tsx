@@ -764,7 +764,7 @@ const Dashboard = () => {
         ];
 
         const results = await Promise.all(dataPromises);
-        console.log('🏠 Dashboard - All data promises resolved:', {
+        console.log('���� Dashboard - All data promises resolved:', {
           userData: results[0] ? 'success' : 'failed',
           campaigns: results[1] ? 'success' : 'failed',
           premiumStatus: results[2],
@@ -1383,7 +1383,7 @@ const Dashboard = () => {
                   </CardHeader>
                   <CardContent>
                     <p className="text-purple-700 mb-4">
-                      <strong>Premium Benefits:</strong> Unlimited backlinks, complete SEO Academy, and priority support.<br/>
+                      <strong>Premium Benefits:</strong> Premium backlinks (credit-based), complete SEO Academy, and priority support.<br/>
                       <strong>Credits:</strong> Use for premium services and additional features. Credits work alongside your premium subscription.
                     </p>
                     <div className="flex gap-2">
@@ -1393,7 +1393,7 @@ const Dashboard = () => {
                       </Button>
                       <Button onClick={() => setActiveTab('campaigns')}>
                         <Infinity className="h-4 w-4 mr-2" />
-                        Unlimited Campaigns
+                        Higher Campaign Limits
                       </Button>
                     </div>
                   </CardContent>
@@ -1451,7 +1451,7 @@ const Dashboard = () => {
                       <Crown className="h-4 w-4 text-purple-600" />
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold text-purple-600">Unlimited</div>
+                      <div className="text-2xl font-bold text-purple-600">Premium</div>
                       <p className="text-xs text-purple-600">Backlinks & SEO Academy</p>
                     </CardContent>
                   </Card>
@@ -1730,7 +1730,7 @@ const Dashboard = () => {
                   </CardHeader>
                   <CardContent>
                     <p className="text-purple-700 mb-4">
-                      <strong>Premium Benefits:</strong> Access unlimited campaign features and premium tools.<br/>
+                      <strong>Premium Benefits:</strong> Access premium campaign features and tools.<br/>
                       <strong>Credits Available:</strong> {credits} credits for premium services and enhanced features.
                     </p>
                     <Button onClick={() => {

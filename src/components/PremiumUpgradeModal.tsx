@@ -40,8 +40,8 @@ export function PremiumUpgradeModal({
   const features = [
     {
       icon: <Infinity className="h-5 w-5 text-purple-600" />,
-      title: "Unlimited Link Building",
-      description: "Build unlimited high-authority backlinks across all platforms"
+      title: "Premium Link Building",
+      description: "Access high-authority backlinks with credit-based usage"
     },
     {
       icon: <Zap className="h-5 w-5 text-yellow-600" />,
@@ -93,7 +93,7 @@ export function PremiumUpgradeModal({
           </div>
           
           <DialogDescription className="text-lg text-gray-600">
-            You've reached your free limit of {maxLinks} published links. Upgrade to Premium for unlimited access and advanced features.
+            You've reached your free limit of {maxLinks} published links. Upgrade to Premium for higher limits and advanced features.
           </DialogDescription>
         </DialogHeader>
 
@@ -137,7 +137,7 @@ export function PremiumUpgradeModal({
               <ul className="space-y-3 mb-6">
                 <li className="flex items-center gap-2">
                   <CheckCircle className="h-4 w-4 text-green-600" />
-                  <span className="text-sm">Unlimited link building</span>
+                  <span className="text-sm">Premium link building (credit-based)</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle className="h-4 w-4 text-green-600" />
@@ -186,7 +186,7 @@ export function PremiumUpgradeModal({
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle className="h-4 w-4 text-green-600" />
-                  <span className="text-sm">Unlimited campaigns</span>
+                  <span className="text-sm">Higher campaign limits</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle className="h-4 w-4 text-green-600" />

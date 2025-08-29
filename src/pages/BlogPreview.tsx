@@ -307,7 +307,7 @@ export function BlogPreview() {
               <div className="text-center space-y-4">
                 <h3 className="text-xl font-semibold">Want More High-Quality Backlinks?</h3>
                 <p className="text-muted-foreground">
-                  This is just a preview of what our AI can create for you. Get unlimited backlinks, 
+                  This is just a preview of what our AI can create for you. Get premium backlinks (credit-based),
                   custom targeting, and premium features with our paid plans.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">

@@ -71,7 +71,7 @@ export function StreamlinedPremiumButton({
 // Specialized variants for common use cases
 export function PremiumUpgradeCard({
   title = "Upgrade to Premium",
-  description = "Unlock unlimited features and advanced tools",
+  description = "Unlock premium features and advanced tools",
   buttonText = "Upgrade Now",
   context = "card",
   redirectAfterSuccess,

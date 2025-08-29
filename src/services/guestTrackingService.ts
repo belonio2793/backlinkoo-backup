@@ -102,9 +102,9 @@ class GuestTrackingService {
         success: false,
         warning: {
           type: 'campaign_limit',
-          message: `Free users are limited to ${this.MAX_FREE_CAMPAIGNS} campaigns. Upgrade to Premium for unlimited campaigns!`,
+          message: `Free users are limited to ${this.MAX_FREE_CAMPAIGNS} campaigns. Upgrade to Premium for higher campaign limits!`,
           action: 'block',
-          upgradeCTA: 'Upgrade to Premium - Unlimited Campaigns!'
+          upgradeCTA: 'Upgrade to Premium - Higher Campaign Limits'
         },
         shouldShowPremiumModal: true
       };
@@ -134,7 +134,7 @@ class GuestTrackingService {
       shouldShowPremiumModal,
       warning: shouldShowPremiumModal ? {
         type: 'campaign_limit',
-        message: `You're using ${guestData.campaignsCreated}/${this.MAX_FREE_CAMPAIGNS} free campaigns. Upgrade to Premium for unlimited access!`,
+        message: `You're using ${guestData.campaignsCreated}/${this.MAX_FREE_CAMPAIGNS} free campaigns. Upgrade to Premium for higher limits!`,
         action: 'warn',
         upgradeCTA: 'Upgrade Now - Only $49/month'
       } : undefined
@@ -171,7 +171,7 @@ class GuestTrackingService {
           type: 'link_limit',
           message: `Free campaigns are limited to ${this.MAX_LINKS_PER_CAMPAIGN} links each. This campaign has ${campaign.linksGenerated} links.`,
           action: 'block',
-          upgradeCTA: 'Upgrade to Premium - Unlimited Links per Campaign!'
+          upgradeCTA: 'Upgrade to Premium - Higher Link Limits per Campaign'
         },
         shouldShowPremiumModal: true
       };
@@ -203,10 +203,10 @@ class GuestTrackingService {
       warning: shouldShowPremiumModal ? {
         type: 'link_limit',
         message: newTotal >= this.MAX_LINKS_PER_CAMPAIGN
-          ? `Campaign reached the ${this.MAX_LINKS_PER_CAMPAIGN} link limit and has been paused. Upgrade to Premium for unlimited links!`
-          : `Campaign approaching limit: ${newTotal}/${this.MAX_LINKS_PER_CAMPAIGN} links. Upgrade for unlimited links!`,
+          ? `Campaign reached the ${this.MAX_LINKS_PER_CAMPAIGN} link limit and has been paused. Upgrade to Premium for higher link limits!`
+          : `Campaign approaching limit: ${newTotal}/${this.MAX_LINKS_PER_CAMPAIGN} links. Upgrade for higher link limits!`,
         action: newTotal >= this.MAX_LINKS_PER_CAMPAIGN ? 'block' : 'warn',
-        upgradeCTA: 'Upgrade to Premium - Unlimited Links!'
+        upgradeCTA: 'Upgrade to Premium - Higher Link Limits'
       } : undefined
     };
   }
@@ -281,7 +281,7 @@ class GuestTrackingService {
         type: 'campaign_limit',
         message: `You've reached the free limit of ${this.MAX_FREE_CAMPAIGNS} campaigns`,
         action: 'block',
-        upgradeCTA: 'Upgrade to Premium for Unlimited Campaigns'
+        upgradeCTA: 'Upgrade to Premium for Higher Campaign Limits'
       });
     }
 
@@ -345,7 +345,7 @@ class GuestTrackingService {
         reason: 'Link limit reached',
         warning: {
           type: 'link_limit',
-          message: `This campaign has reached the ${this.MAX_LINKS_PER_CAMPAIGN} link limit. Upgrade to Premium for unlimited links and to continue this campaign.`,
+          message: `This campaign has reached the ${this.MAX_LINKS_PER_CAMPAIGN} link limit. Upgrade to Premium for higher link limits to continue this campaign.`,
           action: 'block',
           upgradeCTA: 'Upgrade to Premium - Continue Campaign'
         }

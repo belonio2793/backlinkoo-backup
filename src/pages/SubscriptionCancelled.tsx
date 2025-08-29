@@ -33,7 +33,7 @@ const SubscriptionCancelled = () => {
               <div className="text-center space-y-2">
                 <p className="font-medium">Still interested in Premium?</p>
                 <p className="text-sm text-muted-foreground">
-                  Get unlimited access to keyword research, rank tracking, and automated campaigns for just $29/month
+                  Get full access to keyword research, rank tracking, and automated campaigns for just $29/month
                 </p>
               </div>
             </div>

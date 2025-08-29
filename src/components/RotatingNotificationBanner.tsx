@@ -14,7 +14,7 @@ const notifications = [
   "Get started with our SEO Academy as a complimentary e-learning experience for Premium Plan subscribers.",
   "Learn how search engine optimization is changing and take advantage of the opportunities this industry has to offer right now.",
   "Claim up to 3 free blog posts with contextual links and experience SEO for your website.",
-  "Generate unlimited blog posts and claim unlimited permanent links as a Premium Plan subscriber.",
+  "Generate more blog posts and claim permanent links with a Premium Plan.",
   "Get proprietary merchant tools, access to backlink network technology and more."
 ];
 
