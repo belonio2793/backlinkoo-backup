@@ -19,7 +19,16 @@ export const AuthRedirectHandler = ({ children }: { children: React.ReactNode })
       if (!user) return;
 
       localStorage.setItem('auto_checkout_done', '1');
-      await stripeWrapper.quickBuyCredits(100, user.email || undefined);
+      // Use full-page redirect to avoid popup blockers (no user gesture here)
+      const result = await stripeWrapper.createPayment({
+        amount: 140,
+        credits: 100,
+        productName: '100 Backlink Credits',
+        userEmail: user.email || undefined
+      });
+      if (result.success && result.url) {
+        window.location.href = result.url;
+      }
     } catch (e) {
       console.warn('Auto-checkout open skipped:', e instanceof Error ? e.message : e);
     }
