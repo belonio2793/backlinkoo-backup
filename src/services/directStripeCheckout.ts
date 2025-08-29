@@ -30,7 +30,7 @@ export class DirectStripeCheckout {
       }
     } else {
       // For custom amounts, use createPayment directly
-      const amount = Math.ceil(credits * 1.40); // $1.40 per credit
+      const amount = Number((credits * 1.40).toFixed(2)); // $1.40 per credit
       const result = await stripeWrapper.createPayment({
         amount,
         credits,
