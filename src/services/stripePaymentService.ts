@@ -72,9 +72,7 @@ class StripePaymentService {
 
       const subscriptionOptions: SubscriptionOptions = {
         plan: options.plan || 'monthly',
-        tier: 'premium',
-        isGuest: options.isGuest || false,
-        guestEmail: options.guestEmail
+        tier: 'premium'
       };
 
       const result = await stripeWrapper.createSubscription(subscriptionOptions);
