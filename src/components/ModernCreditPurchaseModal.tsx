@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -94,15 +95,9 @@ export function ModernCreditPurchaseModal({
 
   const getPriceAmount = (): number => {
     const credits = getCreditsAmount();
-    
-    // Check if it matches a preset package
     const preset = creditPackages.find(pkg => pkg.credits === credits);
-    if (preset) {
-      return preset.price;
-    }
-    
-    // Use custom rate for non-preset amounts
-    return Math.ceil(credits * rate);
+    if (preset) return preset.price;
+    return Number((credits * rate).toFixed(2));
   };
 
   const startCheckout = async () => {
