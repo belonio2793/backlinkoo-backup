@@ -165,7 +165,7 @@ export function ModernCreditPurchaseModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-[960px] md:max-w-[1000px] w-full max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <CreditCard className="h-5 w-5" />
@@ -173,103 +173,121 @@ export function ModernCreditPurchaseModal({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
-          {/* Preset Packages */}
-          <div className="space-y-3">
-            <Label className="text-sm font-medium">Choose a Package</Label>
-            <div className="grid grid-cols-2 gap-3">
-              {creditPackages.map((pkg, index) => (
-                <Card
-                  key={index}
-                  className={`cursor-pointer transition-all ${
-                    selectedPackage === index 
-                      ? 'ring-2 ring-primary border-primary' 
-                      : 'hover:border-gray-300'
-                  }`}
-                  onClick={() => handlePackageSelect(index)}
-                >
-                  <CardContent className="p-4 text-center">
-                    <div className="text-lg font-semibold">{pkg.credits} Credits</div>
-                    <div className="text-2xl font-bold text-primary">${pkg.price}</div>
-                    <div className="text-sm text-muted-foreground">${pkg.pricePerCredit.toFixed(2)} per credit</div>
-                    {index === 1 && (
-                      <div className="mt-2">
-                        <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
-                          Popular
-                        </span>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-
-          <Separator />
-
-          {/* Custom Amount */}
-          <div className="space-y-3">
-            <Label className="text-sm font-medium">Or Enter Custom Amount</Label>
-            <div className="space-y-2">
-              <div className="relative">
-                <Input
-                  type="text"
-                  value={customCredits}
-                  onChange={(e) => handleCustomCreditsChange(e.target.value)}
-                  placeholder="Enter number of credits"
-                  className="pr-16"
-                />
-                <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-muted-foreground">
-                  Credits
-                </span>
-              </div>
-              <div className="text-center">
-                <span className="text-2xl font-bold text-primary">
-                  ${getPriceAmount().toFixed(2)}
-                </span>
-                <span className="text-sm text-muted-foreground ml-2">
-                  (${rate.toFixed(2)} per credit)
-                </span>
+        {/* Two-column responsive layout */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* LEFT: Packages + Custom input */}
+          <div className="space-y-6">
+            {/* Preset Packages */}
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">Choose a Package</Label>
+              <div className="grid grid-cols-2 gap-3">
+                {creditPackages.map((pkg, index) => (
+                  <Card
+                    key={index}
+                    className={`cursor-pointer transition-all ${
+                      selectedPackage === index
+                        ? 'ring-2 ring-primary border-primary'
+                        : 'hover:border-gray-300'
+                    }`}
+                    onClick={() => handlePackageSelect(index)}
+                  >
+                    <CardContent className="p-4 text-center">
+                      <div className="text-base md:text-lg font-semibold">{pkg.credits} Credits</div>
+                      <div className="text-xl md:text-2xl font-bold text-primary">${pkg.price}</div>
+                      <div className="text-xs md:text-sm text-muted-foreground">${pkg.pricePerCredit.toFixed(2)} per credit</div>
+                      {index === 1 && (
+                        <div className="mt-2">
+                          <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                            Popular
+                          </span>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
             </div>
+
+            <Separator />
+
+            {/* Custom Amount */}
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">Or Enter Custom Amount</Label>
+              <div className="space-y-2">
+                <div className="relative">
+                  <Input
+                    type="text"
+                    value={customCredits}
+                    onChange={(e) => handleCustomCreditsChange(e.target.value)}
+                    placeholder="Enter number of credits"
+                    className="pr-16"
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                    Credits
+                  </span>
+                </div>
+                <div className="text-center">
+                  <span className="text-2xl font-bold text-primary">
+                    ${getPriceAmount().toFixed(2)}
+                  </span>
+                  <span className="text-sm text-muted-foreground ml-2">
+                    (${rate.toFixed(2)} per credit)
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <Separator />
+          {/* RIGHT: Summary + CTA + Features */}
+          <div className="flex flex-col gap-4">
+            {/* Summary */}
+            <Card>
+              <CardContent className="p-5">
+                <div className="text-center">
+                  <div className="text-3xl font-bold">${getPriceAmount().toFixed(2)}</div>
+                  <div className="text-sm text-muted-foreground">for {getCreditsAmount()} credits</div>
+                </div>
+                <div className="mt-4">
+                  {user ? (
+                    <div className="space-y-2">
+                      <InlineStripeCredits
+                        credits={getCreditsAmount()}
+                        email={user?.email || undefined}
+                        onSuccess={() => { onClose(); onSuccess?.(); }}
+                      />
+                    </div>
+                  ) : (
+                    <Button onClick={handleLoginThenPurchase} className="w-full" size="lg">
+                      Login to Pay ${getPriceAmount().toFixed(2)}
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
 
-          {/* Security & Features */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 text-sm">
-              <Shield className="h-4 w-4 text-green-600" />
-              <span>Secure payment processing via Stripe</span>
+            {/* Features grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="flex items-center gap-2 text-sm">
+                <Shield className="h-4 w-4 text-green-600" />
+                <span>Secure payment via Stripe</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <CheckCircle className="h-4 w-4 text-green-600" />
+                <span>Credits never expire</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <CheckCircle className="h-4 w-4 text-green-600" />
+                <span>Instant activation via webhooks</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <ExternalLink className="h-4 w-4 text-blue-600" />
+                <span>Redirects to secure checkout</span>
+              </div>
             </div>
-            <div className="flex items-center gap-2 text-sm">
-              <CheckCircle className="h-4 w-4 text-green-600" />
-              <span>Credits never expire</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              <CheckCircle className="h-4 w-4 text-green-600" />
-              <span>Instant credit activation via webhooks</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              <ExternalLink className="h-4 w-4 text-blue-600" />
-              <span>Redirects to Stripe's secure checkout page</span>
-            </div>
-          </div>
 
-          {/* Integrated Payment */}
-          {user ? (
-            <div className="space-y-2">
-              <div className="text-center text-sm font-medium">Pay ${getPriceAmount().toFixed(2)} for {getCreditsAmount()} credits</div>
-              <InlineStripeCredits credits={getCreditsAmount()} email={user?.email || undefined} onSuccess={() => { onClose(); onSuccess?.(); }} />
+            <div className="text-xs text-muted-foreground text-center">
+              Powered by Stripe • Secure checkout • Credits activated automatically via webhooks
             </div>
-          ) : (
-            <div className="space-y-2">
-              <Button onClick={handleLoginThenPurchase} className="w-full" size="lg">Login to Pay ${getPriceAmount().toFixed(2)}</Button>
-            </div>
-          )}
-
-          <div className="text-xs text-muted-foreground text-center">
-            Powered by Stripe • Secure checkout • Credits activated automatically via webhooks
           </div>
         </div>
       </DialogContent>
