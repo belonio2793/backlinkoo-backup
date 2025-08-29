@@ -308,7 +308,7 @@ export function TrialExhaustedModal({
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
               <div className="text-center">
                 <div className="text-2xl font-bold">∞</div>
-                <div className="text-sm opacity-90">Unlimited Links per Campaign</div>
+                <div className="text-sm opacity-90">Higher Link Limits per Campaign</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold">🎓</div>
