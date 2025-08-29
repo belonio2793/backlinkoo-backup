@@ -631,13 +631,13 @@ const EnhancedDomainsPage = () => {
 
   const getStatusBadge = (domain: Domain) => {
     if (domain.status === 'verified' && domain.netlify_verified) {
-      return <Badge className="bg-green-600">Active</Badge>;
+      return <span className="text-green-700">Active</span>;
     } else if (domain.status === 'error') {
-      return <Badge variant="destructive">Error</Badge>;
+      return <span className="text-red-700">Error</span>;
     } else if (domain.netlify_verified) {
-      return <Badge className="bg-blue-600">Netlify Only</Badge>;
+      return <span className="text-blue-700">Netlify Only</span>;
     } else {
-      return <Badge variant="secondary">Pending</Badge>;
+      return <span className="text-gray-600">Pending</span>;
     }
   };
 
@@ -653,7 +653,7 @@ const EnhancedDomainsPage = () => {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+    <div className="min-h-screen bg-white">
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         {/* Header */}
         <div className="text-center mb-8">
@@ -713,32 +713,15 @@ const EnhancedDomainsPage = () => {
         </div>
 
         {/* Netlify Connection Status */}
-        {netlifyConnected !== null && (
-          <Alert className={`mb-6 ${netlifyConnected ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
+        {!netlifyConnected && netlifyConnected !== null && (
+          <Alert className="mb-6 border-amber-200 bg-amber-50">
             <Globe className="h-4 w-4" />
             <AlertDescription>
               <div className="flex items-center justify-between">
-                <div>
-                  <strong>Netlify Connection:</strong>
-                  {netlifyConnected ? (
-                    <span className="text-green-700 ml-2">✅ Connected</span>
-                  ) : (
-                    <span className="text-red-700 ml-2">❌ Not Connected</span>
-                  )}
-                  {syncStats && syncStats.needsSync && (
-                    <span className="text-blue-700 ml-2">• Sync Available</span>
-                  )}
-                </div>
-                {netlifyConnected && syncStats?.needsSync && (
-                  <Button
-                    size="sm"
-                    onClick={syncFromNetlify}
-                    disabled={syncing}
-                    className="ml-4"
-                  >
-                    {syncing ? 'Syncing...' : 'Sync Now'}
-                  </Button>
-                )}
+                <span className="text-amber-800">Netlify not connected</span>
+                <Button size="sm" variant="outline" onClick={checkNetlifyConnection} disabled={checkingConnection}>
+                  {checkingConnection ? 'Checking…' : 'Retry'}
+                </Button>
               </div>
             </AlertDescription>
           </Alert>
@@ -750,8 +733,8 @@ const EnhancedDomainsPage = () => {
           <Button
             onClick={performBulkSync}
             disabled={bulkSyncing}
-            size="lg"
-            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white border-0 shadow-lg"
+            size="sm"
+            className=""
           >
             {bulkSyncing ? (
               <>
@@ -840,11 +823,11 @@ const EnhancedDomainsPage = () => {
             )}
           </Button>
 
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={loadDomains}
             disabled={loading}
-            size="lg"
+            size="sm"
           >
             {loading ? (
               <Loader2 className="h-5 w-5 mr-2 animate-spin" />
@@ -884,17 +867,16 @@ const EnhancedDomainsPage = () => {
                 </Button>
               </div>
             ) : (
-              <Table>
+              <Table className="table-auto">
                 <TableHeader>
                   <TableRow>
                     <TableHead>Domain</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Verification</TableHead>
-                    <TableHead>SSL Status</TableHead>
-                    <TableHead>DNS Configuration</TableHead>
-                    <TableHead>Theme/Blog</TableHead>
+                    <TableHead>SSL</TableHead>
+                    <TableHead>DNS</TableHead>
                     <TableHead>Netlify</TableHead>
-                    <TableHead>Last Validation</TableHead>
+                    <TableHead>Last Check</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -914,82 +896,35 @@ const EnhancedDomainsPage = () => {
                         {getStatusBadge(domain)}
                       </TableCell>
                       <TableCell>
-                        <div className="flex flex-col gap-1">
-                          <div className="flex items-center gap-2">
-                            {domain.netlify_verified ? (
-                              <Badge className="bg-green-100 text-green-800 text-xs">Netlify ✓</Badge>
-                            ) : (
-                              <Badge variant="secondary" className="text-xs">Local Only</Badge>
-                            )}
-                            {domain.dns_verified && (
-                              <Badge className="bg-blue-100 text-blue-800 text-xs">DNS ✓</Badge>
-                            )}
-                          </div>
-                          {!domain.netlify_verified && !domain.dns_verified && (
-                            <span className="text-xs text-gray-500">Not verified</span>
-                          )}
+                        <div className="text-sm text-gray-700">
+                          {domain.netlify_verified ? 'Netlify ✓' : 'Local only'}
+                          {domain.dns_verified ? ' • DNS ✓' : ''}
+                          {!domain.netlify_verified && !domain.dns_verified ? ' • Not verified' : ''}
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Badge
-                            variant={domain.ssl_status === 'issued' ? 'default' : domain.ssl_status === 'pending' ? 'secondary' : 'destructive'}
-                            className="text-xs"
-                          >
-                            {domain.ssl_status === 'issued' ? '🔒 SSL Active' :
-                             domain.ssl_status === 'pending' ? '⏳ SSL Pending' :
-                             domain.ssl_status === 'error' ? '❌ SSL Error' :
-                             '🔓 No SSL'}
-                          </Badge>
-                        </div>
+                        <span className="text-sm text-gray-700">
+                          {domain.ssl_status === 'issued' ? 'SSL Active' :
+                           domain.ssl_status === 'pending' ? 'SSL Pending' :
+                           domain.ssl_status === 'error' ? 'SSL Error' :
+                           'No SSL'}
+                        </span>
                       </TableCell>
                       <TableCell>
-                        <div className="max-w-32">
-                          <div className="text-xs space-y-1">
-                            <div className="flex items-center gap-1">
-                              <span className="font-medium">CNAME:</span>
-                              <code className="bg-blue-50 text-blue-700 px-1 py-0.5 rounded text-xs">
-                                {CNAME_RECORD}
-                              </code>
-                            </div>
-                            {domain.txt_record_value && (
-                              <div className="flex items-center gap-1">
-                                <span className="font-medium">TXT:</span>
-                                <code className="bg-gray-100 px-1 py-0.5 rounded text-xs">
-                                  {domain.txt_record_value.substring(0, 12)}...
-                                </code>
-                              </div>
-                            )}
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="text-xs h-6 px-2"
-                              onClick={() => openDnsModal(domain)}
-                            >
-                              DNS Setup
-                            </Button>
+                        <div className="text-sm text-gray-700">
+                          CNAME: <code className="px-1 py-0.5 rounded bg-gray-100 text-gray-700">{CNAME_RECORD}</code>
+                          {domain.txt_record_value ? (
+                            <span className="ml-2">TXT: <code className="px-1 py-0.5 rounded bg-gray-100">{domain.txt_record_value.substring(0,12)}...</code></span>
+                          ) : null}
+                          <div>
+                            <Button size="sm" variant="outline" className="mt-1 h-7 px-2 text-xs" onClick={() => openDnsModal(domain)}>DNS Setup</Button>
                           </div>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="text-xs space-y-1">
-                          {domain.selected_theme && (
-                            <div className="flex items-center gap-1">
-                              <Badge variant="outline" className="text-xs">
-                                {domain.theme_name || domain.selected_theme}
-                              </Badge>
-                            </div>
-                          )}
-                          {domain.blog_enabled && (
-                            <Badge className="bg-purple-100 text-purple-800 text-xs">
-                              📝 Blog Enabled
-                            </Badge>
-                          )}
-                          {domain.pages_published && domain.pages_published > 0 && (
-                            <div className="text-xs text-gray-500">
-                              {domain.pages_published} pages
-                            </div>
-                          )}
+                        <div className="text-sm text-gray-700">
+                          {domain.selected_theme ? (domain.theme_name || domain.selected_theme) : '-'}
+                          {domain.blog_enabled ? ' • Blog Enabled' : ''}
                         </div>
                       </TableCell>
                       <TableCell>
@@ -1074,7 +1009,7 @@ const EnhancedDomainsPage = () => {
             )}
 
             {/* Synced Domains List */}
-            {domains.filter(d => d.netlify_verified || d.last_sync).length > 0 && (
+            {false && domains.filter(d => d.netlify_verified || d.last_sync).length > 0 && (
               <div className="mt-6">
                 <div className="flex items-center gap-2 mb-4">
                   <div className="h-1 w-1 bg-green-500 rounded-full animate-pulse"></div>
