@@ -111,6 +111,88 @@ serve(async (req) => {
           .eq("stripe_session_id", body.sessionId);
       } catch (_) {}
 
+      // Allocate credits when paid
+      let allocatedCredits = 0;
+      let orderId: string | null = null;
+      try {
+        if (paid) {
+          const metadata: Record<string, string> = (session.metadata || {}) as Record<string, string>;
+          const credits = parseInt(String(metadata.credits || '0'));
+          if (credits > 0) {
+            // Find order and user
+            const { data: order } = await supabase
+              .from('orders')
+              .select('id, user_id, email')
+              .eq('stripe_session_id', body.sessionId)
+              .maybeSingle();
+            orderId = order?.id || null;
+            let userId = order?.user_id as string | null;
+            const email = (order?.email || session.customer_details?.email || '').toLowerCase();
+            if (!userId && email) {
+              const { data: profile } = await supabase
+                .from('profiles')
+                .select('user_id')
+                .eq('email', email)
+                .maybeSingle();
+              userId = (profile?.user_id as string) || null;
+            }
+            if (userId) {
+              // Upsert credits
+              const { data: current } = await supabase
+                .from('credits')
+                .select('amount, total_purchased')
+                .eq('user_id', userId)
+                .maybeSingle();
+
+              if (current) {
+                await supabase
+                  .from('credits')
+                  .update({
+                    amount: (current.amount || 0) + credits,
+                    total_purchased: (current.total_purchased || 0) + credits,
+                    updated_at: new Date().toISOString(),
+                  })
+                  .eq('user_id', userId);
+              } else {
+                await supabase
+                  .from('credits')
+                  .insert({
+                    user_id: userId,
+                    amount: credits,
+                    total_purchased: credits,
+                    total_used: 0,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString(),
+                  });
+              }
+
+              // Insert transaction (idempotent by order_id)
+              if (orderId) {
+                const { data: existing } = await supabase
+                  .from('credit_transactions')
+                  .select('id')
+                  .eq('order_id', orderId)
+                  .limit(1);
+                if (!existing || existing.length === 0) {
+                  await supabase
+                    .from('credit_transactions')
+                    .insert({
+                      user_id: userId,
+                      amount: credits,
+                      type: 'purchase',
+                      order_id: orderId,
+                      description: (metadata.product_name as string) || 'Credits purchase',
+                      created_at: new Date().toISOString(),
+                    });
+                }
+              }
+
+              allocatedCredits = credits;
+            }
+          }
+        }
+      } catch (_) {}
+
       return new Response(
         JSON.stringify({
           success: true,
@@ -118,6 +200,8 @@ serve(async (req) => {
           status: session.payment_status,
           amount_total: session.amount_total,
           currency: session.currency,
+          credits: allocatedCredits || undefined,
+          order_id: orderId || undefined,
         }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );

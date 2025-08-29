@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -93,6 +93,7 @@ export function PremiumPlanTab({ isSubscribed, onUpgrade }: PremiumPlanTabProps)
     { feature: "White-label Options", free: "❌", premium: "✅ Available" },
     { feature: "Account Manager", free: "❌", premium: "✅ Dedicated" }
   ];
+
 
   const handleUpgrade = () => {
     console.log('PremiumPlanTab handleUpgrade called, isCheckoutOpen will be set to true');

@@ -651,6 +651,7 @@ const Dashboard = () => {
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [showCampaignForm, setShowCampaignForm] = useState(false);
   const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
+  const [transactions, setTransactions] = useState<any[]>([]);
 
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(() => {
@@ -764,6 +765,7 @@ const Dashboard = () => {
         ];
 
         const results = await Promise.all(dataPromises);
+        await fetchTransactions(session.user);
         console.log('���� Dashboard - All data promises resolved:', {
           userData: results[0] ? 'success' : 'failed',
           campaigns: results[1] ? 'success' : 'failed',
@@ -981,6 +983,22 @@ const Dashboard = () => {
     console.log('Loading global stats after blog generation...');
   };
 
+  const fetchTransactions = async (authUser?: User) => {
+    try {
+      const currentUser = authUser || user;
+      if (!currentUser) return;
+      const { data, error } = await supabase
+        .from('credit_transactions')
+        .select('created_at, type, amount, description, order_id')
+        .eq('user_id', currentUser.id)
+        .order('created_at', { ascending: false })
+        .limit(20);
+      if (!error && data) setTransactions(data);
+    } catch (e) {
+      console.warn('⚠️ Failed to load transactions');
+    }
+  };
+
   const fetchCampaigns = async (authUser?: User) => {
     try {
       const currentUser = authUser || user;
@@ -1160,7 +1178,7 @@ const Dashboard = () => {
                 <Home className="h-4 w-4" />
                 <span className="hidden sm:inline">Home</span>
               </Button>
-              {(activeSection === "dashboard" || activeSection === "seo-tools" || activeSection === "trial") && (
+              {(activeSection === "dashboard" || activeSection === "seo-tools" || activeSection === "trial" || activeSection === "premium-plan") && (
                 <>
                   {/* Credit system - visible to all users (separate from premium subscription) */}
                   <Badge variant="outline" className="gap-1 text-xs sm:text-sm">
@@ -1178,8 +1196,9 @@ const Dashboard = () => {
                     }
                     userEmail={user?.email || "support@backlinkoo.com"}
                     isGuest={!user}
-                    onPaymentSuccess={() => {
-                      fetchDashboardData();
+                    onPaymentSuccess={async () => {
+                      await fetchUserData();
+                      await fetchTransactions();
                       toast({
                         title: "Payment Successful!",
                         description: "Your credits have been added to your account."
@@ -1472,6 +1491,44 @@ const Dashboard = () => {
                   </Card>
                 )}
               </div>
+
+              {/* Transaction History */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-2">
+                    <CreditCard className="h-4 w-4 text-muted-foreground" />
+                    <CardTitle className="text-sm font-medium">Transaction History</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {transactions.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">No transactions yet.</p>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="text-muted-foreground border-b">
+                            <th className="text-left py-2 pr-2">Date</th>
+                            <th className="text-left py-2 pr-2">Type</th>
+                            <th className="text-right py-2 pr-2">Amount</th>
+                            <th className="text-left py-2">Description</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {transactions.map((tx, idx) => (
+                            <tr key={idx} className="border-b last:border-0">
+                              <td className="py-2 pr-2">{new Date(tx.created_at).toLocaleString()}</td>
+                              <td className="py-2 pr-2 capitalize">{tx.type}</td>
+                              <td className="py-2 pr-2 text-right">{tx.type === 'purchase' ? '+' : '-'}{tx.amount}</td>
+                              <td className="py-2">{tx.description || (tx.type === 'purchase' ? 'Credits purchase' : 'Usage')}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
 
               {campaigns.length > 0 && (
                 <Card className="shadow-lg border-0 bg-gradient-to-br from-card to-card/50">

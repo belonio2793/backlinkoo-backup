@@ -1,5 +1,6 @@
 const Stripe = require("stripe");
 const { createClient } = require('@supabase/supabase-js');
+const Stripe = require('stripe');
 
 // Initialize Supabase client
 function getSupabaseClient() {
@@ -84,14 +85,14 @@ exports.handler = async (event, context) => {
 
     // Check if payment was successful
     const isPaymentSuccessful = session.payment_status === 'paid' || session.status === 'complete';
-    
+
     if (!isPaymentSuccessful) {
       return {
         statusCode: 200,
         headers,
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           verified: false,
-          error: `Payment not completed. Status: ${session.payment_status || session.status}` 
+          error: `Payment not completed. Status: ${session.payment_status || session.status}`
         })
       };
     }
@@ -112,20 +113,93 @@ exports.handler = async (event, context) => {
     const metadata = session.metadata || {};
     const credits = parseInt(metadata.credits || '0');
     const plan = metadata.plan;
-    
+
+    // Update order status to completed
+    try {
+      await supabase.from('orders')
+        .update({ status: 'completed', updated_at: new Date().toISOString() })
+        .eq('stripe_session_id', sessionId);
+    } catch (_) {}
+
+    // Allocate credits if applicable (idempotent)
+    let allocatedCredits = 0;
+    let userId = order?.user_id || null;
+    const customerEmail = (metadata.email || session.customer_details?.email || order?.email || '').toLowerCase();
+
+    // Resolve userId via profiles if missing
+    if (!userId && customerEmail) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('user_id')
+        .eq('email', customerEmail)
+        .single();
+      userId = profile?.user_id || null;
+    }
+
+    if (credits > 0 && userId) {
+      // Check if already processed for this order
+      let alreadyProcessed = false;
+      if (order?.id) {
+        const { data: existingTx } = await supabase
+          .from('credit_transactions')
+          .select('id')
+          .eq('order_id', order.id)
+          .limit(1)
+          .maybeSingle();
+        alreadyProcessed = !!existingTx;
+      }
+
+      if (!alreadyProcessed) {
+        // Fetch current credits
+        const { data: currentCredits } = await supabase
+          .from('credits')
+          .select('amount, total_purchased')
+          .eq('user_id', userId)
+          .single();
+
+        const newAmount = (currentCredits?.amount || 0) + credits;
+        const newPurchased = (currentCredits?.total_purchased || 0) + credits;
+
+        if (currentCredits) {
+          await supabase
+            .from('credits')
+            .update({ amount: newAmount, total_purchased: newPurchased, updated_at: new Date().toISOString() })
+            .eq('user_id', userId);
+        } else {
+          await supabase
+            .from('credits')
+            .insert({ user_id: userId, amount: credits, total_purchased: credits, total_used: 0, created_at: new Date().toISOString(), updated_at: new Date().toISOString() });
+        }
+
+        // Record transaction
+        await supabase
+          .from('credit_transactions')
+          .insert({
+            user_id: userId,
+            amount: credits,
+            type: 'purchase',
+            order_id: order?.id || null,
+            description: metadata.product_name || 'Credits purchase',
+            created_at: new Date().toISOString()
+          });
+
+        allocatedCredits = credits;
+      }
+    }
+
     // Return verification result
     const result = {
       verified: true,
       sessionId: session.id,
       amount: session.amount_total ? session.amount_total / 100 : 0, // Convert from cents
       currency: session.currency,
-      customerEmail: metadata.email || session.customer_details?.email,
+      customerEmail: customerEmail || undefined,
       orderId: order?.id,
-      ...(credits > 0 && { credits }),
+      ...(allocatedCredits > 0 && { credits: allocatedCredits }),
       ...(plan && { plan })
     };
 
-    console.log(`✅ Payment verified: ${sessionId} - ${result.customerEmail} - $${result.amount}`);
+    console.log(`✅ Payment verified: ${sessionId} - ${result.customerEmail} - $${result.amount}${allocatedCredits ? ` (+${allocatedCredits} credits)` : ''}`);
 
     return {
       statusCode: 200,
