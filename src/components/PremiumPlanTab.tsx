@@ -9,6 +9,8 @@ import { SEOAcademyTab } from '@/components/SEOAcademyTab';
 import { PremiumCheckoutModal } from '@/components/PremiumCheckoutModal';
 import { CompleteCourseExperience } from '@/components/CompleteCourseExperience';
 import { BuyCreditsButton } from '@/components/BuyCreditsButton';
+import { supabase } from '@/integrations/supabase/client';
+import { useEffect, useState } from 'react';
 import {
   Crown,
   Star,
@@ -40,6 +42,7 @@ export function PremiumPlanTab({ isSubscribed, onUpgrade }: PremiumPlanTabProps)
   const { toast } = useToast();
   const [activeFeature, setActiveFeature] = useState('overview');
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [creditBalance, setCreditBalance] = useState(0);
 
   // Debug logging
   console.log('PremiumPlanTab render - isCheckoutOpen:', isCheckoutOpen);
@@ -94,6 +97,23 @@ export function PremiumPlanTab({ isSubscribed, onUpgrade }: PremiumPlanTabProps)
     { feature: "Account Manager", free: "❌", premium: "✅ Dedicated" }
   ];
 
+  useEffect(() => {
+    const loadCredits = async () => {
+      try {
+        if (!user) return;
+        const { data } = await supabase
+          .from('credits')
+          .select('amount')
+          .eq('user_id', user.id)
+          .single();
+        setCreditBalance(data?.amount || 0);
+      } catch (_) {
+        setCreditBalance(0);
+      }
+    };
+    loadCredits();
+  }, [user]);
+
   const handleUpgrade = () => {
     console.log('PremiumPlanTab handleUpgrade called, isCheckoutOpen will be set to true');
     setIsCheckoutOpen(true);
@@ -110,6 +130,31 @@ export function PremiumPlanTab({ isSubscribed, onUpgrade }: PremiumPlanTabProps)
 
   return (
     <div className="space-y-8">
+      {/* Credit Balance and Buy Credits */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-sm font-medium">Credit Balance</CardTitle>
+            <BuyCreditsButton
+              trigger={<Button variant="outline" size="sm"><CreditCard className="h-4 w-4 mr-1"/>Buy Credits</Button>}
+              onPaymentSuccess={async () => {
+                const { data } = await supabase
+                  .from('credits')
+                  .select('amount')
+                  .eq('user_id', user?.id || '')
+                  .single();
+                setCreditBalance(data?.amount || 0);
+                toast({ title: 'Payment Successful!', description: 'Your credits have been added to your account.' });
+              }}
+            />
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{creditBalance}</div>
+          <p className="text-xs text-muted-foreground">$1.40 per credit</p>
+        </CardContent>
+      </Card>
+
       {/* Premium Active Dashboard for subscribed users */}
       {isSubscribed && (
         <div className="relative overflow-hidden bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-700 rounded-3xl p-8 text-white">
