@@ -186,7 +186,7 @@ export function PremiumUpgradeModal({
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle className="h-4 w-4 text-green-600" />
-                  <span className="text-sm">Unlimited campaigns</span>
+                  <span className="text-sm">Higher campaign limits</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle className="h-4 w-4 text-green-600" />
