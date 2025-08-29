@@ -12,7 +12,6 @@ import { PremiumPopupProvider } from "@/components/PremiumPopupProvider";
 import { PremiumService } from "@/services/premiumService";
 import { PremiumCheckoutModal } from "@/components/PremiumCheckoutModal";
 import { PricingModal } from "@/components/PricingModal";
-import { QuickCreditButton, PremiumUpgradeButton } from "@/components/UniversalPaymentComponent";
 import { BuyCreditsButton } from "@/components/BuyCreditsButton";
 import { ModernCreditPurchaseModal } from "@/components/ModernCreditPurchaseModal";
 import { setPremiumStatus } from "@/utils/setPremiumStatus";
@@ -353,7 +352,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
             <div>🔧 Status: {loadingStatus}</div>
             <div>⏰ Last check: {lastRefresh?.toLocaleTimeString() || 'Never'}</div>
             <div>🔄 Auto-refresh: Every 30 seconds</div>
-            <div>📡 Connection: {navigator.onLine ? 'Online' : 'Offline'}</div>
+            <div>��� Connection: {navigator.onLine ? 'Online' : 'Offline'}</div>
           </div>
         </div>
       </div>

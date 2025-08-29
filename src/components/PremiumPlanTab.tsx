@@ -8,7 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { SEOAcademyTab } from '@/components/SEOAcademyTab';
 import { PremiumCheckoutModal } from '@/components/PremiumCheckoutModal';
 import { CompleteCourseExperience } from '@/components/CompleteCourseExperience';
-import { UniversalPaymentComponent } from '@/components/UniversalPaymentComponent';
+import { BuyCreditsButton } from '@/components/BuyCreditsButton';
 import {
   Crown,
   Star,
@@ -165,7 +165,7 @@ export function PremiumPlanTab({ isSubscribed, onUpgrade }: PremiumPlanTabProps)
                 <Infinity className="mr-2 h-5 w-5" />
                 Create Campaigns
               </Button>
-              <UniversalPaymentComponent
+              <BuyCreditsButton
                 trigger={
                   <Button
                     size="lg"
@@ -176,8 +176,6 @@ export function PremiumPlanTab({ isSubscribed, onUpgrade }: PremiumPlanTabProps)
                     Buy Credits
                   </Button>
                 }
-                defaultType="credits"
-                showTrigger={true}
                 onPaymentSuccess={() => {
                   toast({
                     title: "Payment Successful!",
@@ -237,7 +235,7 @@ export function PremiumPlanTab({ isSubscribed, onUpgrade }: PremiumPlanTabProps)
                 Upgrade to Premium
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
-              <UniversalPaymentComponent
+              <BuyCreditsButton
                 trigger={
                   <Button
                     size="lg"
@@ -248,8 +246,6 @@ export function PremiumPlanTab({ isSubscribed, onUpgrade }: PremiumPlanTabProps)
                     Buy Credits
                   </Button>
                 }
-                defaultType="credits"
-                showTrigger={true}
                 onPaymentSuccess={() => {
                   toast({
                     title: "Payment Successful!",
