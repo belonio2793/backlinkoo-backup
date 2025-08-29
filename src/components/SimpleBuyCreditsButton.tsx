@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { CreditCard, Loader2, ExternalLink } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { stripeWrapper } from '@/services/stripeWrapper';
 
 interface SimpleBuyCreditsButtonProps {
   trigger?: React.ReactNode;
@@ -31,27 +32,10 @@ export function SimpleBuyCreditsButton({
   const { toast } = useToast();
   const { user } = useAuth();
 
-  // Stripe checkout URL for credits
-  const CREDITS_CHECKOUT_URL = 'https://buy.stripe.com/9B63cv1tmcYe';
-
-  const createCheckoutUrl = (): string => {
-    const url = new URL(CREDITS_CHECKOUT_URL);
-    const currentOrigin = window.location.origin;
-    
-    // Add return URLs
-    url.searchParams.set('success_url', `${currentOrigin}/payment-success?session_id={CHECKOUT_SESSION_ID}`);
-    url.searchParams.set('cancel_url', `${currentOrigin}/payment-cancelled`);
-    
-    // Add user email if available
+  // Use central Stripe wrapper (Payment Links) to build and open checkout
+  const openCheckout = async () => {
     const emailToUse = user?.email || guestEmail;
-    if (emailToUse) {
-      url.searchParams.set('prefilled_email', emailToUse);
-    }
-    
-    // Add metadata for webhook processing
-    url.searchParams.set('client_reference_id', `credits_${defaultCredits}`);
-    
-    return url.toString();
+    await stripeWrapper.quickBuyCredits(defaultCredits as 50 | 100 | 250 | 500, emailToUse);
   };
 
   const handleBuyCredits = async () => {
@@ -65,11 +49,7 @@ export function SimpleBuyCreditsButton({
         description: `Opening secure checkout for ${defaultCredits} credits...`,
       });
 
-      // Create checkout URL and redirect
-      const checkoutUrl = createCheckoutUrl();
-      
-      // Redirect to Stripe checkout
-      window.location.href = checkoutUrl;
+      await openCheckout();
 
       // Call success callback if provided
       if (onPaymentSuccess) {
