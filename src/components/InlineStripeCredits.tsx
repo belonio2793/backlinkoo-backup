@@ -63,12 +63,15 @@ export default function InlineStripeCredits({ credits, email, onSuccess }:{ cred
             body: JSON.stringify({ credits, email })
           });
           let data: any = null;
-          try { data = await res.json(); } catch(_) {}
+          let text: string | null = null;
+          try { data = await res.json(); } catch(_) {
+            try { text = await res.text(); } catch(_) {}
+          }
           if (!res.ok) {
-            const msg = data?.error || `HTTP ${res.status}`;
+            const msg = data?.error || text || `HTTP ${res.status}`;
             throw new Error(msg);
           }
-          return data;
+          return data || (text ? { clientSecret: null, info: text } : {});
         };
         let data: any;
         try {
