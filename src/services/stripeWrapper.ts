@@ -119,6 +119,12 @@ class StripeWrapper {
       paymentMethod: 'stripe'
     };
 
+    // Prefer Payment Link for credits to auto-fill quantity
+    if (typeof options.credits === 'number' && options.credits > 0) {
+      const link = this.buildCreditsPaymentLink(options.credits, options.userEmail);
+      if (link) return { success: true, url: link, method: 'direct_stripe' };
+    }
+
     // Try multiple endpoints before falling back to Supabase
     const endpoints = [
       '/.netlify/functions/create-payment',
