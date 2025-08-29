@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CreditCard, Shield, ExternalLink, Zap, Calculator, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { stripeWrapper } from "@/services/stripeWrapper";
 
 interface CustomCreditsModalProps {
   isOpen: boolean;
