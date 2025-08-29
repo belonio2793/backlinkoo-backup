@@ -271,7 +271,7 @@ export function MinimalisticSuccessSection({
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
                   <div className="flex items-center gap-1 text-blue-700">
                     <Star className="h-3 w-3 text-yellow-500" />
-                    <span>Unlimited backlinks</span>
+                    <span>Premium-quality backlinks</span>
                   </div>
                   <div className="flex items-center gap-1 text-blue-700">
                     <Zap className="h-3 w-3 text-orange-500" />
