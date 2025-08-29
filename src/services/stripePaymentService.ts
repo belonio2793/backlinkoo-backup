@@ -147,21 +147,19 @@ class StripePaymentService {
 export const stripePaymentService = new StripePaymentService();
 
 // Convenience methods - now powered by Stripe Wrapper
-export const buyCredits = (credits: number, amount: number, guestEmail?: string) =>
+export const buyCredits = (credits: number, amount: number) =>
   stripePaymentService.createPayment({
     amount,
     credits,
     type: 'credits',
-    productName: `${credits} Backlink Credits`,
-    isGuest: !!guestEmail,
-    guestEmail
+    productName: `${credits} Backlink Credits`
   });
 
-export const quickBuyCredits = (credits: 50 | 100 | 250 | 500, guestEmail?: string) =>
-  stripePaymentService.quickPurchase(credits, guestEmail);
+export const quickBuyCredits = (credits: 50 | 100 | 250 | 500) =>
+  stripePaymentService.quickPurchase(credits);
 
-export const upgradeToPremium = (plan: 'monthly' | 'yearly', guestEmail?: string) =>
-  stripePaymentService.purchasePremium(plan, guestEmail);
+export const upgradeToPremium = (plan: 'monthly' | 'yearly') =>
+  stripePaymentService.purchasePremium(plan);
 
 // Direct wrapper exports for advanced usage
 export { stripeWrapper, createPayment, createSubscription, verifyPayment, openCheckout, getStripeStatus } from './stripeWrapper';
