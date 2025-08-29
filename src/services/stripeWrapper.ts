@@ -92,6 +92,16 @@ class StripeWrapper {
     };
   }
 
+  /** Helper: build Payment Link with prefilled quantity and email */
+  private buildCreditsPaymentLink(credits: number, userEmail?: string): string | null {
+    const base = STRIPE_CHECKOUT_URLS.credits;
+    if (!base) return null;
+    const url = new URL(base);
+    if (credits && credits > 0) url.searchParams.set('quantity', String(credits));
+    if (userEmail) url.searchParams.set('prefilled_email', userEmail);
+    return url.toString();
+  }
+
   /**
    * Create payment session - now redirects directly to Stripe checkout
    */
