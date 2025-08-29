@@ -18,8 +18,19 @@ function SecurePayment() {
     url.searchParams.set('success_url', `${currentOrigin}/payment-success?session_id={CHECKOUT_SESSION_ID}`);
     url.searchParams.set('cancel_url', `${currentOrigin}/payment-cancelled`);
     
-    // Redirect to Stripe checkout
-    window.location.href = url.toString();
+    // Open Stripe checkout in new window
+    const checkoutWindow = window.open(
+      url.toString(),
+      'stripe-checkout',
+      'width=800,height=600,scrollbars=yes,resizable=yes,status=yes,location=yes'
+    );
+
+    if (!checkoutWindow) {
+      // Fallback to same window if popup blocked
+      window.location.href = url.toString();
+    } else {
+      checkoutWindow.focus();
+    }
   }, []);
 
   const handleGoBack = () => {
