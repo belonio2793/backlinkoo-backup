@@ -334,15 +334,15 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
               <div className="flex items-start gap-3">
                 <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5" />
                 <div>
-                  <div className="font-medium">Unlimited Campaigns</div>
-                  <div className="text-sm text-muted-foreground">Create as many projects as you need</div>
+                  <div className="font-medium">Higher Campaign Limits</div>
+                  <div className="text-sm text-muted-foreground">Create more projects with premium</div>
                 </div>
               </div>
               <div className="flex items-start gap-3">
                 <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5" />
                 <div>
-                  <div className="font-medium">Unlimited Keywords</div>
-                  <div className="text-sm text-muted-foreground">Target any number of keywords</div>
+                  <div className="font-medium">Flexible Keywords</div>
+                  <div className="text-sm text-muted-foreground">Target more keywords with premium</div>
                 </div>
               </div>
               <div className="flex items-start gap-3">
