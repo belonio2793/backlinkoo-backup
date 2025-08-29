@@ -186,14 +186,20 @@ class StripeWrapper {
     // Supabase Edge fallback
     try {
       const { data, error } = await supabase.functions.invoke('create-subscription', { body: payload });
-      if (error || !data?.url) {
-        return { success: false, error: error?.message || 'Failed to start subscription checkout' };
+      if (!error && data?.url) {
+        return { success: true, url: data.url, sessionId: data.sessionId };
       }
-      return { success: true, url: data.url, sessionId: data.sessionId };
-    } catch (e2: any) {
-      console.error('❌ Supabase subscription fallback failed:', e2?.message);
-      return { success: false, error: e2?.message || 'Failed to start subscription checkout' };
+    } catch (_) {}
+
+    // Final fallback: Stripe Payment Links
+    const fallbackUrl = payload.plan === 'yearly' ? STRIPE_CHECKOUT_URLS.premiumAnnual : STRIPE_CHECKOUT_URLS.premiumMonthly;
+    if (fallbackUrl) {
+      const url = new URL(fallbackUrl);
+      if (payload.guestEmail) url.searchParams.set('prefilled_email', payload.guestEmail as string);
+      return { success: true, url: url.toString(), sessionId: undefined };
     }
+
+    return { success: false, error: 'Failed to start subscription checkout' };
   }
 
   /**
