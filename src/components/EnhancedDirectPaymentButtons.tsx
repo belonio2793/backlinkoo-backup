@@ -231,7 +231,7 @@ export function QuickPremiumButtons({ guestEmail, showGuestInput = true }: Direc
             <div className="text-center">
               <div className="font-semibold">Monthly Premium</div>
               <div className="text-sm opacity-80">$29/month</div>
-              <div className="text-xs opacity-60">Unlimited backlinks</div>
+              <div className="text-xs opacity-60">Premium backlinks (credit-based)</div>
             </div>
             {loading === 'premium-monthly' && (
               <div className="absolute inset-0 flex items-center justify-center bg-background/80 rounded">
