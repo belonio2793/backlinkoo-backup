@@ -150,46 +150,44 @@ class StripeWrapper {
       return { success: false, error: 'Stripe Wrapper not initialized' };
     }
 
-    try {
-      const plan = options.plan === 'annual' ? 'yearly' : options.plan;
-      console.log('🎖️ Creating Stripe Subscription Session (server):', { plan, tier: options.tier });
+    const plan = options.plan === 'annual' ? 'yearly' : options.plan;
+    const payload = {
+      plan,
+      isGuest: !options.userEmail,
+      guestEmail: options.userEmail,
+      paymentMethod: 'stripe'
+    };
 
-      const response = await fetch('/api/create-subscription', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          plan,
-          isGuest: !options.userEmail,
-          guestEmail: options.userEmail,
-          paymentMethod: 'stripe'
-        })
-      });
+    // Try multiple endpoints first
+    const endpoints = [
+      '/.netlify/functions/create-subscription',
+      '/api/create-subscription'
+    ];
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-
-      const data = await response.json();
-      return { success: true, url: data.url, sessionId: data.sessionId };
-    } catch (e: any) {
-      console.warn('⚠️ Netlify create-subscription failed, falling back to Supabase Edge:', e?.message);
+    for (const url of endpoints) {
       try {
-        const { data, error } = await supabase.functions.invoke('create-subscription', {
-          body: {
-            plan,
-            isGuest: !options.userEmail,
-            guestEmail: options.userEmail,
-            paymentMethod: 'stripe'
-          }
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
         });
-        if (error || !data?.url) {
-          return { success: false, error: error?.message || 'Failed to start subscription checkout' };
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.url) return { success: true, url: data.url, sessionId: data.sessionId };
         }
-        return { success: true, url: data.url, sessionId: data.sessionId };
-      } catch (e2: any) {
-        console.error('❌ Supabase subscription fallback failed:', e2?.message);
-        return { success: false, error: e2?.message || 'Failed to start subscription checkout' };
+      } catch (_) {}
+    }
+
+    // Supabase Edge fallback
+    try {
+      const { data, error } = await supabase.functions.invoke('create-subscription', { body: payload });
+      if (error || !data?.url) {
+        return { success: false, error: error?.message || 'Failed to start subscription checkout' };
       }
+      return { success: true, url: data.url, sessionId: data.sessionId };
+    } catch (e2: any) {
+      console.error('❌ Supabase subscription fallback failed:', e2?.message);
+      return { success: false, error: e2?.message || 'Failed to start subscription checkout' };
     }
   }
 
