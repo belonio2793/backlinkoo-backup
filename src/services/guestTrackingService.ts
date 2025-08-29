@@ -102,9 +102,9 @@ class GuestTrackingService {
         success: false,
         warning: {
           type: 'campaign_limit',
-          message: `Free users are limited to ${this.MAX_FREE_CAMPAIGNS} campaigns. Upgrade to Premium for unlimited campaigns!`,
+          message: `Free users are limited to ${this.MAX_FREE_CAMPAIGNS} campaigns. Upgrade to Premium for higher campaign limits!`,
           action: 'block',
-          upgradeCTA: 'Upgrade to Premium - Unlimited Campaigns!'
+          upgradeCTA: 'Upgrade to Premium - Higher Campaign Limits'
         },
         shouldShowPremiumModal: true
       };
@@ -134,7 +134,7 @@ class GuestTrackingService {
       shouldShowPremiumModal,
       warning: shouldShowPremiumModal ? {
         type: 'campaign_limit',
-        message: `You're using ${guestData.campaignsCreated}/${this.MAX_FREE_CAMPAIGNS} free campaigns. Upgrade to Premium for unlimited access!`,
+        message: `You're using ${guestData.campaignsCreated}/${this.MAX_FREE_CAMPAIGNS} free campaigns. Upgrade to Premium for higher limits!`,
         action: 'warn',
         upgradeCTA: 'Upgrade Now - Only $49/month'
       } : undefined
@@ -281,7 +281,7 @@ class GuestTrackingService {
         type: 'campaign_limit',
         message: `You've reached the free limit of ${this.MAX_FREE_CAMPAIGNS} campaigns`,
         action: 'block',
-        upgradeCTA: 'Upgrade to Premium for Unlimited Campaigns'
+        upgradeCTA: 'Upgrade to Premium for Higher Campaign Limits'
       });
     }
 
