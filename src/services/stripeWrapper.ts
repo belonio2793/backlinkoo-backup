@@ -99,8 +99,7 @@ class StripeWrapper {
 
     console.log('💳 Redirecting to direct Stripe checkout for credits:', {
       amount: options.amount,
-      credits: options.credits,
-      isGuest: options.isGuest
+      credits: options.credits
     });
 
     // All credit purchases go to the credits checkout URL
@@ -157,9 +156,7 @@ class StripeWrapper {
     const url = new URL(baseUrl);
     
     // Add customer email if available
-    if ('guestEmail' in options && options.guestEmail) {
-      url.searchParams.set('prefilled_email', options.guestEmail);
-    } else if ('userEmail' in options && options.userEmail) {
+    if ('userEmail' in options && options.userEmail) {
       url.searchParams.set('prefilled_email', options.userEmail);
     }
 
