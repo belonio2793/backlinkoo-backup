@@ -58,17 +58,13 @@ export default function PaymentSuccess() {
     try {
       setVerifying(true);
 
-      // Call our payment verification function
-      const response = await fetch(`/.netlify/functions/verify-payment?session_id=${sessionId}`);
-      
-      if (!response.ok) {
-        throw new Error(`Verification failed: ${response.status}`);
-      }
+      // Verify via wrapper (Supabase Edge first, fallback to Netlify)
+      const { verifyPayment } = await import('@/services/stripeWrapper');
+      const v = await verifyPayment(sessionId);
 
-      const result = await response.json();
-      
-      setVerification(result);
-      
+      const result = v.success ? { verified: v.paid, credits: v.credits, plan: undefined } : { verified: false, error: v.error || 'Verification failed' };
+      setVerification(result as any);
+
       if (result.verified) {
         toast({
           title: "Payment Verified!",
