@@ -295,8 +295,8 @@ export const createPayment = (options: PaymentOptions) => stripeWrapper.createPa
 export const createSubscription = (options: SubscriptionOptions) => stripeWrapper.createSubscription(options);
 export const verifyPayment = (sessionId: string) => stripeWrapper.verifyPayment(sessionId);
 export const openCheckout = (url: string, sessionId?: string) => stripeWrapper.openCheckoutWindow(url, sessionId);
-export const quickBuyCredits = (credits: 50 | 100 | 250 | 500, guestEmail?: string) => stripeWrapper.quickBuyCredits(credits, guestEmail);
-export const quickSubscribe = (plan: 'monthly' | 'yearly', guestEmail?: string) => stripeWrapper.quickSubscribe(plan, guestEmail);
+export const quickBuyCredits = (credits: 50 | 100 | 250 | 500) => stripeWrapper.quickBuyCredits(credits);
+export const quickSubscribe = (plan: 'monthly' | 'yearly') => stripeWrapper.quickSubscribe(plan);
 export const getStripeStatus = () => stripeWrapper.getStatus();
 
 export default stripeWrapper;
