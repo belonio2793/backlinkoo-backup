@@ -133,11 +133,7 @@ export function ModernCreditPurchaseModal({
         description: `Redirecting to secure checkout for ${credits} credits...`,
       });
 
-      // Create checkout URL and redirect
-      const checkoutUrl = createCheckoutUrl();
-      
-      // Redirect to Stripe checkout
-      window.location.href = checkoutUrl;
+      await startCheckout();
 
       // Close modal
       onClose();
