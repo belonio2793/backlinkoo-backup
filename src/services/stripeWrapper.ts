@@ -267,7 +267,7 @@ class StripeWrapper {
    */
   openCheckoutWindow(url: string, sessionId?: string): Window | null {
     try {
-      console.log('���� Opening Stripe checkout in new window:', url);
+      console.log('🚀 Opening Stripe checkout in new window:', url);
       const popup = window.open(
         url,
         'stripe-checkout',
@@ -367,7 +367,7 @@ export const createPayment = (options: PaymentOptions) => stripeWrapper.createPa
 export const createSubscription = (options: SubscriptionOptions) => stripeWrapper.createSubscription(options);
 export const verifyPayment = (sessionId: string) => stripeWrapper.verifyPayment(sessionId);
 export const openCheckout = (url: string, sessionId?: string) => stripeWrapper.openCheckoutWindow(url, sessionId);
-export const quickBuyCredits = (credits: 50 | 100 | 250 | 500, userEmail?: string) => stripeWrapper.quickBuyCredits(credits, userEmail);
+export const quickBuyCredits = (credits: number, userEmail?: string) => stripeWrapper.quickBuyCredits(credits, userEmail);
 export const quickSubscribe = (plan: 'monthly' | 'yearly', userEmail?: string) => stripeWrapper.quickSubscribe(plan, userEmail);
 export const getStripeStatus = () => stripeWrapper.getStatus();
 
