@@ -251,12 +251,22 @@ class StripeWrapper {
    */
   openCheckoutWindow(url: string, sessionId?: string): Window | null {
     try {
-      console.log('🚀 Redirecting to Stripe checkout:', url);
+      console.log('🚀 Opening Stripe checkout in new window:', url);
+      const popup = window.open(
+        url,
+        'stripe-checkout',
+        'width=800,height=720,scrollbars=yes,resizable=yes,noopener,noreferrer'
+      );
+      if (!popup) {
+        console.warn('Popup blocked, falling back to same-window redirect');
+        window.location.href = url;
+        return null;
+      }
+      return popup;
+    } catch (error: any) {
+      console.error('❌ Failed to open checkout window:', error?.message);
       window.location.href = url;
       return null;
-    } catch (error: any) {
-      console.error('❌ Failed to redirect to checkout:', error?.message);
-      throw error;
     }
   }
 
