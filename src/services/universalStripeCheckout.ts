@@ -6,7 +6,7 @@
  */
 
 import { stripeWrapper, type PaymentOptions as WrapperPaymentOptions, type SubscriptionOptions as WrapperSubscriptionOptions, type PaymentResult as WrapperPaymentResult } from './stripeWrapper';
-import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface PaymentOptions {
   amount?: number;

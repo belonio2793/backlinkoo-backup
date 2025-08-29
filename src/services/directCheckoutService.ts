@@ -171,11 +171,11 @@ class DirectCheckoutService {
    * Get price for credits (simplified pricing)
    */
   private static getCreditsPrice(credits: number): number {
-    if (credits <= 50) return 70;
-    if (credits <= 100) return 140;
-    if (credits <= 250) return 350;
-    if (credits <= 500) return 700;
-    return credits * 1.40; // $1.40 per credit default
+    if (credits === 50) return 70;
+    if (credits === 100) return 140;
+    if (credits === 250) return 350;
+    if (credits === 500) return 700;
+    return Number((credits * 1.40).toFixed(2)); // $1.40 per credit default
   }
   
   /**

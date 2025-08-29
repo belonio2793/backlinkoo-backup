@@ -150,9 +150,8 @@ class StripeWrapper {
 
     // Final fallback: Stripe Payment Link (no server dependency)
     if (STRIPE_CHECKOUT_URLS.credits) {
-      const url = new URL(STRIPE_CHECKOUT_URLS.credits);
-      if (payload.guestEmail) url.searchParams.set('prefilled_email', payload.guestEmail as string);
-      return { success: true, url: url.toString(), sessionId: undefined };
+      const link = this.buildCreditsPaymentLink(payload.credits || 0, payload.guestEmail as string | undefined);
+      if (link) return { success: true, url: link, sessionId: undefined };
     }
 
     return { success: false, error: 'Failed to start checkout' };
