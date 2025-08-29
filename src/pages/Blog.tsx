@@ -754,7 +754,7 @@ function Blog() {
                   </div>
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="h-4 w-4 text-green-300 flex-shrink-0" />
-                    <span>Up to 3 free (unlimited with subscription)</span>
+                    <span>Up to 3 free (higher limits with subscription)</span>
                   </div>
                 </div>
               </div>
