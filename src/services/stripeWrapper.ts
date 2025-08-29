@@ -120,15 +120,32 @@ class StripeWrapper {
       });
 
       if (!response.ok) {
-        const err = await response.json().catch(() => ({} as any));
-        return { success: false, error: err.error || `Payment creation failed (${response.status})` };
+        throw new Error(`HTTP ${response.status}`);
       }
 
       const data = await response.json();
       return { success: true, url: data.url, sessionId: data.sessionId };
     } catch (e: any) {
-      console.error('❌ createPayment error:', e);
-      return { success: false, error: e?.message || 'Failed to start checkout' };
+      console.warn('⚠️ Netlify create-payment failed, falling back to Supabase Edge:', e?.message);
+      try {
+        const { data, error } = await supabase.functions.invoke('create-payment', {
+          body: {
+            amount: options.amount,
+            credits: options.credits,
+            productName: options.productName || (options.credits ? `${options.credits} Backlink Credits` : 'Backlink Credits'),
+            isGuest: !options.userEmail,
+            guestEmail: options.userEmail,
+            paymentMethod: 'stripe'
+          }
+        });
+        if (error || !data?.url) {
+          return { success: false, error: error?.message || 'Failed to start checkout' };
+        }
+        return { success: true, url: data.url, sessionId: data.sessionId };
+      } catch (e2: any) {
+        console.error('❌ Supabase fallback failed:', e2?.message);
+        return { success: false, error: e2?.message || 'Failed to start checkout' };
+      }
     }
   }
 
