@@ -258,7 +258,7 @@ export function GuestCampaignRestrictionsOverlay({
                   className="h-6 text-xs border-purple-200 text-purple-600 hover:bg-purple-50"
                 >
                   <Infinity className="h-3 w-3 mr-1" />
-                  Go Unlimited
+                  Raise Limits
                 </Button>
               </div>
             )}
