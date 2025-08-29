@@ -38,17 +38,18 @@ exports.handler = async (event) => {
     const intent = await stripe.paymentIntents.create({
       amount: amountInCents,
       currency: "usd",
-      automatic_payment_methods: { enabled: true },
+      payment_method_types: ["card"],
       metadata: {
         product_type: "credits",
         credits: String(credits),
         email: email || ""
       },
-      receipt_email: email
+      receipt_email: email || undefined
     });
 
     return { statusCode: 200, headers, body: JSON.stringify({ clientSecret: intent.client_secret }) };
   } catch (e) {
-    return { statusCode: 500, headers, body: JSON.stringify({ error: e.message || "Failed to create payment intent" }) };
+    const msg = e?.raw?.message || e?.message || 'Failed to create payment intent';
+    return { statusCode: 500, headers, body: JSON.stringify({ error: msg }) };
   }
 };
