@@ -47,7 +47,8 @@ export const CustomCreditsModal = ({
   // Calculate total amount based on credits
   const calculateAmount = (creditCount: string): number => {
     const numCredits = parseFloat(creditCount) || 0;
-    return numCredits * CREDIT_PRICE;
+    // Always round to cents to match Stripe amount
+    return Number((numCredits * CREDIT_PRICE).toFixed(2));
   };
 
   const totalAmount = calculateAmount(credits);
@@ -66,7 +67,7 @@ export const CustomCreditsModal = ({
 
   const startCheckout = async () => {
     const creditCount = parseInt(credits);
-    const amount = Math.ceil(creditCount * CREDIT_PRICE);
+    const amount = calculateAmount(credits);
     const result = await stripeWrapper.createPayment({ amount, credits: creditCount, productName: `${creditCount} Backlink Credits`, userEmail: user?.email || undefined });
     if (result.success && result.url) {
       stripeWrapper.openCheckoutWindow(result.url, result.sessionId);
