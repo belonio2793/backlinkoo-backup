@@ -458,34 +458,6 @@ export function PremiumPlanModal({
         </p>
       </div>
 
-      {/* Quick Guest Checkout Option */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <CreditCard className="h-5 w-5 text-blue-600" />
-            <span className="font-medium text-blue-900">Quick Guest Checkout</span>
-          </div>
-          <p className="text-sm text-blue-700">
-            Enter your email to proceed directly to payment. We'll create your account automatically.
-          </p>
-          <div className="flex gap-3">
-            <Input
-              type="email"
-              placeholder="your@email.com"
-              value={guestEmail}
-              onChange={(e) => setGuestEmail(e.target.value)}
-              className="flex-1"
-            />
-            <Button
-              onClick={handleGuestCheckout}
-              disabled={!guestEmail || isProcessing}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      </div>
 
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
