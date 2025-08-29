@@ -10,8 +10,6 @@ export interface StripePaymentOptions {
   credits?: number;
   productName?: string;
   plan?: 'monthly' | 'yearly';
-  isGuest?: boolean;
-  guestEmail?: string;
   type: 'credits' | 'subscription';
 }
 
