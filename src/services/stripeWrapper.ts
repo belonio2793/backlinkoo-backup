@@ -274,14 +274,12 @@ class StripeWrapper {
         'width=800,height=720,scrollbars=yes,resizable=yes,noopener,noreferrer'
       );
       if (!popup) {
-        console.warn('Popup blocked, falling back to same-window redirect');
-        window.location.href = url;
+        console.warn('Popup blocked');
         return null;
       }
       return popup;
     } catch (error: any) {
       console.error('❌ Failed to open checkout window:', error?.message);
-      window.location.href = url;
       return null;
     }
   }
@@ -290,16 +288,30 @@ class StripeWrapper {
    * Quick credit purchase - redirects to credits checkout
    */
   async quickBuyCredits(credits: number, userEmail?: string): Promise<PaymentResult> {
+    // Open placeholder window immediately to preserve user gesture
+    let popup: Window | null = null;
+    try {
+      popup = window.open('about:blank', 'stripe-checkout', 'width=800,height=720,scrollbars=yes,resizable=yes,noopener,noreferrer');
+    } catch (_) {}
+
+    // Prefer server-created session for exact pricing
+    const amount = this.getCreditsPrice(credits);
+    const serverResult = await this.createPayment({ amount, credits, productName: `${credits} Backlink Credits`, userEmail });
+    if (serverResult.success && serverResult.url) {
+      if (popup) popup.location.href = serverResult.url; else this.openCheckoutWindow(serverResult.url, serverResult.sessionId);
+      return serverResult;
+    }
+
+    // Fallback: Payment Link with quantity prefilled
     const link = this.buildCreditsPaymentLink(credits, userEmail);
     if (link) {
-      this.openCheckoutWindow(link);
+      if (popup) popup.location.href = link; else this.openCheckoutWindow(link);
       return { success: true, url: link, method: 'direct_stripe' };
     }
 
-    const amount = this.getCreditsPrice(credits);
-    const result = await this.createPayment({ amount, credits, productName: `${credits} Backlink Credits`, userEmail });
-    if (result.success && result.url) this.openCheckoutWindow(result.url, result.sessionId);
-    return result;
+    // If popup exists but we couldn't get a URL, close it
+    try { if (popup && !popup.closed) popup.close(); } catch (_) {}
+    return { success: false, error: serverResult.error || 'Failed to start checkout' };
   }
 
   /**
