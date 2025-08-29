@@ -60,6 +60,8 @@ export interface WrapperStatus {
   errors: string[];
 }
 
+import { supabase } from '@/integrations/supabase/client';
+
 class StripeWrapper {
   private config: StripeWrapperConfig;
   private initialized = false;
