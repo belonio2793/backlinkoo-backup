@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useAuthModal } from "@/contexts/ModalContext";
 import { stripeWrapper } from "@/services/stripeWrapper";
+import InlineStripeCredits from '@/components/InlineStripeCredits';
 
 interface ModernCreditPurchaseModalProps {
   isOpen: boolean;
